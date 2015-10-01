@@ -62,6 +62,7 @@ spec: HTML5; urlPrefix: http://www.w3.org/TR/html5/
       text: collect a sequence of characters
       text: space characters
       text: split a string on spaces
+      text: split a string on commas
     urlPrefix: document-metadata.html
       text: pragma directives
   type: element
@@ -153,6 +154,12 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
 
   [INTRODUCTION GOES HERE]
 
+  ISSUE: CSP3 is a work in progress, and isn't quite yet ready for anyone to
+  look at seriously. If you have suggestions, please
+  <a href="https://github.com/w3c/webappsec-csp/issues/new">file a bug</a>!
+  Otherwise, you'll probably want to look at the stable document at
+  <a href="http://w3.org/TR/CSP2/">http://w3.org/TR/CSP2/</a>.
+
   <h3 id="examples">Examples</h3>
 
   <h4 id="example-basic">Control Execution</h4>
@@ -223,8 +230,17 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
   is a set of <a>directives</a> that define the policy's implications when
   applied.
 
-  Each policy has an associated <dfn for="policy">type</dfn>, which is either
-  `null`, or one of "`enforce`" or "`report`". 
+  A <dfn>serialized policy</dfn> is an ASCII string, consisting of a
+  semicolon-delimited series of <a>serialized directives</a>, adhering to the
+  following ABNF grammar [[!RFC5234]]:
+ 
+  <pre dfn-type="grammar" link-type="grammar">
+    <dfn>serialized-policy</dfn> = <a>serialized-directive</a> *( <a>OWS</a> ";" [ <a>OWS</a> <a>serialized-directive</a> ] )
+                        ; <a>OWS</a> is defined in section 3.2.3 of RFC 7230
+  </pre>
+
+  To <dfn>parse a serialized policy</dfn> (<var>policy</var>), execute the
+  [[#parse-serialized-policy]] algorithm on <var>policy</var>.
 
   <h3 id="framework-directives">Directives</h3>
 
@@ -236,76 +252,103 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
   <dfn for="directive">value</dfn> pair. The <a>name</a> is a non-empty string,
   and the <a>value</a> is a set of non-empty strings. The <a>value</a> set MAY
   be empty.
-</section>
 
-<!-- Big Text: Syntax -->
-<section>
-  <h2 id="syntax">Syntax and Parsing</h2>
-
-  <h3 id="syntax-policy">
-    Policy Syntax
-  </h3>
-
-  A <dfn>serialized policy</dfn> is an ASCII string, consisting of a
-  semicolon-delimited series of <a>serialized directives</a>. A <dfn>serialized
-  directive</dfn> is an ASCII string, consisting of one or more
-  whitespace-delimited tokens. Both serializations are defined by the following
-  ABNF [[!RFC5234]]:
+  A <dfn>serialized directive</dfn> is an ASCII string, consisting of one or more
+  whitespace-delimited tokens, and adhering to the following ABNF [[!RFC5234]]:
 
   <pre dfn-type="grammar" link-type="grammar">
-    <dfn>serialized-policy</dfn>    = <a>serialized-directive</a> *( <a>OWS</a> ";" [ <a>OWS</a> <a>serialized-directive</a> ] )
     <dfn>serialized-directive</dfn> = <a>directive-name</a> [ <a>RWS</a> <a>directive-value</a> ]
     <dfn>directive-name</dfn>       = 1*( <a>ALPHA</a> / <a>DIGIT</a> / "-" )
     <dfn>directive-value</dfn>      = *( %x09 / %x20-%x2B / %x2D-%x3A / %x3C-%7E )
-                           ; whitespace and <a>VCHAR</a>, excluding ";" and ","
+                           ; Directive values may contain whitespace and <a>VCHAR</a> characters,
+                           ; excluding ";" and ","
+
+    ; <a>RWS</a> is defined in section 3.2.3 of RFC7230. <a>ALPHA</a>, <a>DIGIT</a>, and
+    ; <a>VCHAR</a> are defined in Appendix B.1 of RFC 5234.
   </pre>
 
-  <div link-type="grammar" class="note">
-    Note: The <a>BWS</a>, <a>OWS</a>, and <a>RWS</a> rules are defined in
-    [[RFC7230]]. <a>ALPHA</a>, <a>DIGIT</a>, <a>VCHAR</a>, and <a>WSP</a>
-    are defined in [[RFC5234]].
-  </div>
 
-  <h4 id="parse-policy">
-    Policy Parsing
-  </h4>
+  <h3 id="framework-directive-source-list">Source Lists</h3>
 
-  Given a string (<var>serialized policy</var>), the user agent 
-  <dfn lt="parse the policy">parses the policy</dfn> by executing the following
-  steps:
+  Many <a>directives</a>' <a>values</a> consist of <dfn>source lists</dfn>: sets
+  of tokens which identify content that can be fetched and potentially embedded
+  or executed. These tokens represent one of the following types of <dfn>source
+  expression</dfn>:
 
-  1.  Let <var>policy</var> be a new <a>policy</a> with an empty <a>directive
-      set</a>, and a `null` <a>type</a>.
+  1.  Keywords such as <a grammar>`'none'`</a> and
+      <a grammar>`'self'`</a> (which match nothing and the current
+      URL's origin, respectively)
 
-  2.  For each <var>token</var> returned by
-      <a lt="strictly split a string">strictly splitting</a> <var>serialized
-      policy</var> on the U+003B SEMICOLON character (`;`):
+  2.  Serialized URLs such as `https://example.com/path/to/file.js`
+      (which matches a specific file) or `https://example.com/`
+      (which matches everything on that origin)
 
-      1.  <a>Strip leading and trailing whitespace</a> from <var>token</var>.
+  3.  Schemes such as `https:` (which matches any resource having
+      the specified scheme)
 
-      2.  If <var>token</var> is an empty string, skip the remaining substeps
-          and continue to the next item.
+  4.  Hosts such as `example.com` (which matches any resource on
+      the host, regardless of scheme) or `*.example.com` (which
+      matches any resource on the host or any of its subdomains (and any of
+      its subdomains' subdomains, and so on))
 
-      3.  Let <var>directive name</var> be the result of
-          <a lt="collect a sequence of characters">collecting a sequence of
-          characters</a> from <var>token</var> which are not <a>space
-          characters</a>.
+  5.  Nonces such as `'nonce-qwertyu12345'` (which can match specific
+      elements on a page)
 
-      4.  If <var>policy</var>'s <a>directive set</a> contains a
-          <a>directive</a> whose <a>name</a> is <var>directive name</var>,
-          skip the remaining substeps and continue to the next item.
+  6.  Digests such as `'sha256-abcd...'` (which can match specific
+      elements on a page)
 
-      5.  Let <var>directive value</var> be the result of
-          <a lt="split a string on spaces">splitting <var>token</var> on
-          spaces</a>.
+  A <dfn>serialized source list</dfn> is an ASCII string, consisting of a
+  space-delimited series of <a>source expressions</a>, adhering to the
+  following ABNF grammar [[!RFC5234]]:
 
-      6.  Let <var>directive</var> be a new <a>directive</a> whose <a>name</a>
-          is <var>directive name</var>, and whose <a>value</a> is <var>directive
-          value</var>.
+  <pre dfn-type="grammar" link-type="grammar">
+    <dfn>serialized-source-list</dfn> = <a>source-expression</a> *( <a>RWS</a> <a>source-expression</a> ) / "<dfn>'none'</dfn>"
+    <dfn>source-expression</dfn>      = <a>scheme-source</a> / <a>host-source</a> / <a>keyword-source</a>
+                             / <a>nonce-source</a> / <a>hash-source</a>
 
-      7.  Add <var>directive</var> to <var>policy</var>'s <a>directive set</a>.
+    ; Schemes:
+    <dfn>scheme-source</dfn> = <a>scheme</a> ":"
+                    ; <a>scheme</a> is defined in section 3.1 of RFC 3986.
 
-  3.  Return <var>policy</var>.
+    ; Hosts: "example.com" / "*.example.com" / "https://*.example.com:12/path/to/file.js"
+    <dfn>host-source</dfn> = [ <a>scheme-part</a> "://" ] <a>host-part</a> [ <a>port-part</a> ] [ <a>path-part</a> ]
+    <dfn>scheme-part</dfn> = <a>scheme</a>
+    <dfn>host-part</dfn>   = "*" / [ "*." ] 1*<a>host-char</a> *( "." 1*<a>host-char</a> )
+    <dfn>host-char</dfn>   = <a>ALPHA</a> / <a>DIGIT</a> / "-"
+    <dfn>port-part</dfn>   = ":" ( 1*<a>DIGIT</a> / "*" )
+    <dfn>path-part</dfn>   = <a>path</a>
+                  ; <a>path</a> is defined in section 3.3 of RFC 3986.
+   
+    ; Keywords:
+    <dfn>keyword-source</dfn> = "<dfn>'self'</dfn>" / "<dfn>'unsafe-inline'</dfn>" / "<dfn>'unsafe-eval'</dfn>" 
+
+    ; Nonces: 'nonce-[nonce goes here]'
+    <dfn>nonce-source</dfn>  = "'nonce-" <a>base64-value</a> "'"
+    <dfn>base64-value</dfn>  = 1*( <a>ALPHA</a> / <a>DIGIT</a> / "+" / "/" )*2( "=" ) 
+
+    ; Digests: 'sha256-[digest goes here]'
+    <dfn>hash-source</dfn>    = "'" <a>hash-algorithm</a> "-" <a>base64-value</a> "'"
+    <dfn>hash-algorithm</dfn> = "sha256" / "sha384" / "sha512"
+  </pre>
+
+  The <a grammar>host-char</a> production intentionally contains only ASCII
+  characters; internationalized domain names cannot be entered directly as part
+  of a <a>serialized policy</a>, but instead MUST be Punycode-encoded
+  [[!RFC3492]]. For example, the domain `üüüüüü.de` MUST be represented as
+  `xn--tdaaaaaa.de`.
+
+  Note: Though IP address do match the grammar above, only
+  `127.0.0.1` will actually match a URL when used in a source
+  expression (see [[#match-url-to-source-list]] for details). The security
+  properties of IP addresses are suspect, and authors ought to prefer hostnames
+  whenever possible.
+
+  To <dfn>parse a serialized source list</dfn> (<var>serialized source
+  list</var>), execute the [[#parse-serialized-source-list]] algorithm on
+  <var>serialized source list</var>.
+
+  A {{URL}} <dfn>matches a source list</var> if the algorithm in
+  [[#match-url-to-source-list]] returns `Matches`.
 </section>
 
 <!-- Big Text: Delivery -->
@@ -319,16 +362,11 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
   1.  An HTTP response header (defined in [[#csp-header]] and [[#cspro-header]])
       which declares a policy as a string and applies it to the resource which
       which the header is delivered. The policy syntax is defined in
-      [[#syntax]].
+      [[#framework-policy]].
 
   2.  A <{meta}> element (defined in [[#meta-element]]), which declares a policy
       as a string and applies it to the resource in which the <{meta}> element
-      is embedded. The policy syntax is defined in [[#syntax]].
-
-  3.  Inheritance, which applies a policy to a <a>nested browsing context</a>
-      in certain circumstances, as defined in [[#delivery-implicit]].
-
-  4.  A JavaScript interface (defined in [[#javascript-interface]]).
+      is embedded. The policy syntax is defined in [[#framework-policy]].
 
   <h3 id="delivery-declarative">
     Declarative Delivery
@@ -343,7 +381,7 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
   The header's value is represented by the following ABNF [[!RFC5234]]:
 
   <pre>
-    Content-Security-Policy = 1#<a grammar>policy-token</a>
+    Content-Security-Policy = 1#<a grammar>serialized-policy</a>
   </pre>
 
   <div class="example">
@@ -372,7 +410,7 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
   following ABNF [[!RFC5234]]:
 
   <pre>
-    Content-Security-Policy-Report-Only = 1#<a grammar>policy-token</a>
+    Content-Security-Policy-Report-Only = 1#<a grammar>serialized-policy</a>
   </pre>
 
   This header field allows developers to piece together their security policy in
@@ -452,312 +490,7 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
   ISSUE(w3c/webappsec#451): We should consider extending this to include
   auxiliary browsing contexts, not just nested browsing contexts.
 
-  <h3 id="javascript-interface">
-    Imperative Delivery
-  </h3>
-
-  Developers may manipulate a page's policy via a JavaScript API which allows
-  construction of {{SecurityPolicy}} objects, and the application of those
-  objects to an <a>environment settings object</a>.
-
-  <h4 id="javascript-application">
-    Applying a Policy
-  </h4>
-
-  A {{SecurityPolicy}} can be applied to an <a>environment settings object</a>
-  via the following interfaces:
-
-  <pre class="idl">
-    partial interface Window {
-      void applySecurityPolicy(SecurityPolicy policy);
-    };
-  </pre>
-  <dl dfn-for="Window">
-    <dt><dfn method>applySecurityPolicy(policy)</dfn></dt>
-    <dd>
-      To execute this method, execute [[#apply-to-global-object]] on
-      <var>policy</var>'s associated <a>policy</a> and the {{Window}} object.
-    </dd>
-  </dl>
-
-  <pre class="idl">
-    partial interface WorkerGlobalScope {
-      void applySecurityPolicy(SecurityPolicy policy);
-    };
-  </pre>
-  <dl dfn-for="WorkerGlobalScope">
-    <dt><dfn method>applySecurityPolicy(policy)</dfn></dt>
-    <dd>
-      To execute this method, execute [[#apply-to-global-object]] on
-      <var>policy</var>'s associated <a>policy</a> and the {{WorkerGlobalScope}}
-      object.
-    </dd>
-  </dl>
-
-  <div class="example">
-    To apply the policy `script-src 'self'; object-src 'none'` from
-    JavaScript inside a {{Worker}} or {{Document}}, execute the following code:
-
-    <pre>
-      var policy = new SecurityPolicy("script-src 'self'; object-src 'none'");
-      self.applySecurityPolicy(policy);
-    </pre>
-  </div>
-
-  ISSUE: Maybe this makes more sense as `window.csp.apply()`? Which would also
-  allow `window.csp.enforced` and `window.csp.monitored` as sequences of
-  {{SecurityPolicy}} objects?
-
-  <h4 id="idl-securitypolicy">
-    `SecurityPolicy` Interface
-  </h4>
-
-  A policy object is defined via the following IDL:
-
-  <pre class="idl">
-    enum SecurityPolicyType {
-      "enforce",
-      "report-only"
-    };
-
-    [Constructor(DOMString policy, SecurityPolicyType type), Exposed=(Window,Worker)]
-    interface SecurityPolicy {
-      boolean requestMatches(Request request);
-      boolean nodeMatches(Node node);
-  
-      readonly attribute FrozenArray&lt;SecurityPolicyDirective&gt; directives;
-      readonly attribute SecurityPolicyType type;
-      readonly attribute USVString reportingEndpoint;
-    };
-  </pre>
-
-  A {{SecurityPolicy}} object has an internal slot named
-  <dfn attribute for="SecurityPolicy">\[[policy]]</dfn>, which contains a
-  <a>policy</a>. Unless otherwise stated, its value is `null`.
-
-  The <dfn for="SecurityPolicy" attribute>directives</dfn> attribute's getter
-  returns a list of {{SecurityPolicyDirective}}s corresponding to
-  {{SecurityPolicy/[[policy]]}}'s <a for="policy">directive list</a>
-
-  The <dfn for="SecurityPolicy" attribute>type</dfn> attribute's getter
-  returns the value of {{SecurityPolicy/[[policy]]}}'s <a for="policy">type</a>.
-
-  The <dfn for="SecurityPolicy" attribute>reportingEndpoint</dfn> attribute's
-  getter returns the serialization of the <a for="directive">value</a> of
-  the <a>directive</a> in {{SecurityPolicy/[[policy]]}}'s
-  <a for="policy">directive list</a> with a <a for="directive">name</a> of
-  "`report-uri`", if present. If no such directive is present, the
-  empty string is returned.
-
-  The <dfn constructor for="SecurityPolicy">SecurityPolicy(policy, type)</dfn>
-  constructor, when invoked, MUST execute the following steps:
-
-  1.  Let <var>policy list</var> be the result of executing
-      [[#parse-policy-string]] on <var>policy</var>.
-
-  2.  If <var>policy list</var> does not have exactly one element, throw a
-      `SyntaxError` exception, and abort the remaining steps.
-
-  3.  Set `this@`{{SecurityPolicy/[[policy]]}} to the only element
-      in <var>policy list</var>.
-
-  4.  Return `this`.
-
-  The <dfn method for="SecurityPolicy">requestMatches(request)</dfn> method
-  returns `true` if [[#match-request-to-directive-list]] returns
-  `Matches` when executed upon <var>request</var> and
-  {{SecurityPolicy/[[policy]]}}'s <a for="policy">directive list</a>, and
-  `false` otherwise.
-
-  The <dfn method for="SecurityPolicy">nodeMatches(node)</dfn> method returns
-  `true` if [[#match-node-to-directive-list]] returns
-  `Matches` when executed upon <var>node</var> and
-  {{SecurityPolicy/[[policy]]}}'s <a for="policy">directive list</a>, and
-  `false` otherwise.
-
-  <h4 id="idl-securitypolicydirective">
-    `SecurityPolicyDirective` Interface
-  </h4>
-
-  Policy objects contain a list of directives, each defined according to the
-  following IDL:
-
-  <pre class="idl">
-    enum DirectiveName {
-      "base-uri",
-      "child-src",
-      "connect-src",
-      "default-src",
-      "font-src",
-      "form-action",
-      "frame-ancestors",
-      "img-src",
-      "media-src",
-      "object-src",
-      "plugin-types",
-      "report-uri",
-      "reports",
-      "sandbox",
-      "script-src",
-      "style-src"
-    };
-
-    [Constructor(DOMString name, DOMString value), Exposed=(Window,Worker)]
-    interface SecurityPolicyDirective {
-      boolean requestMatches(Request request);
-      boolean nodeMatches(Node node);
-
-      readonly attribute DirectiveName name;  
-    };
-  </pre>
-  
-  A {{SecurityPolicyDirective}} object has an internal slot named
-  <dfn attribute for="SecurityPolicyDirective">\[[directive]]</dfn>, which
-  contains a <a>directive</a>. Unless otherwise specified, its value is
-  `null`.
-
-  The <dfn attribute for="SecurityPolicyDirective">name</dfn> attribute's
-  getter returns {{SecurityPolicyDirective/[[directive]]}}'s
-  <a for="directive">name</a>.
-
-  The <dfn attribute for="SecurityPolicyDirective">value</dfn> attribute's
-  getter returns {{SecurityPolicyDirective/[[directive]]}}'s
-  <a for="directive">value</a>.
-
-  The <dfn constructor for="SecurityPolicyDirective">SecurityPolicyDirective(name, value)</dfn>
-  constructor, when invoked, MUST execute the following steps:
-
-  1.  If <var>name</var> is not a valid {{DirectiveName}}, throw a
-      `SyntaxError` exception, and abort the remaining steps.
-
-  2.  Let <var>directive</var> be a new <a>directive</a> with a
-      <a for="directive">name</a> of <var>name</var> and a
-      <a for="directive">value</a> of <var>value</var>.
-
-  3.  Set `this@`{{SecurityPolicyDirective/[[directive]]}} to
-      <var>directive</var>.
-
-  4.  Return `this`.
-
-  The <dfn method for="SecurityPolicyDirective">requestMatches(request)</dfn>
-  method returns `true`.
-
-  The <dfn method for="SecurityPolicyDirective">nodeMatches(node)</dfn> method
-  returns `true`.
-
-  Note: Directives which operate on either {{Request}}s or {{Node}}s are
-  expected to inherit from {{SecurityPolicyDirective}} and override these
-  method implementations. {{SourceListDirective}} is one example of this.
-
-  <h4 id="idl-sourcelistdirective">
-    `SourceListDirective` Interface
-  </h4>
-
-  Directives whose values are <a>source lists</a> are parsed into
-  {{SourceListDirective}} objects (which subclass {{SecurityPolicyDirective}}).
-  These are defined according to the following IDL:
-
-  <pre class="idl">
-    [Constructor(DOMString name, DOMString value), Exposed=(Window,Worker)]
-    interface SourceListDirective : SecurityPolicyDirective {
-      readonly attribute FrozenArray&lt;SourceExpression&gt; sources;
-    };
-  </pre>
-
-  The <dfn constructor for="SourceListDirective">SourceListDirective(name, value)</dfn>
-  constructor, when invoked, MUST execute the following steps:
-
-  1.  If <var>name</var> is not a valid {{DirectiveName}}, throw a
-      `SyntaxError` exception, and abort the remaining steps.
-
-  2.  Let <var>directive</var> be a new <a>directive</a> with a
-      <a for="directive">name</a> of <var>name</var> and a
-      <a for="directive">value</a> of <var>value</var>.
-
-  3.  Set `this@`{{SecurityPolicyDirective/[[directive]]}} to
-      <var>directive</var>.
-
-  4.  `this@`Set {{SourceListDirective/sources}} to the result of
-      executing [[#parse-source-list]] on <var>value</var>.
-
-  5.  Return `this`.
-
-  The <dfn method for="SourceListDirective">requestMatches(request)</dfn>
-  method, when invoked, MUST execute the following steps:
-
-  1.  Let <var>url</var> be <var>request</var>'s {{Request/url}}.
-
-  2.  For each <var>expression</var> in this object's
-      {{SourceListDirective/sources}} attribute:
-
-      1.  If <var>expression</var>'s {{SourceExpression/urlMatches(url)}}
-          returns `true` when executed upon <var>url</var>, return
-          `true`.
-
-  3.  Return `false`.
-
-  The <dfn method for="SourceListDirective">nodeMatches(node)</dfn> method,
-  when invoked, MUST execute the following steps:
-
-  1.  For each <var>expression</var> in this object's
-      {{SourceListDirective/sources}} attribute:
-
-      1.  If <var>expression</var>'s {{SourceExpression/nodeMatches(node)}}
-          returns `true` when executed upon <var>node</var>,
-          return `true`.
-
-  2.  Return `false`.
-
-  <h4 id="idl-sourceexpression">
-    `SourceExpression` Interface
-  </h4>
-
-  {{SourceListDirective}} objects' {{SourceListDirective/sources}} attribute
-  contains the list of <a>source expressions</a> that make up the directive's
-  value. These are represented as {{SourceExpression}} objects according to
-  the following IDL:
-
-  <pre class="idl">
-    [Constructor(DOMString value), Exposed=(Window,Worker)]
-    interface SourceExpression {
-      boolean urlMatches(USVString url);
-      boolean nodeMatches(Node node);
-
-      readonly attribute DOMString value;
-    };
-  </pre>
-  <dl dfn-for="SourceExpression">
-    <dt><dfn attribute>value</dfn></dt>
-    <dd>
-      The expression's value. `script-src https://example.com/
-      'nonce-abcde'` will, for example, produce two {{SourceExpression}}
-      objects, one with a value of "https://example.com/", the other with a
-      value of "'nonce-abcde'".
-    </dd>
-    <dt><dfn method>urlMatches(url)</dfn></dt>
-    <dd>
-      This method returns `true` if executing
-      [[#match-url-to-source-expression]] on <var>url</var> and the object's
-      {{SourceExpression/value}} attribute returns `Matches`, and
-      `false` otherwise.
-
-      <pre class="argumentdef" for="SourceExpression/urlMatches(url)">
-        url: The URL to match against the SourceExpression.
-      </pre>
-    </dd>
-    <dt><dfn method>nodeMatches(node)</dfn></dt>
-    <dd>
-      This method returns `true` if executing
-      [[#match-node-to-source-expression]] on <var>node</var> and the object's
-      {{SourceExpression/value}} attribute returns `Matches`, and
-      `false` otherwise.
-
-      <pre class="argumentdef" for="SourceExpression/nodeMatches(node)">
-        node: The Node which will be matched against the directive.
-      </pre>
-    </dd>
-  </dl>
-</section>
+  ISSUE: Move this to a monkey patch of the relevant algorithms in HTML.
 
 <!-- Big text: Application -->
 <section>
@@ -765,89 +498,11 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
 
 <!-- Big Text: Syntax -->
 <section>
+  <h2 id="monkey-patchings">Monkey Patchings: To Be Categorized</h2>
 
-  <h3 id="syntax-source-list">
-    Source List Syntax
-  </h3>
-
-  The syntax for individual directives is defined in [[#csp-directives]], though
-  many directives share a common <dfn>source list</dfn> syntax defined below.
-
-  A source list represents a set of locations from which content of a specified
-  type can be fetched and potentially embedded or executed. Locations are
-  represented by one of the following types of <dfn>source expression</dfn>:
-
-  1.  Keywords such as <a grammar>`'none'`</a> and
-      <a grammar>`'self'`</a> (which match nothing and the current
-      URL's origin, respectively)
-
-  2.  Serialized URLs such as `https://example.com/path/to/file.js`
-      (which matches a specific file) or `https://example.com/`
-      (which matches everything on that origin)
-
-  3.  Schemes such as `https:` (which matches any resource having
-      the specified scheme)
-
-  4.  Hosts such as `example.com` (which matches any resource on
-      the host, regardless of scheme) or `*.example.com` (which
-      matches any resource on the host or any of its subdomains (and any of
-      its subdomains' subdomains, and so on))
-
-  5.  Nonces such as `'nonce-qwertyu12345'` (which can match specific
-      elements on a page)
-
-  6.  Digests such as `'sha256-abcd...'` (which can match specific
-      elements on a page)
-
-  These representations are defined by the following ABNF [[!RFC5234]]:
-
-  <pre dfn-type="grammar" link-type="grammar">
-    <dfn>source-list</dfn>       = <a>source-expression</a> *( <a>RWS</a> <a>source-expression</a> )
-                        / "<dfn>'none'</dfn>"
-    <dfn>source-expression</dfn> = <a>scheme-source</a> / <a>host-source</a> / <a>keyword-source</a>
-                        / <a>nonce-source</a> / <a>hash-source</a>
-
-    ; Schemes: `scheme:`
-    <dfn>scheme-source</dfn> = <a>scheme</a> ":"
-
-    ; Hosts: `example.com` / `*.example.com` / `https://*.example.com:12/path/to/file.js`
-    <dfn>host-source</dfn> = [ <a>scheme-part</a> "://" ] <a>host-part</a> [ <a>port-part</a> ] [ <a>path-part</a> ]
-    <dfn>scheme-part</dfn> = <a>scheme</a>
-    <dfn>host-part</dfn>   = "*" / [ "*." ] 1*<a>host-char</a> *( "." 1*<a>host-char</a> )
-    <dfn>host-char</dfn>   = <a>ALPHA</a> / <a>DIGIT</a> / "-"
-    <dfn>port-part</dfn>   = ":" ( 1*<a>DIGIT</a> / "*" )
-    <dfn>path-part</dfn>   = <a>path</a>
-   
-    ; Keywords:
-    <dfn>keyword-source</dfn> = "<dfn>'self'</dfn>" / "<dfn>'unsafe-inline'</dfn>" / "<dfn>'unsafe-eval'</dfn>" 
-
-    ; Nonces: 'nonce-[nonce goes here]'
-    <dfn>nonce-source</dfn>  = "'nonce-" <a>base64-value</a> "'"
-    <dfn>base64-value</dfn>  = 1*( <a>ALPHA</a> / <a>DIGIT</a> / "+" / "/" )*2( "=" ) 
-
-    ; Digests: 'sha256-[digest goes here]'
-    <dfn>hash-source</dfn>    = "'" <a>hash-algorithm</a> "-" <a>base64-value</a> "'"
-    <dfn>hash-algorithm</dfn> = "sha256" / "sha384" / "sha512"
-  </pre>
-
-  Note: The <a grammar>scheme</a> and <a grammar>path</a> rules are defined in
-  [[RFC3986]].
-
-  The <a grammar>host-char</a> production intentionally contains only ASCII
-  characters; internationalized domain names cannot be entered directly into a
-  <a>policy string</a>, but instead MUST be Punycode-encoded [[!RFC3492]]. For
-  example, the domain `üüüüüü.de` MUST be represented as
-  `xn--tdaaaaaa.de`.
-
-  Note: Though IP address do match the grammar above, only
-  `127.0.0.1` will actually match a URL when used in a source
-  expression (see [[#match-url-to-source-list]] for details). The security
-  properties of IP addresses are suspect, and authors ought to prefer hostnames
-  whenever possible.
-
-  <h4 id="script-src-the-nonce-attribute">
+  <h3 id="the-nonce-attribute">
     The `nonce` attribute
-  </h4>
+  </h3>
 
   Nonce sources require a new `nonce` attribute to be added to
   both <{script}> and <{style}> elements.
@@ -930,7 +585,7 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
 
   <pre>
     directive-name  = "child-src"
-    directive-value = <a grammar>source-list</a>
+    directive-value = <a grammar>serialized-source-list</a>
   </pre>
 
   <div class="example">
@@ -960,7 +615,7 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
 
   <pre>
     directive-name  = "connect-src"
-    directive-value = <a grammar>source-list</a>
+    directive-value = <a grammar>serialized-source-list</a>
   </pre>
 
   <h4 id="directive-default-src">`default-src`</h4>
@@ -971,7 +626,7 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
 
   <pre>
     directive-name  = "default-src"
-    directive-value = <a grammar>source-list</a>
+    directive-value = <a grammar>serialized-source-list</a>
   </pre>
 
   <h4 id="directive-font-src">`font-src`</h4>
@@ -982,7 +637,7 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
 
   <pre>
     directive-name  = "font-src"
-    directive-value = <a grammar>source-list</a>
+    directive-value = <a grammar>serialized-source-list</a>
   </pre>
 
   <h4 id="directive-img-src">`img-src`</h4>
@@ -993,7 +648,7 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
 
   <pre>
     directive-name  = "img-src"
-    directive-value = <a grammar>source-list</a>
+    directive-value = <a grammar>serialized-source-list</a>
   </pre>
 
   <h4 id="directive-media-src">`media-src`</h4>
@@ -1004,7 +659,7 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
 
   <pre>
     directive-name  = "media-src"
-    directive-value = <a grammar>source-list</a>
+    directive-value = <a grammar>serialized-source-list</a>
   </pre>
 
   <h4 id="directive-object-src">`object-src`</h4>
@@ -1015,7 +670,7 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
 
   <pre>
     directive-name  = "object-src"
-    directive-value = <a grammar>source-list</a>
+    directive-value = <a grammar>serialized-source-list</a>
   </pre>
 
   <h4 id="directive-script-src">`script-src`</h4>
@@ -1028,7 +683,7 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
 
   <pre>
     directive-name  = "script-src"
-    directive-value = <a grammar>source-list</a>
+    directive-value = <a grammar>serialized-source-list</a>
   </pre>
 
 
@@ -1040,7 +695,7 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
 
   <pre>
     directive-name  = "style-src"
-    directive-value = <a grammar>source-list</a>
+    directive-value = <a grammar>serialized-source-list</a>
   </pre>
 
   <h3 id="directives-other">
@@ -1168,14 +823,14 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
   A <a>policy</a> is <dfn export local-lt="enforcing">enforced</dfn> for an
   <a>environment settings object</a> by inserting it into the object's
   <a>enforced Content Security Policies</a> list. A string is <a>enforced</a>
-  by <a>enforcing</a> each result of executing [[#parse-policy-string]] on the
-  string.
+  by <a>enforcing</a> each result of executing [[#parse-serialized-policy]] on
+  the string.
 
   A <a>policy</a> is <dfn export local-lt="monitoring">monitored</dfn> for an
   <a>environment settings object</a> by inserting it into the object's
   <a>monitored Content Security Policies</a> list. A string is <a>monitored</a>
-  by <a>monitoring</a> each result of executing [[#parse-policy-string]] on the
-  string.
+  by <a>monitoring</a> each result of executing [[#parse-serialized-policy]] on
+  the string.
 
   <h4 id="apply-to-document">
     Apply policies to a `Document` created via a <var>response</var>
@@ -1267,7 +922,7 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
 
         <li>
           Let <var>policy</var> be the result of executing
-          [[#parse-policy-string]] on <var>content</var>.
+          [[#parse-header-value]] on <var>content</var>.
         </li>
 
         <li>
@@ -1321,7 +976,7 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
       <var>header list</var>.
 
   2.  Let <var>policies</var> be the result of executing
-      [[#parse-policy-string]] on <var>policy to enforce</var>.
+      [[#parse-header-value]] on <var>policy to enforce</var>.
 
   3.  <a>Enforce</a> each policy object in <var>policies</var> on
       <var>settings</var>.
@@ -1332,23 +987,80 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
       <var>header list</var>.
 
   5.  Let <var>policies</var> be the result of executing
-      [[#parse-policy-string]] on <var>policy to monitor</var>.
+      [[#parse-header-value]] on <var>policy to monitor</var>.
 
   6.  <a>Monitor</a> each policy object in <var>policies</var> on
       <var>settings</var>.
 
   <h3 id="algorithms-parsing">Parsing Algorithms</h3>
 
-  <h4 id="parse-policy-string">
-    Parse <var>string</var> as a Content Security Policy
+  <h4 id="parse-serialized-policy">
+    Parse <var>string</var> as a serialized policy
   </h4>
 
-  Given a <a>policy string</a> (<var>string</var>), this algorithm will return a
-  list of <a>policies</a>. In the case of a fatal parse error, this list will be
-  empty.
+  Given a <a>serialized policy</a> (<var>serialized policy</var>), this
+  algorithm will return a <a>policy</a> object. If the string cannot be parsed,
+  the resulting <a>policy</a>'s <a>directive set</a> will be empty.
 
-  <h4 id="parse-source-list">
-    Parse <var>string</var> as a source list
+  1.  Let <var>policy</var> be a new <a>policy</a> with an empty <a>directive
+      set</a>, and a `null` <a>type</a>.
+
+  2.  For each <var>token</var> returned by
+      <a lt="strictly split a string">strictly splitting</a> <var>serialized
+      policy</var> on the U+003B SEMICOLON character (`;`):
+
+      1.  <a>Strip leading and trailing whitespace</a> from <var>token</var>.
+
+      2.  If <var>token</var> is an empty string, skip the remaining substeps
+          and continue to the next item.
+
+      3.  Let <var>directive name</var> be the result of
+          <a lt="collect a sequence of characters">collecting a sequence of
+          characters</a> from <var>token</var> which are not <a>space
+          characters</a>.
+
+      4.  If <var>policy</var>'s <a>directive set</a> contains a
+          <a>directive</a> whose <a>name</a> is <var>directive name</var>,
+          skip the remaining substeps and continue to the next item.
+
+      5.  Let <var>directive value</var> be the result of
+          <a lt="split a string on spaces">splitting <var>token</var> on
+          spaces</a>.
+
+      6.  Let <var>directive</var> be a new <a>directive</a> whose <a>name</a>
+          is <var>directive name</var>, and whose <a>value</a> is <var>directive
+          value</var>.
+
+      7.  Add <var>directive</var> to <var>policy</var>'s <a>directive set</a>.
+
+  3.  Return <var>policy</var>.
+
+  <h4 id="parse-header-value">
+    Parse <var>header value </var> as a list of Content Security Policies
+  </h4>
+
+  Given a string (<var>header value</var>) which contains a comma-delimited
+  series of <a>serialized policies</a>, the following algorithm will return
+  a list of <a>policies</a>:
+
+  1.  Let <var>policies</var> be an empty list.
+
+  2.  For each <var>token</var> returned by
+      <a lt="split a string on commas">splitting <var>header value</var> on
+      commas</a>:
+
+      1.  Let <var>policy</var> be the result of executing
+          [[#parse-serialized-policy]] on <var>token</var>.
+
+      2.  If <var>policy</var>'s <a>directive set</a> is empty, skip the
+          remaining substeps, and continue to the next item.
+
+      3.  Add <var>policy</var> to <var>policies</var>.
+
+  3.  Return <var>policies</var>.
+
+  <h4 id="parse-serialized-source-list">
+    Parse <var>string</var> as a serialized source list
   </h4>
 
   Given a <a>source list directive</a>'s <a for="directive">value</a>, this
@@ -1358,7 +1070,7 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
   <h3 id="algorithms-matching">Matching Algorithms</h3>
 
   <h4 id="match-request-to-directive-list">
-    Does <var>request</var> match <var>directive list</var>?
+    Does <var>request</var> match <var>directive set</var>?
   </h4>
 
   ISSUE: Parse the request to determine which directive applies, find the
@@ -1392,7 +1104,7 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
   ISSUE: This might need a bit of polishing.
 
   <h4 id="match-node-to-directive-list">
-    Does <var>node</var> match <var>directive list</var>?
+    Does <var>node</var> match <var>directive set</var>?
   </h4>
 
   ISSUE: Parse the node to determine which directive applies, find the
@@ -1505,7 +1217,7 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
   bypassing a resource's policy is otherwise trivial.
 
   If a server delivers a <a grammar>nonce-source</a> expression as part of a
-  <a>policy string</a>, the server MUST generate a unique value each time it
+  <a>policy</a>, the server MUST generate a unique value each time it
   transmits a policy. The generated value SHOULD be at least 128 bits long
   (before encoding), and SHOULD be generated via a cryptographically secure
   random number generator in order to ensure that the value is difficult for
