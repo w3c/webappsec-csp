@@ -1087,16 +1087,8 @@ of security-relevant policy decisions.</p>
       <li>
        <a href="#directives-fetch"><span class="secno">6.1</span> <span class="content"> Fetch Directives </span></a>
        <ul class="toc">
-        <li>
-         <a href="#directive-child-src"><span class="secno">6.1.1</span> <span class="content"><code>child-src</code></span></a>
-         <ul class="toc">
-          <li><a href="#child-src-matching"><span class="secno">6.1.1.1</span> <span class="content">Matching Algorithms</span></a>
-         </ul>
-        <li>
-         <a href="#directive-connect-src"><span class="secno">6.1.2</span> <span class="content"><code>connect-src</code></span></a>
-         <ul class="toc">
-          <li><a href="#connect-src-matching"><span class="secno">6.1.2.1</span> <span class="content">Matching Algorithms</span></a>
-         </ul>
+        <li><a href="#directive-child-src"><span class="secno">6.1.1</span> <span class="content"><code>child-src</code></span></a>
+        <li><a href="#directive-connect-src"><span class="secno">6.1.2</span> <span class="content"><code>connect-src</code></span></a>
         <li><a href="#directive-default-src"><span class="secno">6.1.3</span> <span class="content"><code>default-src</code></span></a>
         <li><a href="#directive-font-src"><span class="secno">6.1.4</span> <span class="content"><code>font-src</code></span></a>
         <li><a href="#directive-img-src"><span class="secno">6.1.5</span> <span class="content"><code>img-src</code></span></a>
@@ -1556,8 +1548,8 @@ of security-relevant policy decisions.</p>
     <p><dfn data-dfn-type="dfn" data-noexport="" id="fetch-directives">Fetch directives<a class="self-link" href="#fetch-directives"></a></dfn> control the locations from which certain resource
   types may be loaded. For instance, <a data-link-type="dfn" href="#script-src">script-src</a> allows developers to
   whitelist trusted sources of script to execute on a page, while <a data-link-type="dfn" href="#font-src">font-src</a> controls the sources of web fonts.</p>
-    <p>Each <a data-link-type="dfn" href="#fetch-directives">fetch directive</a> controls a specific type of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a>. The <dfn data-dfn-type="dfn" data-local-lt="effective directive" data-noexport="" id="effective-directive-for-a-request">effective directive for a request<a class="self-link" href="#effective-directive-for-a-request"></a></dfn> (<var>request</var>) is either <code>null</code> or a <a data-link-type="dfn" href="#fetch-directives">fetch directive</a>, determined
-  according to the following algorithm:</p>
+    <p>Each <a data-link-type="dfn" href="#fetch-directives">fetch directive</a> controls a specific type of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a>. The <dfn data-dfn-type="dfn" data-noexport="" id="effective-directive-for-a-request">effective directive for a request<a class="self-link" href="#effective-directive-for-a-request"></a></dfn> (<var>request</var>) is either <code>null</code> or a <a data-link-type="dfn" href="#fetch-directives">fetch directive</a>, determined according to the following
+  algorithm:</p>
     <ol>
      <li data-md="">
       <p>Switch on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-type">type</a>, and execute
@@ -1648,13 +1640,11 @@ of security-relevant policy decisions.</p>
      <li data-md="">
       <p>Return <code>null</code>.</p>
     </ol>
-    <p>If the <a data-link-type="dfn" href="#effective-directive">effective directive</a> is not present in a <a data-link-type="dfn" href="#policy">policy</a>, <a data-link-type="dfn" href="#fetch-directives">fetch
-  directives</a> will fall back to using the value of <a data-link-type="dfn" href="#default-src"><code>default-src</code></a>, if
-  present. The <dfn data-dfn-type="dfn" data-noexport="" id="effective-source-list">effective source list<a class="self-link" href="#effective-source-list"></a></dfn> for a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>) and <a data-link-type="dfn" href="#policy">policy</a> (<var>policy</var>) is therefore
-  determined by the following algorithm:</p>
+    <p>If the <a data-link-type="dfn" href="#effective-directive-for-a-request">effective directive for a request</a> is not present in a <a data-link-type="dfn" href="#policy">policy</a>, <a data-link-type="dfn" href="#fetch-directives">fetch directives</a> will fall back to using the value of <a data-link-type="dfn" href="#default-src"><code>default-src</code></a>, if present. The <dfn data-dfn-type="dfn" data-noexport="" id="effective-source-list">effective source list<a class="self-link" href="#effective-source-list"></a></dfn> for a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>) and <a data-link-type="dfn" href="#policy">policy</a> (<var>policy</var>) is
+  therefore determined by the following algorithm:</p>
     <ol>
      <li data-md="">
-      <p>Let <var>effective</var> be the <a data-link-type="dfn" href="#effective-directive">effective directive</a> for <var>request</var>.</p>
+      <p>Let <var>effective</var> be the <a data-link-type="dfn" href="#effective-directive-for-a-request">effective directive</a> for <var>request</var>.</p>
      <li data-md="">
       <p>If <var>effective</var> is <code>null</code>, return <code>null</code>.</p>
      <li data-md="">
@@ -1665,17 +1655,6 @@ of security-relevant policy decisions.</p>
      <li data-md="">
       <p>Return <code>null</code>.</p>
     </ol>
-    <p><a data-link-type="dfn" href="#fetch-directives">Fetch directives</a> have a fallback mechanism: if the <a data-link-type="dfn">directive for a
-  request</a> is not present in a <a data-link-type="dfn" href="#policy">policy</a> (e.g. an image is requested, but
-  no <code>img-src</code> directive is specified), then the <code>default-src</code> directive’s value
-  is used for matching, if present. This <dfn data-dfn-type="dfn" data-noexport="" id="effective-directive0">effective directive<a class="self-link" href="#effective-directive0"></a></dfn> for a
-   is
-  either <code>null</code> or a <a data-link-type="dfn" href="#fetch-directives">fetch directive</a>, determined according to the
-  following algorithm:</p>
-    <ol>
-     <li data-md="">
-      <p>Let <var>directive</var> be the <a data-link-type="dfn">directive for <var>request</var></a>.</p>
-    </ol>
     <h4 class="heading settled" data-level="6.1.1" id="directive-child-src"><span class="secno">6.1.1. </span><span class="content"><code>child-src</code></span><a class="self-link" href="#directive-child-src"></a></h4>
     <p>The <dfn data-dfn-type="dfn" data-noexport="" id="child-src">child-src<a class="self-link" href="#child-src"></a></dfn> directive governs the creation of <a data-link-type="dfn" href="http://www.w3.org/TR/html5/browsers.html#nested-browsing-context">nested browsing
   contexts</a> and Worker execution contexts. The syntax for the directive’s
@@ -1683,9 +1662,25 @@ of security-relevant policy decisions.</p>
 <pre>directive-name  = "child-src"
 directive-value = <a data-link-type="grammar" href="#grammardef-serialized-source-list">serialized-source-list</a>
 </pre>
-    <div class="example" id="example-ed9b7baa">
-     <a class="self-link" href="#example-ed9b7baa"></a> Given a page with the following Content Security Policy: 
-<pre>Content-Security-Policy: child-src https://example.com/
+    <p>The <a data-link-type="dfn" href="#child-src">child-src</a> directive controls requests which load data into:</p>
+    <ol>
+     <li data-md="">
+      <p><code><a data-link-type="element" href="http://www.w3.org/TR/html5/embedded-content-0.html#the-iframe-element">iframe</a></code></p>
+     <li data-md="">
+      <p><code><a data-link-type="element">frame</a></code></p>
+    </ol>
+    <p>and which will be fed to the <a data-link-type="dfn" href="https://html.spec.whatwg.org/#run-a-worker">run a worker</a> algorithm for:</p>
+    <ol>
+     <li data-md="">
+      <p><code class="idl"><a data-link-type="idl">ServiceWorker</a></code></p>
+     <li data-md="">
+      <p><code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#sharedworker">SharedWorker</a></code></p>
+     <li data-md="">
+      <p><code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/workers/#worker">Worker</a></code></p>
+    </ol>
+    <div class="example" id="example-1cff8d33">
+     <a class="self-link" href="#example-1cff8d33"></a> Given a page with the following Content Security Policy: 
+<pre>Content-Security-Policy: <a data-link-type="dfn" href="#child-src">child-src</a> https://example.com/
 </pre>
      <p>Fetches for the following code will all return network errors, as the URLs
     provided do not match <code>child-src</code>'s <a data-link-type="dfn" href="#source-lists">source list</a>:</p>
@@ -1695,31 +1690,6 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 &lt;/script>
 </pre>
     </div>
-    <h5 class="heading settled" data-level="6.1.1.1" id="child-src-matching"><span class="secno">6.1.1.1. </span><span class="content">Matching Algorithms</span><a class="self-link" href="#child-src-matching"></a></h5>
-    <p><code>child-src</code> directives' <a data-link-type="dfn">request matching
-  algorithm</a> is as follows:</p>
-    <ol>
-     <li data-md="">
-      <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-destination">destination</a> is <em>not</em> one of "<code>document</code>", "<code>sharedworker</code>", or "<code>worker</code>", return <code>Matches</code>.</p>
-     <li data-md="">
-      <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-destination">destination</a> is "<code>Document</code>",
-  and its <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-target-browsing-context">target browsing context</a> is not a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/browsers.html#nested-browsing-context">nested
-  browsing context</a>, return <code>Matches</code>.</p>
-     <li data-md="">
-      <p>Return the result of executing <a href="#match-url-to-source-list">§7.4.2 Does url match source list?</a> on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url">url</a> and this directive’s <a data-link-type="dfn" href="#value">value</a>.</p>
-    </ol>
-    <p><code>child-src</code> directives' <a data-link-type="dfn">response matching
-  algorithm</a> is as follows:</p>
-    <ol>
-     <li data-md="">
-      <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-destination">destination</a> is <em>not</em> one of "<code>document</code>", "<code>sharedworker</code>", or "<code>worker</code>", return <code>Matches</code>.</p>
-     <li data-md="">
-      <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-destination">destination</a> is "<code>Document</code>",
-  and its <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-target-browsing-context">target browsing context</a> is not a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/browsers.html#nested-browsing-context">nested
-  browsing context</a>, return <code>Matches</code>.</p>
-     <li data-md="">
-      <p>Return the result of executing <a href="#match-url-to-source-list">§7.4.2 Does url match source list?</a> on <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url">url</a> and this directive’s <a data-link-type="dfn" href="#value">value</a>.</p>
-    </ol>
     <h4 class="heading settled" data-level="6.1.2" id="directive-connect-src"><span class="secno">6.1.2. </span><span class="content"><code>connect-src</code></span><a class="self-link" href="#directive-connect-src"></a></h4>
     <p>The <dfn data-dfn-type="dfn" data-noexport="" id="connect-src">connect-src<a class="self-link" href="#connect-src"></a></dfn> directive restricts the URLs which can be loaded
   using script interfaces. The syntax for the directive’s name and value is
@@ -1740,36 +1710,35 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
      <li data-md="">
       <p>Beacon <a data-link-type="biblio" href="#biblio-beacon">[BEACON]</a></p>
     </ol>
-    <p class="issue" id="issue-cda39063"><a class="self-link" href="#issue-cda39063"></a> The matching algorithms below don’t (yet) cover WebSockets.</p>
-    <h5 class="heading settled" data-level="6.1.2.1" id="connect-src-matching"><span class="secno">6.1.2.1. </span><span class="content">Matching Algorithms</span><a class="self-link" href="#connect-src-matching"></a></h5>
-    <p><code>connect-src</code> directives' <a data-link-type="dfn">request
-  matching algorithm</a> is as follows:</p>
-    <ol>
-     <li data-md="">
-      <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-destination">destination</a> is <em>not</em> "<code>subresource</code>", return <code>Matches</code>.</p>
-     <li data-md="">
-      <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-type">type</a> is <em>not</em> the
-  empty string (""), return <code>Matches</code>.</p>
-     <li data-md="">
-      <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-initiator">initiator</a> is "<code>manifest</code>",
-  return <code>Matches</code>.</p>
-     <li data-md="">
-      <p>Return the result of executing <a href="#match-url-to-source-list">§7.4.2 Does url match source list?</a> on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url">url</a> and this directive’s <a data-link-type="dfn" href="#value">value</a>.</p>
-    </ol>
-    <p><code>connect-src</code> directives' <a data-link-type="dfn">response matching
-  algorithm</a> is as follows:</p>
-    <ol>
-     <li data-md="">
-      <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-destination">destination</a> is <em>not</em> "<code>subresource</code>", return <code>Matches</code>.</p>
-     <li data-md="">
-      <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-type">type</a> is <em>not</em> the
-  empty string (""), return <code>Matches</code>.</p>
-     <li data-md="">
-      <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-initiator">initiator</a> is "<code>manifest</code>",
-  return <code>Matches</code>.</p>
-     <li data-md="">
-      <p>Return the result of executing <a href="#match-url-to-source-list">§7.4.2 Does url match source list?</a> on <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url">url</a> and this directive’s <a data-link-type="dfn" href="#value">value</a>.</p>
-    </ol>
+    <div class="example" id="example-1aa8459f">
+     <a class="self-link" href="#example-1aa8459f"></a> JavaScript offers a few mechanisms that directly connect to an external
+    server to send or receive information. <code>EventSource</code> maintains an open
+    HTTP connection to a server in order to receive push notifications, <code>WebSockets</code> open a bidirectional communication channel between your
+    browser and a server, and <code>XMLHttpRequest</code> makes arbitrary HTTP requests
+    on your behalf. These are powerful APIs that enable useful functionality,
+    but also provide tempting avenues for data exfiltration. 
+     <p>The <code>connect-src</code> directive allows you to ensure that these and similar
+    sorts of connections are only opened to origins you trust. Sending a
+    policy that defines a list of source expressions for this directive is
+    straightforward. For example, to limit connections to only <code>https://example.com</code>, send the following header:</p>
+<pre>Content-Security-Policy: <a data-link-type="dfn" href="#connect-src">connect-src</a> https://example.com/
+</pre>
+     <p>Fetches for the following code will all return network errors, as the URLs
+    provided do not match <code>connect-src</code>'s <a data-link-type="dfn" href="#source-lists">source list</a>:</p>
+<pre>&lt;a ping="https://not-example.com">...
+&lt;
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', 'https://not-example.com/');
+  xhr.send();
+
+  var ws = new WebSocket("https://not-example.com/");
+        
+  var es = new EventSource("https://not-example.com/");
+
+  navigator.sendBeacon("https://not-example.com/", { ... });
+>
+</pre>
+    </div>
     <h4 class="heading settled" data-level="6.1.3" id="directive-default-src"><span class="secno">6.1.3. </span><span class="content"><code>default-src</code></span><a class="self-link" href="#directive-default-src"></a></h4>
     <p>The <dfn data-dfn-type="dfn" data-noexport="" id="default-src">default-src<a class="self-link" href="#default-src"></a></dfn> directive serves as a fallback for the other <a data-link-type="dfn" href="#fetch-directives">fetch directives</a>. The syntax for the directive’s name and value is described by
   the following ABNF:</p>
@@ -1783,6 +1752,23 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 <pre>directive-name  = "font-src"
 directive-value = <a data-link-type="grammar" href="#grammardef-serialized-source-list">serialized-source-list</a>
 </pre>
+    <div class="example" id="example-38056220">
+     <a class="self-link" href="#example-38056220"></a> Given a page with the following Content Security Policy: 
+<pre>Content-Security-Policy: <a data-link-type="dfn" href="#font-src">font-src</a> https://example.com/
+</pre>
+     <p>Fetches for the following code will return a network errors, as the URL
+    provided do not match <code>font-src</code>'s <a data-link-type="dfn" href="#source-lists">source list</a>:</p>
+<pre>&lt;style>
+  @font-face {
+    font-family: "Example Font";
+    src: url("https://not-example.com/font");
+  }
+  body {
+    font-family: "Example Font";
+  }
+&lt;/style>
+</pre>
+    </div>
     <h4 class="heading settled" data-level="6.1.5" id="directive-img-src"><span class="secno">6.1.5. </span><span class="content"><code>img-src</code></span><a class="self-link" href="#directive-img-src"></a></h4>
     <p>The <dfn data-dfn-type="dfn" data-noexport="" id="img-src">img-src<a class="self-link" href="#img-src"></a></dfn> directive restricts the URLs from which image resources
   may be loaded. The syntax for the directive’s name and value is described by
@@ -1790,6 +1776,15 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 <pre>directive-name  = "img-src"
 directive-value = <a data-link-type="grammar" href="#grammardef-serialized-source-list">serialized-source-list</a>
 </pre>
+    <div class="example" id="example-8e5ffeae">
+     <a class="self-link" href="#example-8e5ffeae"></a> Given a page with the following Content Security Policy: 
+<pre>Content-Security-Policy: <a data-link-type="dfn" href="#img-src">img-src</a> https://example.com/
+</pre>
+     <p>Fetches for the following code will return a network errors, as the URL
+    provided do not match <code>img-src</code>'s <a data-link-type="dfn" href="#source-lists">source list</a>:</p>
+<pre>&lt;img src="https://not-example.com/img">
+</pre>
+    </div>
     <h4 class="heading settled" data-level="6.1.6" id="directive-media-src"><span class="secno">6.1.6. </span><span class="content"><code>media-src</code></span><a class="self-link" href="#directive-media-src"></a></h4>
     <p>The <dfn data-dfn-type="dfn" data-noexport="" id="media-src">media-src<a class="self-link" href="#media-src"></a></dfn> directive restricts the URLs from which video, audio,
   and associated text track resources may be loaded. The syntax for the
@@ -2324,13 +2319,7 @@ Content-Security-Policy: connect-src http://example.com/;
    <li><a href="#directive-set">directive set</a><span>, in §2.1</span>
    <li><a href="#grammardef-directive-value">directive-value</a><span>, in §2.2</span>
    <li><a href="#disposition">disposition</a><span>, in §2.1</span>
-   <li>
-    effective directive
-    <ul>
-     <li><a href="#effective-directive">dfn for violation</a><span>, in §2.3</span>
-     <li><a href="#effective-directive-for-a-request">definition of</a><span>, in §6.1</span>
-     <li><a href="#effective-directive0">definition of</a><span>, in §6.1</span>
-    </ul>
+   <li><a href="#effective-directive">effective directive</a><span>, in §2.3</span>
    <li><a href="#effective-directive-for-a-request">effective directive for a request</a><span>, in §6.1</span>
    <li><a href="#effective-source-list">effective source list</a><span>, in §6.1</span>
    <li><a href="#embedding-documents">embedding documents</a><span>, in §7.5.1</span>
@@ -2420,7 +2409,7 @@ Content-Security-Policy: connect-src http://example.com/;
      <li><a href="https://fetch.spec.whatwg.org/#concept-response">response</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-target-browsing-context">target browsing context</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-type">type</a>
-     <li><a href="https://fetch.spec.whatwg.org/#concept-request-url">url</a>
+     <li><a href="https://fetch.spec.whatwg.org/#concept-response-url">url</a>
     </ul>
    <li>
     <a data-link-type="biblio" href="#biblio-html">[HTML]</a> defines the following terms:
@@ -2446,6 +2435,7 @@ Content-Security-Policy: connect-src http://example.com/;
      <li><a href="http://www.w3.org/TR/html5/webappapis.html#settings-object">environment settings object</a>
      <li><a href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>
      <li><a href="http://www.w3.org/TR/html5/document-metadata.html#attr-meta-http-equiv">http-equiv</a>
+     <li><a href="http://www.w3.org/TR/html5/embedded-content-0.html#the-iframe-element">iframe</a>
      <li><a href="http://www.w3.org/TR/html5/webappapis.html#incumbent-settings-object">incumbent settings object</a>
      <li><a href="http://www.w3.org/TR/html5/document-metadata.html#the-link-element">link</a>
      <li><a href="http://www.w3.org/TR/html5/document-metadata.html#the-meta-element">meta</a>
@@ -2502,6 +2492,7 @@ Content-Security-Policy: connect-src http://example.com/;
    <li>
     <a data-link-type="biblio" href="#biblio-html">[HTML]</a> defines the following terms:
     <ul>
+     <li><a href="https://html.spec.whatwg.org/multipage/workers.html#sharedworker">SharedWorker</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#window">Window</a>
      <li><a href="https://html.spec.whatwg.org/multipage/workers.html#workerglobalscope">WorkerGlobalScope</a>
     </ul>
@@ -2573,7 +2564,6 @@ Content-Security-Policy: connect-src http://example.com/;
    <div class="issue"> This processing was added to WHATWG’s HTML in <a href="https://github.com/whatwg/html/commit/5064a629f22bef29839ab4dc6f1ceef17f010bc5">whatwg/html@5064a62</a>.
   It has not yet been added to W3C’s HTML.<a href="#issue-389933ec"> ↵ </a></div>
    <div class="issue"> Need an algorithm here, right? :)<a href="#issue-e54eddc4"> ↵ </a></div>
-   <div class="issue"> The matching algorithms below don’t (yet) cover WebSockets.<a href="#issue-cda39063"> ↵ </a></div>
    <div class="issue"> Monkey patches gonna monkey patch. Talk to WHATWG / WICG.<a href="#issue-a9d190ea"> ↵ </a></div>
    <div class="issue"> Does this cover Service Workers?<a href="#issue-91583e37"> ↵ </a></div>
    <div class="issue"> Parse the request to determine which directive applies, find the

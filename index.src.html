@@ -748,11 +748,22 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     directive-value = <a grammar>serialized-source-list</a>
   </pre>
 
+  The <a>child-src</a> directive controls requests which load data into:
+
+  1.  <{iframe}>
+  2.  <{frame}>
+
+  and which will be fed to the <a>run a worker</a> algorithm for:
+  
+  1.  {{ServiceWorker}}
+  2.  {{SharedWorker}}
+  3.  {{Worker}}
+
   <div class="example">
     Given a page with the following Content Security Policy:
 
     <pre>
-      Content-Security-Policy: child-src https://example.com/
+      Content-Security-Policy: <a>child-src</a> https://example.com/
     </pre>
 
     Fetches for the following code will all return network errors, as the URLs
@@ -785,6 +796,44 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   4.  Hyperlink auditing [[HTML]]
   5.  Beacon [[BEACON]]
 
+  <div class="example">
+    JavaScript offers a few mechanisms that directly connect to an external
+    server to send or receive information. `EventSource` maintains an open
+    HTTP connection to a server in order to receive push notifications,
+    `WebSockets` open a bidirectional communication channel between your
+    browser and a server, and `XMLHttpRequest` makes arbitrary HTTP requests
+    on your behalf. These are powerful APIs that enable useful functionality,
+    but also provide tempting avenues for data exfiltration.
+
+    The `connect-src` directive allows you to ensure that these and similar
+    sorts of connections are only opened to origins you trust. Sending a
+    policy that defines a list of source expressions for this directive is
+    straightforward. For example, to limit connections to only
+    `https://example.com`, send the following header:
+
+    <pre>
+      Content-Security-Policy: <a>connect-src</a> https://example.com/
+    </pre>
+
+    Fetches for the following code will all return network errors, as the URLs
+    provided do not match `connect-src`'s <a>source list</a>:
+
+    <pre>
+      &lt;a ping="https://not-example.com"&gt;...
+      &lt;
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'https://not-example.com/');
+        xhr.send();
+
+        var ws = new WebSocket("https://not-example.com/");
+        
+        var es = new EventSource("https://not-example.com/");
+
+        navigator.sendBeacon("https://not-example.com/", { ... });
+      &gt;
+    </pre>
+  </div>
+
   <h4 id="directive-default-src">`default-src`</h4>
 
   The <dfn>default-src</dfn> directive serves as a fallback for the other 
@@ -807,6 +856,29 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     directive-value = <a grammar>serialized-source-list</a>
   </pre>
 
+  <div class="example">
+    Given a page with the following Content Security Policy:
+
+    <pre>
+      Content-Security-Policy: <a>font-src</a> https://example.com/
+    </pre>
+
+    Fetches for the following code will return a network errors, as the URL
+    provided do not match `font-src`'s <a>source list</a>:
+
+    <pre>
+      &lt;style&gt;
+        @font-face {
+          font-family: "Example Font";
+          src: url("https://not-example.com/font");
+        }
+        body {
+          font-family: "Example Font";
+        }
+      &lt;/style&gt;
+    </pre>
+  </div>
+
   <h4 id="directive-img-src">`img-src`</h4>
 
   The <dfn>img-src</dfn> directive restricts the URLs from which image resources
@@ -817,6 +889,21 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     directive-name  = "img-src"
     directive-value = <a grammar>serialized-source-list</a>
   </pre>
+
+  <div class="example">
+    Given a page with the following Content Security Policy:
+
+    <pre>
+      Content-Security-Policy: <a>img-src</a> https://example.com/
+    </pre>
+
+    Fetches for the following code will return a network errors, as the URL
+    provided do not match `img-src`'s <a>source list</a>:
+
+    <pre>
+      &lt;img src="https://not-example.com/img"&gt;
+    </pre>
+  </div>
 
   <h4 id="directive-media-src">`media-src`</h4>
 
