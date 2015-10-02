@@ -27,14 +27,21 @@ spec: DOM; urlPrefix: http://www.w3.org/TR/dom/
 spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   type: dfn
     text: main fetch
+    text: http-network fetch
     text: parse a header value; url: concept-header-parse
     text: request; url: concept-request
     text: response; url: concept-response
-  type: attribute
-    text: client; for: Request; url: concept-request-client
-    text: url; for: Request; url: concept-request-url
-    text: url; for: Response; url: concept-response-url
-    text: header list; for: Response; url: concept-response-header-list
+    text: header; url: concept-header
+    text: client; for: request; url: concept-request-client
+    text: url; for: request; url: concept-request-url
+    text: url; for: response; url: concept-response-url
+    text: header list; for: response; url: concept-response-header-list
+    text: name; for: header; url: concept-header-name
+    text: network error; url: concept-network-error
+    text: destination; for: request; url: concept-request-destination
+    text: type; for: request; url: concept-request-type
+    text: initiator; for: request; url: concept-request-initiator
+    text: target browsing context; for: request; url: concept-request-target-browsing-context
   type: interface
     text: Request
 spec: HTML5; urlPrefix: http://www.w3.org/TR/html5/
@@ -65,6 +72,8 @@ spec: HTML5; urlPrefix: http://www.w3.org/TR/html5/
       text: split a string on commas
     urlPrefix: document-metadata.html
       text: pragma directives
+    urlPrefix: scripting-1.html
+      text: prepare a script
   type: element
     urlPrefix: document-metadata.html
       text: base; url: the-base-element
@@ -126,7 +135,12 @@ spec: RFC7231; urlPrefix: https://tools.ietf.org/html/rfc7231
       text: resource representation
       text: representation
 
-spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/workers.html#run-a-worker; type: dfn
+spec: HTML; urlPrefix: https://html.spec.whatwg.org/
+  type: dfn  
+    text: run a worker
+    text: initialising a new Document object
+    text: update a style block
+    text: Content-Security-Policy http-equiv processing instructions; url: attr-meta-http-equiv-content-security-policy
 </pre>
 <pre class="biblio">
 {
@@ -222,7 +236,7 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
 
   <h3 id="framework-policy">Policies</h3>
 
-  A <dfn local-lt="policies">policy</dfn> defines a set of allowed and
+  A <dfn local-lt="policies" export>policy</dfn> defines a set of allowed and
   restricted behaviors, and may be applied to a {{Window}} or
   {{WorkerGlobalScope}} as described in [[#apply-to-global-object]].
   
@@ -230,7 +244,11 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
   is a set of <a>directives</a> that define the policy's implications when
   applied.
 
-  A <dfn>serialized policy</dfn> is an ASCII string, consisting of a
+  Each policy has an associated <dfn for="policy">disposition</dfn>, which is
+  one of `null`, "`enforce`", or "`report`". The value is `null` unless
+  otherwise specified.
+
+  A <dfn export>serialized policy</dfn> is an ASCII string, consisting of a
   semicolon-delimited series of <a>serialized directives</a>, adhering to the
   following ABNF grammar [[!RFC5234]]:
  
@@ -239,8 +257,9 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
                         ; <a>OWS</a> is defined in section 3.2.3 of RFC 7230
   </pre>
 
-  To <dfn>parse a serialized policy</dfn> (<var>policy</var>), execute the
-  [[#parse-serialized-policy]] algorithm on <var>policy</var>.
+  To <dfn local-lt="parse" export>parse a serialized policy</dfn>
+  (<var>policy</var>), execute the [[#parse-serialized-policy]] algorithm on
+  <var>policy</var>.
 
   <h3 id="framework-directives">Directives</h3>
 
@@ -249,9 +268,9 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
   detail in [[#csp-directives]].
 
   Each <a>directive</a> is a <dfn for="directive">name</dfn> /
-  <dfn for="directive">value</dfn> pair. The <a>name</a> is a non-empty string,
-  and the <a>value</a> is a set of non-empty strings. The <a>value</a> set MAY
-  be empty.
+  <dfn for="directive">value</dfn> pair. The <a for="directive">name</a> is a
+  non-empty string, and the <a>value</a> is a set of non-empty strings. The
+  <a>value</a> set MAY be empty.
 
   A <dfn>serialized directive</dfn> is an ASCII string, consisting of one or more
   whitespace-delimited tokens, and adhering to the following ABNF [[!RFC5234]]:
@@ -267,6 +286,37 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
     ; <a>VCHAR</a> are defined in Appendix B.1 of RFC 5234.
   </pre>
 
+  <h3 id="framework-violation">Violations</h3>
+
+  A <dfn>violation</dfn> represents an action or resource which goes against the
+  <a>policies</a> associated with a <a>global object</a>.
+
+  Each <a>violation</a> has a <dfn for="violation">resource URL</dfn>, which is
+  either `null` or a {{URL}}.
+
+  Each <a>violation</a> has a <dfn for="violation">violated policy</dfn>, which
+  is a <a>policy</a>.
+
+  Each <a>violation</a> has an <dfn for="violation">violated directive</dfn>,
+  which is a non-empty string representing the <a>directive</a> which was
+  violated.
+
+  Each <a>violation</a> has an <dfn for="violation">effective directive</dfn>
+  which is a non-empty string representing the <a>directive</a> whose
+  enforcement caused the violation.
+  
+  Note: This generally the same as the <a for="violation">violated directive</a>
+  but will differ in cases where <a>fetch directives</a> are not explicitly
+  present in a <a>policy</a>, but fall back to <a>default-src</a>.
+
+  Each <a>violation</a> has a <dfn for="violation">source file</dfn>, which is
+  either `null` or a {{URL}}.
+
+  Each <a>violation</a> has a <dfn for="violation">line number</dfn>, which is
+  a non-negative integer.
+
+  Each <a>violation</a> has a <dfn for="violation">column number</dfn>, which is
+  a non-negative integer.
 
   <h3 id="framework-directive-source-list">Source Lists</h3>
 
@@ -347,7 +397,7 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
   list</var>), execute the [[#parse-serialized-source-list]] algorithm on
   <var>serialized source list</var>.
 
-  A {{URL}} <dfn>matches a source list</var> if the algorithm in
+  A {{URL}} <dfn>matches a source list</dfn> if the algorithm in
   [[#match-url-to-source-list]] returns `Matches`.
 </section>
 
@@ -357,24 +407,19 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
     Policy Delivery
   </h2>
 
-  This document defines four delivery mechanisms for a resource's policy:
+  A server MAY declare a <a>policy</a> for a particular <a>resource
+  representation</a> via an HTTP response header field whose value is a
+  <a>serialized policy</a>. This mechanism is defined in detail in
+  [[#csp-header]] and [[#cspro-header]], and the integration with Fetch
+  and HTML is described in [[#fetch-integration]] and [[#html-integration]].
 
-  1.  An HTTP response header (defined in [[#csp-header]] and [[#cspro-header]])
-      which declares a policy as a string and applies it to the resource which
-      which the header is delivered. The policy syntax is defined in
-      [[#framework-policy]].
+  A <a>policy</a> may also be declared inline in an HTML document via a
+  <{meta}> element's <{meta/http-equiv}> attribute, as described in
+  [[#meta-element]].
 
-  2.  A <{meta}> element (defined in [[#meta-element]]), which declares a policy
-      as a string and applies it to the resource in which the <{meta}> element
-      is embedded. The policy syntax is defined in [[#framework-policy]].
-
-  <h3 id="delivery-declarative">
-    Declarative Delivery
-  </h3>
-
-  <h4 id="csp-header">
+  <h3 id="csp-header">
     The `Content-Security-Policy` HTTP Response Header Field
-  </h4>
+  </h3>
 
   The <dfn>`Content-Security-Policy`</dfn> HTTP response header field
   is the preferred mechanism for delivering a policy from a server to a client.
@@ -396,13 +441,15 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
 
   A server SHOULD NOT send more than one HTTP response header field named
   "`Content-Security-Policy`" with a given <a>resource
-  representation</a>. The user agent MUST <a>enforce</a> each of the policies
-  contained in each such header field as described in
-  [[#algorithms-application]].
+  representation</a>.
 
-  <h4 id="cspro-header">
+  When the user agent receives a `Content-Security-Policy` header field, it
+  MUST <a>parse</a> and <a>enforce</a> each <a>serialized policy</a> it contains
+  as described in [[#fetch-integration]], [[#html-integration]].
+
+  <h3 id="cspro-header">
     The `Content-Security-Policy-Report-Only` HTTP Response Header Field
-  </h4>
+  </h3>
 
   The <dfn>`Content-Security-Policy-Report-Only`</dfn> HTTP response
   header field allows web developers to experiment with policies by monitoring
@@ -431,16 +478,18 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
 
   A server SHOULD NOT send more than one HTTP response header field named
   "`Content-Security-Policy-Report-Only`" with a given <a>resource
-  representation</a>. The user agent MUST <a>monitor</a> each of the policies
-  contained in each such header field as described in
-  [[#algorithms-application]].
+  representation</a>.
+
+  When the user agent receives a `Content-Security-Policy-Report-Only` header
+  field, it MUST <a>parse</a> and <a>enforce</a> each <a>serialized policy</a>
+  it contains as described in [[#fetch-integration]] and [[#html-integration]].
 
   Note: The `<a>Content-Security-Policy-Report-Only</a>` header is
   <strong>not</strong> supported inside a <{meta}> element.
 
-  <h4 id="meta-element">
+  <h3 id="meta-element">
     The `<meta>` element
-  </h4>
+  </h3>
 
   A {{Document}} may deliver a policy via one or more HTML <{meta}> elements
   whose <{meta/http-equiv}> attributes are an <a>ASCII case-insensitive
@@ -452,7 +501,14 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
     </pre>
   </div>
 
-  Implementation details can be found in [[#apply-via-meta]].
+  Implementation details can be found in HTML's <a>`Content-Security-Policy`
+  `http-equiv` processing instructions</a> [[!HTML]].
+
+  Note: The `<a>Content-Security-Policy-Report-Only</a>` header is <em>not</em>
+  supported inside a <{meta}> element. Neither are the `reflected-xss`,
+  `report-uri`, `frame-ancestors`, and `sandbox` directives.
+
+  ISSUE: Why `sandbox`? Can we loosen that?
 
   Authors are <em>strongly encouraged</em> to place <{meta}> elements as early
   in the document as possible, because policies in <{meta}> elements are not
@@ -468,71 +524,91 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
 
   Note: Modifications to the <{meta/content}> attribute of a <{meta}> element
   after the element has been parsed will be ignored.
-
-  Note: The `<a>Content-Security-Policy-Report-Only</a>`
-  header is <em>not</em> supported inside a <{meta}> element.
-
-  <h3 id="delivery-implicit">
-    Implicit Delivery 
-  </h3>
-
-  Resources with <a>local schemes</a> (e.g. `about`,
-  `blob:`, `data:`, and `filesystem:`), as well
-  as resouces embedded via <{iframe}>'s <{iframe/srcdoc}> attribute, are
-  considered same-origin with the origin that created them, but have no
-  mechanism for header-based policy delivery. To ensure that this property
-  doesn't allow a trivial bypass of a page's policy (by creating a
-  `blob:` and embedding it in an <{iframe}>, for instance), these
-  kinds of resources inherit the policy of their embedding context, as described
-  in [[#apply-to-document]], [[#apply-to-worker]], and
-  [[#apply-to-srcdoc-document]].
-
-  ISSUE(w3c/webappsec#451): We should consider extending this to include
-  auxiliary browsing contexts, not just nested browsing contexts.
-
-  ISSUE: Move this to a monkey patch of the relevant algorithms in HTML.
-
-<!-- Big text: Application -->
-<section>
 </section>
 
-<!-- Big Text: Syntax -->
+<!-- Big Text: Integration -->
 <section>
-  <h2 id="monkey-patchings">Monkey Patchings: To Be Categorized</h2>
+  <h2 id="integrations">Integrations</h2>
 
-  <h3 id="the-nonce-attribute">
-    The `nonce` attribute
+  <em>This section is non-normative.</em>
+
+  This document defines a set of algorithms which are used in other
+  specifications in order to implement the functionality. These
+  integrations are outlined here for clarity, but those external
+  documents are the normative references which ought to be consulted for
+  detailed information.
+
+  <h3 id="fetch-integration">
+    Integration with Fetch
   </h3>
 
-  Nonce sources require a new `nonce` attribute to be added to
-  both <{script}> and <{style}> elements.
+  A number of <a>directives</a> control resource loading in one way or
+  another. This specification provides algorithms which allow Fetch to make
+  decisions about whether or not a particular <a>request</a> should be blocked
+  or allowed, and about whether a particular <a>response</a> should be replaced
+  with a <a>network error</a>.
 
-  <pre class="idl">
-    partial interface HTMLScriptElement {
-      attribute DOMString nonce;
-    };
-  </pre>
-  <dl dfn-for="HTMLScriptElement">
-    <dt><dfn attribute>nonce</dfn></dt>
-    <dd>
-      This attribute <a>reflects</a> the value of the element's
-      `<dfn element-attr for="script">nonce</a>`
-      content attribute.
-    </dd>
-  </dl>
-  <pre class="idl">
-    partial interface HTMLStyleElement {
-      attribute DOMString nonce;
-    };
-  </pre>
-  <dl dfn-for="HTMLStyleElement">
-    <dt><dfn attribute>nonce</dfn></dt>
-    <dd>
-      This attribute <a>reflects</a> the value of the element's
-      `<dfn element-attr for="style">nonce</a>`
-      content attribute.
-    </dd>
-  </dl>
+  1.  [[#should-block-request]] is called as part of step #4 of its <a>Main
+      Fetch</a> algorithm.
+
+  2.  [[#should-block-response]] is called as part of step #12 of its <a>Main
+      Fetch</a> algorithm.
+
+  A <a>policy</a> is generally enforced upon a <a>global object</a>, but the
+  user agent needs to <a>parse</a> any policy delivered via an HTTP response
+  header field before any <a>global object</a> is created in order to handle
+  directives like <a>frame-ancestors</a>. To that end, Anne SHOULD accept
+  the following monkey patches to [[!FETCH]] (or come up with better ideas):
+
+  1.  A <a>response</a> has an associated <dfn for="response">policy list</dfn>
+      which contains any policy objects delivered in the <a>response</a>'s
+      <a for="response">header list</a>. The list is empty unless otherwise
+      specified.
+
+  2.  Insert the following steps after the <a>HTTP-network fetch</a>'s current
+      step 6:
+
+      7.  Execute [[#set-response-policy-list]] on <var>response</var>.
+
+  <h3 id="html-integration">
+    Integration with HTML
+  </h3>
+
+  1.  [[#apply-to-global-object]] is called during the <a>initialising a new
+      `Document` object</a> and <a>run a worker</a> algorithms in order to bind
+      a set of <a>policy</a> objects associated with a <a>response</a> to a
+      newly created <a>global object</a>.
+
+      ISSUE: The algorithm is named "creating a new `Document` object" in W3C's
+      HTML, and isn't well-integrated with Fetch.
+
+      ISSUE: Need to monkey-patch these in: something like "Set the `Window`
+      object's `policy list` to the `policy list` of the resource used to
+      generate the document.
+
+  2.  [[#does-node-match]] is called during the <a>prepare a script</a> and
+      <a>update a `style` block</a> algorithms in order to determine whether or
+      not an inline script or style block is allowed to execute.
+
+      ISSUE: The <a>update a `style` block</a> algorithm does not exist in
+      W3C's HTML.
+
+      ISSUE: The `nonce` attribute for <{script}> and <{style}> were added to
+      WHATWG's HTML in
+      <a href="https://github.com/whatwg/html/commit/882803c4cc8fba2fa5472b76f628d95cc82c421d">whatwg/html@882803c</a>.
+      They have not yet been added to W3C's HTML.
+
+      ISSUE: Need to monkey-patch these in: something like "If
+      [[#does-node-match]] returns `Does Not Match` when executed upon the
+      element and the element's `Document`'s <a>global object</a>'s
+      `policy list`, abort these steps."
+
+  3.  [[#apply-to-global-object]] is called during processing of the <{meta}>
+      element's <{meta/http-equiv}>.
+
+      ISSUE: This processing was added to WHATWG's HTML in
+      <a href="https://github.com/whatwg/html/commit/5064a629f22bef29839ab4dc6f1ceef17f010bc5">whatwg/html@5064a62</a>.
+      It has not yet been added to W3C's HTML.
 </section>
 
 <!-- Big Text: Reporting -->
@@ -540,6 +616,10 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
   <h2 id="reporting">
     Reporting
   </h2>
+
+  <dfn>Report a violation</dfn>.
+
+  ISSUE: Need an algorithm here, right? :)
 </section>
 
 <!-- Big Text: Directives -->
@@ -552,10 +632,6 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
   developers to control certain aspects of their sites' behavior. The defined
   directives fall into one of several categories:
 
-  1.  <dfn>Request Directives</dfn> control the locations from which certain
-      resource types may be loaded. For instance, <a>script-src</a> allows
-      developers to whitelist trusted sources of script to execute on a page,
-      while <a>font-src</a> controls the sources of web fonts.
 
   2.  ...
 
@@ -571,11 +647,95 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
   sources in their policies. Both enable XSS attacks by allowing code to be
   included directly in the document itself; they are best avoided completely.
 
-  <h3 id="directives-request">
-    Request Directives
+  <h3 id="directives-fetch">
+    Fetch Directives
   </h3>
-
   
+  <dfn>Fetch directives</dfn> control the locations from which certain resource
+  types may be loaded. For instance, <a>script-src</a> allows developers to
+  whitelist trusted sources of script to execute on a page, while
+  <a>font-src</a> controls the sources of web fonts.
+
+  Each <a>fetch directive</a> controls a specific type of <a>request</a>. The
+  <dfn>effective directive for a request</dfn> (<var>request</var>) is either
+  `null` or a <a>fetch directive</a>, determined according to the following
+  algorithm:
+
+  1.  Switch on <var>request</var>'s <a for="request">type</a>, and execute
+      the associated steps:
+
+      : ""
+      ::
+        1.  If the <var>request</var>'s <a for="request">initiator</a> is
+            "`fetch`", return `connect-src`.
+        2.  If the <var>request</var>'s <a for="request">initiator</a> is
+            "`manifest`", return `manifest-src`.
+        3.  If the <var>request</var>'s <a for="request">destination</a> is
+            "`subresource`", return `connect-src`.
+        4.  If the <var>request</var>'s <a for="request">destination</a> is
+            "`unknown`", return `object-src`.
+        5.  If the <var>request</var>'s <a for="request">destination</a> is
+            "`document`" <em>and</em> the <var>request</var>'s
+            <a for="request">target browsing context</a> is a <a>nested browsing
+            context</a>, return `child-src`.
+
+      : "`audio`"
+      : "`track`"
+      : "`video`"
+      ::
+        1.  Return `media-src`.
+
+      : "`font`"
+      ::
+        1.  Return `font-src`.
+
+      : "`image`"
+      ::
+        1.  Return `image-src`.
+
+      : "`style`"
+      ::
+        1.  Return `style-src`.
+
+      : "`script`"
+      ::
+        1.  Switch on <var>request</var>'s <a for="request">destination</a>, and
+            execute the associated steps:
+
+            : "`subresource`"
+            ::
+              1.  Return `script-src`.
+
+            : "`serviceworker`"
+            : "`sharedworker`"
+            : "`worker`"
+            ::
+              1.  Return `child-src`.
+
+  2.  Return `null`.
+
+  If the <a>effective directive for a request</a> is not present in a
+  <a>policy</a>, <a>fetch directives</a> will fall back to using the value of
+  <a>`default-src`</a>, if present. The <dfn>effective source list</dfn> for a
+  <a>request</a> (<var>request</var>) and <a>policy</a> (<var>policy</var>) is
+  therefore determined by the following algorithm:
+
+  1.  Let <var>effective</var> be the
+      <a lt="effective directive for a request">effective directive</a> for
+      <var>request</var>.
+
+  2.  If <var>effective</var> is `null`, return `null`.
+
+  3.  If a <a>directive</a> whose <a for="directive">name</a> is
+      <var>effective</var> is present in <var>policy</var>'s
+      <a for="policy">directive list</a>, return that <a>directive</a>'s
+      <a for="directive">value</a>.
+
+  4.  If a <a>directive</a> whose <a for="directive">name</a> is
+      `default-src` is present in <var>policy</var>'s <a for="policy">directive
+      list</a>, return that <a>directive</a>'s <a for="directive">value</a>.
+
+  5.  Return `null`.
 
   <h4 id="directive-child-src">`child-src`</h4>
 
@@ -609,19 +769,26 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
   <h4 id="directive-connect-src">`connect-src`</h4>
 
   The <dfn>connect-src</dfn> directive restricts the URLs which can be loaded
-  using script interfaces such as those defined in [[XMLHttpRequest]] and
-  [[FETCH]]. The syntax for the directive's name and value is described by
-  the following ABNF:
+  using script interfaces. The syntax for the directive's name and value is
+  described by the following ABNF:
 
   <pre>
     directive-name  = "connect-src"
     directive-value = <a grammar>serialized-source-list</a>
   </pre>
 
+  The <a>connect-src</a> directive controls connections from the following:
+
+  1.  `XMLHttpRequest` [[XHR]]
+  2.  WebSocket [[WEBSOCKETS]]
+  3.  EventSource [[EVENTSOURCE]]
+  4.  Hyperlink auditing [[HTML]]
+  5.  Beacon [[BEACON]]
+
   <h4 id="directive-default-src">`default-src`</h4>
 
   The <dfn>default-src</dfn> directive serves as a fallback for the other 
-  <a>request directives</a>. The syntax for the directive's name and value is described by
+  <a>fetch directives</a>. The syntax for the directive's name and value is described by
   the following ABNF:
 
   <pre>
@@ -746,31 +913,80 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
 
   <h3 id="algorithms-fetch">Fetch Interface</h3>
 
-  This specification provides two algorithms which allow Fetch to make decisions
-  about whether or not a particular <a>request</a> should be blocked based on
-  its {{Request/client}}'s Content Security Policy [[!FETCH]]. The policy check
-  occurs twice: once at the top of Fetch, ensuring that outgoing requests
-  satisfy the relevant policy; and once at the bottom, ensuring that incoming
-  responses match as well (as they could have been modified in interesting ways
-  by an intermediate Service Worker). These algorithms can be considered the
-  public interface to the Content Security Policy specification:
+  This specification provides an algorithm for extracting policy information
+  from a <a>response</a>, and algorithms which allow Fetch to make decisions
+  about whether or not a particular <a>request</a> or <a>response</a> should
+  be blocked. Details are in [[!FETCH]], and are summarized in
+  [[#fetch-integration]].
+
+  <h4 id="set-response-policy-list">
+    Set <var>response</var>'s `policy list`
+  </h4>
+
+  Given a <a>response</a> (<var>response</var>), this algorithm evaluates its
+  <a for="response">header list</a> for <a>serialized policy</a> values, and
+  populates its <a for="response">policy list</a> accordingly:
+
+  1.  Let <var>policies to enforce</var> be the result of executing
+      [[#parse-header-value]] on the result of
+      <a lt="parse a header value">parsing</a> `Content-Security-Policy`
+      in <var>response</var>'s <a for="response">header list</a>.
+
+  2.  For each <var>policy</var> in <var>policies to enforce</var>:
+
+      1.  Set <var>policy</var>'s <a for="policy">disposition</a> to
+          "`enforce`".
+
+      2.  Insert <var>policy</var> into <var>response</var>'s
+          <a for="response">policy list</a>.
+
+  3.  Let <var>policies to report</var> be the result of executing
+      [[#parse-header-value]] on the result of
+      <a lt="parse a header value">parsing</a>
+      `Content-Security-Policy-Report-Only` in <var>response</var>'s
+      <a for="response">header list</a>.
+
+  4.  For each <var>policy</var> in <var>policies to report</var>:
+
+      1.  Set <var>policy</var>'s <a for="policy">disposition</a> to
+          "`report`".
+
+      2.  Insert <var>policy</var> into <var>response</var>'s
+          <a for="response">policy list</a>.
 
   <h4 id="should-block-request">
     Should <var>request</var> be blocked by Content Security Policy?
   </h4>
 
   Given a <a>request</a> (<var>request</var>), this algorithm returns
-  `Blocked` or `Allowed` based on <var>request</var>'s
-  {{Request/client}}'s Content Security Policy.
+  `Blocked` or `Allowed` and reports violations based on <var>request</var>'s
+  <a for="request">client</a>'s Content Security Policy.
 
-  Note: [[FETCH]] calls this algorithm as step #3 of its <a>Main Fetch</a>
-  algorithm.
+  1.  Let <var>policy list</var> be <var>request</var>'s
+      <a for="request">client</a>'s <a>global object</a>'s
+      <a for="global object">policy list</a>.
 
-  1.  Let <var>client</var> be <var>request</var>'s {{Request/client}}.
+  2.  Let <var>result</var> be "`Allowed`".
 
-  2.  Return `Blocked`.
+  3.  For each <var>policy</var> in <var>policy list</var>:
 
-  ISSUE: We should probably expand on this definition a bit.
+      1.  For each <var>directive</var> in <var>policy</var>'s
+          <a for="policy">directive list</a>:
+
+          1.  If <var>directive</var> is not a <a>fetch directive</a>, then
+              skip to the next <a>directive</a>.
+
+          2.  If the result of executing <a>Does <var>directive</var> match
+              <var>request</var>?</a> is `Matches`, then skip to the next
+              <a>directive</a>.
+
+          3.  <a>Report a violation</a> for <var>policy</var>,
+              <var>directive</var> and <var>request</var>.
+
+          4.  If <var>policy</var>'s <a for="policy">disposition</a> is
+              "`enforce`", set <var>result</var> to "`Blocked`".
+
+  4.  Return <var>result</var>.
 
   <h4 id="should-block-response">
     Should <var>response</var> to <var>request</var> be blocked by Content
@@ -779,17 +995,34 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
 
   Given a <a>response</a> (<var>response</var>) and a <a>request</a>
   (<var>request</var>), this algorithm returns `Blocked` or
-  `Allowed` based on <var>request</var>'s {{Request/client}}'s
-  Content Security Policy.
+  `Allowed`, and reports violations based on <var>request</var>'s
+  <a for="request">client</a>'s Content Security Policy.
 
-  Note: [[FETCH]] calls this algorithm as step #12 of its <a>Main Fetch</a>
-  algorithm.
+  1.  Let <var>policy list</var> be <var>request</var>'s
+      <a for="request">client</a>'s <a>global object</a>'s
+      <a for="global object">policy list</a>.
 
-  1.  Let <var>client</var> be <var>request</var>'s {{Request/client}}.
+  2.  Let <var>result</var> be "`Allowed`".
 
-  2.  Return `Blocked`.
+  3.  For each <var>policy</var> in <var>policy list</var>:
 
-  ISSUE: We should probably expand on this definition a bit.
+      1.  For each <var>directive</var> in <var>policy</var>'s
+          <a for="policy">directive list</a>:
+
+          1.  If <var>directive</var> is not a <a>fetch directive</a>, then
+              skip to the next <a>directive</a>.
+
+          2.  If the result of executing <a>Does <var>directive</var> match
+              <var>response</var>?</a> is `Matches`, then skip to the next
+              <a>directive</a>.
+
+          3.  <a>Report a violation</a> for <var>policy</var>,
+              <var>directive</var> and <var>request</var>.
+
+          4.  If <var>policy</var>'s <a for="policy">disposition</a> is
+              "`enforce`", set <var>result</var> to "`Blocked`".
+
+  4.  Return <var>result</var>.
 
   <h3 id="algorithms-application">
     Policy Application Algorithms
@@ -839,7 +1072,7 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
   When <a lt="create a Document object">creating</a> a {{Document}} object
   (<var>document</var>) for a <a>response</a> (<var>response</var>):
     
-  1.  If <var>response</var>'s {{Response/url}}'s {{URL/scheme}} is a
+  1.  If <var>response</var>'s <a for="response">url</a>'s {{URL/scheme}} is a
       <a>local scheme</a>:
 
       1.  Set <var>document</var>'s <a>incumbent settings object</a>'s
@@ -849,7 +1082,7 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
   2.  Otherwise:
 
       1.  Execute [[#apply-policy-from-headers]] on 
-          <var>response</var>'s <a attribute>header list</a> and
+          <var>response</var>'s <a for="response">header list</a> and
           <var>document</var>'s <a>incumbent settings object</a>.
 
   <h4 id="apply-to-srcdoc-document">
@@ -872,7 +1105,7 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
   <a>environment settings object</a> <var>settings</var> successfully
   executes a Fetch in its current step 4:
 
-  1.  If <var>response</var>'s {{Response/url}}'s {{URL/scheme}} is a
+  1.  If <var>response</var>'s <a for="response">url</a>'s {{URL/scheme}} is a
       <a>local scheme</a>:
 
       1.  Set <var>settings</var> `<a>inherits Content Security
@@ -881,69 +1114,13 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
   2.  Otherwise:
 
       1.  Execute [[#apply-policy-from-headers]] on 
-          the <a>response</a>'s <a attribute>header list</a> and
+          the <a>response</a>'s <a for="response">header list</a> and
           <var>settings</var>.
 
   Note: This is using the WHATWG's definition of "run a worker", because
   the W3C's version has no concept of environment settings objects.
 
   ISSUE: Does this cover Service Workers?
-
-  <h4 id="apply-via-meta">
-    Apply policies to <var>document</var> via `<meta>`
-  </h4>
-
-  ISSUE: Monkey-patching! Move this to HTML.
-
-  Add the following entry to the <a>pragma directives</a> for the <{meta}>
-  element:
-
-  <dl>
-    <dt>
-      Content security policy
-      (`http-equiv="content-security-policy"`)
-    </dt>
-    <dd>
-      <ol>
-        <li>
-          If the Document's <{head}> element is not an ancestor of the <{meta}>
-          element, abort these steps.
-        </li>
-
-        <li>
-          If the <{meta}> element lacks a <{meta/content}> attribute, abort
-          these steps.
-        </li>
-
-        <li>
-          Let <var>content</var> be the value of the <{meta/content}> attribute
-          of the <{meta}> element.
-        </li>
-
-        <li>
-          Let <var>policy</var> be the result of executing
-          [[#parse-header-value]] on <var>content</var>.
-        </li>
-
-        <li>
-          Remove all occurrences of `report-uri`,
-          `frame-ancestors`, and `sandbox`
-          directives from <var>policy</var>'s directive set.
-
-          Note: User agents are encouraged to issue a warning to developers
-          if one or more of these directives are included in a policy
-          delivered via <{meta}>.
-
-          ISSUE: Wire all this up once the directives exist and the policy
-          object is defined.
-        </li>
-
-        <li>
-          <a>Enforce</a> <var>policy</var> on the <a>incumbent settings
-          object</a>.
-      </ol>
-    </dd>
-  </dl>
 
   <h4 id="apply-to-global-object">
     Apply <var>policy</var> to <var>global object</var>
@@ -952,11 +1129,10 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
   1.  Let <var>settings</var> be the <a>relevant settings object</a> for
       <var>global object</var>.
 
-  2.  If <var>policy</var>'s <a for="policy">type</a> attribute is
-      "`enforce`", <a>enforce</a> <var>policy</var> for
-      <var>settings</var>.
+  2.  If <var>policy</var>'s <a for="policy">disposition</a> is "`enforce`",
+      <a>enforce</a> <var>policy</var> for <var>settings</var>.
 
-  3.  Otherwise, <var>policy</var>'s <a for="policy">type</a> attribute is
+  3.  Otherwise, <var>policy</var>'s <a for="policy">disposition</a> is
       "`report-only`", so <a>monitor</a> <var>policy</var> for
       <var>settings</var>.
 
@@ -965,7 +1141,7 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
     object</var>
   </h4>
 
-  Given a <a>response</a>'s <a attribute>header list</a> (<var>header
+  Given a <a>response</a>'s <a for="response">header list</a> (<var>header
   list</var>) and an <a>environment settings object</a> (<var>settings</var>),
   this algorithm extracts the policies which ought to be <a>enforced</a> and
   <a>monitored</a> for the settings object, and does so:
@@ -1020,16 +1196,16 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
           characters</a>.
 
       4.  If <var>policy</var>'s <a>directive set</a> contains a
-          <a>directive</a> whose <a>name</a> is <var>directive name</var>,
-          skip the remaining substeps and continue to the next item.
+          <a>directive</a> whose <a for="directive">name</a> is <var>directive
+          name</var>, skip the remaining substeps and continue to the next item.
 
       5.  Let <var>directive value</var> be the result of
           <a lt="split a string on spaces">splitting <var>token</var> on
           spaces</a>.
 
-      6.  Let <var>directive</var> be a new <a>directive</a> whose <a>name</a>
-          is <var>directive name</var>, and whose <a>value</a> is <var>directive
-          value</var>.
+      6.  Let <var>directive</var> be a new <a>directive</a> whose
+          <a for="directive">name</a> is <var>directive name</var>, and
+          <a for="directive">value</a> is <var>directive value</var>.
 
       7.  Add <var>directive</var> to <var>policy</var>'s <a>directive set</a>.
 
@@ -1103,8 +1279,8 @@ spec: HTML; text: run a worker; url: https://html.spec.whatwg.org/multipage/work
 
   ISSUE: This might need a bit of polishing.
 
-  <h4 id="match-node-to-directive-list">
-    Does <var>node</var> match <var>directive set</var>?
+  <h4 id="does-node-match">
+    Does <var>node</var> match <var>policy</var>?
   </h4>
 
   ISSUE: Parse the node to determine which directive applies, find the
