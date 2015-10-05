@@ -820,7 +820,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
     <pre>
       &lt;a ping="https://not-example.com"&gt;...
-      &lt;
+      &lt;script&gt;
         var xhr = new XMLHttpRequest();
         xhr.open('GET', 'https://not-example.com/');
         xhr.send();
@@ -830,7 +830,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
         var es = new EventSource("https://not-example.com/");
 
         navigator.sendBeacon("https://not-example.com/", { ... });
-      &gt;
+      &gt;/script&gt;
     </pre>
   </div>
 
@@ -844,6 +844,57 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     directive-name  = "default-src"
     directive-value = <a grammar>serialized-source-list</a>
   </pre>
+
+  <div class="example">
+    The following header:
+
+    <pre>
+      <a>Content-Security-Policy</a>: <a>default-src</a> <a grammar>'self'</a>
+    </pre>
+
+    will have the same behavior as the following header:
+
+    <pre>
+      <a>Content-Security-Policy</a>: <a>child-src</a> <a grammar>'self'</a>
+                               <a>connect-src</a> <a grammar>'self'</a>
+                               <a>font-src</a> <a grammar>'self'</a>
+                               <a>img-src</a> <a grammar>'self'</a>
+                               <a>media-src</a> <a grammar>'self'</a>
+                               <a>object-src</a> <a grammar>'self'</a>
+                               <a>script-src</a> <a grammar>'self'</a>
+                               <a>style-src</a> <a grammar>'self'</a>
+    </pre>
+
+    That is, when `default-src` is set, every <a>fetch directive</a> that isn't
+    explicitly set will fall back to the value `default-src` specifies.
+  </div>
+  <div class="example">
+    There is no inheritance. If a `script-src` directive is explicitly
+    specified, for example, then the value of `default-src` has no influence on
+    script requests. That is, the following header:
+
+    <pre>
+      <a>Content-Security-Policy</a>: <a>default-src</a> <a grammar>'self'</a>, <a>script-src</a> https://example.com
+    </pre>
+
+    will have the same behavior as the following header:
+
+    <pre>
+      <a>Content-Security-Policy</a>: <a>child-src</a> <a grammar>'self'</a>
+                               <a>connect-src</a> <a grammar>'self'</a>
+                               <a>font-src</a> <a grammar>'self'</a>
+                               <a>img-src</a> <a grammar>'self'</a>
+                               <a>media-src</a> <a grammar>'self'</a>
+                               <a>object-src</a> <a grammar>'self'</a>
+                               <a>script-src</a> https://example.com
+                               <a>style-src</a> <a grammar>'self'</a>
+    </pre>
+
+    Given this behavior, one good way to build a policy for a site would be to
+    begin with a `default-src` of `'none'`, and to build up a policy from there
+    which allowed only those resource types which are necessary for the
+    particular page the policy will apply to.
+  </div>
 
   <h4 id="directive-font-src">`font-src`</h4>
 
@@ -916,6 +967,21 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     directive-value = <a grammar>serialized-source-list</a>
   </pre>
 
+  <div class="example">
+    Given a page with the following Content Security Policy:
+
+    <pre>
+      Content-Security-Policy: <a>img-src</a> https://example.com/
+    </pre>
+
+    Fetches for the following code will return a network errors, as the URL
+    provided do not match `img-src`'s <a>source list</a>:
+
+    <pre>
+      &lt;img src="https://not-example.com/img"&gt;
+    </pre>
+  </div>
+
   <h4 id="directive-object-src">`object-src`</h4>
 
   The <dfn>object-src</dfn> directive restricts the URLs from which plugins may
@@ -926,6 +992,37 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     directive-name  = "object-src"
     directive-value = <a grammar>serialized-source-list</a>
   </pre>
+
+  <div class="example">
+    Given a page with the following Content Security Policy:
+
+    <pre>
+      Content-Security-Policy: <a>object-src</a> https://example.com/
+    </pre>
+
+    Fetches for the following code will return a network errors, as the URL
+    provided do not match `object-src`'s <a>source list</a>:
+
+    <pre>
+      &lt;embed src="https://not-example.com/flash"&gt;&lt;/embed&gt;
+      &lt;object data="https://not-example.com/flash"&gt;&lt;/object&gt;
+      &lt;applet archive="https://not-example.com/flash"&gt;&lt;/applet&gt;
+    </pre>
+  </div>
+
+  If plugin content is loaded without an associated URL (perhaps an <{object}>
+  element lacks a <{object/data}> attribute, but loads some default plugin based
+  on the specified `type`), it MUST be blocked if `object-src`'s value is
+  `'none'`, but will otherwise be allowed. The <a>`plugin-types`</a> directive
+  can be used to control these kinds of plugins with more granularity.
+
+  Note: The `object-src` directive acts upon any request made on behalf of
+  an <{object}>, <{embed}>, or <{applet}> element. This includes requests
+  which would populate the <a>nested browsing context</a> generated by the
+  former two (also including navigations). This is true even when the data is
+  semantically equivalent to content which would otherwise be restricted by
+  another directive, such as an <{object}> element with a `text/html` MIME
+  type.
 
   <h4 id="directive-script-src">`script-src`</h4>
 
