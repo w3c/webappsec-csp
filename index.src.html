@@ -28,6 +28,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   type: dfn
     text: main fetch
     text: http-network fetch
+    text: http fetch
     text: parse a header value; url: concept-header-parse
     text: request; url: concept-request
     text: response; url: concept-response
@@ -634,6 +635,11 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   2.  [[#should-block-response]] is called as part of step #12 of its <a>Main
       Fetch</a> algorithm.
 
+      Note: The <a>`frame-ancestors`</a> check is handled here, inside
+      [[#should-block-response]].
+
+  ISSUE: Give Anne a patch to Fetch to make this bit true.
+
   A <a>policy</a> is generally enforced upon a <a>global object</a>, but the
   user agent needs to <a lt="parse a serialized policy">parse</a> any policy
   delivered via an HTTP response header field before any <a>global object</a>
@@ -647,13 +653,22 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       <a for="response">header list</a>. The list is empty unless otherwise
       specified.
 
-  2.  Insert the following steps after the <a>HTTP-network fetch</a>'s current
+  2.  Insert the following steps after <a>HTTP fetch</a>'s current step 2.2:
+
+      3.  Execute [[#set-response-policy-list]] on <var>response</var>.
+
+  3.  Insert the following steps before the <a>HTTP-network fetch</a>'s current
       step 6:
 
-      7.  Execute [[#set-response-policy-list]] on <var>response</var>.
+      6.  Execute [[#set-response-policy-list]] on <var>response</var>.
 
-  Note: The <a>`frame-ancestors`</a> check is handled inside
-  [[#should-block-response]].
+  Note: These two additions should ensure that <a>responses</a>'s
+  <a for="response">policy lists</a> are set, regardless of how the
+  <a>response</a> is created. If we hit the network (via
+  <a>HTTP-network fetch</a>, then we parse the policy before we handle the
+  `Set-Cookie` header. If we get a response from a Service Worker (via <a>HTTP
+  fetch</a>, we'll process its <a for="response">policy list</a> before handing
+  the response back to our caller.
 
   <h4 id="set-response-policy-list">
     Set <var>response</var>'s `policy list`
