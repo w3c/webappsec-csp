@@ -7,7 +7,6 @@ category: std
 
 ipr: trust200902
 area: General
-workgroup: HTTPbis
 keyword: Internet-Draft
 
 pi: [toc, tocindent, sortrefs, symrefs, strict, compact, comments, inline]
@@ -91,7 +90,7 @@ be registered with IANA.
 When registering a new Content Security Policy directive, the following
 information MUST be provided:
 
-* The directive's name
+* The directive's name (which MUST be an ASCII string)
 * A reference to the readily available public specification defining the new
   directive's syntax, usage, and semantics.
 
