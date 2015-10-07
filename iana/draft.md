@@ -1,7 +1,7 @@
 ---
 title: Content Security Policy Directive Registry
 abbrev: webappsec-csp-reg
-docname: draft-west-webappsec-csp-reg-01
+docname: draft-west-webappsec-csp-reg-02
 date: 2015
 category: info
 
@@ -86,7 +86,9 @@ When registering a new Content Security Policy directive, the following
 information must be provided:
 
 * The directive's name, an ASCII string conforming to the `directive-name`
-  rule specified in Section 4.1 of {{CSP}}.
+  rule specified in Section 4.1 of {{CSP}}. The ABNF {{RFC5234}} is as follows:
+
+      directive-name  = 1*( ALPHA / DIGIT / "-" )
 
 * A reference to the readily available public specification defining the new
   directive's syntax, usage, and semantics.
