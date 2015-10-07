@@ -1,7 +1,7 @@
 ---
 title: Content Security Policy Directive Registry
 abbrev: webappsec-csp-reg
-docname: draft-west-webappsec-csp-reg-02
+docname: draft-west-webappsec-csp-reg-03
 date: 2015
 category: info
 
@@ -32,7 +32,6 @@ normative:
       ins: D. Veditz
       name: Dan Veditz
       organization: Mozilla
-  RFC2119:
   RFC5226:
   RFC5234:
 
