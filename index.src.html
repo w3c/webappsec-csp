@@ -64,6 +64,7 @@ spec: HTML5; urlPrefix: http://www.w3.org/TR/html5/
       text: relevant settings object; url: relevant-settings-object-for-a-global-object
       text: responsible browsing context
     urlPrefix: infrastructure.html
+      text: case-sensitive; url: case-sensitive
       text: ASCII case-insensitive match; url: ascii-case-insensitive
       text: reflect
       text: strictly split a string
@@ -89,6 +90,8 @@ spec: HTML5; urlPrefix: http://www.w3.org/TR/html5/
       text: iframe; url: the-iframe-element
     urlPrefix: scripting-1.html
       text: script; url: the-script-element
+    urlPrefix: text-level-semantics.html
+      text: a; url: the-a-element
     urlPrefix: obsolete.html
       text: applet; url: the-applet-element
       text: frame
@@ -157,6 +160,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     text: update a style block
     text: the worker's documents
     text: Content-Security-Policy http-equiv processing instructions; url: attr-meta-http-equiv-content-security-policy
+  type: element-attr
+    text: ping; for: a
 </pre>
 <pre class="biblio">
 {
@@ -458,7 +463,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   which is a non-empty string representing the <a>directive</a> which was
   violated.
 
-  Each <a>violation</a> has an <dfn for="violation">effective directive</dfn>
+  Each <a>violation</a> has an
+  <dfn for="violation" id="violation-effective-directive">effective directive</dfn>
   which is a non-empty string representing the <a>directive</a> whose
   enforcement caused the violation.
   
@@ -474,20 +480,6 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   Each <a>violation</a> has a <dfn for="violation">column number</dfn>, which is
   a non-negative integer.
-
-
-  <h4 id="parse-source-list">
-    Parse a <var>serialized source list</var>
-  </h4>
-
-  Given a <a>serialized source list</a> (<var>string</var>), this algorithm will
-  return a list of <a>source expressions</a>. In the case of a fatal parse
-  error, this list will be empty.
-
-
-
-
-</section>
 </section>
 
 <!-- Big Text: Delivery -->
@@ -957,87 +949,6 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   whitelist trusted sources of script to execute on a page, while
   <a>font-src</a> controls the sources of web fonts.
 
-  Each <a>fetch directive</a> controls a specific type of <a>request</a>. The
-  <dfn>effective directive for a request</dfn> (<var>request</var>) is either
-  `null` or a <a>fetch directive</a>, determined according to the following
-  algorithm:
-
-  1.  Switch on <var>request</var>'s <a for="request">type</a>, and execute
-      the associated steps:
-
-      : ""
-      ::
-        1.  If the <var>request</var>'s <a for="request">initiator</a> is
-            "`fetch`", return `connect-src`.
-        2.  If the <var>request</var>'s <a for="request">initiator</a> is
-            "`manifest`", return `manifest-src`.
-        3.  If the <var>request</var>'s <a for="request">destination</a> is
-            "`subresource`", return `connect-src`.
-        4.  If the <var>request</var>'s <a for="request">destination</a> is
-            "`unknown`", return `object-src`.
-        5.  If the <var>request</var>'s <a for="request">destination</a> is
-            "`document`" <em>and</em> the <var>request</var>'s
-            <a for="request">target browsing context</a> is a <a>nested browsing
-            context</a>, return `child-src`.
-
-      : "`audio`"
-      : "`track`"
-      : "`video`"
-      ::
-        1.  Return `media-src`.
-
-      : "`font`"
-      ::
-        1.  Return `font-src`.
-
-      : "`image`"
-      ::
-        1.  Return `image-src`.
-
-      : "`style`"
-      ::
-        1.  Return `style-src`.
-
-      : "`script`"
-      ::
-        1.  Switch on <var>request</var>'s <a for="request">destination</a>, and
-            execute the associated steps:
-
-            : "`subresource`"
-            ::
-              1.  Return `script-src`.
-
-            : "`serviceworker`"
-            : "`sharedworker`"
-            : "`worker`"
-            ::
-              1.  Return `child-src`.
-
-  2.  Return `null`.
-
-  If the <a>effective directive for a request</a> is not present in a
-  <a>policy</a>, <a>fetch directives</a> will fall back to using the value of
-  <a>`default-src`</a>, if present. The <dfn>effective source list</dfn> for a
-  <a>request</a> (<var>request</var>) and <a>policy</a> (<var>policy</var>) is
-  therefore determined by the following algorithm:
-
-  1.  Let <var>effective</var> be the
-      <a lt="effective directive for a request">effective directive</a> for
-      <var>request</var>.
-
-  2.  If <var>effective</var> is `null`, return `null`.
-
-  3.  If a <a>directive</a> whose <a for="directive">name</a> is
-      <var>effective</var> is present in <var>policy</var>'s
-      <a for="policy">directive set</a>, return that <a>directive</a>'s
-      <a for="directive">value</a>.
-
-  4.  If a <a>directive</a> whose <a for="directive">name</a> is
-      `default-src` is present in <var>policy</var>'s <a for="policy">directive
-      set</a>, return that <a>directive</a>'s <a for="directive">value</a>.
-
-  5.  Return `null`.
-
   <h4 id="directive-child-src">`child-src`</h4>
 
   The <dfn>child-src</dfn> directive governs the creation of <a>nested browsing
@@ -1049,16 +960,19 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     directive-value = <a grammar>serialized-source-list</a>
   </pre>
 
-  The <a>child-src</a> directive controls requests which load data into:
-
-  1.  <{iframe}>
-  2.  <{frame}>
-
-  and which will be fed to the <a>run a worker</a> algorithm for:
+  This directive controls <a>requests</a> which will populate a frame or a
+  worker. More formally, <a>requests</a> falling into one of the
+  following categories:
   
-  1.  {{ServiceWorker}}
-  2.  {{SharedWorker}}
-  3.  {{Worker}}
+  *  <a for="request">destination</a> is "`document`", and whose
+     <a for="request">target browsing context</a> is a <a>nested browsing
+     context</a> (e.g. requests which will populate an <{iframe}> or <{frame}>
+     element)
+     
+  *  <a for="request">destination</a> is either "`serviceworker`",
+     "`sharedworker`", or "`worker`" (which are fed to the <a>run a worker</a>
+     algorithm for {{ServiceWorker}}, {{SharedWorker}}, and {{Worker}},
+     respectively).
 
   <div class="example">
     Given a page with the following Content Security Policy:
@@ -1089,13 +1003,17 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     directive-value = <a grammar>serialized-source-list</a>
   </pre>
 
-  The <a>connect-src</a> directive controls connections from the following:
+  This directive controls <a>requests</a> which transmit or receive data from
+  other origins. More formally, <a>requests</a> falling into one of the
+  following categories: 
+ 
+  *   <a for="request">initiator</a> is "`fetch`" (e.g. `fetch()`)
+  *   <a for="request">type</a> is "", and whose
+      <a for="request">destination</a> is "`subresource`". (e.g. [[XHR]],
+      [[EVENTSOURCE]], <{a}>'s <{a/ping}>, and [[BEACON]]
 
-  1.  `XMLHttpRequest` [[XHR]]
-  2.  WebSocket [[WEBSOCKETS]]
-  3.  EventSource [[EVENTSOURCE]]
-  4.  Hyperlink auditing [[HTML]]
-  5.  Beacon [[BEACON]]
+  This directive <em>also</em> controls WebSocket [[WEBSOCKETS]] connections,
+  though those aren't technically part of Fetch.  
 
   <div class="example">
     JavaScript offers a few mechanisms that directly connect to an external
@@ -1145,6 +1063,15 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     directive-name  = "default-src"
     directive-value = <a grammar>serialized-source-list</a>
   </pre>
+
+  If a <a>default-src</a> directive is present, its value will be used as the
+  <a>effective source list</a> for any <a>fetch directive</a> which is not
+  explicitly present in the policy.
+
+  That is, given `default-src 'none'; script-src 'self'`, script requests will
+  use `'self'` as the <a>effective source list</a> to match against. Other
+  requests will use `'none'`. This is spelled out in more detail in the
+  [[#match-request-to-directive-list]] algorithm.
 
   <div class="example">
     The following header:
@@ -1272,11 +1199,14 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     Given a page with the following Content Security Policy:
 
     <pre>
-      Content-Security-Policy: <a>img-src</a> https://example.com/
+      Content-Security-Policy: <a>media-src</a> https://example.com/
     </pre>
 
+    
+
+
     Fetches for the following code will return a network errors, as the URL
-    provided do not match `img-src`'s <a>source list</a>:
+    provided do not match `media-src`'s <a>source list</a>:
 
     <pre>
       &lt;img src="https://not-example.com/img"&gt;
@@ -1349,6 +1279,173 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     directive-name  = "style-src"
     directive-value = <a grammar>serialized-source-list</a>
   </pre>
+
+  <h4 id="fetch-directive-matching">Matching Algorithms</h4>
+
+  <h5 id="match-request-to-directive-list">
+    Does <var>request</var> match <var>policy</var>?
+  </h5>
+
+  1.  Let <var>source list</var> be the result of executing
+      [[#effective-source-list-for-request]] on <var>request</var> and
+      <var>policy</var>.
+
+  2.  Return the result of executing [[#match-url-to-source-list]] on
+      <var>request</var>'s <a for="request">url</a> and <var>source list</var>.
+
+  <h5 id="match-url-to-source-list">
+    Does <var>url</var> match <var>source list</var>?
+  </h5>
+
+  Given a {{URL}} (<var>url</var>) and a <a>source list</a> (<var>list</var>),
+  this algorithm returns `Matches` or `Does Not Match`.
+
+  1.  If <var>list</var> is `null`, return `Matches`.
+
+  2.  If <var>list</var> contains a single item which is a <a>case-sensitive</a>
+      match for the string "`'none'`", return `Does Not Match`.
+
+  3.  For each <var>expression</var> in <var>list</var>:
+
+      1.  If [[#match-url-to-source-expression]] returns `Matches`
+          when executed upon <var>url</var> and <var>expression</var>, then
+          return `Matches`
+
+  2.  Return `Does Not Match`.
+
+  <h5 id="match-url-to-source-expression">
+    Does <var>url</var> match <var>source expression</var>?
+  </h5>
+
+  Given a {{URL}} (<var>url</var>) and a <a>source expression</a>
+  (<var>source</var>), this algorithm returns `Matches` or `Does
+  Not Match`.
+ 
+  1.  Return `Does Not Match`.
+
+  ISSUE: This might need a bit of polishing.
+
+  <h5 id="does-node-match">
+    Does <var>node</var> match <var>policy</var>?
+  </h5>
+
+  ISSUE: Parse the node to determine which directive applies, find the
+  relevant directive in the list, and call [[#match-node-to-source-list]].
+
+  <h5 id="match-node-to-source-list">
+    Does <var>node</var> match <var>source list</var>?
+  </h5>
+
+  Given a {{Node}} (<var>node</var>) and a <a>source list</a> (<var>list</var>),
+  this algorithm returns `Matches` or `Does Not Match`.
+
+  1.  For each <var>expression</var> in <var>list</var>:
+
+      1.  If [[#match-node-to-source-expression]] returns `Matches`
+          when executed upon <var>node</var> and <var>expression</var>, then
+          return `Matches`
+
+  2.  Return `Does Not Match`.
+
+  <h5 id="match-node-to-source-expression">
+    Does <var>node</var> match <var>source expression</var>?
+  </h5>
+
+  Given a {{Node}} (<var>url</var>) and a <a>source expression</a>
+  (<var>source</var>), this algorithm returns `Matches` or `Does
+  Not Match`.
+ 
+  1.  Return `Does Not Match`.
+
+  ISSUE: This might need a bit of polishing.
+
+  <h5 id="effective-directive-for-a-request">
+    Get the effective directive for <var>request</var>
+  </h5>
+
+  Each <a>fetch directive</a> controls a specific type of <a>request</a>. Given
+  a <a>request</a> (<var>request</var>), the following algorithm returns either
+  `null` or the <a for="directive">name</a> of the request's
+  <dfn for="request">effective directive</dfn>:
+
+  1.  Switch on <var>request</var>'s <a for="request">type</a>, and execute
+      the associated steps:
+
+      : ""
+      ::
+        1.  If the <var>request</var>'s <a for="request">initiator</a> is
+            "`fetch`", return `connect-src`.
+        2.  If the <var>request</var>'s <a for="request">initiator</a> is
+            "`manifest`", return `manifest-src`.
+        3.  If the <var>request</var>'s <a for="request">destination</a> is
+            "`subresource`", return `connect-src`.
+        4.  If the <var>request</var>'s <a for="request">destination</a> is
+            "`unknown`", return `object-src`.
+        5.  If the <var>request</var>'s <a for="request">destination</a> is
+            "`document`" <em>and</em> the <var>request</var>'s
+            <a for="request">target browsing context</a> is a <a>nested browsing
+            context</a>, return `child-src`.
+
+      : "`audio`"
+      : "`track`"
+      : "`video`"
+      ::
+        1.  Return `media-src`.
+
+      : "`font`"
+      ::
+        1.  Return `font-src`.
+
+      : "`image`"
+      ::
+        1.  Return `image-src`.
+
+      : "`style`"
+      ::
+        1.  Return `style-src`.
+
+      : "`script`"
+      ::
+        1.  Switch on <var>request</var>'s <a for="request">destination</a>, and
+            execute the associated steps:
+
+            : "`subresource`"
+            ::
+              1.  Return `script-src`.
+
+            : "`serviceworker`"
+            : "`sharedworker`"
+            : "`worker`"
+            ::
+              1.  Return `child-src`.
+
+  2.  Return `null`.
+
+  <h5 id="effective-source-list-for-request">
+    Get the effective source list for <var>request</var> and <var>policy</var>
+  </h5>
+
+  If the <a for="request">effective directive</a> for a <a>request</a> is not
+  present in a <a>policy</a>, <a>fetch directives</a> will fall back to using
+  the value of <a>`default-src`</a>, if present. The <dfn>effective source
+  list</dfn> for a <a>request</a> (<var>request</var>) and <a>policy</a>
+  (<var>policy</var>) is therefore determined by the following algorithm:
+
+  1.  Let <var>effective</var> be the result of executing
+      [[#effective-directive-for-a-request]] on <var>request</var>.
+
+  2.  If <var>effective</var> is `null`, return `null`.
+
+  3.  If a <a>directive</a> whose <a for="directive">name</a> is
+      <var>effective</var> is present in <var>policy</var>'s
+      <a for="policy">directive set</a>, return that <a>directive</a>'s
+      <a for="directive">value</a>.
+
+  4.  If a <a>directive</a> whose <a for="directive">name</a> is
+      `default-src` is present in <var>policy</var>'s <a for="policy">directive
+      set</a>, return that <a>directive</a>'s <a for="directive">value</a>.
+
+  5.  Return `null`.
 
   <h3 id="directives-other">
     Grabbag
@@ -1431,73 +1528,6 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   <h3 id="algorithms-matching">Matching Algorithms</h3>
 
-  <h4 id="match-request-to-directive-list">
-    Does <var>request</var> match <var>directive set</var>?
-  </h4>
-
-  ISSUE: Parse the request to determine which directive applies, find the
-  relevant directive in the list, and call [[#match-url-to-source-list]].
-
-  <h4 id="match-url-to-source-list">
-    Does <var>url</var> match <var>source list</var>?
-  </h4>
-
-  Given a {{URL}} (<var>url</var>) and a <a>source list</a> (<var>list</var>),
-  this algorithm returns `Matches` or `Does Not Match`.
-
-  1.  For each <var>expression</var> in <var>list</var>:
-
-      1.  If [[#match-url-to-source-expression]] returns `Matches`
-          when executed upon <var>url</var> and <var>expression</var>, then
-          return `Matches`
-
-  2.  Return `Does Not Match`.
-
-  <h4 id="match-url-to-source-expression">
-    Does <var>url</var> match <var>source expression</var>?
-  </h4>
-
-  Given a {{URL}} (<var>url</var>) and a <a>source expression</a>
-  (<var>source</var>), this algorithm returns `Matches` or `Does
-  Not Match`.
- 
-  1.  Return `Does Not Match`.
-
-  ISSUE: This might need a bit of polishing.
-
-  <h4 id="does-node-match">
-    Does <var>node</var> match <var>policy</var>?
-  </h4>
-
-  ISSUE: Parse the node to determine which directive applies, find the
-  relevant directive in the list, and call [[#match-node-to-source-list]].
-
-  <h4 id="match-node-to-source-list">
-    Does <var>node</var> match <var>source list</var>?
-  </h4>
-
-  Given a {{Node}} (<var>node</var>) and a <a>source list</a> (<var>list</var>),
-  this algorithm returns `Matches` or `Does Not Match`.
-
-  1.  For each <var>expression</var> in <var>list</var>:
-
-      1.  If [[#match-node-to-source-expression]] returns `Matches`
-          when executed upon <var>node</var> and <var>expression</var>, then
-          return `Matches`
-
-  2.  Return `Does Not Match`.
-
-  <h4 id="match-node-to-source-expression">
-    Does <var>node</var> match <var>source expression</var>?
-  </h4>
-
-  Given a {{Node}} (<var>url</var>) and a <a>source expression</a>
-  (<var>source</var>), this algorithm returns `Matches` or `Does
-  Not Match`.
- 
-  1.  Return `Does Not Match`.
-
-  ISSUE: This might need a bit of polishing.
 
   <h3 id="internal-helpers">Internal Helpers</h3>
 
