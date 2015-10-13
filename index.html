@@ -993,7 +993,7 @@
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="http://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/Icons/w3c_home" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">Content Security Policy Level 3</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2015-10-09">9 October 2015</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2015-10-13">13 October 2015</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1003,7 +1003,7 @@
      <dt>Version History:
      <dd><a href="https://github.com/w3c/webappsec-csp/commits/master/index.src.html">https://github.com/w3c/webappsec-csp/commits/master/index.src.html</a>
      <dt>Feedback:
-     <dd><span><a href="mailto:public-webappsec@w3.org?subject=%5BCSP%5D%20YOUR%20TOPIC%20HERE">public-webappsec@w3.org</a> with subject line “<kbd>[CSP] <var>… message topic …</var></kbd>” (<a href="http://lists.w3.org/Archives/Public/public-webappsec/" rel="discussion">archives</a>)</span>
+     <dd><span><a href="mailto:public-webappsec@w3.org?subject=%5BCSP%5D%20YOUR%20TOPIC%20HERE">public-webappsec@w3.org</a> with subject line “<kbd>[CSP] <i>… message topic …</i></kbd>” (<a href="http://lists.w3.org/Archives/Public/public-webappsec/" rel="discussion">archives</a>)</span>
      <dt class="editor">Editor:
      <dd class="editor p-author h-card vcard" data-editor-id="56384"><a class="p-name fn u-email email" href="mailto:mkwst@google.com">Mike West</a> (<span class="p-org org">Google Inc.</span>)
      <dt>Participate:
@@ -1065,7 +1065,7 @@ of security-relevant policy decisions.</p>
        <a href="#framework-policy"><span class="secno">2.1</span> <span class="content">Policies</span></a>
        <ul class="toc">
         <li><a href="#parse-serialized-policy"><span class="secno">2.1.1</span> <span class="content"> Parse a <var>serialized policy</var> </span></a>
-        <li><a href="#parse-serialized-policy-list"><span class="secno">2.1.2</span> <span class="content"> Parse a <var>serialized policy list</var> </span></a>
+        <li><a href="#parse-serialized-policy-list"><span class="secno">2.1.2</span> <span class="content"> Parse a serialized policy list </span></a>
        </ul>
       <li>
        <a href="#framework-directives"><span class="secno">2.2</span> <span class="content">Directives</span></a>
@@ -1115,10 +1115,19 @@ of security-relevant policy decisions.</p>
         <li><a href="#directive-script-src"><span class="secno">6.1.8</span> <span class="content"><code>script-src</code></span></a>
         <li><a href="#directive-style-src"><span class="secno">6.1.9</span> <span class="content"><code>style-src</code></span></a>
         <li>
-         <a href="#fetch-directive-matching"><span class="secno">6.1.10</span> <span class="content">Matching Algorithms</span></a>
+         <a href="#fetch-directive-matching-url"><span class="secno">6.1.10</span> <span class="content">URL Matching Algorithms</span></a>
          <ul class="toc">
-          <li><a href="#effective-directive-for-a-request"><span class="secno">6.1.10.1</span> <span class="content"> Get the effective directive for <var>request</var> </span></a>
-          <li><a href="#effective-source-list-for-a-request"><span class="secno">6.1.10.2</span> <span class="content"> Get the effective source list for <var>request</var> and <var>policy</var> </span></a>
+          <li><a href="#match-request-to-policy"><span class="secno">6.1.10.1</span> <span class="content"> Does <var>request</var> match <var>policy</var>? </span></a>
+          <li><a href="#match-url-to-source-list"><span class="secno">6.1.10.2</span> <span class="content"> Does <var>url</var> match <var>source list</var>? </span></a>
+          <li><a href="#match-url-to-source-expression"><span class="secno">6.1.10.3</span> <span class="content"> Does <var>url</var> match <var>expression</var> in <var>origin</var> with <var>redirect count</var>? </span></a>
+          <li><a href="#effective-directive-for-a-request"><span class="secno">6.1.10.4</span> <span class="content"> Get the effective directive for <var>request</var> </span></a>
+          <li><a href="#effective-source-list-for-request"><span class="secno">6.1.10.5</span> <span class="content"> Get the effective source list for <var>request</var> and <var>policy</var> </span></a>
+         </ul>
+        <li>
+         <a href="#fetch-directive-matching-nodes"><span class="secno">6.1.11</span> <span class="content">Node Matching Algorithms</span></a>
+         <ul class="toc">
+          <li><a href="#match-node-to-policy"><span class="secno">6.1.11.1</span> <span class="content"> Does <var>node</var> match <var>policy</var>? </span></a>
+          <li><a href="#match-node-to-source-list"><span class="secno">6.1.11.2</span> <span class="content"> Does <var>node</var> match source <var>list</var>? </span></a>
          </ul>
        </ul>
       <li>
@@ -1140,16 +1149,7 @@ of security-relevant policy decisions.</p>
     <li>
      <a href="#algorithms"><span class="secno">7</span> <span class="content">Algorithms</span></a>
      <ul class="toc">
-      <li>
-       <a href="#algorithms-matching"><span class="secno">7.1</span> <span class="content">Matching Algorithms</span></a>
-       <ul class="toc">
-        <li><a href="#match-request-to-directive-list"><span class="secno">7.1.1</span> <span class="content"> Does <var>request</var> match <var>directive set</var>? </span></a>
-        <li><a href="#match-url-to-source-list"><span class="secno">7.1.2</span> <span class="content"> Does <var>url</var> match <var>source list</var>? </span></a>
-        <li><a href="#match-url-to-source-expression"><span class="secno">7.1.3</span> <span class="content"> Does <var>url</var> match <var>source expression</var>? </span></a>
-        <li><a href="#does-node-match"><span class="secno">7.1.4</span> <span class="content"> Does <var>node</var> match <var>policy</var>? </span></a>
-        <li><a href="#match-node-to-source-list"><span class="secno">7.1.5</span> <span class="content"> Does <var>node</var> match <var>source list</var>? </span></a>
-        <li><a href="#match-node-to-source-expression"><span class="secno">7.1.6</span> <span class="content"> Does <var>node</var> match <var>source expression</var>? </span></a>
-       </ul>
+      <li><a href="#algorithms-matching"><span class="secno">7.1</span> <span class="content">Matching Algorithms</span></a>
       <li>
        <a href="#internal-helpers"><span class="secno">7.2</span> <span class="content">Internal Helpers</span></a>
        <ul class="toc">
@@ -1292,7 +1292,7 @@ of security-relevant policy decisions.</p>
   characters</a> from <var>token</var> which are not <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#space-characters">space
   characters</a>.</p>
        <li data-md="">
-        <p>If <var>policy</var>’s <a data-link-type="dfn" href="#directive-set">directive set</a> contains a <a data-link-type="dfn" href="#directives">directive</a> whose <a data-link-type="dfn" href="#name">name</a> is <var>directive
+        <p>If <var>policy</var>'s <a data-link-type="dfn" href="#directive-set">directive set</a> contains a <a data-link-type="dfn" href="#directives">directive</a> whose <a data-link-type="dfn" href="#name">name</a> is <var>directive
   name</var>, skip the remaining substeps and continue to the next item.</p>
         <p>The user agent SHOULD notify developers that a directive was ignored.
   A console warning might be appropriate, for example.</p>
@@ -1302,12 +1302,12 @@ of security-relevant policy decisions.</p>
        <li data-md="">
         <p>Let <var>directive</var> be a new <a data-link-type="dfn" href="#directives">directive</a> whose <a data-link-type="dfn" href="#name">name</a> is <var>directive name</var>, and <a data-link-type="dfn" href="#value">value</a> is <var>directive value</var>.</p>
        <li data-md="">
-        <p>Add <var>directive</var> to <var>policy</var>’s <a data-link-type="dfn" href="#directive-set">directive set</a>.</p>
+        <p>Add <var>directive</var> to <var>policy</var>'s <a data-link-type="dfn" href="#directive-set">directive set</a>.</p>
       </ol>
      <li data-md="">
       <p>Return <var>policy</var>.</p>
     </ol>
-    <h4 class="heading settled" data-level="2.1.2" id="parse-serialized-policy-list"><span class="secno">2.1.2. </span><span class="content"> Parse a <var>serialized policy list</var> </span><a class="self-link" href="#parse-serialized-policy-list"></a></h4>
+    <h4 class="heading settled" data-level="2.1.2" id="parse-serialized-policy-list"><span class="secno">2.1.2. </span><span class="content"> Parse a serialized policy list </span><a class="self-link" href="#parse-serialized-policy-list"></a></h4>
     <p>Given a string (<var>list</var>) which contains a comma-delimited series of <a data-link-type="dfn" href="#serialized-policy">serialized policies</a>, the following algorithm will return a list of <a data-link-type="dfn" href="#policy">policies</a>:</p>
     <ol>
      <li data-md="">
@@ -1404,10 +1404,10 @@ of security-relevant policy decisions.</p>
   characters; internationalized domain names cannot be entered directly as part
   of a <a data-link-type="dfn" href="#serialized-policy">serialized policy</a>, but instead MUST be Punycode-encoded <a data-link-type="biblio" href="#biblio-rfc3492">[RFC3492]</a>. For example, the domain <code>üüüüüü.de</code> MUST be represented as <code>xn--tdaaaaaa.de</code>.</p>
     <p class="note" role="note">Note: Though IP address do match the grammar above, only <code>127.0.0.1</code> will actually match a URL when used in a source
-  expression (see <a href="#match-url-to-source-list">§7.1.2 Does url match source list?</a> for details). The security
+  expression (see <a href="#match-url-to-source-list">§6.1.10.2 Does url match source list?</a> for details). The security
   properties of IP addresses are suspect, and authors ought to prefer hostnames
   whenever possible.</p>
-    <p>A <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url">URL</a></code> <dfn data-dfn-type="dfn" data-noexport="" id="matches-a-source-list">matches a source list<a class="self-link" href="#matches-a-source-list"></a></dfn> if the algorithm in <a href="#match-url-to-source-list">§7.1.2 Does url match source list?</a> returns <code>Matches</code>.</p>
+    <p>A <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url">URL</a></code> <dfn data-dfn-type="dfn" data-noexport="" id="matches-a-source-list">matches a source list<a class="self-link" href="#matches-a-source-list"></a></dfn> if the algorithm in <a href="#match-url-to-source-list">§6.1.10.2 Does url match source list?</a> returns <code>Matches</code>.</p>
     <h3 class="heading settled" data-level="2.3" id="framework-violation"><span class="secno">2.3. </span><span class="content">Violations</span><a class="self-link" href="#framework-violation"></a></h3>
     <p>A <dfn data-dfn-type="dfn" data-noexport="" id="violation">violation<a class="self-link" href="#violation"></a></dfn> represents an action or resource which goes against the <a data-link-type="dfn" href="#policy">policies</a> associated with a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>.</p>
     <p>Each <a data-link-type="dfn" href="#violation">violation</a> has a <dfn data-dfn-for="violation" data-dfn-type="dfn" data-noexport="" id="resource-url">resource URL<a class="self-link" href="#resource-url"></a></dfn>, which is
@@ -1597,7 +1597,7 @@ of security-relevant policy decisions.</p>
        <li data-md="">
         <p>If <var>source list</var> is <code>null</code>, then skip to the next <var>policy</var>.</p>
        <li data-md="">
-        <p>If the result of executing <a href="#match-url-to-source-list">§7.1.2 Does url match source list?</a> on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url">url</a> is <code>Matches</code>, then skip
+        <p>If the result of executing <a href="#match-url-to-source-list">§6.1.10.2 Does url match source list?</a> on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url">url</a> is <code>Matches</code>, then skip
   to the next <var>policy</var>.</p>
        <li data-md="">
         <p><a data-link-type="dfn" href="#report-a-violation">Report a violation</a> for <var>policy</var>, <var>directive</var> and <var>request</var>.</p>
@@ -1624,7 +1624,7 @@ of security-relevant policy decisions.</p>
        <li data-md="">
         <p>If <var>source list</var> is <code>null</code>, then skip to the next <var>policy</var>.</p>
        <li data-md="">
-        <p>If the result of executing <a href="#match-url-to-source-list">§7.1.2 Does url match source list?</a> on <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a> is <code>Matches</code>, then skip
+        <p>If the result of executing <a href="#match-url-to-source-list">§6.1.10.2 Does url match source list?</a> on <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a> is <code>Matches</code>, then skip
   to the next <var>policy</var>.</p>
        <li data-md="">
         <p><a data-link-type="dfn" href="#report-a-violation">Report a violation</a> for <var>policy</var>, <var>directive</var> and <var>request</var>.</p>
@@ -1650,7 +1650,7 @@ of security-relevant policy decisions.</p>
   browsing context</a>s:</p>
           <ol>
            <li data-md="">
-            <p>If <a href="#match-url-to-source-list">§7.1.2 Does url match source list?</a> returns <code>Matches</code> when
+            <p>If <a href="#match-url-to-source-list">§6.1.10.2 Does url match source list?</a> returns <code>Matches</code> when
   executed upon <var>ancestor</var>’s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/browsers.html#active-document">active document</a>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document-url">URL</a> and <var>source list</var>, skip
   to the next <var>ancestor</var>.</p>
            <li data-md="">
@@ -1685,14 +1685,14 @@ of security-relevant policy decisions.</p>
       <p class="issue" id="issue-f230fb23"><a class="self-link" href="#issue-f230fb23"></a> Need to monkey-patch these in: something like "Set the <code>Window</code> object’s <code>policy list</code> to the <code>policy list</code> of the resource used to
   generate the document.</p>
      <li data-md="">
-      <p><a href="#does-node-match">§7.1.4 Does node match policy?</a> is called during the <a data-link-type="dfn" href="http://www.w3.org/TR/html5/scripting-1.html#prepare-a-script">prepare a script</a> and <a data-link-type="dfn" href="https://html.spec.whatwg.org/#update-a-style-block">update a <code>style</code> block</a> algorithms in order to determine whether or
+      <p><a href="#match-node-to-policy">§6.1.11.1 Does node match policy?</a> is called during the <a data-link-type="dfn" href="http://www.w3.org/TR/html5/scripting-1.html#prepare-a-script">prepare a script</a> and <a data-link-type="dfn" href="https://html.spec.whatwg.org/#update-a-style-block">update a <code>style</code> block</a> algorithms in order to determine whether or
   not an inline script or style block is allowed to execute.</p>
       <p class="issue" id="issue-f40dd242"><a class="self-link" href="#issue-f40dd242"></a> The <a data-link-type="dfn" href="https://html.spec.whatwg.org/#update-a-style-block">update a <code>style</code> block</a> algorithm does not exist in
   W3C’s HTML.</p>
       <p class="issue" id="issue-80f81a73"><a class="self-link" href="#issue-80f81a73"></a> The <code>nonce</code> attribute for <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> and <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-style-element">style</a></code> were added to
   WHATWG’s HTML in <a href="https://github.com/whatwg/html/commit/882803c4cc8fba2fa5472b76f628d95cc82c421d">whatwg/html@882803c</a>.
   They have not yet been added to W3C’s HTML.</p>
-      <p class="issue" id="issue-364d60e2"><a class="self-link" href="#issue-364d60e2"></a> Need to monkey-patch these in: something like "If <a href="#does-node-match">§7.1.4 Does node match policy?</a> returns <code>Does Not Match</code> when executed upon the
+      <p class="issue" id="issue-5c251acc"><a class="self-link" href="#issue-5c251acc"></a> Need to monkey-patch these in: something like "If <a href="#match-node-to-policy">§6.1.11.1 Does node match policy?</a> returns <code>Does Not Match</code> when executed upon the
   element and the element’s <code>Document</code>'s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <code>policy list</code>, abort these steps."</p>
      <li data-md="">
       <p><a data-link-type="dfn" href="#policy">Policies</a> are <a data-link-type="dfn" href="#enforced">enforced</a> during processing of the <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-meta-element">meta</a></code> element’s <code><a data-link-type="element-attr" href="http://www.w3.org/TR/html5/document-metadata.html#attr-meta-http-equiv">http-equiv</a></code>.</p>
@@ -1851,7 +1851,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
   explicitly present in the policy.</p>
     <p>That is, given <code>default-src 'none'; script-src 'self'</code>, script requests will
   use <code>'self'</code> as the <a data-link-type="dfn" href="#effective-source-list">effective source list</a> to match against. Other
-  requests will use <code>'none'</code>. This is spelled out in more detail in the <a href="#match-request-to-directive-list">§7.1.1 Does request match directive set?</a> algorithm.</p>
+  requests will use <code>'none'</code>. This is spelled out in more detail in the <a href="#match-request-to-policy">§6.1.10.1 Does request match policy?</a> algorithm.</p>
     <div class="example" id="example-cd6e259c">
      <a class="self-link" href="#example-cd6e259c"></a> The following header: 
 <pre><a data-link-type="dfn" href="#content-security-policy">Content-Security-Policy</a>: <a data-link-type="dfn" href="#default-src">default-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>
@@ -1988,8 +1988,139 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 <pre>directive-name  = "style-src"
 directive-value = <a data-link-type="grammar" href="#grammardef-serialized-source-list">serialized-source-list</a>
 </pre>
-    <h4 class="heading settled" data-level="6.1.10" id="fetch-directive-matching"><span class="secno">6.1.10. </span><span class="content">Matching Algorithms</span><a class="self-link" href="#fetch-directive-matching"></a></h4>
-    <h5 class="heading settled" data-level="6.1.10.1" id="effective-directive-for-a-request"><span class="secno">6.1.10.1. </span><span class="content"> Get the effective directive for <var>request</var> </span><a class="self-link" href="#effective-directive-for-a-request"></a></h5>
+    <h4 class="heading settled" data-level="6.1.10" id="fetch-directive-matching-url"><span class="secno">6.1.10. </span><span class="content">URL Matching Algorithms</span><a class="self-link" href="#fetch-directive-matching-url"></a></h4>
+    <h5 class="heading settled" data-level="6.1.10.1" id="match-request-to-policy"><span class="secno">6.1.10.1. </span><span class="content"> Does <var>request</var> match <var>policy</var>? </span><a class="self-link" href="#match-request-to-policy"></a></h5>
+    <ol>
+     <li data-md="">
+      <p>Let <var>source list</var> be the result of executing <a href="#effective-source-list-for-request">§6.1.10.5 Get the effective source list for request and policy</a> on <var>request</var> and <var>policy</var>.</p>
+     <li data-md="">
+      <p>Return the result of executing <a href="#match-url-to-source-list">§6.1.10.2 Does url match source list?</a> on <var>request</var>'s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url">url</a> and <var>source list</var>.</p>
+    </ol>
+    <h5 class="heading settled" data-level="6.1.10.2" id="match-url-to-source-list"><span class="secno">6.1.10.2. </span><span class="content"> Does <var>url</var> match <var>source list</var>? </span><a class="self-link" href="#match-url-to-source-list"></a></h5>
+    <p>Given a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url">URL</a></code> (<var>url</var>), and a <a data-link-type="dfn" href="#source-lists">source list</a> (<var>source list</var>), this
+  algorithm returns "<code>Matches</code>" if the URL matches one or more source
+  expressions in <var>source list</var>, or "<code>Does Not Match</code>" otherwise:</p>
+    <ol>
+     <li data-md="">
+      <p>If <var>source list</var> is <code>null</code>, return "<code>Matches</code>".</p>
+     <li data-md="">
+      <p>If <var>source list</var> contains a single item which is a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#case-sensitive">case-sensitive</a> match for the string "<code>'none'</code>", return <code>Does Not Match</code>.</p>
+     <li data-md="">
+      <p>For each <var>expression</var> in <var>source list</var>:</p>
+      <ol>
+       <li data-md="">
+        <p>If <a href="#match-url-to-source-expression">§6.1.10.3 Does url match expression in origin with redirect count?</a> returns "<code>Matches</code>" when
+  executed upon <var>url</var> and <var>expression</var>, return "<code>Matches</code>".</p>
+      </ol>
+     <li data-md="">
+      <p>Return "<code>Does Not Match</code>".</p>
+    </ol>
+    <h5 class="heading settled" data-level="6.1.10.3" id="match-url-to-source-expression"><span class="secno">6.1.10.3. </span><span class="content"> Does <var>url</var> match <var>expression</var> in <var>origin</var> with <var>redirect count</var>? </span><a class="self-link" href="#match-url-to-source-expression"></a></h5>
+    <p>Given a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url">URL</a></code> (<var>url</var>), a <a data-link-type="dfn" href="#source-expression">source expression</a> (<var>expression</var>), an <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6454#section-3.2">origin</a> (<var>origin</var>), and a number (<var>redirect count</var>), this algorithm
+  returns "<code>Matches</code>" if <var>url</var> matches <var>expression</var>, and "<code>Does Not Match</code>"
+  otherwise.</p>
+    <p class="note" role="note">Note: <var>origin</var> is the <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6454#section-3.2">origin</a> of the resource relative to which the <var>expression</var> should be resolved. "<code>'self'</code>", for instance, will have distinct
+  meaning depending on that bit of context.</p>
+    <ol>
+     <li data-md="">
+      <p>If <var>expression</var> is the string "*", and <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code> is not a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#local-scheme">local scheme</a>, return "<code>Matches</code>".</p>
+     <li data-md="">
+      <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-scheme-source"><code>scheme-source</code></a> grammar:</p>
+      <ol>
+       <li data-md="">
+        <p>If <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code> is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for <var>expression</var>'s <a data-link-type="grammar" href="#grammardef-scheme-part"><code>scheme-part</code></a>, return "<code>Matches</code>".</p>
+       <li data-md="">
+        <p>Return "<code>Does Not Match</code>".</p>
+      </ol>
+     <li data-md="">
+      <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-host-source"><code>host-source</code></a> grammar:</p>
+      <ol>
+       <li data-md="">
+        <p>If <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-host">host</a></code> is <code>null</code>, return "<code>Does Not Match</code>".</p>
+       <li data-md="">
+        <p>If <var>expression</var> has a <a data-link-type="grammar" href="#grammardef-scheme-part"><code>scheme-part</code></a> that is not an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code>, return
+  "<code>Does Not Match</code>".</p>
+       <li data-md="">
+        <p>If <var>expression</var> does not have a <a data-link-type="grammar" href="#grammardef-scheme-part"><code>scheme-part</code></a>, then
+  return "<code>Does Not Match</code>" unless one of the following conditions is
+  met:</p>
+        <ol>
+         <li data-md="">
+          <p><var>origin</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code> is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive
+  match</a> for "<code>HTTP</code>", and <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code> is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII
+  case-insensitive match</a> for either "<code>HTTP</code>" or "<code>HTTPS</code>".</p>
+         <li data-md="">
+          <p><var>origin</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code> is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive
+  match</a> for <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code>.</p>
+        </ol>
+       <li data-md="">
+        <p>If the first character of <var>expression</var>'s <a data-link-type="grammar" href="#grammardef-host-part"><code>host-part</code></a> is an U+002A ASTERISK character (<code>*</code>):</p>
+        <ol>
+         <li data-md="">
+          <p>Let <var>remaining</var> be the result of removing the leading "<code>*</code>" from <var>expression</var>.</p>
+         <li data-md="">
+          <p>If <var>remaining</var> (including the leading U+002E FULL STOP character
+  (<code>.</code>)) is not an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for the
+  rightmost characters of <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-host">host</a></code>, then return "<code>Does Not Match</code>".</p>
+        </ol>
+       <li data-md="">
+        <p>If the first character of <var>expression</var>'s <a data-link-type="grammar" href="#grammardef-host-part"><code>host-part</code></a> is not an U+002A ASTERISK character (<code>*</code>), and <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-host">host</a></code> is not an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for <var>expression</var>'s <a data-link-type="grammar" href="#grammardef-host-part"><code>host-part</code></a>, return "<code>Does Not Match</code>".</p>
+       <li data-md="">
+        <p>If <var>expression</var>'s <a data-link-type="grammar" href="#grammardef-host-part"><code>host-part</code></a> matches the <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc3986#section-3.2.2">IPv4address</a> rule from <a data-link-type="biblio" href="#biblio-rfc3986">[RFC3986]</a>, and is not
+  "<code>127.0.0.1</code>"; or if <var>expression</var>'s <a data-link-type="grammar" href="#grammardef-host-part"><code>host-part</code></a> is an <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-ipv6">IPv6 address</a>, return "<code>Does Not Match</code>".</p>
+        <p class="note" role="note">Note: A future version of this specification may allow literal IPv6
+  and IPv4 addresses, depending on usage and demand. Given the weak
+  security properties of IP addresses in relation to named hosts,
+  however, authors are encouraged to prefer the latter whenever
+  possible.</p>
+       <li data-md="">
+        <p>If <var>expression</var> does not contain a <a data-link-type="grammar" href="#grammardef-port-part"><code>port-part</code></a>, and <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-port">port</a></code> is not the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#default-port">default port</a> for <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code>, return "<code>Does Not Match</code>".</p>
+       <li data-md="">
+        <p>If <var>expression</var> does contain a <a data-link-type="grammar" href="#grammardef-port-part"><code>port-part</code></a>:</p>
+        <ol>
+         <li data-md="">
+          <p>If <var>expression</var>'s <a data-link-type="grammar" href="#grammardef-port-part"><code>port-part</code></a> is not "<code>*</code>", and
+  is not the same number as <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-port">port</a></code>, return "<code>Does Not Match</code>".</p>
+        </ol>
+       <li data-md="">
+        <p>If <var>expression</var> contains a non-empty <a data-link-type="grammar" href="#grammardef-path-part"><code>path-part</code></a>, and <var>redirect count</var> is 0, then:</p>
+        <ol>
+         <li data-md="">
+          <p>Let <var>exact match</var> be <code>false</code> if the final character of <var>expression</var>'s <a data-link-type="grammar" href="#grammardef-path-part"><code>path-part</code></a> is the U+002F SOLIDUS
+  character (<code>/</code>), and <code>true</code> otherwise.</p>
+         <li data-md="">
+          <p>Let <var>path list</var> be the result of <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#strictly-split-a-string">strictly splitting</a> <var>expression</var>'s <a data-link-type="grammar" href="#grammardef-path-part"><code>path-part</code></a> on the U+002F SOLIDUS
+  character (<code>/</code>).</p>
+         <li data-md="">
+          <p>If <var>path list</var> has more items than <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-path">path</a></code>, return
+  "<code>Does Not Match</code>".</p>
+         <li data-md="">
+          <p>If <var>exact match</var> is <code>true</code>, and <var>path list</var> does not have the same
+  number of items as <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-path">path</a></code>, return "<code>Does Not Match</code>".</p>
+         <li data-md="">
+          <p>For each <var>expression piece</var> in <var>path list</var>:</p>
+          <ol>
+           <li data-md="">
+            <p>Let <var>url piece</var> be the next item in <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-path">path</a></code>.</p>
+           <li data-md="">
+            <p><a data-link-type="dfn" href="https://url.spec.whatwg.org/#percent-decode">Percent decode</a> <var>expression piece</var>.</p>
+           <li data-md="">
+            <p><a data-link-type="dfn" href="https://url.spec.whatwg.org/#percent-decode">Percent decode</a> <var>url piece</var>.</p>
+           <li data-md="">
+            <p>If <var>expression piece</var> is not an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive
+  match</a> for <var>url piece</var>, return "<code>Does Not Match</code>".</p>
+          </ol>
+        </ol>
+       <li data-md="">
+        <p>Return "<code>Matches</code>".</p>
+      </ol>
+     <li data-md="">
+      <p>If <var>expression</var> is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for "<code>'self'</code>",
+  and <var>origin</var> is the same as <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-origin">origin</a></code>, return "<code>Matches</code>".</p>
+     <li data-md="">
+      <p>Return "<code>Does Not Match</code>".</p>
+    </ol>
+    <h5 class="heading settled" data-level="6.1.10.4" id="effective-directive-for-a-request"><span class="secno">6.1.10.4. </span><span class="content"> Get the effective directive for <var>request</var> </span><a class="self-link" href="#effective-directive-for-a-request"></a></h5>
     <p>Each <a data-link-type="dfn" href="#fetch-directives">fetch directive</a> controls a specific type of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a>. Given
   a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>), the following algorithm returns either <code>null</code> or the <a data-link-type="dfn" href="#name">name</a> of the request’s <dfn data-dfn-for="request" data-dfn-type="dfn" data-noexport="" id="effective-directive">effective directive<a class="self-link" href="#effective-directive"></a></dfn>:</p>
     <ol>
@@ -2082,23 +2213,93 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
      <li data-md="">
       <p>Return <code>null</code>.</p>
     </ol>
-    <h5 class="heading settled" data-level="6.1.10.2" id="effective-source-list-for-a-request"><span class="secno">6.1.10.2. </span><span class="content"> Get the effective source list for <var>request</var> and <var>policy</var> </span><a class="self-link" href="#effective-source-list-for-a-request"></a></h5>
+    <h5 class="heading settled" data-level="6.1.10.5" id="effective-source-list-for-request"><span class="secno">6.1.10.5. </span><span class="content"> Get the effective source list for <var>request</var> and <var>policy</var> </span><a class="self-link" href="#effective-source-list-for-request"></a></h5>
     <p>If the <a data-link-type="dfn" href="#effective-directive">effective directive</a> for a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> is not
   present in a <a data-link-type="dfn" href="#policy">policy</a>, <a data-link-type="dfn" href="#fetch-directives">fetch directives</a> will fall back to using
   the value of <a data-link-type="dfn" href="#default-src"><code>default-src</code></a>, if present. The <dfn data-dfn-type="dfn" data-noexport="" id="effective-source-list">effective source
   list<a class="self-link" href="#effective-source-list"></a></dfn> for a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>) and <a data-link-type="dfn" href="#policy">policy</a> (<var>policy</var>) is therefore determined by the following algorithm:</p>
     <ol>
      <li data-md="">
-      <p>Let <var>effective</var> be the result of executing <a href="#effective-directive-for-a-request">§6.1.10.1 Get the effective directive for request</a> on <var>request</var>.</p>
+      <p>Let <var>effective</var> be the result of executing <a href="#effective-directive-for-a-request">§6.1.10.4 Get the effective directive for request</a> on <var>request</var>.</p>
      <li data-md="">
       <p>If <var>effective</var> is <code>null</code>, return <code>null</code>.</p>
      <li data-md="">
-      <p>If a <a data-link-type="dfn" href="#directives">directive</a> whose <a data-link-type="dfn" href="#name">name</a> is <var>effective</var> is present in <var>policy</var>’s <a data-link-type="dfn" href="#directive-set">directive set</a>, return that <a data-link-type="dfn" href="#directives">directive</a>’s <a data-link-type="dfn" href="#value">value</a>.</p>
+      <p>If a <a data-link-type="dfn" href="#directives">directive</a> whose <a data-link-type="dfn" href="#name">name</a> is <var>effective</var> is present in <var>policy</var>'s <a data-link-type="dfn" href="#directive-set">directive set</a>, return that <a data-link-type="dfn" href="#directives">directive</a>’s <a data-link-type="dfn" href="#value">value</a>.</p>
      <li data-md="">
-      <p>If a <a data-link-type="dfn" href="#directives">directive</a> whose <a data-link-type="dfn" href="#name">name</a> is <code>default-src</code> is present in <var>policy</var>’s <a data-link-type="dfn" href="#directive-set">directive
+      <p>If a <a data-link-type="dfn" href="#directives">directive</a> whose <a data-link-type="dfn" href="#name">name</a> is <code>default-src</code> is present in <var>policy</var>'s <a data-link-type="dfn" href="#directive-set">directive
   set</a>, return that <a data-link-type="dfn" href="#directives">directive</a>’s <a data-link-type="dfn" href="#value">value</a>.</p>
      <li data-md="">
       <p>Return <code>null</code>.</p>
+    </ol>
+    <h4 class="heading settled" data-level="6.1.11" id="fetch-directive-matching-nodes"><span class="secno">6.1.11. </span><span class="content">Node Matching Algorithms</span><a class="self-link" href="#fetch-directive-matching-nodes"></a></h4>
+    <h5 class="heading settled" data-level="6.1.11.1" id="match-node-to-policy"><span class="secno">6.1.11.1. </span><span class="content"> Does <var>node</var> match <var>policy</var>? </span><a class="self-link" href="#match-node-to-policy"></a></h5>
+    <p>Given a <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/dom/#interface-node">Node</a></code> (<var>node</var>) and a <a data-link-type="dfn" href="#policy">policy</a> (<var>policy</var>), this algorithm
+  returns "<code>Matches</code>" or "<code>Does Not Match</code>".</p>
+    <ol>
+     <li data-md="">
+      <p>Let <var>directive name</var> be <code>null</code>.</p>
+     <li data-md="">
+      <p>If <var>node</var> is a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> element, set <var>directive name</var> to "<code>script-src</code>".</p>
+     <li data-md="">
+      <p>If <var>node</var> is a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-style-element">style</a></code> element, set <var>directive name</var> to "<code>style-src</code>".</p>
+     <li data-md="">
+      <p>If <var>directive name</var> is <code>null</code>, return "<code>Matches</code>".</p>
+     <li data-md="">
+      <p>Let <var>source list</var> be <code>null</code>.</p>
+     <li data-md="">
+      <p>If a <a data-link-type="dfn" href="#directives">directive</a> whose <a data-link-type="dfn" href="#name">name</a> is <var>directive
+  name</var> is present in <var>policy</var>'s <a data-link-type="dfn" href="#directive-set">directive set</a>, set <var>source list</var> to that <a data-link-type="dfn" href="#directives">directive</a>’s <a data-link-type="dfn" href="#value">value</a>.</p>
+     <li data-md="">
+      <p>If <var>source list</var> is <code>null</code>, and a <a data-link-type="dfn" href="#directives">directive</a> whose <a data-link-type="dfn" href="#name">name</a> is "<code>default-src</code>" is present in <var>policy</var>'s <a data-link-type="dfn" href="#directive-set">directive set</a>, set <var>source list</var> to that <a data-link-type="dfn" href="#directives">directive</a>’s <a data-link-type="dfn" href="#value">value</a>.</p>
+     <li data-md="">
+      <p>Return the result of executing <a href="#match-node-to-source-list">§6.1.11.2 Does node match source list?</a> on <var>node</var> and <var>source list</var>.</p>
+    </ol>
+    <h5 class="heading settled" data-level="6.1.11.2" id="match-node-to-source-list"><span class="secno">6.1.11.2. </span><span class="content"> Does <var>node</var> match source <var>list</var>? </span><a class="self-link" href="#match-node-to-source-list"></a></h5>
+    <p>Given a <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/dom/#interface-node">Node</a></code> (<var>node</var>) and a <a data-link-type="dfn" href="#source-lists">source list</a> (<var>list</var>),
+  this algorithm returns "<code>Matches</code>" or "<code>Does Not Match</code>".</p>
+    <ol>
+     <li data-md="">
+      <p>If <var>node</var> is a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> element, and has a <code><a data-link-type="element-attr" href="http://www.w3.org/TR/html5/scripting-1.html#attr-script-src">src</a></code> attribute,
+  then return "<code>Matches</code>".</p>
+     <li data-md="">
+      <p>Let <var>contains nonce or hash</var> be <code>false</code>.</p>
+     <li data-md="">
+      <p>Let <var>content</var> be <a data-link-type="dfn" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-block&apos;s-source">the script block’s source</a> if <var>node</var> is a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> element, or the value of <var>node</var>'s <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/dom/#dom-node-textcontent">textContent</a></code> IDL attribute for any other element.</p>
+     <li data-md="">
+      <p>For each <var>expression</var> in <var>list</var>:</p>
+      <ol>
+       <li data-md="">
+        <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-nonce-source"><code>nonce-source</code></a> or <a data-link-type="grammar" href="#grammardef-hash-source"><code>hash-source</code></a> grammar, set <var>contains nonce or hash</var> to <code>true</code>.</p>
+      </ol>
+     <li data-md="">
+      <p>For each <var>expression</var> in <var>list</var>:</p>
+      <ol>
+       <li data-md="">
+        <p>If <var>contains nonce or hash</var> is <code>false</code>, and <var>expression</var> is a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#case-sensitive">case-sensitive</a> match for "<code>'unsafe-inline'</code>", return
+  "<code>Matches</code>".</p>
+       <li data-md="">
+        <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-nonce-source"><code>nonce-source</code></a> grammar,
+  and <var>node</var> has a <code><a data-link-type="element-attr" href="https://html.spec.whatwg.org/#attr-script-nonce">nonce</a></code> attribute whose value is a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#case-sensitive">case-sensitive</a> match for <var>expression</var>'s <a data-link-type="grammar" href="#grammardef-base64-value"><code>base64-value</code></a> part, return "<code>Matches</code>".</p>
+       <li data-md="">
+        <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-hash-source"><code>hash-source</code></a> grammar:</p>
+        <ol>
+         <li data-md="">
+          <p>Let <var>algorithm</var> be <code>null</code>.</p>
+         <li data-md="">
+          <p>If <var>expression</var>'s <a data-link-type="grammar" href="#grammardef-hash-algorithm"><code>hash-algorithm</code></a> part is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for "sha256", set <var>algorithm</var> to <a data-link-type="dfn" href="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf#">SHA-256</a>.</p>
+         <li data-md="">
+          <p>If <var>expression</var>'s <a data-link-type="grammar" href="#grammardef-hash-algorithm"><code>hash-algorithm</code></a> part is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for "sha384", set <var>algorithm</var> to <a data-link-type="dfn" href="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf#">SHA-384</a>.</p>
+         <li data-md="">
+          <p>If <var>expression</var>'s <a data-link-type="grammar" href="#grammardef-hash-algorithm"><code>hash-algorithm</code></a> part is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for "sha512", set <var>algorithm</var> to <a data-link-type="dfn" href="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf#">SHA-512</a>.</p>
+         <li data-md="">
+          <p>Let <var>actual</var> be the result of <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc4648#section-4">base64 encoding</a> the result of
+  applying <var>algorithm</var> to <var>content</var>.</p>
+         <li data-md="">
+          <p>If <var>actual</var> is a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#case-sensitive">case-sensitive</a> match for <var>expression</var>'s <a data-link-type="grammar" href="#grammardef-base64-value"><code>base64-value</code></a> part, return "<code>Matches</code>".</p>
+        </ol>
+      </ol>
+     <li data-md="">
+      <p>Return "<code>Does Not Match</code>".</p>
     </ol>
     <h3 class="heading settled" data-level="6.2" id="directives-other"><span class="secno">6.2. </span><span class="content"> Grabbag </span><a class="self-link" href="#directives-other"></a></h3>
     <h4 class="heading settled" data-level="6.2.1" id="directive-base-uri"><span class="secno">6.2.1. </span><span class="content"><code>base-uri</code></span><a class="self-link" href="#directive-base-uri"></a></h4>
@@ -2145,54 +2346,6 @@ directive-value = &lt;URL> ; TODO: Figure out what to use here.
    <section>
     <h2 class="heading settled" data-level="7" id="algorithms"><span class="secno">7. </span><span class="content">Algorithms</span><a class="self-link" href="#algorithms"></a></h2>
     <h3 class="heading settled" data-level="7.1" id="algorithms-matching"><span class="secno">7.1. </span><span class="content">Matching Algorithms</span><a class="self-link" href="#algorithms-matching"></a></h3>
-    <h4 class="heading settled" data-level="7.1.1" id="match-request-to-directive-list"><span class="secno">7.1.1. </span><span class="content"> Does <var>request</var> match <var>directive set</var>? </span><a class="self-link" href="#match-request-to-directive-list"></a></h4>
-    <p class="issue" id="issue-db7807b9"><a class="self-link" href="#issue-db7807b9"></a> Parse the request to determine which directive applies, find the
-  relevant directive in the list, and call <a href="#match-url-to-source-list">§7.1.2 Does url match source list?</a>.</p>
-    <h4 class="heading settled" data-level="7.1.2" id="match-url-to-source-list"><span class="secno">7.1.2. </span><span class="content"> Does <var>url</var> match <var>source list</var>? </span><a class="self-link" href="#match-url-to-source-list"></a></h4>
-    <p>Given a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url">URL</a></code> (<var>url</var>) and a <a data-link-type="dfn" href="#source-lists">source list</a> (<var>list</var>),
-  this algorithm returns <code>Matches</code> or <code>Does Not Match</code>.</p>
-    <ol>
-     <li data-md="">
-      <p>For each <var>expression</var> in <var>list</var>:</p>
-      <ol>
-       <li data-md="">
-        <p>If <a href="#match-url-to-source-expression">§7.1.3 Does url match source expression?</a> returns <code>Matches</code> when executed upon <var>url</var> and <var>expression</var>, then
-  return <code>Matches</code></p>
-      </ol>
-     <li data-md="">
-      <p>Return <code>Does Not Match</code>.</p>
-    </ol>
-    <h4 class="heading settled" data-level="7.1.3" id="match-url-to-source-expression"><span class="secno">7.1.3. </span><span class="content"> Does <var>url</var> match <var>source expression</var>? </span><a class="self-link" href="#match-url-to-source-expression"></a></h4>
-    <p>Given a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url">URL</a></code> (<var>url</var>) and a <a data-link-type="dfn" href="#source-expression">source expression</a> (<var>source</var>), this algorithm returns <code>Matches</code> or <code>Does Not Match</code>.</p>
-    <ol>
-     <li data-md="">
-      <p>Return <code>Does Not Match</code>.</p>
-    </ol>
-    <p class="issue" id="issue-4ba1072f"><a class="self-link" href="#issue-4ba1072f"></a> This might need a bit of polishing.</p>
-    <h4 class="heading settled" data-level="7.1.4" id="does-node-match"><span class="secno">7.1.4. </span><span class="content"> Does <var>node</var> match <var>policy</var>? </span><a class="self-link" href="#does-node-match"></a></h4>
-    <p class="issue" id="issue-f302c0a4"><a class="self-link" href="#issue-f302c0a4"></a> Parse the node to determine which directive applies, find the
-  relevant directive in the list, and call <a href="#match-node-to-source-list">§7.1.5 Does node match source list?</a>.</p>
-    <h4 class="heading settled" data-level="7.1.5" id="match-node-to-source-list"><span class="secno">7.1.5. </span><span class="content"> Does <var>node</var> match <var>source list</var>? </span><a class="self-link" href="#match-node-to-source-list"></a></h4>
-    <p>Given a <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/dom/#interface-node">Node</a></code> (<var>node</var>) and a <a data-link-type="dfn" href="#source-lists">source list</a> (<var>list</var>),
-  this algorithm returns <code>Matches</code> or <code>Does Not Match</code>.</p>
-    <ol>
-     <li data-md="">
-      <p>For each <var>expression</var> in <var>list</var>:</p>
-      <ol>
-       <li data-md="">
-        <p>If <a href="#match-node-to-source-expression">§7.1.6 Does node match source expression?</a> returns <code>Matches</code> when executed upon <var>node</var> and <var>expression</var>, then
-  return <code>Matches</code></p>
-      </ol>
-     <li data-md="">
-      <p>Return <code>Does Not Match</code>.</p>
-    </ol>
-    <h4 class="heading settled" data-level="7.1.6" id="match-node-to-source-expression"><span class="secno">7.1.6. </span><span class="content"> Does <var>node</var> match <var>source expression</var>? </span><a class="self-link" href="#match-node-to-source-expression"></a></h4>
-    <p>Given a <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/dom/#interface-node">Node</a></code> (<var>url</var>) and a <a data-link-type="dfn" href="#source-expression">source expression</a> (<var>source</var>), this algorithm returns <code>Matches</code> or <code>Does Not Match</code>.</p>
-    <ol>
-     <li data-md="">
-      <p>Return <code>Does Not Match</code>.</p>
-    </ol>
-    <p class="issue" id="issue-4ba1072f0"><a class="self-link" href="#issue-4ba1072f0"></a> This might need a bit of polishing.</p>
     <h3 class="heading settled" data-level="7.2" id="internal-helpers"><span class="secno">7.2. </span><span class="content">Internal Helpers</span><a class="self-link" href="#internal-helpers"></a></h3>
     <p>These algorithms are part of the internal processing model of Content Security
   Policy, and are not meant to be called from other specifications.</p>
@@ -2334,10 +2487,10 @@ Content-Security-Policy: connect-src http://example.com/;
     effective directive
     <ul>
      <li><a href="#violation-effective-directive">dfn for violation</a><span>, in §2.3</span>
-     <li><a href="#effective-directive">dfn for request</a><span>, in §6.1.10.1</span>
+     <li><a href="#effective-directive">dfn for request</a><span>, in §6.1.10.4</span>
     </ul>
    <li><a href="#effective-source-list">effective source
-  list</a><span>, in §6.1.10.2</span>
+  list</a><span>, in §6.1.10.5</span>
    <li><a href="#embedding-document">embedding document</a><span>, in §4.2</span>
    <li><a href="#enforced">enforced</a><span>, in §4.2</span>
    <li><a href="#fetch-directives">Fetch directives</a><span>, in §6.1</span>
@@ -2404,6 +2557,7 @@ Content-Security-Policy: connect-src http://example.com/;
     <a data-link-type="biblio" href="#biblio-dom">[dom]</a> defines the following terms:
     <ul>
      <li><a href="http://www.w3.org/TR/dom/#interface-node">Node</a>
+     <li><a href="http://www.w3.org/TR/dom/#dom-node-textcontent">textContent</a>
     </ul>
    <li>
     <a data-link-type="biblio" href="#biblio-es2015">[ES2015]</a> defines the following terms:
@@ -2433,6 +2587,7 @@ Content-Security-Policy: connect-src http://example.com/;
     <ul>
      <li><a href="https://html.spec.whatwg.org/#attr-meta-http-equiv-content-security-policy">content-security-policy http-equiv processing instructions</a>
      <li><a href="https://html.spec.whatwg.org/#initialising-a-new-document-object">initialising a new document object</a>
+     <li><a href="https://html.spec.whatwg.org/#attr-script-nonce">nonce</a>
      <li><a href="https://html.spec.whatwg.org/#ping">ping</a>
      <li><a href="https://html.spec.whatwg.org/#run-a-worker">run a worker</a>
      <li><a href="https://html.spec.whatwg.org/#the-workers-documents">the worker's documents</a>
@@ -2451,6 +2606,7 @@ Content-Security-Policy: connect-src http://example.com/;
      <li><a href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ascii case-insensitive match</a>
      <li><a href="http://www.w3.org/TR/html5/document-metadata.html#the-base-element">base</a>
      <li><a href="http://www.w3.org/TR/html5/browsers.html#browsing-context">browsing context</a>
+     <li><a href="http://www.w3.org/TR/html5/infrastructure.html#case-sensitive">case-sensitive</a>
      <li><a href="http://www.w3.org/TR/html5/infrastructure.html#collect-a-sequence-of-characters">collect a sequence of characters</a>
      <li><a href="http://www.w3.org/TR/html5/document-metadata.html#attr-meta-content">content</a>
      <li><a href="http://www.w3.org/TR/html5/browsers.html#dom-document-2">document</a>
@@ -2469,15 +2625,23 @@ Content-Security-Policy: connect-src http://example.com/;
      <li><a href="http://www.w3.org/TR/html5/infrastructure.html#space-characters">space characters</a>
      <li><a href="http://www.w3.org/TR/html5/infrastructure.html#split-a-string-on-commas">split a string on commas</a>
      <li><a href="http://www.w3.org/TR/html5/infrastructure.html#split-a-string-on-spaces">split a string on spaces</a>
+     <li><a href="http://www.w3.org/TR/html5/scripting-1.html#attr-script-src">src</a>
      <li><a href="http://www.w3.org/TR/html5/infrastructure.html#strictly-split-a-string">strictly split a string</a>
      <li><a href="http://www.w3.org/TR/html5/infrastructure.html#strip-leading-and-trailing-whitespace">strip leading and trailing whitespace</a>
      <li><a href="http://www.w3.org/TR/html5/document-metadata.html#the-style-element">style</a>
+     <li><a href="http://www.w3.org/TR/html5/scripting-1.html#the-script-block&apos;s-source">the script block's source</a>
     </ul>
    <li>
     <a data-link-type="biblio" href="#biblio-rfc3986">[rfc3986]</a> defines the following terms:
     <ul>
+     <li><a href="https://tools.ietf.org/html/rfc3986#section-3.2.2">ipv4address</a>
      <li><a href="https://tools.ietf.org/html/rfc3986#section-3.3">path</a>
      <li><a href="https://tools.ietf.org/html/rfc3986#section-3.1">scheme</a>
+    </ul>
+   <li>
+    <a data-link-type="biblio" href="#biblio-rfc4648">[rfc4648]</a> defines the following terms:
+    <ul>
+     <li><a href="https://tools.ietf.org/html/rfc4648#section-4">base64 encoding</a>
     </ul>
    <li>
     <a data-link-type="biblio" href="#biblio-rfc5234">[rfc5234]</a> defines the following terms:
@@ -2485,6 +2649,11 @@ Content-Security-Policy: connect-src http://example.com/;
      <li><a href="https://tools.ietf.org/html/rfc5234#appendix-B.1">alpha</a>
      <li><a href="https://tools.ietf.org/html/rfc5234#appendix-B.1">digit</a>
      <li><a href="https://tools.ietf.org/html/rfc5234#appendix-B.1">vchar</a>
+    </ul>
+   <li>
+    <a data-link-type="biblio" href="#biblio-rfc6454">[rfc6454]</a> defines the following terms:
+    <ul>
+     <li><a href="https://tools.ietf.org/html/rfc6454#section-3.2">origin</a>
     </ul>
    <li>
     <a data-link-type="biblio" href="#biblio-rfc7230">[rfc7230]</a> defines the following terms:
@@ -2504,10 +2673,24 @@ Content-Security-Policy: connect-src http://example.com/;
      <li><a href="http://www.w3.org/TR/service-workers/#service-worker-interface">ServiceWorker</a>
     </ul>
    <li>
+    <a data-link-type="biblio" href="#biblio-sha2">[SHA2]</a> defines the following terms:
+    <ul>
+     <li><a href="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf#">sha-256</a>
+     <li><a href="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf#">sha-384</a>
+     <li><a href="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf#">sha-512</a>
+    </ul>
+   <li>
     <a data-link-type="biblio" href="#biblio-url">[url]</a> defines the following terms:
     <ul>
      <li><a href="https://url.spec.whatwg.org/#url">URL</a>
+     <li><a href="https://url.spec.whatwg.org/#default-port">default port</a>
+     <li><a href="https://url.spec.whatwg.org/#concept-url-host">host</a>
+     <li><a href="https://url.spec.whatwg.org/#concept-ipv6">ipv6 address</a>
      <li><a href="https://url.spec.whatwg.org/#local-scheme">local scheme</a>
+     <li><a href="https://url.spec.whatwg.org/#concept-url-origin">origin</a>
+     <li><a href="https://url.spec.whatwg.org/#concept-url-path">path</a>
+     <li><a href="https://url.spec.whatwg.org/#percent-decode">percent decode</a>
+     <li><a href="https://url.spec.whatwg.org/#concept-url-port">port</a>
      <li><a href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a>
     </ul>
    <li>
@@ -2537,6 +2720,8 @@ Content-Security-Policy: connect-src http://example.com/;
    <dd>Anne van Kesteren. <a href="https://fetch.spec.whatwg.org/">Fetch Standard</a>. Living Standard. URL: <a href="https://fetch.spec.whatwg.org/">https://fetch.spec.whatwg.org/</a>
    <dt id="biblio-html"><a class="self-link" href="#biblio-html"></a>[HTML]
    <dd>Ian Hickson. <a href="https://html.spec.whatwg.org/multipage/">HTML Standard</a>. Living Standard. URL: <a href="https://html.spec.whatwg.org/multipage/">https://html.spec.whatwg.org/multipage/</a>
+   <dt id="biblio-sha2"><a class="self-link" href="#biblio-sha2"></a>[SHA2]
+   <dd><a href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf">FIPS PUB 180-4, Secure Hash Standard</a>. URL: <a href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf">http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf</a>
    <dt id="biblio-dom"><a class="self-link" href="#biblio-dom"></a>[DOM]
    <dd>Anne van Kesteren; et al. <a href="http://www.w3.org/TR/dom/">W3C DOM4</a>. 18 June 2015. LCWD. URL: <a href="http://www.w3.org/TR/dom/">http://www.w3.org/TR/dom/</a>
    <dt id="biblio-dom-ls"><a class="self-link" href="#biblio-dom-ls"></a>[DOM-LS]
@@ -2551,8 +2736,12 @@ Content-Security-Policy: connect-src http://example.com/;
    <dd>G. Klyne; M. Nottingham; J. Mogul. <a href="https://tools.ietf.org/html/rfc3864">Registration Procedures for Message Header Fields</a>. September 2004. Best Current Practice. URL: <a href="https://tools.ietf.org/html/rfc3864">https://tools.ietf.org/html/rfc3864</a>
    <dt id="biblio-rfc3986"><a class="self-link" href="#biblio-rfc3986"></a>[RFC3986]
    <dd>T. Berners-Lee; R. Fielding; L. Masinter. <a href="https://tools.ietf.org/html/rfc3986">Uniform Resource Identifier (URI): Generic Syntax</a>. January 2005. Internet Standard. URL: <a href="https://tools.ietf.org/html/rfc3986">https://tools.ietf.org/html/rfc3986</a>
+   <dt id="biblio-rfc4648"><a class="self-link" href="#biblio-rfc4648"></a>[RFC4648]
+   <dd>S. Josefsson. <a href="https://tools.ietf.org/html/rfc4648">The Base16, Base32, and Base64 Data Encodings</a>. October 2006. Proposed Standard. URL: <a href="https://tools.ietf.org/html/rfc4648">https://tools.ietf.org/html/rfc4648</a>
    <dt id="biblio-rfc5234"><a class="self-link" href="#biblio-rfc5234"></a>[RFC5234]
    <dd>D. Crocker, Ed.; P. Overell. <a href="https://tools.ietf.org/html/rfc5234">Augmented BNF for Syntax Specifications: ABNF</a>. January 2008. Internet Standard. URL: <a href="https://tools.ietf.org/html/rfc5234">https://tools.ietf.org/html/rfc5234</a>
+   <dt id="biblio-rfc6454"><a class="self-link" href="#biblio-rfc6454"></a>[RFC6454]
+   <dd>A. Barth. <a href="https://tools.ietf.org/html/rfc6454">The Web Origin Concept</a>. December 2011. Proposed Standard. URL: <a href="https://tools.ietf.org/html/rfc6454">https://tools.ietf.org/html/rfc6454</a>
    <dt id="biblio-rfc7230"><a class="self-link" href="#biblio-rfc7230"></a>[RFC7230]
    <dd>R. Fielding, Ed.; J. Reschke, Ed.. <a href="https://tools.ietf.org/html/rfc7230">Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing</a>. June 2014. Proposed Standard. URL: <a href="https://tools.ietf.org/html/rfc7230">https://tools.ietf.org/html/rfc7230</a>
    <dt id="biblio-rfc7231"><a class="self-link" href="#biblio-rfc7231"></a>[RFC7231]
@@ -2597,19 +2786,13 @@ Content-Security-Policy: connect-src http://example.com/;
    <div class="issue"> The <code>nonce</code> attribute for <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> and <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-style-element">style</a></code> were added to
   WHATWG’s HTML in <a href="https://github.com/whatwg/html/commit/882803c4cc8fba2fa5472b76f628d95cc82c421d">whatwg/html@882803c</a>.
   They have not yet been added to W3C’s HTML.<a href="#issue-80f81a73"> ↵ </a></div>
-   <div class="issue"> Need to monkey-patch these in: something like "If <a href="#does-node-match">§7.1.4 Does node match policy?</a> returns <code>Does Not Match</code> when executed upon the
-  element and the element’s <code>Document</code>'s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <code>policy list</code>, abort these steps."<a href="#issue-364d60e2"> ↵ </a></div>
+   <div class="issue"> Need to monkey-patch these in: something like "If <a href="#match-node-to-policy">§6.1.11.1 Does node match policy?</a> returns <code>Does Not Match</code> when executed upon the
+  element and the element’s <code>Document</code>'s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <code>policy list</code>, abort these steps."<a href="#issue-5c251acc"> ↵ </a></div>
    <div class="issue"> This processing was added to WHATWG’s HTML in <a href="https://github.com/whatwg/html/commit/5064a629f22bef29839ab4dc6f1ceef17f010bc5">whatwg/html@5064a62</a>.
   It has not yet been added to W3C’s HTML.<a href="#issue-389933ec"> ↵ </a></div>
    <div class="issue"> Need an algorithm here, right? :)<a href="#issue-e54eddc4"> ↵ </a></div>
    <div class="issue"> TODO: "To enforce the <code>frame-ancestors</code> directive...". Will need to be
   called from Fetch, probably right after parsing the policy.<a href="#issue-6fe8f1f6"> ↵ </a></div>
-   <div class="issue"> Parse the request to determine which directive applies, find the
-  relevant directive in the list, and call <a href="#match-url-to-source-list">§7.1.2 Does url match source list?</a>.<a href="#issue-db7807b9"> ↵ </a></div>
-   <div class="issue"> This might need a bit of polishing.<a href="#issue-4ba1072f"> ↵ </a></div>
-   <div class="issue"> Parse the node to determine which directive applies, find the
-  relevant directive in the list, and call <a href="#match-node-to-source-list">§7.1.5 Does node match source list?</a>.<a href="#issue-f302c0a4"> ↵ </a></div>
-   <div class="issue"> This might need a bit of polishing.<a href="#issue-4ba1072f0"> ↵ </a></div>
   </div>
  </body>
 </html>

@@ -24,6 +24,8 @@ spec: ES2015; urlPrefix: http://www.ecma-international.org/ecma-262/6.0/index.ht
 spec: DOM; urlPrefix: http://www.w3.org/TR/dom/
   type: interface
     text: Node; url: interface-node
+  type: attribute
+    text: textContent; for: Node; url: dom-node-textcontent
 spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   type: dfn
     text: main fetch
@@ -77,6 +79,7 @@ spec: HTML5; urlPrefix: http://www.w3.org/TR/html5/
       text: pragma directives
     urlPrefix: scripting-1.html
       text: prepare a script
+      text: the script block's source; url: the-script-block's-source
   type: element
     urlPrefix: document-metadata.html
       text: base; url: the-base-element
@@ -101,6 +104,8 @@ spec: HTML5; urlPrefix: http://www.w3.org/TR/html5/
       text: http-equiv; for: meta; url: attr-meta-http-equiv
     urlPrefix: embedded-content-0.html
       text: srcdoc; for: iframe; url: attr-iframe-srcdoc
+    urlPrefix: scripting-1.html
+      text: src; for: script; url: attr-script-src
   type: interface
     urlPrefix: dom.html
       text: Document
@@ -112,7 +117,14 @@ spec: HTML5; urlPrefix: http://www.w3.org/TR/html5/
 spec: URL; urlPrefix: https://url.spec.whatwg.org/
   type: dfn
     text: local scheme
+    text: default port
+    text: IPv6 address; url: concept-ipv6
+    text: percent decode
   type: attribute
+    text: host; for: URL; url: concept-url-host
+    text: port; for: URL; url: concept-url-port
+    text: path; for: URL; url: concept-url-path
+    text: origin; for: URL; url: concept-url-origin
     text: scheme; for: URL; url: concept-url-scheme
   type: interface;
     text: URL
@@ -126,6 +138,10 @@ spec: RFC3986; urlPrefix: https://tools.ietf.org/html/rfc3986
   type: grammar
     text: path; url: section-3.3
     text: scheme; url: section-3.1
+    text: IPv4address; url: section-3.2.2
+spec: RFC4648; urlPrefix: https://tools.ietf.org/html/rfc4648
+  type: dfn
+    text: base64 encoding; url: section-4
 spec: RFC5234; urlPrefix: https://tools.ietf.org/html/rfc5234
   type: grammar
     text: ALPHA; url: appendix-B.1
@@ -162,6 +178,13 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     text: Content-Security-Policy http-equiv processing instructions; url: attr-meta-http-equiv-content-security-policy
   type: element-attr
     text: ping; for: a
+    text: nonce; for: script; url: attr-script-nonce
+
+spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf
+  type: dfn
+    text: SHA-256; url: #
+    text: SHA-384; url: #
+    text: SHA-512; url: #
 </pre>
 <pre class="biblio">
 {
@@ -170,6 +193,10 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     "href": "http://www.ecma-international.org/ecma-262/6.0/index.html",
     "title": "ECMAScript® 2015 Language Specification",
     "publisher": "ECMA"
+  },
+  "SHA2": {
+    "href": "http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf",
+    "title": "FIPS PUB 180-4, Secure Hash Standard"
   }
 }
 </pre>
@@ -279,51 +306,51 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   </pre>
 
   <h4 id="parse-serialized-policy" dfn lt="parse a serialized policy">
-    Parse a <var>serialized policy</var>
+    Parse a |serialized policy|
   </h4>
 
-  Given a <a>serialized policy</a> (<var>serialized policy</var>), this
+  Given a <a>serialized policy</a> (|serialized policy|), this
   algorithm will return a <a>policy</a> object. If the string cannot be parsed,
   the resulting <a>policy</a>'s <a>directive set</a> will be empty.
 
-  1.  Let <var>policy</var> be a new <a>policy</a> with an empty <a>directive
+  1.  Let |policy| be a new <a>policy</a> with an empty <a>directive
       set</a>, and a `null` <a>type</a>.
 
-  2.  For each <var>token</var> returned by
-      <a lt="strictly split a string">strictly splitting</a> <var>serialized
-      policy</var> on the U+003B SEMICOLON character (`;`):
+  2.  For each |token| returned by
+      <a lt="strictly split a string">strictly splitting</a> |serialized
+      policy| on the U+003B SEMICOLON character (`;`):
 
-      1.  <a>Strip leading and trailing whitespace</a> from <var>token</var>.
+      1.  <a>Strip leading and trailing whitespace</a> from |token|.
 
-      2.  If <var>token</var> is an empty string, skip the remaining substeps
+      2.  If |token| is an empty string, skip the remaining substeps
           and continue to the next item.
 
-      3.  Let <var>directive name</var> be the result of
+      3.  Let |directive name| be the result of
           <a lt="collect a sequence of characters">collecting a sequence of
-          characters</a> from <var>token</var> which are not <a>space
+          characters</a> from |token| which are not <a>space
           characters</a>.
 
-      4.  If <var>policy</var>'s <a>directive set</a> contains a
-          <a>directive</a> whose <a for="directive">name</a> is <var>directive
-          name</var>, skip the remaining substeps and continue to the next item.
+      4.  If |policy|'s <a>directive set</a> contains a
+          <a>directive</a> whose <a for="directive">name</a> is |directive
+          name|, skip the remaining substeps and continue to the next item.
 
           The user agent SHOULD notify developers that a directive was ignored.
           A console warning might be appropriate, for example.
 
-      5.  Let <var>directive value</var> be the result of
-          <a lt="split a string on spaces">splitting <var>token</var> on
+      5.  Let |directive value| be the result of
+          <a lt="split a string on spaces">splitting |token| on
           spaces</a>.
 
-      6.  Let <var>directive</var> be a new <a>directive</a> whose
-          <a for="directive">name</a> is <var>directive name</var>, and
-          <a for="directive">value</a> is <var>directive value</var>.
+      6.  Let |directive| be a new <a>directive</a> whose
+          <a for="directive">name</a> is |directive name|, and
+          <a for="directive">value</a> is |directive value|.
 
-      7.  Add <var>directive</var> to <var>policy</var>'s <a>directive set</a>.
+      7.  Add |directive| to |policy|'s <a>directive set</a>.
 
-  3.  Return <var>policy</var>.
+  3.  Return |policy|.
 
   <h4 id="parse-serialized-policy-list">
-    Parse a <var>serialized policy list</var>
+    Parse a serialized policy list
   </h4>
 
   Given a string (<var>list</var>) which contains a comma-delimited series of
@@ -837,7 +864,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       object's `policy list` to the `policy list` of the resource used to
       generate the document.
 
-  4.  [[#does-node-match]] is called during the <a>prepare a script</a> and
+  4.  [[#match-node-to-policy]] is called during the <a>prepare a script</a> and
       <a>update a `style` block</a> algorithms in order to determine whether or
       not an inline script or style block is allowed to execute.
 
@@ -850,7 +877,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       They have not yet been added to W3C's HTML.
 
       ISSUE: Need to monkey-patch these in: something like "If
-      [[#does-node-match]] returns `Does Not Match` when executed upon the
+      [[#match-node-to-policy]] returns `Does Not Match` when executed upon the
       element and the element's `Document`'s <a>global object</a>'s
       `policy list`, abort these steps."
 
@@ -864,6 +891,12 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   6.  A {{Document}}'s <dfn>embedding document</dfn> is the {{Document}}
       <a lt="nested through">through which</a> the {{Document}}'s
       <a>browsing context</a> is nested.
+
+  7.  [[#allow-base-for-document]] is called during <{base}>'s <a>set the frozen
+      base URL</a> algorithm to ensure that the <{base/href}> attribute's value
+      is valid.
+
+      ISSUE: Need to add this to HTML.
 
   <h4 id="initialise-global-object-csp">
     Initialise <var>global object</var>'s `policy list`
@@ -1071,7 +1104,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   That is, given `default-src 'none'; script-src 'self'`, script requests will
   use `'self'` as the <a>effective source list</a> to match against. Other
   requests will use `'none'`. This is spelled out in more detail in the
-  [[#match-request-to-directive-list]] algorithm.
+  [[#match-request-to-policy]] algorithm.
 
   <div class="example">
     The following header:
@@ -1280,84 +1313,153 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     directive-value = <a grammar>serialized-source-list</a>
   </pre>
 
-  <h4 id="fetch-directive-matching">Matching Algorithms</h4>
+  <h4 id="fetch-directive-matching-url">URL Matching Algorithms</h4>
 
-  <h5 id="match-request-to-directive-list">
-    Does <var>request</var> match <var>policy</var>?
+  <h5 id="match-request-to-policy">
+    Does |request| match |policy|?
   </h5>
 
-  1.  Let <var>source list</var> be the result of executing
-      [[#effective-source-list-for-request]] on <var>request</var> and
-      <var>policy</var>.
+  1.  Let |source list| be the result of executing
+      [[#effective-source-list-for-request]] on |request| and |policy|.
 
   2.  Return the result of executing [[#match-url-to-source-list]] on
-      <var>request</var>'s <a for="request">url</a> and <var>source list</var>.
+      |request|'s <a for="request">url</a> and |source list|.
 
   <h5 id="match-url-to-source-list">
-    Does <var>url</var> match <var>source list</var>?
+    Does |url| match |source list|?
   </h5>
 
-  Given a {{URL}} (<var>url</var>) and a <a>source list</a> (<var>list</var>),
-  this algorithm returns `Matches` or `Does Not Match`.
+  Given a {{URL}} (|url|), and a <a>source list</a> (|source list|), this
+  algorithm returns "`Matches`" if the URL matches one or more source
+  expressions in |source list|, or "`Does Not Match`" otherwise:
 
-  1.  If <var>list</var> is `null`, return `Matches`.
+  1.  If |source list| is `null`, return "`Matches`".
 
-  2.  If <var>list</var> contains a single item which is a <a>case-sensitive</a>
+  2.  If |source list| contains a single item which is a <a>case-sensitive</a>
       match for the string "`'none'`", return `Does Not Match`.
 
-  3.  For each <var>expression</var> in <var>list</var>:
+  3.  For each |expression| in |source list|:
 
-      1.  If [[#match-url-to-source-expression]] returns `Matches`
-          when executed upon <var>url</var> and <var>expression</var>, then
-          return `Matches`
+      1.  If [[#match-url-to-source-expression]] returns "`Matches`" when
+          executed upon |url| and |expression|, return "`Matches`".
 
-  2.  Return `Does Not Match`.
+  4.  Return "`Does Not Match`".
 
   <h5 id="match-url-to-source-expression">
-    Does <var>url</var> match <var>source expression</var>?
+    Does |url| match |expression| in |origin| with |redirect count|?
   </h5>
 
-  Given a {{URL}} (<var>url</var>) and a <a>source expression</a>
-  (<var>source</var>), this algorithm returns `Matches` or `Does
-  Not Match`.
- 
-  1.  Return `Does Not Match`.
+  Given a {{URL}} (|url|), a <a>source expression</a> (|expression|), an
+  <a>origin</a> (|origin|), and a number (|redirect count|), this algorithm
+  returns "`Matches`" if |url| matches |expression|, and "`Does Not Match`"
+  otherwise.
 
-  ISSUE: This might need a bit of polishing.
+  Note: |origin| is the <a>origin</a> of the resource relative to which the
+  |expression| should be resolved. "`'self'`", for instance, will have distinct
+  meaning depending on that bit of context.
 
-  <h5 id="does-node-match">
-    Does <var>node</var> match <var>policy</var>?
-  </h5>
+  1.  If |expression| is the string "*", and |url|'s {{URL/scheme}} is not a
+      <a>local scheme</a>, return "`Matches`".
 
-  ISSUE: Parse the node to determine which directive applies, find the
-  relevant directive in the list, and call [[#match-node-to-source-list]].
+  2.  If |expression| matches the <a grammar>`scheme-source`</a> grammar:
 
-  <h5 id="match-node-to-source-list">
-    Does <var>node</var> match <var>source list</var>?
-  </h5>
+      1.  If |url|'s {{URL/scheme}} is an <a>ASCII case-insensitive match</a>
+          for |expression|'s <a grammar>`scheme-part`</a>, return "`Matches`".
 
-  Given a {{Node}} (<var>node</var>) and a <a>source list</a> (<var>list</var>),
-  this algorithm returns `Matches` or `Does Not Match`.
+      2.  Return "`Does Not Match`".
 
-  1.  For each <var>expression</var> in <var>list</var>:
+  3.  If |expression| matches the <a grammar>`host-source`</a> grammar:
+  
+      1.  If |url|'s {{URL/host}} is `null`, return "`Does Not Match`".
 
-      1.  If [[#match-node-to-source-expression]] returns `Matches`
-          when executed upon <var>node</var> and <var>expression</var>, then
-          return `Matches`
+      2.  If |expression| has a <a grammar>`scheme-part`</a> that is not an
+          <a>ASCII case-insensitive match</a> for |url|'s {{URL/scheme}}, return
+          "`Does Not Match`".
 
-  2.  Return `Does Not Match`.
+      3.  If |expression| does not have a <a grammar>`scheme-part`</a>, then
+          return "`Does Not Match`" unless one of the following conditions is
+          met:
 
-  <h5 id="match-node-to-source-expression">
-    Does <var>node</var> match <var>source expression</var>?
-  </h5>
+          1.  |origin|'s {{URL/scheme}} is an <a>ASCII case-insensitive
+              match</a> for "`HTTP`", and |url|'s {{URL/scheme}} is an <a>ASCII
+              case-insensitive match</a> for either "`HTTP`" or "`HTTPS`".
 
-  Given a {{Node}} (<var>url</var>) and a <a>source expression</a>
-  (<var>source</var>), this algorithm returns `Matches` or `Does
-  Not Match`.
- 
-  1.  Return `Does Not Match`.
+          2.  |origin|'s {{URL/scheme}} is an <a>ASCII case-insensitive
+              match</a> for |url|'s {{URL/scheme}}.
+      
+      4.  If the first character of |expression|'s <a grammar>`host-part`</a>
+          is an U+002A ASTERISK character (`*`):
+          
+          1.  Let |remaining| be the result of removing the leading "`*`" from
+              |expression|.
 
-  ISSUE: This might need a bit of polishing.
+          2.  If |remaining| (including the leading U+002E FULL STOP character
+              (`.`)) is not an <a>ASCII case-insensitive match</a> for the
+              rightmost characters of |url|'s {{URL/host}}, then return "`Does
+              Not Match`".
+
+      5.  If the first character of |expression|'s <a grammar>`host-part`</a>
+          is not an U+002A ASTERISK character (`*`), and |url|'s {{URL/host}}
+          is not an <a>ASCII case-insensitive match</a> for |expression|'s
+          <a grammar>`host-part`</a>, return "`Does Not Match`".
+
+      6.  If |expression|'s <a grammar>`host-part`</a> matches the
+          <a grammar>IPv4address</a> rule from [[!RFC3986]], and is not
+          "`127.0.0.1`"; or if |expression|'s <a grammar>`host-part`</a> is an
+          <a>IPv6 address</a>, return "`Does Not Match`".
+
+          Note: A future version of this specification may allow literal IPv6
+          and IPv4 addresses, depending on usage and demand. Given the weak
+          security properties of IP addresses in relation to named hosts,
+          however, authors are encouraged to prefer the latter whenever
+          possible.
+
+      7.  If |expression| does not contain a <a grammar>`port-part`</a>, and
+          |url|'s {{URL/port}} is not the <a>default port</a> for |url|'s
+          {{URL/scheme}}, return "`Does Not Match`".
+
+      8.  If |expression| does contain a <a grammar>`port-part`</a>:
+
+          1.  If |expression|'s <a grammar>`port-part`</a> is not "`*`", and
+              is not the same number as |url|'s {{URL/port}}, return "`Does Not
+              Match`".
+
+      9.  If |expression| contains a non-empty <a grammar>`path-part`</a>, and
+          |redirect count| is 0, then:
+
+          1.  Let |exact match| be `false` if the final character of
+              |expression|'s <a grammar>`path-part`</a> is the U+002F SOLIDUS
+              character (`/`), and `true` otherwise.
+
+          2.  Let |path list| be the result of
+              <a lt="strictly split a string">strictly splitting</a>
+              |expression|'s <a grammar>`path-part`</a> on the U+002F SOLIDUS
+              character (`/`).
+
+          3.  If |path list| has more items than |url|'s {{URL/path}}, return
+              "`Does Not Match`".
+
+          4.  If |exact match| is `true`, and |path list| does not have the same
+              number of items as |url|'s {{URL/path}}, return "`Does Not
+              Match`".
+
+          5.  For each |expression piece| in |path list|:
+
+              1.  Let |url piece| be the next item in |url|'s {{URL/path}}.
+
+              2.  <a>Percent decode</a> |expression piece|.
+
+              3.  <a>Percent decode</a> |url piece|.
+
+              4.  If |expression piece| is not an <a>ASCII case-insensitive
+                  match</a> for |url piece|, return "`Does Not Match`".
+
+      10. Return "`Matches`".
+
+  4.  If |expression| is an <a>ASCII case-insensitive match</a> for "`'self'`",
+      and |origin| is the same as |url|'s {{URL/origin}}, return "`Matches`".
+
+  5.  Return "`Does Not Match`".
 
   <h5 id="effective-directive-for-a-request">
     Get the effective directive for <var>request</var>
@@ -1422,30 +1524,119 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   2.  Return `null`.
 
   <h5 id="effective-source-list-for-request">
-    Get the effective source list for <var>request</var> and <var>policy</var>
+    Get the effective source list for |request| and |policy|
   </h5>
 
   If the <a for="request">effective directive</a> for a <a>request</a> is not
   present in a <a>policy</a>, <a>fetch directives</a> will fall back to using
   the value of <a>`default-src`</a>, if present. The <dfn>effective source
-  list</dfn> for a <a>request</a> (<var>request</var>) and <a>policy</a>
-  (<var>policy</var>) is therefore determined by the following algorithm:
+  list</dfn> for a <a>request</a> (|request|) and <a>policy</a>
+  (|policy|) is therefore determined by the following algorithm:
 
-  1.  Let <var>effective</var> be the result of executing
-      [[#effective-directive-for-a-request]] on <var>request</var>.
+  1.  Let |effective| be the result of executing
+      [[#effective-directive-for-a-request]] on |request|.
 
-  2.  If <var>effective</var> is `null`, return `null`.
+  2.  If |effective| is `null`, return `null`.
 
   3.  If a <a>directive</a> whose <a for="directive">name</a> is
-      <var>effective</var> is present in <var>policy</var>'s
+      |effective| is present in |policy|'s
       <a for="policy">directive set</a>, return that <a>directive</a>'s
       <a for="directive">value</a>.
 
   4.  If a <a>directive</a> whose <a for="directive">name</a> is
-      `default-src` is present in <var>policy</var>'s <a for="policy">directive
+      `default-src` is present in |policy|'s <a for="policy">directive
       set</a>, return that <a>directive</a>'s <a for="directive">value</a>.
 
   5.  Return `null`.
+
+
+  <h4 id="fetch-directive-matching-nodes">Node Matching Algorithms</h4>
+
+  <h5 id="match-node-to-policy">
+    Does |node| match |policy|?
+  </h5>
+
+  Given a {{Node}} (|node|) and a <a>policy</a> (|policy|), this algorithm
+  returns "`Matches`" or "`Does Not Match`".
+
+  1.  Let |directive name| be `null`.
+
+  2.  If |node| is a <{script}> element, set |directive name| to "`script-src`".
+
+  3.  If |node| is a <{style}> element, set |directive name| to "`style-src`".
+
+  4.  If |directive name| is `null`, return "`Matches`".
+
+  5.  Let |source list| be `null`.
+
+  6.  If a <a>directive</a> whose <a for="directive">name</a> is |directive
+      name| is present in |policy|'s <a for="policy">directive set</a>, set
+      |source list| to that <a>directive</a>'s  <a for="directive">value</a>.
+
+  7.  If |source list| is `null`, and a <a>directive</a> whose
+      <a for="directive">name</a> is "`default-src`" is present in |policy|'s
+      <a for="policy">directive set</a>, set |source list| to that
+      <a>directive</a>'s <a for="directive">value</a>.
+
+  8.  Return the result of executing [[#match-node-to-source-list]] on |node|
+      and |source list|.
+
+  <h5 id="match-node-to-source-list">
+    Does |node| match source |list|?
+  </h5>
+
+  Given a {{Node}} (|node|) and a <a>source list</a> (|list|),
+  this algorithm returns "`Matches`" or "`Does Not Match`".
+
+  1.  If |node| is a <{script}> element, and has a <{script/src}> attribute,
+      then return "`Matches`".
+
+  2.  Let |contains nonce or hash| be `false`.
+
+  3.  Let |content| be <a>the script block's source</a> if |node| is a
+      <{script}> element, or the value of |node|'s {{Node/textContent}}
+      IDL attribute for any other element.
+
+  4.  For each |expression| in |list|:
+
+      1.  If |expression| matches the <a grammar>`nonce-source`</a> or
+          <a grammar>`hash-source`</a> grammar, set |contains nonce or hash|
+          to `true`.
+
+  5.  For each |expression| in |list|:
+
+      1.  If |contains nonce or hash| is `false`, and |expression| is a
+          <a>case-sensitive</a> match for "`'unsafe-inline'`", return
+          "`Matches`".
+
+      2.  If |expression| matches the <a grammar>`nonce-source`</a> grammar,
+          and |node| has a <{script/nonce}> attribute whose value is a
+          <a>case-sensitive</a> match for |expression|'s
+          <a grammar>`base64-value`</a> part, return "`Matches`".
+
+      3.  If |expression| matches the <a grammar>`hash-source`</a> grammar:
+          
+          1.  Let |algorithm| be `null`.
+
+          2.  If |expression|'s <a grammar>`hash-algorithm`</a> part is an
+              <a>ASCII case-insensitive match</a> for "sha256", set |algorithm|
+              to <a>SHA-256</a>.
+
+          3.  If |expression|'s <a grammar>`hash-algorithm`</a> part is an
+              <a>ASCII case-insensitive match</a> for "sha384", set |algorithm|
+              to <a>SHA-384</a>.
+
+          4.  If |expression|'s <a grammar>`hash-algorithm`</a> part is an
+              <a>ASCII case-insensitive match</a> for "sha512", set |algorithm|
+              to <a>SHA-512</a>.
+
+          5.  Let |actual| be the result of <a>base64 encoding</a> the result of
+              applying |algorithm| to |content|.
+
+          6.  If |actual| is a <a>case-sensitive</a> match for |expression|'s
+              <a grammar>`base64-value`</a> part, return "`Matches`".
+
+  6.  Return "`Does Not Match`".
 
   <h3 id="directives-other">
     Grabbag
@@ -1461,6 +1652,31 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     directive-name  = "base-uri"
     directive-value = &lt;URL&gt; ; TODO: Figure out what to use here.
   </pre>
+
+  <h5 id="allow-base-for-document">
+    Is |base| allowed for |document|?
+  </h5>
+
+  Given a {{URL}} (|base|), and a {{Document}} (|document|), this algorithm
+  returns "`Allowed`" if |base| may be used as the value of a <{base}>
+  element's <{base/href}> attribute, and "`Blocked`" otherwise:
+
+  1.  For each |policy| in |document|'s <a>global object</a>'s
+      <a for="global object">policy list</a>:
+
+      1.  Let |source list| be `null`.
+
+      2.  If a <a>directive</a> whose <a for="directive">name</a> is
+          "`base-uri`" is present in |policy|'s <a for="policy">directive
+          set</a>, set |source list| to that <a>directive</a>'s
+          <a for="directive">value</a>.
+
+      3.  If |source list| is `null`, skip to the next |policy|.
+
+      4.  If the result of executing [[#match-url-to-source-list]] on |base| and
+          |source list| is "`Does Not Match`", return "`Blocked`".
+
+  2.  Return "`Allowed`".
 
   <h4 id="directive-form-action">`form-action`</h4>
   <h4 id="directive-frame-ancestors">`frame-ancestors`</h4>
