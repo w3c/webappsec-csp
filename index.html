@@ -1133,7 +1133,11 @@ of security-relevant policy decisions.</p>
       <li>
        <a href="#directives-other"><span class="secno">6.2</span> <span class="content"> Grabbag </span></a>
        <ul class="toc">
-        <li><a href="#directive-base-uri"><span class="secno">6.2.1</span> <span class="content"><code>base-uri</code></span></a>
+        <li>
+         <a href="#directive-base-uri"><span class="secno">6.2.1</span> <span class="content"><code>base-uri</code></span></a>
+         <ul class="toc">
+          <li><a href="#allow-base-for-document"><span class="secno">6.2.1.1</span> <span class="content"> Is <var>base</var> allowed for <var>document</var>? </span></a>
+         </ul>
         <li><a href="#directive-form-action"><span class="secno">6.2.2</span> <span class="content"><code>form-action</code></span></a>
         <li><a href="#directive-frame-ancestors"><span class="secno">6.2.3</span> <span class="content"><code>frame-ancestors</code></span></a>
         <li><a href="#directive-plugin-types"><span class="secno">6.2.4</span> <span class="content"><code>plugin-types</code></span></a>
@@ -1700,6 +1704,11 @@ of security-relevant policy decisions.</p>
   It has not yet been added to W3C’s HTML.</p>
      <li data-md="">
       <p>A <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/html5/dom.html#document">Document</a></code>'s <dfn data-dfn-type="dfn" data-noexport="" id="embedding-document">embedding document<a class="self-link" href="#embedding-document"></a></dfn> is the <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/html5/dom.html#document">Document</a></code> <a data-link-type="dfn" href="http://www.w3.org/TR/html5/browsers.html#browsing-context-nested-through">through which</a> the <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/html5/dom.html#document">Document</a></code>'s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/browsers.html#browsing-context">browsing context</a> is nested.</p>
+     <li data-md="">
+      <p><a href="#allow-base-for-document">§6.2.1.1 Is base allowed for document?</a> is called during <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-base-element">base</a></code>'s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/document-metadata.html#set-the-frozen-base-url">set the frozen
+  base URL</a> algorithm to ensure that the <code><a data-link-type="element-attr" href="https://html.spec.whatwg.org/multipage/semantics.html#attr-base-href">href</a></code> attribute’s value
+  is valid.</p>
+      <p class="issue" id="issue-a8c27cf5"><a class="self-link" href="#issue-a8c27cf5"></a> Need to add this to HTML.</p>
     </ol>
     <h4 class="heading settled" data-level="4.2.1" id="initialise-global-object-csp"><span class="secno">4.2.1. </span><span class="content"> Initialise <var>global object</var>’s <code>policy list</code> </span><a class="self-link" href="#initialise-global-object-csp"></a></h4>
     <p>Given a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a> (<var>global</var>), and a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), the user agent performs the following steps in order
@@ -2309,6 +2318,27 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 <pre>directive-name  = "base-uri"
 directive-value = &lt;URL> ; TODO: Figure out what to use here.
 </pre>
+    <h5 class="heading settled" data-level="6.2.1.1" id="allow-base-for-document"><span class="secno">6.2.1.1. </span><span class="content"> Is <var>base</var> allowed for <var>document</var>? </span><a class="self-link" href="#allow-base-for-document"></a></h5>
+    <p>Given a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url">URL</a></code> (<var>base</var>), and a <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/html5/dom.html#document">Document</a></code> (<var>document</var>), this algorithm
+  returns "<code>Allowed</code>" if <var>base</var> may be used as the value of a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-base-element">base</a></code> element’s <code><a data-link-type="element-attr" href="https://html.spec.whatwg.org/multipage/semantics.html#attr-base-href">href</a></code> attribute, and "<code>Blocked</code>" otherwise:</p>
+    <ol>
+     <li data-md="">
+      <p>For each <var>policy</var> in <var>document</var>'s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <a data-link-type="dfn" href="#global-object-policy-list">policy list</a>:</p>
+      <ol>
+       <li data-md="">
+        <p>Let <var>source list</var> be <code>null</code>.</p>
+       <li data-md="">
+        <p>If a <a data-link-type="dfn" href="#directives">directive</a> whose <a data-link-type="dfn" href="#name">name</a> is
+  "<code>base-uri</code>" is present in <var>policy</var>'s <a data-link-type="dfn" href="#directive-set">directive
+  set</a>, set <var>source list</var> to that <a data-link-type="dfn" href="#directives">directive</a>’s <a data-link-type="dfn" href="#value">value</a>.</p>
+       <li data-md="">
+        <p>If <var>source list</var> is <code>null</code>, skip to the next <var>policy</var>.</p>
+       <li data-md="">
+        <p>If the result of executing <a href="#match-url-to-source-list">§6.1.10.2 Does url match source list?</a> on <var>base</var> and <var>source list</var> is "<code>Does Not Match</code>", return "<code>Blocked</code>".</p>
+      </ol>
+     <li data-md="">
+      <p>Return "<code>Allowed</code>".</p>
+    </ol>
     <h4 class="heading settled" data-level="6.2.2" id="directive-form-action"><span class="secno">6.2.2. </span><span class="content"><code>form-action</code></span><a class="self-link" href="#directive-form-action"></a></h4>
     <h4 class="heading settled" data-level="6.2.3" id="directive-frame-ancestors"><span class="secno">6.2.3. </span><span class="content"><code>frame-ancestors</code></span><a class="self-link" href="#directive-frame-ancestors"></a></h4>
     <p>The <dfn data-dfn-type="dfn" data-noexport="" id="frame-ancestors">frame-ancestors<a class="self-link" href="#frame-ancestors"></a></dfn> directive restricts the <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url">URL</a></code>s which can
@@ -2622,6 +2652,7 @@ Content-Security-Policy: connect-src http://example.com/;
      <li><a href="http://www.w3.org/TR/html5/embedded-content-0.html#the-object-element">object</a>
      <li><a href="http://www.w3.org/TR/html5/scripting-1.html#prepare-a-script">prepare a script</a>
      <li><a href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a>
+     <li><a href="http://www.w3.org/TR/html5/document-metadata.html#set-the-frozen-base-url">set the frozen base url</a>
      <li><a href="http://www.w3.org/TR/html5/infrastructure.html#space-characters">space characters</a>
      <li><a href="http://www.w3.org/TR/html5/infrastructure.html#split-a-string-on-commas">split a string on commas</a>
      <li><a href="http://www.w3.org/TR/html5/infrastructure.html#split-a-string-on-spaces">split a string on spaces</a>
@@ -2709,6 +2740,7 @@ Content-Security-Policy: connect-src http://example.com/;
      <li><a href="https://html.spec.whatwg.org/multipage/workers.html#sharedworker">SharedWorker</a>
      <li><a href="https://html.spec.whatwg.org/multipage/workers.html#workerglobalscope">WorkerGlobalScope</a>
      <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#attr-object-data">data</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/semantics.html#attr-base-href">href</a>
     </ul>
   </ul>
   <h2 class="no-num heading settled" id="references"><span class="content">References</span><a class="self-link" href="#references"></a></h2>
@@ -2790,6 +2822,7 @@ Content-Security-Policy: connect-src http://example.com/;
   element and the element’s <code>Document</code>'s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <code>policy list</code>, abort these steps."<a href="#issue-5c251acc"> ↵ </a></div>
    <div class="issue"> This processing was added to WHATWG’s HTML in <a href="https://github.com/whatwg/html/commit/5064a629f22bef29839ab4dc6f1ceef17f010bc5">whatwg/html@5064a62</a>.
   It has not yet been added to W3C’s HTML.<a href="#issue-389933ec"> ↵ </a></div>
+   <div class="issue"> Need to add this to HTML.<a href="#issue-a8c27cf5"> ↵ </a></div>
    <div class="issue"> Need an algorithm here, right? :)<a href="#issue-e54eddc4"> ↵ </a></div>
    <div class="issue"> TODO: "To enforce the <code>frame-ancestors</code> directive...". Will need to be
   called from Fetch, probably right after parsing the policy.<a href="#issue-6fe8f1f6"> ↵ </a></div>
