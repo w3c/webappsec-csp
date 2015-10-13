@@ -2316,8 +2316,9 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
   a <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/html5/dom.html#document">Document</a></code>'s <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-base-element">base</a></code> element. The syntax for the directive’s name and
   value is described by the following ABNF:</p>
 <pre>directive-name  = "base-uri"
-directive-value = &lt;URL> ; TODO: Figure out what to use here.
+directive-value = <a data-link-type="grammar" href="#grammardef-serialized-source-list">serialized-source-list</a>
 </pre>
+    <p>The following algorithm is called during HTML’s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/document-metadata.html#set-the-frozen-base-url">set the frozen base url</a> algorithm in order to monitor and enforce this directive:</p>
     <h5 class="heading settled" data-level="6.2.1.1" id="allow-base-for-document"><span class="secno">6.2.1.1. </span><span class="content"> Is <var>base</var> allowed for <var>document</var>? </span><a class="self-link" href="#allow-base-for-document"></a></h5>
     <p>Given a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url">URL</a></code> (<var>base</var>), and a <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/html5/dom.html#document">Document</a></code> (<var>document</var>), this algorithm
   returns "<code>Allowed</code>" if <var>base</var> may be used as the value of a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-base-element">base</a></code> element’s <code><a data-link-type="element-attr" href="https://html.spec.whatwg.org/multipage/semantics.html#attr-base-href">href</a></code> attribute, and "<code>Blocked</code>" otherwise:</p>
@@ -2334,7 +2335,14 @@ directive-value = &lt;URL> ; TODO: Figure out what to use here.
        <li data-md="">
         <p>If <var>source list</var> is <code>null</code>, skip to the next <var>policy</var>.</p>
        <li data-md="">
-        <p>If the result of executing <a href="#match-url-to-source-list">§6.1.10.2 Does url match source list?</a> on <var>base</var> and <var>source list</var> is "<code>Does Not Match</code>", return "<code>Blocked</code>".</p>
+        <p>If the result of executing <a href="#match-url-to-source-list">§6.1.10.2 Does url match source list?</a> on <var>base</var> and <var>source list</var> is "<code>Does Not Match</code>":</p>
+        <ol>
+         <li data-md="">
+          <p><a data-link-type="dfn" href="#report-a-violation">Report a violation</a> for <var>policy</var>, "<code>base-uri</code>", and <var>document</var>.</p>
+         <li data-md="">
+          <p>If <var>policy</var>'s <a data-link-type="dfn" href="#disposition">disposition</a> is "<code>enforce</code>",
+  return "<code>Blocked</code>".</p>
+        </ol>
       </ol>
      <li data-md="">
       <p>Return "<code>Allowed</code>".</p>

@@ -1651,8 +1651,11 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   <pre>
     directive-name  = "base-uri"
-    directive-value = &lt;URL&gt; ; TODO: Figure out what to use here.
+    directive-value = <a grammar>serialized-source-list</a>
   </pre>
+
+  The following algorithm is called during HTML's <a>set the frozen base url</a>
+  algorithm in order to monitor and enforce this directive:
 
   <h5 id="allow-base-for-document">
     Is |base| allowed for |document|?
@@ -1675,7 +1678,13 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       3.  If |source list| is `null`, skip to the next |policy|.
 
       4.  If the result of executing [[#match-url-to-source-list]] on |base| and
-          |source list| is "`Does Not Match`", return "`Blocked`".
+          |source list| is "`Does Not Match`":
+          
+          1.  <a>Report a violation</a> for |policy|, "`base-uri`", and
+              |document|.
+          
+          2.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
+              return "`Blocked`".
 
   2.  Return "`Allowed`".
 
