@@ -678,62 +678,65 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   come up with better ideas):
 
   1.  A <a>response</a> has an associated
-      <dfn for="response" id="response-policy-list">policy list</dfn> which
+      <dfn for="response" id="response-csp-list">CSP list</dfn> which
       contains any policy objects delivered in the <a>response</a>'s
       <a for="response">header list</a>. The list is empty unless otherwise
       specified.
 
   2.  Insert the following steps after <a>HTTP fetch</a>'s current step 2.2:
 
-      3.  Execute [[#set-response-policy-list]] on <var>response</var>.
+      3.  Execute [[#set-response-csp-list]] on <var>response</var>.
 
   3.  Insert the following steps before the <a>HTTP-network fetch</a>'s current
       step 6:
 
-      6.  Execute [[#set-response-policy-list]] on <var>response</var>.
+      6.  Execute [[#set-response-csp-list]] on <var>response</var>.
 
-  Note: These two additions should ensure that <a>responses</a>'s
-  <a for="response">policy lists</a> are set, regardless of how the
+  Note: These two additions should ensure that <a>responses</a>'
+  <a for="response">CSP list</a>s are  set, regardless of how the
   <a>response</a> is created. If we hit the network (via
   <a>HTTP-network fetch</a>, then we parse the policy before we handle the
   `Set-Cookie` header. If we get a response from a Service Worker (via <a>HTTP
-  fetch</a>, we'll process its <a for="response">policy list</a> before handing
+  fetch</a>, we'll process its <a for="response">CSP list</a> before handing
   the response back to our caller.
 
-  <h4 id="set-response-policy-list">
-    Set <var>response</var>'s `policy list`
+  <h4 id="set-response-csp-list">
+    Set <var>response</var>'s `csp list`
   </h4>
 
   Given a <a>response</a> (<var>response</var>), this algorithm evaluates its
   <a for="response">header list</a> for <a>serialized policy</a> values, and
-  populates its <a for="response">policy list</a> accordingly:
+  populates its <a for="response">csp list</a> accordingly:
 
-  1.  Let <var>policies to enforce</var> be the result of executing
+  1.  Set <var>response</var>'s <a for="response">CSP list</a> to the
+      empty list.
+
+  2.  Let <var>policies to enforce</var> be the result of executing
       [[#parse-serialized-policy-list]] on the result of
       <a lt="parse a header value">parsing</a> `Content-Security-Policy`
       in <var>response</var>'s <a for="response">header list</a>.
 
-  2.  For each <var>policy</var> in <var>policies to enforce</var>:
+  3.  For each <var>policy</var> in <var>policies to enforce</var>:
 
       1.  Set <var>policy</var>'s <a for="policy">disposition</a> to
           "`enforce`".
 
       2.  Insert <var>policy</var> into <var>response</var>'s
-          <a for="response">policy list</a>.
+          <a for="response">csp list</a>.
 
-  3.  Let <var>policies to report</var> be the result of executing
+  4.  Let <var>policies to report</var> be the result of executing
       [[#parse-serialized-policy-list]] on the result of
       <a lt="parse a header value">parsing</a>
       `Content-Security-Policy-Report-Only` in <var>response</var>'s
       <a for="response">header list</a>.
 
-  4.  For each <var>policy</var> in <var>policies to report</var>:
+  5.  For each <var>policy</var> in <var>policies to report</var>:
 
       1.  Set <var>policy</var>'s <a for="policy">disposition</a> to
           "`report`".
 
       2.  Insert <var>policy</var> into <var>response</var>'s
-          <a for="response">policy list</a>.
+          <a for="response">csp list</a>.
 
   <h4 id="should-block-request">
     Should <var>request</var> be blocked by Content Security Policy?
@@ -743,13 +746,13 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   `Blocked` or `Allowed` and reports violations based on <var>request</var>'s
   <a for="request">client</a>'s Content Security Policy.
 
-  1.  Let <var>policy list</var> be <var>request</var>'s
+  1.  Let <var>csp list</var> be <var>request</var>'s
       <a for="request">client</a>'s <a>global object</a>'s
-      <a for="global object">policy list</a>.
+      <a for="global object">csp list</a>.
 
   2.  Let <var>result</var> be "`Allowed`".
 
-  3.  For each <var>policy</var> in <var>policy list</var>:
+  3.  For each <var>policy</var> in <var>csp list</var>:
 
       1.  Let <var>source list</var> be the <a>effective source list</a> for
           <var>request</var> and <var>policy</var>.
@@ -779,13 +782,13 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   `Allowed`, and reports violations based on <var>request</var>'s
   <a for="request">client</a>'s Content Security Policy.
 
-  1.  Let <var>policy list</var> be <var>request</var>'s
+  1.  Let <var>csp list</var> be <var>request</var>'s
       <a for="request">client</a>'s <a>global object</a>'s
-      <a for="global object">policy list</a>.
+      <a for="global object">csp list</a>.
 
   2.  Let <var>result</var> be "`Allowed`".
 
-  3.  For each <var>policy</var> in <var>policy list</var>:
+  3.  For each <var>policy</var> in <var>csp list</var>:
 
       1.  Let <var>source list</var> be the <a>effective source list</a> for
           <var>request</var> and <var>policy</var>.
@@ -810,7 +813,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       context</a> is a <a>nested browsing context</a>:
 
       1.  For each <var>policy</var> in <var>response</var>'s
-          <a for="response">policy list</a>:
+          <a for="response">csp list</a>:
 
           1.  Let <var>source list</var> be the value of <var>policy</var>'s
               <a for="policy">directive set</a>'s <a>`frame-ancestors`</a>
@@ -844,14 +847,14 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   </h3>
   
   1.  The {{Window}} and {{WorkerGlobalScope}} objects have a
-      <dfn for="global object" id="global-object-policy-list">policy list</dfn>,
+      <dfn for="global object" id="global-object-csp-list">csp list</dfn>,
       which holds all the <a>policy</a> objects which are active for a given
       context. This list is empty unless otherwise specified, and is populated
       via the [[#initialise-global-object-csp]] algorithm.
 
   2.  A <a>policy</a> is <dfn>enforced</dfn> or <dfn>monitored</dfn> for an
       <a>global object</a> by inserting it into the <a>global object</a>'s
-      <a for="global object">policy list</a>.
+      <a for="global object">csp list</a>.
 
   3.  [[#initialise-global-object-csp]] is called during the <a>initialising a
       new `Document` object</a> and <a>run a worker</a> algorithms in order to
@@ -862,7 +865,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       HTML, and isn't well-integrated with Fetch.
 
       ISSUE: Need to monkey-patch these in: something like "Set the `Window`
-      object's `policy list` to the `policy list` of the resource used to
+      object's `csp list` to the `csp list` of the resource used to
       generate the document.
 
   4.  [[#match-node-to-policy]] is called during the <a>prepare a script</a> and
@@ -880,7 +883,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       ISSUE: Need to monkey-patch these in: something like "If
       [[#match-node-to-policy]] returns `Does Not Match` when executed upon the
       element and the element's `Document`'s <a>global object</a>'s
-      `policy list`, abort these steps."
+      `csp list`, abort these steps."
 
   5.  <a>Policies</a> are <a>enforced</a> during processing of the <{meta}>
       element's <{meta/http-equiv}>.
@@ -900,12 +903,12 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       ISSUE: Need to add this to HTML.
 
   <h4 id="initialise-global-object-csp">
-    Initialise <var>global object</var>'s `policy list`
+    Initialise <var>global object</var>'s `csp list`
   </h4>
 
   Given a <a>global object</a> (<var>global</var>), and a <a>response</a>
   (<var>response</var>), the user agent performs the following steps in order
-  to initialize <var>global</var>'s <a for="global object">policy list</a>:
+  to initialize <var>global</var>'s <a for="global object">csp list</a>:
 
   1.  If <var>response</var>'s <a for="response">url</a>'s {{URL/scheme}} is a
       <a>local scheme</a>:
@@ -924,18 +927,18 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       4.  For each <var>document</var> in <var>documents</var>:
 
           1.  For each <var>policy</var> in <var>document</var>'s <a>global
-              object</a>'s <a for="global object">policy list</a>:
+              object</a>'s <a for="global object">csp list</a>:
 
               1.  Insert an alias to <var>policy</var> in <var>global</var>'s
-                  <a for="global object">policy list</a>.
+                  <a for="global object">csp list</a>.
 
       Note: <a>local scheme</a> includes `about:`, and this algorithm will
       therefore alias the <a>embedding document</a>'s policies for <a>an iframe
       `srcdoc` `Document`</a>.
 
   2.  For each <var>policy</var> in <var>response</var>'s
-      <a for="response">policy list</a>, insert <var>policy</var> into
-      <var>global</var>'s <a for="global object">policy list</a>.
+      <a for="response">csp list</a>, insert <var>policy</var> into
+      <var>global</var>'s <a for="global object">csp list</a>.
 </section>
 
 <!-- Big Text: Reporting -->
@@ -1666,7 +1669,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   element's <{base/href}> attribute, and "`Blocked`" otherwise:
 
   1.  For each |policy| in |document|'s <a>global object</a>'s
-      <a for="global object">policy list</a>:
+      <a for="global object">csp list</a>:
 
       1.  Let |source list| be `null`.
 
@@ -1771,7 +1774,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   1.  Let <var>policies</var> be an empty list.
 
   2.  For each <var>policy</var> in <var>global</var>'s
-      <a for="global object">policy list</a>:
+      <a for="global object">csp list</a>:
 
       1.  If <var>policy</var>'s <a for="policy">disposition</a> is
           <var>disposition</var>, add <var>policy</var> to <var>policies</var>.

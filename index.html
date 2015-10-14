@@ -993,7 +993,7 @@
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="http://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/Icons/w3c_home" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">Content Security Policy Level 3</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2015-10-13">13 October 2015</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2015-10-14">14 October 2015</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1087,7 +1087,7 @@ of security-relevant policy decisions.</p>
       <li>
        <a href="#fetch-integration"><span class="secno">4.1</span> <span class="content"> Integration with Fetch </span></a>
        <ul class="toc">
-        <li><a href="#set-response-policy-list"><span class="secno">4.1.1</span> <span class="content"> Set <var>response</var>’s <code>policy list</code> </span></a>
+        <li><a href="#set-response-csp-list"><span class="secno">4.1.1</span> <span class="content"> Set <var>response</var>’s <code>csp list</code> </span></a>
         <li><a href="#should-block-request"><span class="secno">4.1.2</span> <span class="content"> Should <var>request</var> be blocked by Content Security Policy? </span></a>
         <li><a href="#should-block-response"><span class="secno">4.1.3</span> <span class="content"> Should <var>response</var> to <var>request</var> be blocked by Content
     Security Policy? </span></a>
@@ -1095,7 +1095,7 @@ of security-relevant policy decisions.</p>
       <li>
        <a href="#html-integration"><span class="secno">4.2</span> <span class="content"> Integration with HTML </span></a>
        <ul class="toc">
-        <li><a href="#initialise-global-object-csp"><span class="secno">4.2.1</span> <span class="content"> Initialise <var>global object</var>’s <code>policy list</code> </span></a>
+        <li><a href="#initialise-global-object-csp"><span class="secno">4.2.1</span> <span class="content"> Initialise <var>global object</var>’s <code>csp list</code> </span></a>
        </ul>
      </ul>
     <li><a href="#reporting"><span class="secno">5</span> <span class="content"> Reporting </span></a>
@@ -1261,7 +1261,7 @@ of security-relevant policy decisions.</p>
     <h2 class="heading settled" data-level="2" id="framework"><span class="secno">2. </span><span class="content">Framework</span><a class="self-link" href="#framework"></a></h2>
     <h3 class="heading settled" data-level="2.1" id="framework-policy"><span class="secno">2.1. </span><span class="content">Policies</span><a class="self-link" href="#framework-policy"></a></h3>
     <p>A <dfn data-dfn-type="dfn" data-export="" data-local-lt="policies" id="policy">policy<a class="self-link" href="#policy"></a></dfn> defines a set of allowed and
-  restricted behaviors, and may be applied to a <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/html5/browsers.html#dom-window">Window</a></code> or <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#workerglobalscope">WorkerGlobalScope</a></code> as described in <a href="#initialise-global-object-csp">§4.2.1 Initialise global object’s policy list</a>.</p>
+  restricted behaviors, and may be applied to a <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/html5/browsers.html#dom-window">Window</a></code> or <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#workerglobalscope">WorkerGlobalScope</a></code> as described in <a href="#initialise-global-object-csp">§4.2.1 Initialise global object’s csp list</a>.</p>
     <p>Each policy has an associated <dfn data-dfn-for="policy" data-dfn-type="dfn" data-noexport="" id="directive-set">directive set<a class="self-link" href="#directive-set"></a></dfn>, which
   is a set of <a data-link-type="dfn" href="#directives">directives</a> that define the policy’s implications when
   applied.</p>
@@ -1539,30 +1539,33 @@ of security-relevant policy decisions.</p>
   come up with better ideas):</p>
     <ol>
      <li data-md="">
-      <p>A <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> has an associated <dfn data-dfn-for="response" data-dfn-type="dfn" data-noexport="" id="response-policy-list">policy list<a class="self-link" href="#response-policy-list"></a></dfn> which
+      <p>A <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> has an associated <dfn data-dfn-for="response" data-dfn-type="dfn" data-noexport="" id="response-csp-list">CSP list<a class="self-link" href="#response-csp-list"></a></dfn> which
   contains any policy objects delivered in the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a>. The list is empty unless otherwise
   specified.</p>
      <li data-md="">
       <p>Insert the following steps after <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-fetch">HTTP fetch</a>’s current step 2.2:</p>
       <ol>
        <li data-md="">
-        <p>Execute <a href="#set-response-policy-list">§4.1.1 Set response’s policy list</a> on <var>response</var>.</p>
+        <p>Execute <a href="#set-response-csp-list">§4.1.1 Set response’s csp list</a> on <var>response</var>.</p>
       </ol>
      <li data-md="">
       <p>Insert the following steps before the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-network-fetch">HTTP-network fetch</a>’s current
   step 6:</p>
       <ol>
        <li data-md="">
-        <p>Execute <a href="#set-response-policy-list">§4.1.1 Set response’s policy list</a> on <var>response</var>.</p>
+        <p>Execute <a href="#set-response-csp-list">§4.1.1 Set response’s csp list</a> on <var>response</var>.</p>
       </ol>
     </ol>
-    <p class="note" role="note">Note: These two additions should ensure that <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">responses</a>’s <a data-link-type="dfn" href="#response-policy-list">policy lists</a> are set, regardless of how the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> is created. If we hit the network (via <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-network-fetch">HTTP-network fetch</a>, then we parse the policy before we handle the <code>Set-Cookie</code> header. If we get a response from a Service Worker (via <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-fetch">HTTP
-  fetch</a>, we’ll process its <a data-link-type="dfn" href="#response-policy-list">policy list</a> before handing
+    <p class="note" role="note">Note: These two additions should ensure that <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">responses</a>' <a data-link-type="dfn" href="#response-csp-list">CSP list</a>s are  set, regardless of how the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> is created. If we hit the network (via <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-network-fetch">HTTP-network fetch</a>, then we parse the policy before we handle the <code>Set-Cookie</code> header. If we get a response from a Service Worker (via <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-fetch">HTTP
+  fetch</a>, we’ll process its <a data-link-type="dfn" href="#response-csp-list">CSP list</a> before handing
   the response back to our caller.</p>
-    <h4 class="heading settled" data-level="4.1.1" id="set-response-policy-list"><span class="secno">4.1.1. </span><span class="content"> Set <var>response</var>’s <code>policy list</code> </span><a class="self-link" href="#set-response-policy-list"></a></h4>
+    <h4 class="heading settled" data-level="4.1.1" id="set-response-csp-list"><span class="secno">4.1.1. </span><span class="content"> Set <var>response</var>’s <code>csp list</code> </span><a class="self-link" href="#set-response-csp-list"></a></h4>
     <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), this algorithm evaluates its <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a> for <a data-link-type="dfn" href="#serialized-policy">serialized policy</a> values, and
-  populates its <a data-link-type="dfn" href="#response-policy-list">policy list</a> accordingly:</p>
+  populates its <a data-link-type="dfn" href="#response-csp-list">csp list</a> accordingly:</p>
     <ol>
+     <li data-md="">
+      <p>Set <var>response</var>’s <a data-link-type="dfn" href="#response-csp-list">CSP list</a> to the
+  empty list.</p>
      <li data-md="">
       <p>Let <var>policies to enforce</var> be the result of executing <a href="#parse-serialized-policy-list">§2.1.2 Parse a serialized policy list</a> on the result of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-header-parse">parsing</a> <code>Content-Security-Policy</code> in <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a>.</p>
      <li data-md="">
@@ -1572,7 +1575,7 @@ of security-relevant policy decisions.</p>
         <p>Set <var>policy</var>’s <a data-link-type="dfn" href="#disposition">disposition</a> to
   "<code>enforce</code>".</p>
        <li data-md="">
-        <p>Insert <var>policy</var> into <var>response</var>’s <a data-link-type="dfn" href="#response-policy-list">policy list</a>.</p>
+        <p>Insert <var>policy</var> into <var>response</var>’s <a data-link-type="dfn" href="#response-csp-list">csp list</a>.</p>
       </ol>
      <li data-md="">
       <p>Let <var>policies to report</var> be the result of executing <a href="#parse-serialized-policy-list">§2.1.2 Parse a serialized policy list</a> on the result of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-header-parse">parsing</a> <code>Content-Security-Policy-Report-Only</code> in <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a>.</p>
@@ -1583,18 +1586,18 @@ of security-relevant policy decisions.</p>
         <p>Set <var>policy</var>’s <a data-link-type="dfn" href="#disposition">disposition</a> to
   "<code>report</code>".</p>
        <li data-md="">
-        <p>Insert <var>policy</var> into <var>response</var>’s <a data-link-type="dfn" href="#response-policy-list">policy list</a>.</p>
+        <p>Insert <var>policy</var> into <var>response</var>’s <a data-link-type="dfn" href="#response-csp-list">csp list</a>.</p>
       </ol>
     </ol>
     <h4 class="heading settled" data-level="4.1.2" id="should-block-request"><span class="secno">4.1.2. </span><span class="content"> Should <var>request</var> be blocked by Content Security Policy? </span><a class="self-link" href="#should-block-request"></a></h4>
     <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>), this algorithm returns <code>Blocked</code> or <code>Allowed</code> and reports violations based on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>’s Content Security Policy.</p>
     <ol>
      <li data-md="">
-      <p>Let <var>policy list</var> be <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>’s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <a data-link-type="dfn" href="#global-object-policy-list">policy list</a>.</p>
+      <p>Let <var>csp list</var> be <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>’s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list">csp list</a>.</p>
      <li data-md="">
       <p>Let <var>result</var> be "<code>Allowed</code>".</p>
      <li data-md="">
-      <p>For each <var>policy</var> in <var>policy list</var>:</p>
+      <p>For each <var>policy</var> in <var>csp list</var>:</p>
       <ol>
        <li data-md="">
         <p>Let <var>source list</var> be the <a data-link-type="dfn" href="#effective-source-list">effective source list</a> for <var>request</var> and <var>policy</var>.</p>
@@ -1617,11 +1620,11 @@ of security-relevant policy decisions.</p>
     <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>) and a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>), this algorithm returns <code>Blocked</code> or <code>Allowed</code>, and reports violations based on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>’s Content Security Policy.</p>
     <ol>
      <li data-md="">
-      <p>Let <var>policy list</var> be <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>’s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <a data-link-type="dfn" href="#global-object-policy-list">policy list</a>.</p>
+      <p>Let <var>csp list</var> be <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>’s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list">csp list</a>.</p>
      <li data-md="">
       <p>Let <var>result</var> be "<code>Allowed</code>".</p>
      <li data-md="">
-      <p>For each <var>policy</var> in <var>policy list</var>:</p>
+      <p>For each <var>policy</var> in <var>csp list</var>:</p>
       <ol>
        <li data-md="">
         <p>Let <var>source list</var> be the <a data-link-type="dfn" href="#effective-source-list">effective source list</a> for <var>request</var> and <var>policy</var>.</p>
@@ -1643,7 +1646,7 @@ of security-relevant policy decisions.</p>
   context</a> is a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/browsers.html#nested-browsing-context">nested browsing context</a>:</p>
       <ol>
        <li data-md="">
-        <p>For each <var>policy</var> in <var>response</var>’s <a data-link-type="dfn" href="#response-policy-list">policy list</a>:</p>
+        <p>For each <var>policy</var> in <var>response</var>’s <a data-link-type="dfn" href="#response-csp-list">csp list</a>:</p>
         <ol>
          <li data-md="">
           <p>Let <var>source list</var> be the value of <var>policy</var>’s <a data-link-type="dfn" href="#directive-set">directive set</a>’s <a data-link-type="dfn" href="#frame-ancestors"><code>frame-ancestors</code></a> directive.</p>
@@ -1673,20 +1676,20 @@ of security-relevant policy decisions.</p>
     <h3 class="heading settled" data-level="4.2" id="html-integration"><span class="secno">4.2. </span><span class="content"> Integration with HTML </span><a class="self-link" href="#html-integration"></a></h3>
     <ol>
      <li data-md="">
-      <p>The <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/html5/browsers.html#dom-window">Window</a></code> and <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#workerglobalscope">WorkerGlobalScope</a></code> objects have a <dfn data-dfn-for="global object" data-dfn-type="dfn" data-noexport="" id="global-object-policy-list">policy list<a class="self-link" href="#global-object-policy-list"></a></dfn>,
+      <p>The <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/html5/browsers.html#dom-window">Window</a></code> and <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#workerglobalscope">WorkerGlobalScope</a></code> objects have a <dfn data-dfn-for="global object" data-dfn-type="dfn" data-noexport="" id="global-object-csp-list">csp list<a class="self-link" href="#global-object-csp-list"></a></dfn>,
   which holds all the <a data-link-type="dfn" href="#policy">policy</a> objects which are active for a given
   context. This list is empty unless otherwise specified, and is populated
-  via the <a href="#initialise-global-object-csp">§4.2.1 Initialise global object’s policy list</a> algorithm.</p>
+  via the <a href="#initialise-global-object-csp">§4.2.1 Initialise global object’s csp list</a> algorithm.</p>
      <li data-md="">
-      <p>A <a data-link-type="dfn" href="#policy">policy</a> is <dfn data-dfn-type="dfn" data-noexport="" id="enforced">enforced<a class="self-link" href="#enforced"></a></dfn> or <dfn data-dfn-type="dfn" data-noexport="" id="monitored">monitored<a class="self-link" href="#monitored"></a></dfn> for an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a> by inserting it into the <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <a data-link-type="dfn" href="#global-object-policy-list">policy list</a>.</p>
+      <p>A <a data-link-type="dfn" href="#policy">policy</a> is <dfn data-dfn-type="dfn" data-noexport="" id="enforced">enforced<a class="self-link" href="#enforced"></a></dfn> or <dfn data-dfn-type="dfn" data-noexport="" id="monitored">monitored<a class="self-link" href="#monitored"></a></dfn> for an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a> by inserting it into the <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list">csp list</a>.</p>
      <li data-md="">
-      <p><a href="#initialise-global-object-csp">§4.2.1 Initialise global object’s policy list</a> is called during the <a data-link-type="dfn" href="https://html.spec.whatwg.org/#initialising-a-new-document-object">initialising a
+      <p><a href="#initialise-global-object-csp">§4.2.1 Initialise global object’s csp list</a> is called during the <a data-link-type="dfn" href="https://html.spec.whatwg.org/#initialising-a-new-document-object">initialising a
   new <code>Document</code> object</a> and <a data-link-type="dfn" href="https://html.spec.whatwg.org/#run-a-worker">run a worker</a> algorithms in order to
   bind a set of <a data-link-type="dfn" href="#policy">policy</a> objects associated with a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> to a
   newly created <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>.</p>
       <p class="issue" id="issue-106a0c5c"><a class="self-link" href="#issue-106a0c5c"></a> The algorithm is named "creating a new <code>Document</code> object" in W3C’s
   HTML, and isn’t well-integrated with Fetch.</p>
-      <p class="issue" id="issue-f230fb23"><a class="self-link" href="#issue-f230fb23"></a> Need to monkey-patch these in: something like "Set the <code>Window</code> object’s <code>policy list</code> to the <code>policy list</code> of the resource used to
+      <p class="issue" id="issue-1e5f494a"><a class="self-link" href="#issue-1e5f494a"></a> Need to monkey-patch these in: something like "Set the <code>Window</code> object’s <code>csp list</code> to the <code>csp list</code> of the resource used to
   generate the document.</p>
      <li data-md="">
       <p><a href="#match-node-to-policy">§6.1.11.1 Does node match policy?</a> is called during the <a data-link-type="dfn" href="http://www.w3.org/TR/html5/scripting-1.html#prepare-a-script">prepare a script</a> and <a data-link-type="dfn" href="https://html.spec.whatwg.org/#update-a-style-block">update a <code>style</code> block</a> algorithms in order to determine whether or
@@ -1696,8 +1699,8 @@ of security-relevant policy decisions.</p>
       <p class="issue" id="issue-80f81a73"><a class="self-link" href="#issue-80f81a73"></a> The <code>nonce</code> attribute for <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> and <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-style-element">style</a></code> were added to
   WHATWG’s HTML in <a href="https://github.com/whatwg/html/commit/882803c4cc8fba2fa5472b76f628d95cc82c421d">whatwg/html@882803c</a>.
   They have not yet been added to W3C’s HTML.</p>
-      <p class="issue" id="issue-5c251acc"><a class="self-link" href="#issue-5c251acc"></a> Need to monkey-patch these in: something like "If <a href="#match-node-to-policy">§6.1.11.1 Does node match policy?</a> returns <code>Does Not Match</code> when executed upon the
-  element and the element’s <code>Document</code>'s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <code>policy list</code>, abort these steps."</p>
+      <p class="issue" id="issue-18f0a7e9"><a class="self-link" href="#issue-18f0a7e9"></a> Need to monkey-patch these in: something like "If <a href="#match-node-to-policy">§6.1.11.1 Does node match policy?</a> returns <code>Does Not Match</code> when executed upon the
+  element and the element’s <code>Document</code>'s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <code>csp list</code>, abort these steps."</p>
      <li data-md="">
       <p><a data-link-type="dfn" href="#policy">Policies</a> are <a data-link-type="dfn" href="#enforced">enforced</a> during processing of the <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-meta-element">meta</a></code> element’s <code><a data-link-type="element-attr" href="http://www.w3.org/TR/html5/document-metadata.html#attr-meta-http-equiv">http-equiv</a></code>.</p>
       <p class="issue" id="issue-389933ec"><a class="self-link" href="#issue-389933ec"></a> This processing was added to WHATWG’s HTML in <a href="https://github.com/whatwg/html/commit/5064a629f22bef29839ab4dc6f1ceef17f010bc5">whatwg/html@5064a62</a>.
@@ -1710,9 +1713,9 @@ of security-relevant policy decisions.</p>
   is valid.</p>
       <p class="issue" id="issue-a8c27cf5"><a class="self-link" href="#issue-a8c27cf5"></a> Need to add this to HTML.</p>
     </ol>
-    <h4 class="heading settled" data-level="4.2.1" id="initialise-global-object-csp"><span class="secno">4.2.1. </span><span class="content"> Initialise <var>global object</var>’s <code>policy list</code> </span><a class="self-link" href="#initialise-global-object-csp"></a></h4>
+    <h4 class="heading settled" data-level="4.2.1" id="initialise-global-object-csp"><span class="secno">4.2.1. </span><span class="content"> Initialise <var>global object</var>’s <code>csp list</code> </span><a class="self-link" href="#initialise-global-object-csp"></a></h4>
     <p>Given a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a> (<var>global</var>), and a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), the user agent performs the following steps in order
-  to initialize <var>global</var>’s <a data-link-type="dfn" href="#global-object-policy-list">policy list</a>:</p>
+  to initialize <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list">csp list</a>:</p>
     <ol>
      <li data-md="">
       <p>If <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code> is a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#local-scheme">local scheme</a>:</p>
@@ -1729,17 +1732,17 @@ of security-relevant policy decisions.</p>
         <ol>
          <li data-md="">
           <p>For each <var>policy</var> in <var>document</var>’s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global
-  object</a>’s <a data-link-type="dfn" href="#global-object-policy-list">policy list</a>:</p>
+  object</a>’s <a data-link-type="dfn" href="#global-object-csp-list">csp list</a>:</p>
           <ol>
            <li data-md="">
-            <p>Insert an alias to <var>policy</var> in <var>global</var>’s <a data-link-type="dfn" href="#global-object-policy-list">policy list</a>.</p>
+            <p>Insert an alias to <var>policy</var> in <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list">csp list</a>.</p>
           </ol>
         </ol>
       </ol>
       <p class="note" role="note">Note: <a data-link-type="dfn" href="https://url.spec.whatwg.org/#local-scheme">local scheme</a> includes <code>about:</code>, and this algorithm will
   therefore alias the <a data-link-type="dfn" href="#embedding-document">embedding document</a>’s policies for <a data-link-type="dfn" href="http://www.w3.org/TR/html5/embedded-content-0.html#an-iframe-srcdoc-document">an iframe <code>srcdoc</code> <code>Document</code></a>.</p>
      <li data-md="">
-      <p>For each <var>policy</var> in <var>response</var>’s <a data-link-type="dfn" href="#response-policy-list">policy list</a>, insert <var>policy</var> into <var>global</var>’s <a data-link-type="dfn" href="#global-object-policy-list">policy list</a>.</p>
+      <p>For each <var>policy</var> in <var>response</var>’s <a data-link-type="dfn" href="#response-csp-list">csp list</a>, insert <var>policy</var> into <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list">csp list</a>.</p>
     </ol>
    </section>
    <section>
@@ -2324,7 +2327,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
   returns "<code>Allowed</code>" if <var>base</var> may be used as the value of a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-base-element">base</a></code> element’s <code><a data-link-type="element-attr" href="https://html.spec.whatwg.org/multipage/semantics.html#attr-base-href">href</a></code> attribute, and "<code>Blocked</code>" otherwise:</p>
     <ol>
      <li data-md="">
-      <p>For each <var>policy</var> in <var>document</var>'s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <a data-link-type="dfn" href="#global-object-policy-list">policy list</a>:</p>
+      <p>For each <var>policy</var> in <var>document</var>'s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list">csp list</a>:</p>
       <ol>
        <li data-md="">
         <p>Let <var>source list</var> be <code>null</code>.</p>
@@ -2393,7 +2396,7 @@ directive-value = &lt;URL> ; TODO: Figure out what to use here.
      <li data-md="">
       <p>Let <var>policies</var> be an empty list.</p>
      <li data-md="">
-      <p>For each <var>policy</var> in <var>global</var>’s <a data-link-type="dfn" href="#global-object-policy-list">policy list</a>:</p>
+      <p>For each <var>policy</var> in <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list">csp list</a>:</p>
       <ol>
        <li data-md="">
         <p>If <var>policy</var>’s <a data-link-type="dfn" href="#disposition">disposition</a> is <var>disposition</var>, add <var>policy</var> to <var>policies</var>.</p>
@@ -2515,6 +2518,8 @@ Content-Security-Policy: connect-src http://example.com/;
    <li><a href="#connect-src">connect-src</a><span>, in §6.1.2</span>
    <li><a href="#content-security-policy">Content-Security-Policy</a><span>, in §3.1</span>
    <li><a href="#content-security-policy-report-only">Content-Security-Policy-Report-Only</a><span>, in §3.2</span>
+   <li><a href="#response-csp-list">CSP list</a><span>, in §4.1</span>
+   <li><a href="#global-object-csp-list">csp list</a><span>, in §4.2</span>
    <li><a href="#default-src">default-src</a><span>, in §6.1.3</span>
    <li><a href="#grammardef-directive-name">directive-name</a><span>, in §2.2</span>
    <li><a href="#directives">directives</a><span>, in §2.2</span>
@@ -2554,12 +2559,6 @@ Content-Security-Policy: connect-src http://example.com/;
    <li><a href="#plugin-types">plugin-types</a><span>, in §6.2.4</span>
    <li><a href="#policy">policies</a><span>, in §2.1</span>
    <li><a href="#policy">policy</a><span>, in §2.1</span>
-   <li>
-    policy list
-    <ul>
-     <li><a href="#response-policy-list">dfn for response</a><span>, in §4.1</span>
-     <li><a href="#global-object-policy-list">dfn for global object</a><span>, in §4.2</span>
-    </ul>
    <li><a href="#grammardef-port-part">port-part</a><span>, in §2.2.1</span>
    <li><a href="#report-a-violation">Report a violation</a><span>, in §5</span>
    <li><a href="#reports">reports</a><span>, in §6.3.2</span>
@@ -2819,15 +2818,15 @@ Content-Security-Policy: connect-src http://example.com/;
    <div class="issue"> Give Anne a patch to Fetch to make this bit true.<a href="#issue-533fa99d"> ↵ </a></div>
    <div class="issue"> The algorithm is named "creating a new <code>Document</code> object" in W3C’s
   HTML, and isn’t well-integrated with Fetch.<a href="#issue-106a0c5c"> ↵ </a></div>
-   <div class="issue"> Need to monkey-patch these in: something like "Set the <code>Window</code> object’s <code>policy list</code> to the <code>policy list</code> of the resource used to
-  generate the document.<a href="#issue-f230fb23"> ↵ </a></div>
+   <div class="issue"> Need to monkey-patch these in: something like "Set the <code>Window</code> object’s <code>csp list</code> to the <code>csp list</code> of the resource used to
+  generate the document.<a href="#issue-1e5f494a"> ↵ </a></div>
    <div class="issue"> The <a data-link-type="dfn" href="https://html.spec.whatwg.org/#update-a-style-block">update a <code>style</code> block</a> algorithm does not exist in
   W3C’s HTML.<a href="#issue-f40dd242"> ↵ </a></div>
    <div class="issue"> The <code>nonce</code> attribute for <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> and <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-style-element">style</a></code> were added to
   WHATWG’s HTML in <a href="https://github.com/whatwg/html/commit/882803c4cc8fba2fa5472b76f628d95cc82c421d">whatwg/html@882803c</a>.
   They have not yet been added to W3C’s HTML.<a href="#issue-80f81a73"> ↵ </a></div>
    <div class="issue"> Need to monkey-patch these in: something like "If <a href="#match-node-to-policy">§6.1.11.1 Does node match policy?</a> returns <code>Does Not Match</code> when executed upon the
-  element and the element’s <code>Document</code>'s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <code>policy list</code>, abort these steps."<a href="#issue-5c251acc"> ↵ </a></div>
+  element and the element’s <code>Document</code>'s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <code>csp list</code>, abort these steps."<a href="#issue-18f0a7e9"> ↵ </a></div>
    <div class="issue"> This processing was added to WHATWG’s HTML in <a href="https://github.com/whatwg/html/commit/5064a629f22bef29839ab4dc6f1ceef17f010bc5">whatwg/html@5064a62</a>.
   It has not yet been added to W3C’s HTML.<a href="#issue-389933ec"> ↵ </a></div>
    <div class="issue"> Need to add this to HTML.<a href="#issue-a8c27cf5"> ↵ </a></div>
