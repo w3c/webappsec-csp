@@ -1098,7 +1098,12 @@ of security-relevant policy decisions.</p>
         <li><a href="#initialise-global-object-csp"><span class="secno">4.2.1</span> <span class="content"> Initialise <var>global object</var>’s <code>csp list</code> </span></a>
        </ul>
      </ul>
-    <li><a href="#reporting"><span class="secno">5</span> <span class="content"> Reporting </span></a>
+    <li>
+     <a href="#reporting"><span class="secno">5</span> <span class="content"> Reporting </span></a>
+     <ul class="toc">
+      <li><a href="#report-violation-for-request"><span class="secno">5.1</span> <span class="content"> Report a violation for <var>policy</var>, <var>directive</var>, and <var>request</var> </span></a>
+      <li><a href="#report-violation-for-global"><span class="secno">5.2</span> <span class="content"> Report a violation for <var>policy</var>, <var>directive</var>, and <var>global</var> </span></a>
+     </ul>
     <li>
      <a href="#csp-directives"><span class="secno">6</span> <span class="content"> Content Security Policy Directives </span></a>
      <ul class="toc">
@@ -1612,7 +1617,8 @@ of security-relevant policy decisions.</p>
         <p>If the result of executing <a href="#match-url-to-source-list">§6.1.10.2 Does url match source list?</a> on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url">url</a> is <code>Matches</code>, then skip
   to the next <var>policy</var>.</p>
        <li data-md="">
-        <p><a data-link-type="dfn" href="#report-a-violation">Report a violation</a> for <var>policy</var>, <var>directive</var> and <var>request</var>.</p>
+        <p>Execute <a href="#report-violation-for-request">§5.1 Report a violation for policy, directive, and request</a> on <var>policy</var>, <var>directive</var>,
+  and <var>request</var>.</p>
        <li data-md="">
         <p>If <var>policy</var>’s <a data-link-type="dfn" href="#disposition">disposition</a> is "<code>enforce</code>",
   set <var>result</var> to "<code>Blocked</code>".</p>
@@ -1639,7 +1645,8 @@ of security-relevant policy decisions.</p>
         <p>If the result of executing <a href="#match-url-to-source-list">§6.1.10.2 Does url match source list?</a> on <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a> is <code>Matches</code>, then skip
   to the next <var>policy</var>.</p>
        <li data-md="">
-        <p><a data-link-type="dfn" href="#report-a-violation">Report a violation</a> for <var>policy</var>, <var>directive</var> and <var>request</var>.</p>
+        <p>Execute <a href="#report-violation-for-request">§5.1 Report a violation for policy, directive, and request</a> on <var>policy</var>, <var>directive</var>,
+  and <var>request</var>.</p>
        <li data-md="">
         <p>If <var>policy</var>’s <a data-link-type="dfn" href="#disposition">disposition</a> is "<code>enforce</code>",
   set <var>result</var> to "<code>Blocked</code>".</p>
@@ -1666,7 +1673,8 @@ of security-relevant policy decisions.</p>
   executed upon <var>ancestor</var>’s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/browsers.html#active-document">active document</a>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document-url">URL</a> and <var>source list</var>, skip
   to the next <var>ancestor</var>.</p>
            <li data-md="">
-            <p><a data-link-type="dfn" href="#report-a-violation">Report a violation</a> for <var>policy</var>, <a data-link-type="dfn" href="#frame-ancestors"><code>frame-ancestors</code></a>, and <var>request</var>.</p>
+            <p>Execute <a href="#report-violation-for-request">§5.1 Report a violation for policy, directive, and request</a> on <var>policy</var>,
+  "<a data-link-type="dfn" href="#frame-ancestors"><code>frame-ancestors</code></a>" and <var>request</var>.</p>
            <li data-md="">
             <p>If <var>policy</var>’s <a data-link-type="dfn" href="#disposition">disposition</a> is
   "<code>enforce</code>", set <var>result</var> to "<code>Blocked</code>".</p>
@@ -1752,8 +1760,17 @@ of security-relevant policy decisions.</p>
    </section>
    <section>
     <h2 class="heading settled" data-level="5" id="reporting"><span class="secno">5. </span><span class="content"> Reporting </span><a class="self-link" href="#reporting"></a></h2>
-    <p><dfn data-dfn-type="dfn" data-noexport="" id="report-a-violation">Report a violation<a class="self-link" href="#report-a-violation"></a></dfn>.</p>
+    <p>When one or more of a <a data-link-type="dfn" href="#policy">policy</a>’s directives is violated, a <dfn data-dfn-type="dfn" data-noexport="" id="violation-report">violation
+  report<a class="self-link" href="#violation-report"></a></dfn> may be generated and sent out to a reporting endpoint associated
+  with the <a data-link-type="dfn" href="#policy">policy</a>.</p>
+    <h3 class="heading settled" data-level="5.1" id="report-violation-for-request"><span class="secno">5.1. </span><span class="content"> Report a violation for <var>policy</var>, <var>directive</var>, and <var>request</var> </span><a class="self-link" href="#report-violation-for-request"></a></h3>
+    <p>Given a <a data-link-type="dfn" href="#policy">policy</a> (<var>policy</var>), a directive name (<var>directive</var>), and a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>), this algorithm reports a violation to an endpoint
+  specified by <var>policy</var>.</p>
     <p class="issue" id="issue-e54eddc4"><a class="self-link" href="#issue-e54eddc4"></a> Need an algorithm here, right? :)</p>
+    <h3 class="heading settled" data-level="5.2" id="report-violation-for-global"><span class="secno">5.2. </span><span class="content"> Report a violation for <var>policy</var>, <var>directive</var>, and <var>global</var> </span><a class="self-link" href="#report-violation-for-global"></a></h3>
+    <p>Given a <a data-link-type="dfn" href="#policy">policy</a> (<var>policy</var>), a directive name (<var>directive</var>), and a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a> (<var>global</var>), this algorithm reports a violation to an
+  endpoint specified by <var>policy</var>.</p>
+    <p class="issue" id="issue-e54eddc40"><a class="self-link" href="#issue-e54eddc40"></a> Need an algorithm here, right? :)</p>
    </section>
    <section>
     <h2 class="heading settled" data-level="6" id="csp-directives"><span class="secno">6. </span><span class="content"> Content Security Policy Directives </span><a class="self-link" href="#csp-directives"></a></h2>
@@ -2346,7 +2363,8 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
         <p>If the result of executing <a href="#match-url-to-source-list">§6.1.10.2 Does url match source list?</a> on <var>base</var> and <var>source list</var> is "<code>Does Not Match</code>":</p>
         <ol>
          <li data-md="">
-          <p><a data-link-type="dfn" href="#report-a-violation">Report a violation</a> for <var>policy</var>, "<code>base-uri</code>", and <var>document</var>.</p>
+          <p>Execute <a href="#report-violation-for-global">§5.2 Report a violation for policy, directive, and global</a> on <var>policy</var>,
+  "<a data-link-type="dfn" href="#base-uri"><code>base-uri</code></a>", and <var>document</var>.</p>
          <li data-md="">
           <p>If <var>policy</var>'s <a data-link-type="dfn" href="#disposition">disposition</a> is "<code>enforce</code>",
   return "<code>Blocked</code>".</p>
@@ -2579,7 +2597,6 @@ Content-Security-Policy: connect-src http://example.com/;
    <li><a href="#policy">policies</a><span>, in §2.1</span>
    <li><a href="#policy">policy</a><span>, in §2.1</span>
    <li><a href="#grammardef-port-part">port-part</a><span>, in §2.2.1</span>
-   <li><a href="#report-a-violation">Report a violation</a><span>, in §5</span>
    <li><a href="#reports">reports</a><span>, in §6.3.2</span>
    <li><a href="#report-uri">report-uri</a><span>, in §6.3.1</span>
    <li><a href="#resource-url">resource URL</a><span>, in §2.3</span>
@@ -2606,6 +2623,8 @@ Content-Security-Policy: connect-src http://example.com/;
    <li><a href="#violated-directive">violated directive</a><span>, in §2.3</span>
    <li><a href="#violated-policy">violated policy</a><span>, in §2.3</span>
    <li><a href="#violation">violation</a><span>, in §2.3</span>
+   <li><a href="#violation-report">violation
+  report</a><span>, in §5</span>
   </ul>
   <h3 class="no-num heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
   <ul class="indexlist">
@@ -2852,6 +2871,7 @@ Content-Security-Policy: connect-src http://example.com/;
   It has not yet been added to W3C’s HTML.<a href="#issue-389933ec"> ↵ </a></div>
    <div class="issue"> Need to add this to HTML.<a href="#issue-a8c27cf5"> ↵ </a></div>
    <div class="issue"> Need an algorithm here, right? :)<a href="#issue-e54eddc4"> ↵ </a></div>
+   <div class="issue"> Need an algorithm here, right? :)<a href="#issue-e54eddc40"> ↵ </a></div>
    <div class="issue"> TODO: "To enforce the <code>frame-ancestors</code> directive...". Will need to be
   called from Fetch, probably right after parsing the policy.<a href="#issue-6fe8f1f6"> ↵ </a></div>
   </div>

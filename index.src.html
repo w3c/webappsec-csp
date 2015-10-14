@@ -770,8 +770,8 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
           <var>request</var>'s <a for="request">url</a> is `Matches`, then skip
           to the next <var>policy</var>.
 
-      4.  <a>Report a violation</a> for <var>policy</var>, <var>directive</var>
-          and <var>request</var>.
+      4.  Execute [[#report-violation-for-request]] on |policy|, |directive|,
+          and |request|.
 
       5.  If <var>policy</var>'s <a for="policy">disposition</a> is "`enforce`",
           set <var>result</var> to "`Blocked`".
@@ -806,8 +806,8 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
           <var>response</var>'s <a for="response">url</a> is `Matches`, then skip
           to the next <var>policy</var>.
 
-      4.  <a>Report a violation</a> for <var>policy</var>, <var>directive</var>
-          and <var>request</var>.
+      4.  Execute [[#report-violation-for-request]] on |policy|, |directive|,
+          and |request|.
 
       5.  If <var>policy</var>'s <a for="policy">disposition</a> is "`enforce`",
           set <var>result</var> to "`Blocked`".
@@ -837,8 +837,8 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
                   <a for="Document">URL</a> and <var>source list</var>, skip
                   to the next <var>ancestor</var>.
 
-              2.  <a>Report a violation</a> for <var>policy</var>,
-                  <a>`frame-ancestors`</a>, and <var>request</var>.
+              2.  Execute [[#report-violation-for-request]] on |policy|,
+                  "<a>`frame-ancestors`</a>" and |request|.
 
               3.  If <var>policy</var>'s <a for="policy">disposition</a> is
                   "`enforce`", set <var>result</var> to "`Blocked`".
@@ -953,7 +953,27 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     Reporting
   </h2>
 
-  <dfn>Report a violation</dfn>.
+  When one or more of a <a>policy</a>'s directives is violated, a <dfn>violation
+  report</dfn> may be generated and sent out to a reporting endpoint associated
+  with the <a>policy</a>.
+
+  <h3 id="report-violation-for-request">
+    Report a violation for |policy|, |directive|, and |request|
+  </h3>
+
+  Given a <a>policy</a> (|policy|), a directive name (|directive|), and a
+  <a>request</a> (|request|), this algorithm reports a violation to an endpoint
+  specified by |policy|.
+
+  ISSUE: Need an algorithm here, right? :)
+
+  <h3 id="report-violation-for-global">
+    Report a violation for |policy|, |directive|, and |global|
+  </h3>
+
+  Given a <a>policy</a> (|policy|), a directive name (|directive|), and a
+  <a>global object</a> (|global|), this algorithm reports a violation to an
+  endpoint specified by |policy|.
 
   ISSUE: Need an algorithm here, right? :)
 </section>
@@ -1688,9 +1708,9 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
       4.  If the result of executing [[#match-url-to-source-list]] on |base| and
           |source list| is "`Does Not Match`":
-          
-          1.  <a>Report a violation</a> for |policy|, "`base-uri`", and
-              |document|.
+         
+          1.  Execute [[#report-violation-for-global]] on |policy|,
+              "<a>`base-uri`</a>", and |document|.
           
           2.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
               return "`Blocked`".
