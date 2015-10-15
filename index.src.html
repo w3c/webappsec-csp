@@ -361,24 +361,24 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     Parse a serialized policy list
   </h4>
 
-  Given a string (<var>list</var>) which contains a comma-delimited series of
+  Given a string (|list|) which contains a comma-delimited series of
   <a>serialized policies</a>, the following algorithm will return a list of
   <a>policies</a>:
 
-  1.  Let <var>policies</var> be an empty list.
+  1.  Let |policies| be an empty list.
 
-  2.  For each <var>token</var> returned by
-      <a lt="split a string on commas">splitting <var>list</var> on commas</a>:
+  2.  For each |token| returned by
+      <a lt="split a string on commas">splitting |list| on commas</a>:
 
-      1.  Let <var>policy</var> be the result of executing
-          [[#parse-serialized-policy]] on <var>token</var>.
+      1.  Let |policy| be the result of executing
+          [[#parse-serialized-policy]] on |token|.
 
-      2.  If <var>policy</var>'s <a>directive set</a> is empty, skip the
+      2.  If |policy|'s <a>directive set</a> is empty, skip the
           remaining substeps, and continue to the next item.
 
-      3.  Add <var>policy</var> to <var>policies</var>.
+      3.  Add |policy| to |policies|.
 
-  3.  Return <var>policies</var>.
+  3.  Return |policies|.
 
   <h3 id="framework-directives">Directives</h3>
 
@@ -697,145 +697,145 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       response back to our caller.
 
   <h4 id="set-response-csp-list">
-    Set <var>response</var>'s `csp list`
+    Set |response|'s `csp list`
   </h4>
 
-  Given a <a>response</a> (<var>response</var>), this algorithm evaluates its
+  Given a <a>response</a> (|response|), this algorithm evaluates its
   <a for="response">header list</a> for <a>serialized policy</a> values, and
   populates its <a for="response">csp list</a> accordingly:
 
-  1.  Set <var>response</var>'s <a for="response">CSP list</a> to the
+  1.  Set |response|'s <a for="response">CSP list</a> to the
       empty list.
 
-  2.  Let <var>policies to enforce</var> be the result of executing
+  2.  Let |policies to enforce| be the result of executing
       [[#parse-serialized-policy-list]] on the result of
       <a lt="parse a header value">parsing</a> `Content-Security-Policy`
-      in <var>response</var>'s <a for="response">header list</a>.
+      in |response|'s <a for="response">header list</a>.
 
-  3.  For each <var>policy</var> in <var>policies to enforce</var>:
+  3.  For each |policy| in |policies to enforce|:
 
-      1.  Set <var>policy</var>'s <a for="policy">disposition</a> to
+      1.  Set |policy|'s <a for="policy">disposition</a> to
           "`enforce`".
 
-      2.  Insert <var>policy</var> into <var>response</var>'s
+      2.  Insert |policy| into |response|'s
           <a for="response">csp list</a>.
 
-  4.  Let <var>policies to report</var> be the result of executing
+  4.  Let |policies to report| be the result of executing
       [[#parse-serialized-policy-list]] on the result of
       <a lt="parse a header value">parsing</a>
-      `Content-Security-Policy-Report-Only` in <var>response</var>'s
+      `Content-Security-Policy-Report-Only` in |response|'s
       <a for="response">header list</a>.
 
-  5.  For each <var>policy</var> in <var>policies to report</var>:
+  5.  For each |policy| in |policies to report|:
 
-      1.  Set <var>policy</var>'s <a for="policy">disposition</a> to
+      1.  Set |policy|'s <a for="policy">disposition</a> to
           "`report`".
 
-      2.  Insert <var>policy</var> into <var>response</var>'s
+      2.  Insert |policy| into |response|'s
           <a for="response">csp list</a>.
 
   <h4 id="should-block-request">
-    Should <var>request</var> be blocked by Content Security Policy?
+    Should |request| be blocked by Content Security Policy?
   </h4>
 
-  Given a <a>request</a> (<var>request</var>), this algorithm returns
-  `Blocked` or `Allowed` and reports violations based on <var>request</var>'s
+  Given a <a>request</a> (|request|), this algorithm returns
+  `Blocked` or `Allowed` and reports violations based on |request|'s
   <a for="request">client</a>'s Content Security Policy.
 
-  1.  Let <var>csp list</var> be <var>request</var>'s
+  1.  Let |csp list| be |request|'s
       <a for="request">client</a>'s <a>global object</a>'s
       <a for="global object">csp list</a>.
 
-  2.  Let <var>result</var> be "`Allowed`".
+  2.  Let |result| be "`Allowed`".
 
-  3.  For each <var>policy</var> in <var>csp list</var>:
+  3.  For each |policy| in |csp list|:
 
-      1.  Let <var>source list</var> be the <a>effective source list</a> for
-          <var>request</var> and <var>policy</var>.
+      1.  Let |source list| be the <a>effective source list</a> for
+          |request| and |policy|.
 
-      2.  If <var>source list</var> is `null`, then skip to the next
-          <var>policy</var>.
+      2.  If |source list| is `null`, then skip to the next
+          |policy|.
 
       3.  If the result of executing [[#match-url-to-source-list]] on
-          <var>request</var>'s <a for="request">url</a> is `Matches`, then skip
-          to the next <var>policy</var>.
+          |request|'s <a for="request">url</a> is `Matches`, then skip
+          to the next |policy|.
 
       4.  Execute [[#report-violation-for-request]] on |policy|, |directive|,
           and |request|.
 
-      5.  If <var>policy</var>'s <a for="policy">disposition</a> is "`enforce`",
-          set <var>result</var> to "`Blocked`".
+      5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
+          set |result| to "`Blocked`".
 
-  4.  Return <var>result</var>.
+  4.  Return |result|.
 
   <h4 id="should-block-response">
-    Should <var>response</var> to <var>request</var> be blocked by Content
+    Should |response| to |request| be blocked by Content
     Security Policy?
   </h4>
 
-  Given a <a>response</a> (<var>response</var>) and a <a>request</a>
-  (<var>request</var>), this algorithm returns `Blocked` or
-  `Allowed`, and reports violations based on <var>request</var>'s
+  Given a <a>response</a> (|response|) and a <a>request</a>
+  (|request|), this algorithm returns `Blocked` or
+  `Allowed`, and reports violations based on |request|'s
   <a for="request">client</a>'s Content Security Policy.
 
-  1.  Let <var>csp list</var> be <var>request</var>'s
+  1.  Let |csp list| be |request|'s
       <a for="request">client</a>'s <a>global object</a>'s
       <a for="global object">csp list</a>.
 
-  2.  Let <var>result</var> be "`Allowed`".
+  2.  Let |result| be "`Allowed`".
 
-  3.  For each <var>policy</var> in <var>csp list</var>:
+  3.  For each |policy| in |csp list|:
 
-      1.  Let <var>source list</var> be the <a>effective source list</a> for
-          <var>request</var> and <var>policy</var>.
+      1.  Let |source list| be the <a>effective source list</a> for
+          |request| and |policy|.
 
-      2.  If <var>source list</var> is `null`, then skip to the next
-          <var>policy</var>.
+      2.  If |source list| is `null`, then skip to the next
+          |policy|.
 
       3.  If the result of executing [[#match-url-to-source-list]] on
-          <var>response</var>'s <a for="response">url</a> is `Matches`, then skip
-          to the next <var>policy</var>.
+          |response|'s <a for="response">url</a> is `Matches`, then skip
+          to the next |policy|.
 
       4.  Execute [[#report-violation-for-request]] on |policy|, |directive|,
           and |request|.
 
-      5.  If <var>policy</var>'s <a for="policy">disposition</a> is "`enforce`",
-          set <var>result</var> to "`Blocked`".
+      5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
+          set |result| to "`Blocked`".
 
-  4.  If <var>result</var>is "`Blocked`", return "`Blocked`".
+  4.  If |result|is "`Blocked`", return "`Blocked`".
 
-  5.  If <var>request</var>'s <a for="request">destination</a> is "`document`"
-      <em>and</em> the <var>request</var>'s <a for="request">target browsing
+  5.  If |request|'s <a for="request">destination</a> is "`document`"
+      <em>and</em> the |request|'s <a for="request">target browsing
       context</a> is a <a>nested browsing context</a>:
 
-      1.  For each <var>policy</var> in <var>response</var>'s
+      1.  For each |policy| in |response|'s
           <a for="response">csp list</a>:
 
-          1.  Let <var>source list</var> be the value of <var>policy</var>'s
+          1.  Let |source list| be the value of |policy|'s
               <a for="policy">directive set</a>'s <a>`frame-ancestors`</a>
               directive.
 
-          2.  If <var>source list</var> is `null`, then skip to the next
-              <var>policy</var>.
+          2.  If |source list| is `null`, then skip to the next
+              |policy|.
 
-          3.  For each <var>ancestor</var> of the <var>request</var>'s
+          3.  For each |ancestor| of the |request|'s
               <a for="request">target browsing context</a>'s <a>ancestor
               browsing context</a>s:
 
               1.  If [[#match-url-to-source-list]] returns `Matches` when
-                  executed upon <var>ancestor</var>'s <a>active document</a>'s
-                  <a for="Document">URL</a> and <var>source list</var>, skip
-                  to the next <var>ancestor</var>.
+                  executed upon |ancestor|'s <a>active document</a>'s
+                  <a for="Document">URL</a> and |source list|, skip
+                  to the next |ancestor|.
 
               2.  Execute [[#report-violation-for-request]] on |policy|,
                   "<a>`frame-ancestors`</a>" and |request|.
 
-              3.  If <var>policy</var>'s <a for="policy">disposition</a> is
-                  "`enforce`", set <var>result</var> to "`Blocked`".
+              3.  If |policy|'s <a for="policy">disposition</a> is
+                  "`enforce`", set |result| to "`Blocked`".
 
-              4.  Skip to the next <var>policy</var>.
+              4.  Skip to the next |policy|.
 
-  6.  Return <var>result</var>.
+  6.  Return |result|.
 
 
   <h3 id="html-integration">
@@ -899,42 +899,42 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       ISSUE: Need to add this to HTML.
 
   <h4 id="initialise-global-object-csp">
-    Initialise <var>global object</var>'s `csp list`
+    Initialise |global object|'s `csp list`
   </h4>
 
-  Given a <a>global object</a> (<var>global</var>), and a <a>response</a>
-  (<var>response</var>), the user agent performs the following steps in order
-  to initialize <var>global</var>'s <a for="global object">csp list</a>:
+  Given a <a>global object</a> (|global|), and a <a>response</a>
+  (|response|), the user agent performs the following steps in order
+  to initialize |global|'s <a for="global object">csp list</a>:
 
-  1.  If <var>response</var>'s <a for="response">url</a>'s {{URL/scheme}} is a
+  1.  If |response|'s <a for="response">url</a>'s {{URL/scheme}} is a
       <a>local scheme</a>:
 
-      1.  Let <var>documents</var> be an empty list.
+      1.  Let |documents| be an empty list.
 
-      2.  If <var>global</var> is a {{Window}} object, and <var>global</var>'s
+      2.  If |global| is a {{Window}} object, and |global|'s
           {{Window/document}} has an <a>embedding document</a>
-          (<var>document</var>), then add <var>document</var> to
-          <var>documents</var>.
+          (|document|), then add |document| to
+          |documents|.
 
-      3.  Otherwise <var>global</var> is a {{WorkerGlobalScope}} object, so, add 
-          each of <var>global</var>'s
-          <a lt="the worker's documents">document</a>s to <var>documents</var>.
+      3.  Otherwise |global| is a {{WorkerGlobalScope}} object, so, add 
+          each of |global|'s
+          <a lt="the worker's documents">document</a>s to |documents|.
 
-      4.  For each <var>document</var> in <var>documents</var>:
+      4.  For each |document| in |documents|:
 
-          1.  For each <var>policy</var> in <var>document</var>'s <a>global
+          1.  For each |policy| in |document|'s <a>global
               object</a>'s <a for="global object">csp list</a>:
 
-              1.  Insert an alias to <var>policy</var> in <var>global</var>'s
+              1.  Insert an alias to |policy| in |global|'s
                   <a for="global object">csp list</a>.
 
       Note: <a>local scheme</a> includes `about:`, and this algorithm will
       therefore alias the <a>embedding document</a>'s policies for <a>an iframe
       `srcdoc` `Document`</a>.
 
-  2.  For each <var>policy</var> in <var>response</var>'s
-      <a for="response">csp list</a>, insert <var>policy</var> into
-      <var>global</var>'s <a for="global object">csp list</a>.
+  2.  For each |policy| in |response|'s
+      <a for="response">csp list</a>, insert |policy| into
+      |global|'s <a for="global object">csp list</a>.
 </section>
 
 <!-- Big Text: Reporting -->
@@ -1482,29 +1482,29 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   5.  Return "`Does Not Match`".
 
   <h5 id="effective-directive-for-a-request">
-    Get the effective directive for <var>request</var>
+    Get the effective directive for |request|
   </h5>
 
   Each <a>fetch directive</a> controls a specific type of <a>request</a>. Given
-  a <a>request</a> (<var>request</var>), the following algorithm returns either
+  a <a>request</a> (|request|), the following algorithm returns either
   `null` or the <a for="directive">name</a> of the request's
   <dfn for="request">effective directive</dfn>:
 
-  1.  Switch on <var>request</var>'s <a for="request">type</a>, and execute
+  1.  Switch on |request|'s <a for="request">type</a>, and execute
       the associated steps:
 
       : ""
       ::
-        1.  If the <var>request</var>'s <a for="request">initiator</a> is
+        1.  If the |request|'s <a for="request">initiator</a> is
             "`fetch`", return `connect-src`.
-        2.  If the <var>request</var>'s <a for="request">initiator</a> is
+        2.  If the |request|'s <a for="request">initiator</a> is
             "`manifest`", return `manifest-src`.
-        3.  If the <var>request</var>'s <a for="request">destination</a> is
+        3.  If the |request|'s <a for="request">destination</a> is
             "`subresource`", return `connect-src`.
-        4.  If the <var>request</var>'s <a for="request">destination</a> is
+        4.  If the |request|'s <a for="request">destination</a> is
             "`unknown`", return `object-src`.
-        5.  If the <var>request</var>'s <a for="request">destination</a> is
-            "`document`" <em>and</em> the <var>request</var>'s
+        5.  If the |request|'s <a for="request">destination</a> is
+            "`document`" <em>and</em> the |request|'s
             <a for="request">target browsing context</a> is a <a>nested browsing
             context</a>, return `child-src`.
 
@@ -1528,7 +1528,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
       : "`script`"
       ::
-        1.  Switch on <var>request</var>'s <a for="request">destination</a>, and
+        1.  Switch on |request|'s <a for="request">destination</a>, and
             execute the associated steps:
 
             : "`subresource`"
@@ -1780,22 +1780,22 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   Policy, and are not meant to be called from other specifications.
 
   <h4 id="get-policies">
-    Gather policies for <var>global object</var> and <var>disposition</var>
+    Gather policies for |global object| and |disposition|
   </h4>
 
-  Given a <a>global object</a> (<var>global</var>), and a <var>disposition</var>
+  Given a <a>global object</a> (|global|), and a |disposition|
   of either `enforce` or `monitor` this algorithm returns a list of
   <a>policies</a> which ought to be considered.
 
-  1.  Let <var>policies</var> be an empty list.
+  1.  Let |policies| be an empty list.
 
-  2.  For each <var>policy</var> in <var>global</var>'s
+  2.  For each |policy| in |global|'s
       <a for="global object">csp list</a>:
 
-      1.  If <var>policy</var>'s <a for="policy">disposition</a> is
-          <var>disposition</var>, add <var>policy</var> to <var>policies</var>.
+      1.  If |policy|'s <a for="policy">disposition</a> is
+          |disposition|, add |policy| to |policies|.
 
-  3.  Return <var>policies</var>.
+  3.  Return |policies|.
 </section>
 
 <!-- Big text: Security -->
