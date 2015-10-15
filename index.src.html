@@ -45,6 +45,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
     text: type; for: request; url: concept-request-type
     text: initiator; for: request; url: concept-request-initiator
     text: target browsing context; for: request; url: concept-request-target-browsing-context
+    text: CSP list; for: response; url: concept-response-csp-list
   type: interface
     text: Request
 spec: HTML5; urlPrefix: http://www.w3.org/TR/html5/
@@ -674,37 +675,26 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       Note: The <a>`frame-ancestors`</a> check is handled here, inside
       [[#should-block-response]].
 
-  ISSUE: Give Anne a patch to Fetch to make this bit true.
-
   A <a>policy</a> is generally enforced upon a <a>global object</a>, but the
   user agent needs to <a lt="parse a serialized policy">parse</a> any policy
   delivered via an HTTP response header field before any <a>global object</a>
   is created in order to handle directives like <a>frame-ancestors</a>. To
-  that end, Anne SHOULD accept the following monkey patches to [[!FETCH]] (or
-  come up with better ideas):
-
-  1.  A <a>response</a> has an associated
-      <dfn for="response" id="response-csp-list">CSP list</dfn> which
+  that end:
+  
+  1.  A <a>response</a> has an associated <a for="response">CSP list</a> which
       contains any policy objects delivered in the <a>response</a>'s
-      <a for="response">header list</a>. The list is empty unless otherwise
-      specified.
+      <a for="response">header list</a>.
 
-  2.  Insert the following steps after <a>HTTP fetch</a>'s current step 2.2:
+  2.  [[#set-response-csp-list]] is called in the <a>HTTP fetch</a> and
+      <a>HTTP-network fetch</a> algorithms.
 
-      3.  Execute [[#set-response-csp-list]] on <var>response</var>.
-
-  3.  Insert the following steps before the <a>HTTP-network fetch</a>'s current
-      step 6:
-
-      6.  Execute [[#set-response-csp-list]] on <var>response</var>.
-
-  Note: These two additions should ensure that <a>responses</a>'
-  <a for="response">CSP list</a>s are  set, regardless of how the
-  <a>response</a> is created. If we hit the network (via
-  <a>HTTP-network fetch</a>, then we parse the policy before we handle the
-  `Set-Cookie` header. If we get a response from a Service Worker (via <a>HTTP
-  fetch</a>, we'll process its <a for="response">CSP list</a> before handing
-  the response back to our caller.
+      Note: These two calls should ensure that a <a>response</a>'s
+      <a for="response">CSP list</a> is set, regardless of how the
+      <a>response</a> is created. If we hit the network (via <a>HTTP-network
+      fetch</a>, then we parse the policy before we handle the `Set-Cookie`
+      header. If we get a response from a Service Worker (via <a>HTTP fetch</a>,
+      we'll process its <a for="response">CSP list</a> before handing the
+      response back to our caller.
 
   <h4 id="set-response-csp-list">
     Set <var>response</var>'s `csp list`

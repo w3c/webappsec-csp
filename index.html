@@ -993,7 +993,7 @@
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="http://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/Icons/w3c_home" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">Content Security Policy Level 3</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2015-10-14">14 October 2015</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2015-10-15">15 October 2015</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1541,40 +1541,27 @@ of security-relevant policy decisions.</p>
       <p class="note" role="note">Note: The <a data-link-type="dfn" href="#frame-ancestors"><code>frame-ancestors</code></a> check is handled here, inside <a href="#should-block-response">§4.1.3 Should response to request be blocked by Content
     Security Policy?</a>.</p>
     </ol>
-    <p class="issue" id="issue-533fa99d"><a class="self-link" href="#issue-533fa99d"></a> Give Anne a patch to Fetch to make this bit true.</p>
     <p>A <a data-link-type="dfn" href="#policy">policy</a> is generally enforced upon a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>, but the
   user agent needs to <a data-link-type="dfn" href="#parse-serialized-policy">parse</a> any policy
   delivered via an HTTP response header field before any <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a> is created in order to handle directives like <a data-link-type="dfn" href="#frame-ancestors">frame-ancestors</a>. To
-  that end, Anne SHOULD accept the following monkey patches to <a data-link-type="biblio" href="#biblio-fetch">[FETCH]</a> (or
-  come up with better ideas):</p>
+  that end:</p>
     <ol>
      <li data-md="">
-      <p>A <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> has an associated <dfn data-dfn-for="response" data-dfn-type="dfn" data-noexport="" id="response-csp-list">CSP list<a class="self-link" href="#response-csp-list"></a></dfn> which
-  contains any policy objects delivered in the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a>. The list is empty unless otherwise
-  specified.</p>
+      <p>A <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> has an associated <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">CSP list</a> which
+  contains any policy objects delivered in the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a>.</p>
      <li data-md="">
-      <p>Insert the following steps after <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-fetch">HTTP fetch</a>’s current step 2.2:</p>
-      <ol>
-       <li data-md="">
-        <p>Execute <a href="#set-response-csp-list">§4.1.1 Set response’s csp list</a> on <var>response</var>.</p>
-      </ol>
-     <li data-md="">
-      <p>Insert the following steps before the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-network-fetch">HTTP-network fetch</a>’s current
-  step 6:</p>
-      <ol>
-       <li data-md="">
-        <p>Execute <a href="#set-response-csp-list">§4.1.1 Set response’s csp list</a> on <var>response</var>.</p>
-      </ol>
+      <p><a href="#set-response-csp-list">§4.1.1 Set response’s csp list</a> is called in the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-fetch">HTTP fetch</a> and <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-network-fetch">HTTP-network fetch</a> algorithms.</p>
+      <p class="note" role="note">Note: These two calls should ensure that a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">CSP list</a> is set, regardless of how the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> is created. If we hit the network (via <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-network-fetch">HTTP-network
+  fetch</a>, then we parse the policy before we handle the <code>Set-Cookie</code> header. If we get a response from a Service Worker (via <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-fetch">HTTP fetch</a>,
+  we’ll process its <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">CSP list</a> before handing the
+  response back to our caller.</p>
     </ol>
-    <p class="note" role="note">Note: These two additions should ensure that <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">responses</a>' <a data-link-type="dfn" href="#response-csp-list">CSP list</a>s are  set, regardless of how the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> is created. If we hit the network (via <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-network-fetch">HTTP-network fetch</a>, then we parse the policy before we handle the <code>Set-Cookie</code> header. If we get a response from a Service Worker (via <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-fetch">HTTP
-  fetch</a>, we’ll process its <a data-link-type="dfn" href="#response-csp-list">CSP list</a> before handing
-  the response back to our caller.</p>
     <h4 class="heading settled" data-level="4.1.1" id="set-response-csp-list"><span class="secno">4.1.1. </span><span class="content"> Set <var>response</var>’s <code>csp list</code> </span><a class="self-link" href="#set-response-csp-list"></a></h4>
     <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), this algorithm evaluates its <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a> for <a data-link-type="dfn" href="#serialized-policy">serialized policy</a> values, and
-  populates its <a data-link-type="dfn" href="#response-csp-list">csp list</a> accordingly:</p>
+  populates its <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">csp list</a> accordingly:</p>
     <ol>
      <li data-md="">
-      <p>Set <var>response</var>’s <a data-link-type="dfn" href="#response-csp-list">CSP list</a> to the
+      <p>Set <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">CSP list</a> to the
   empty list.</p>
      <li data-md="">
       <p>Let <var>policies to enforce</var> be the result of executing <a href="#parse-serialized-policy-list">§2.1.2 Parse a serialized policy list</a> on the result of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-header-parse">parsing</a> <code>Content-Security-Policy</code> in <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a>.</p>
@@ -1585,7 +1572,7 @@ of security-relevant policy decisions.</p>
         <p>Set <var>policy</var>’s <a data-link-type="dfn" href="#disposition">disposition</a> to
   "<code>enforce</code>".</p>
        <li data-md="">
-        <p>Insert <var>policy</var> into <var>response</var>’s <a data-link-type="dfn" href="#response-csp-list">csp list</a>.</p>
+        <p>Insert <var>policy</var> into <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">csp list</a>.</p>
       </ol>
      <li data-md="">
       <p>Let <var>policies to report</var> be the result of executing <a href="#parse-serialized-policy-list">§2.1.2 Parse a serialized policy list</a> on the result of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-header-parse">parsing</a> <code>Content-Security-Policy-Report-Only</code> in <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a>.</p>
@@ -1596,7 +1583,7 @@ of security-relevant policy decisions.</p>
         <p>Set <var>policy</var>’s <a data-link-type="dfn" href="#disposition">disposition</a> to
   "<code>report</code>".</p>
        <li data-md="">
-        <p>Insert <var>policy</var> into <var>response</var>’s <a data-link-type="dfn" href="#response-csp-list">csp list</a>.</p>
+        <p>Insert <var>policy</var> into <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">csp list</a>.</p>
       </ol>
     </ol>
     <h4 class="heading settled" data-level="4.1.2" id="should-block-request"><span class="secno">4.1.2. </span><span class="content"> Should <var>request</var> be blocked by Content Security Policy? </span><a class="self-link" href="#should-block-request"></a></h4>
@@ -1658,7 +1645,7 @@ of security-relevant policy decisions.</p>
   context</a> is a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/browsers.html#nested-browsing-context">nested browsing context</a>:</p>
       <ol>
        <li data-md="">
-        <p>For each <var>policy</var> in <var>response</var>’s <a data-link-type="dfn" href="#response-csp-list">csp list</a>:</p>
+        <p>For each <var>policy</var> in <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">csp list</a>:</p>
         <ol>
          <li data-md="">
           <p>Let <var>source list</var> be the value of <var>policy</var>’s <a data-link-type="dfn" href="#directive-set">directive set</a>’s <a data-link-type="dfn" href="#frame-ancestors"><code>frame-ancestors</code></a> directive.</p>
@@ -1755,7 +1742,7 @@ of security-relevant policy decisions.</p>
       <p class="note" role="note">Note: <a data-link-type="dfn" href="https://url.spec.whatwg.org/#local-scheme">local scheme</a> includes <code>about:</code>, and this algorithm will
   therefore alias the <a data-link-type="dfn" href="#embedding-document">embedding document</a>’s policies for <a data-link-type="dfn" href="http://www.w3.org/TR/html5/embedded-content-0.html#an-iframe-srcdoc-document">an iframe <code>srcdoc</code> <code>Document</code></a>.</p>
      <li data-md="">
-      <p>For each <var>policy</var> in <var>response</var>’s <a data-link-type="dfn" href="#response-csp-list">csp list</a>, insert <var>policy</var> into <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list">csp list</a>.</p>
+      <p>For each <var>policy</var> in <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">csp list</a>, insert <var>policy</var> into <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list">csp list</a>.</p>
     </ol>
    </section>
    <section>
@@ -2555,7 +2542,6 @@ Content-Security-Policy: connect-src http://example.com/;
    <li><a href="#connect-src">connect-src</a><span>, in §6.1.2</span>
    <li><a href="#content-security-policy">Content-Security-Policy</a><span>, in §3.1</span>
    <li><a href="#content-security-policy-report-only">Content-Security-Policy-Report-Only</a><span>, in §3.2</span>
-   <li><a href="#response-csp-list">CSP list</a><span>, in §4.1</span>
    <li><a href="#global-object-csp-list">csp list</a><span>, in §4.2</span>
    <li><a href="#default-src">default-src</a><span>, in §6.1.3</span>
    <li><a href="#grammardef-directive-name">directive-name</a><span>, in §2.2</span>
@@ -2643,6 +2629,7 @@ Content-Security-Policy: connect-src http://example.com/;
     <a data-link-type="biblio" href="#biblio-fetch">[FETCH]</a> defines the following terms:
     <ul>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>
+     <li><a href="https://fetch.spec.whatwg.org/#concept-response-csp-list">csp list</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-destination">destination</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a>
      <li><a href="https://fetch.spec.whatwg.org/#http-fetch">http fetch</a>
@@ -2855,7 +2842,6 @@ Content-Security-Policy: connect-src http://example.com/;
   look at seriously. If you have suggestions, please <a href="https://github.com/w3c/webappsec-csp/issues/new">file a bug</a>!
   Otherwise, you’ll probably want to look at the stable document at <a href="http://w3.org/TR/CSP2/">http://w3.org/TR/CSP2/</a>.<a href="#issue-0e9efa69"> ↵ </a></div>
    <div class="issue"> Why <code>sandbox</code>? Can we loosen that?<a href="#issue-6521ca1c"> ↵ </a></div>
-   <div class="issue"> Give Anne a patch to Fetch to make this bit true.<a href="#issue-533fa99d"> ↵ </a></div>
    <div class="issue"> The algorithm is named "creating a new <code>Document</code> object" in W3C’s
   HTML, and isn’t well-integrated with Fetch.<a href="#issue-106a0c5c"> ↵ </a></div>
    <div class="issue"> Need to monkey-patch these in: something like "Set the <code>Window</code> object’s <code>csp list</code> to the <code>csp list</code> of the resource used to
