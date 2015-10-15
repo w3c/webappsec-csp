@@ -19,6 +19,11 @@ Boilerplate: omit conformance, omit feedback-header
 Markup Shorthands: css off, markdown on
 </pre>
 <pre class="anchors">
+spec: RFC6454; urlPrefix: https://tools.ietf.org/html/rfc6454
+  type: dfn
+    text: globally unique identifier; url: section-2.3
+    text: origin; url: section-3.2
+    text: the same; url: section-5
 spec: ES2015; urlPrefix: http://www.ecma-international.org/ecma-262/6.0/index.html
   type: method
     text: eval(); url: sec-eval-x
@@ -27,28 +32,6 @@ spec: DOM; urlPrefix: http://www.w3.org/TR/dom/
     text: Node; url: interface-node
   type: attribute
     text: textContent; for: Node; url: dom-node-textcontent
-spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
-  type: dfn
-    text: main fetch
-    text: http-network fetch
-    text: http fetch
-    text: parse a header value; url: concept-header-parse
-    text: request; url: concept-request
-    text: response; url: concept-response
-    text: header; url: concept-header
-    text: client; for: request; url: concept-request-client
-    text: url; for: request; url: concept-request-url
-    text: url; for: response; url: concept-response-url
-    text: header list; for: response; url: concept-response-header-list
-    text: name; for: header; url: concept-header-name
-    text: network error; url: concept-network-error
-    text: destination; for: request; url: concept-request-destination
-    text: type; for: request; url: concept-request-type
-    text: initiator; for: request; url: concept-request-initiator
-    text: target browsing context; for: request; url: concept-request-target-browsing-context
-    text: CSP list; for: response; url: concept-response-csp-list
-  type: interface
-    text: Request
 spec: HTML5; urlPrefix: http://www.w3.org/TR/html5/
   type: dfn
     urlPrefix: embedded-content-0.html
@@ -67,7 +50,10 @@ spec: HTML5; urlPrefix: http://www.w3.org/TR/html5/
       text: incumbent settings object
       text: relevant settings object; url: relevant-settings-object-for-a-global-object
       text: responsible browsing context
+      text: queue a task
     urlPrefix: infrastructure.html
+      text: fire; url: concept-event-fire
+      text: trusted; url: concept-event-trusted
       text: case-sensitive; url: case-sensitive
       text: ASCII case-insensitive match; url: ascii-case-insensitive
       text: reflect
@@ -117,12 +103,48 @@ spec: HTML5; urlPrefix: http://www.w3.org/TR/html5/
   type: attribute
     urlPrefix: browsers.html
       text: document; for: Window; url: dom-document-2
+    urlPrefix: dom.html
+      text: referrer; for: Document; url: dom-document-referrer
+spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
+  type: dfn
+    text: method; for:request; url:concept-request-method
+    text: origin; for:request; url:concept-request-origin
+    text: window; for:request; url:concept-request-window
+    text: body; for:request; url:concept-request-body
+    text: redirect mode; for: request; url:concept-request-redirect-mode
+    text: cache mode; for:request; url:concept-request-cache-mode
+    text: credentials mode; for:request; url:concept-request-credentials-mode
+    text: header list; for: request; url: concept-request-header-list
+    text: fetch; url: concept-fetch
+    text: main fetch
+    text: http-network fetch
+    text: http fetch
+    text: parse a header value; url: concept-header-parse
+    text: request; url: concept-request
+    text: response; url: concept-response
+    text: header; url: concept-header
+    text: client; for: request; url: concept-request-client
+    text: url; for: request; url: concept-request-url
+    text: global object; for: request; url: concept-request-global-object
+    text: current url; for: request; url: concept-request-current-url
+    text: url; for: response; url: concept-response-url
+    text: header list; for: response; url: concept-response-header-list
+    text: name; for: header; url: concept-header-name
+    text: network error; url: concept-network-error
+    text: destination; for: request; url: concept-request-destination
+    text: type; for: request; url: concept-request-type
+    text: initiator; for: request; url: concept-request-initiator
+    text: target browsing context; for: request; url: concept-request-target-browsing-context
+    text: CSP list; for: response; url: concept-response-csp-list
+  type: interface
+    text: Request
 spec: URL; urlPrefix: https://url.spec.whatwg.org/
   type: dfn
     text: local scheme
     text: default port
     text: IPv6 address; url: concept-ipv6
     text: percent decode
+    text: URL parser; url: concept-url-parser
   type: attribute
     text: host; for: URL; url: concept-url-host
     text: port; for: URL; url: concept-url-port
@@ -154,11 +176,6 @@ spec: RFC5234; urlPrefix: https://tools.ietf.org/html/rfc5234
 spec: RFC5890; urlPrefix: https://tools.ietf.org/html/rfc5890
   type: dfn
     text: label; url: section-2.2
-spec: RFC6454; urlPrefix: https://tools.ietf.org/html/rfc6454
-  type: dfn
-    text: globally unique identifier; url: section-2.3
-    text: origin; url: section-3.2
-    text: the same; url: section-5
 spec: RFC7230; urlPrefix: https://tools.ietf.org/html/rfc7230
   type: grammar
     text: BWS; url: section-3.2.3
@@ -484,33 +501,104 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   A <dfn>violation</dfn> represents an action or resource which goes against the
   <a>policies</a> associated with a <a>global object</a>.
 
-  Each <a>violation</a> has a <dfn for="violation">resource URL</dfn>, which is
-  either `null` or a {{URL}}.
+  Each <a>violation</a> has a
+  <dfn for="violation" id="violation-global-object">global object</dfn>, which
+  is the <a>global object</a> whose <a>policy</a> has been violated.
 
-  Each <a>violation</a> has a <dfn for="violation">violated policy</dfn>, which
-  is a <a>policy</a>.
+  Each <a>violation</a> has a <dfn for="violation" id="violation-url">url</dfn>
+  which is its <a for="violation">global object</a>'s {{URL}}.
 
-  Each <a>violation</a> has an <dfn for="violation">violated directive</dfn>,
-  which is a non-empty string representing the <a>directive</a> which was
-  violated.
+  Each <a>violation</a> has a
+  <dfn for="violation" id="violation-status">status</dfn> which is a
+  non-negative integer representing the HTTP status code of the resource for
+  which the global object was instantiated.
+
+  Each <a>violation</a> has a
+  <dfn for="violation" id="violation-resource">resource</dfn>, which is
+  either `null`, "`inline`", "`eval`", or a {{URL}}. It represents the resource
+  which violated the policy.
+
+  Each <a>violation</a> has a
+  <dfn for="violation" id="violation-referrer">referrer</dfn>, which is either
+  `null`, or a {{URL}}. It represents the referrer of the resource whose policy
+  was violated.
+
+  Each <a>violation</a> has a
+  <dfn for="violation" id="violation-policy">policy</dfn>, which is the
+  <a>policy</a> that has been violated.
 
   Each <a>violation</a> has an
   <dfn for="violation" id="violation-effective-directive">effective directive</dfn>
   which is a non-empty string representing the <a>directive</a> whose
   enforcement caused the violation.
   
-  Note: This generally the same as the <a for="violation">violated directive</a>
-  but will differ in cases where <a>fetch directives</a> are not explicitly
-  present in a <a>policy</a>, but fall back to <a>default-src</a>.
-
-  Each <a>violation</a> has a <dfn for="violation">source file</dfn>, which is
+  Each <a>violation</a> has a
+  <dfn for="violation" id="violation-source-file">source file</dfn>, which is
   either `null` or a {{URL}}.
 
-  Each <a>violation</a> has a <dfn for="violation">line number</dfn>, which is
+  Each <a>violation</a> has a
+  <dfn for="violation" id="violation-line-number">line number</dfn>, which is
   a non-negative integer.
 
-  Each <a>violation</a> has a <dfn for="violation">column number</dfn>, which is
-  a non-negative integer.
+  Each <a>violation</a> has a
+  <dfn for="violation" id="violation-column-number">column number</dfn>, which
+  is a non-negative integer.
+
+  <h4 id="create-violation-for-global">
+    Create a violation object for |global|, |policy|, and |directive|
+  </h4>
+  
+  Given a <a>global object</a> (|global|), a <a>policy</a> (|policy|), and a
+  string (|directive|), the following algorithm creates a new <a>violation</a>
+  object, and populates it with an initial set of data:
+
+  1.  Let |violation| be a new <a>violation</a> whose <a for="violation">global
+      object</a> is |global|, <a for="violation">policy</a> is |policy|,
+      <a for="violation">effective directive</a> is |directive|, and
+      <a for="violation">resource</a> is `null`.
+
+  2.  If the user agent is currently executing script, and can extract a source
+      file's URL, line number, and column number from the |global|, set
+      |violation|'s <a for="violation">source file</a>, <a for="violation">line
+      number</a>, and <a for="violation">column number</a> accordingly.
+
+      ISSUE: Is this kind of thing specified anywhere? I didn't see anything
+      that looked useful in [[ES2015]].
+
+  3.  If |global| is a {{Window}} object, set |violation|'s
+      <a for="violation">referrer</a> to |global|'s {{Window/document}}'s
+      {{Document/referrer}}.
+
+  4.  Set |violation|'s <a for="violation">status</a> to the HTTP status code
+      for the resource associated with |violation|'s <a for="violation">global
+      object</a>.
+  
+      ISSUE: How, exactly, do we get the status code? We don't actually store it
+      anywhere.
+
+  5.  Return |violation|.
+
+  <h4 id="create-violation-for-request">
+    Create a violation object for |request|, |policy|, and |directive|
+  </h4> 
+
+  Given a <a>request</a> (|request|), a <a>policy</a> (|policy|), and a string
+  (|directive|), the following algorithm creates a new <a>violation</a> object,
+  and populates it with an initial set of data:
+
+  1.  Let |violation| be the result of executing
+      [[#create-violation-for-global]] on |request|'s
+      <a for="request">client</a>'s <a for="request">global object</a>,
+      |policy|, and |directive|.
+
+  2.  Set |violation|'s <a for="violation">resource</a> to |request|'s
+      <a for="request">url</a>.
+
+      Note: We use |request|'s <a for="request">url</a>, and <em>not</em> its
+      <a for="request">current url</a>, as the latter might contain information
+      about redirect targets to which the page MUST NOT be given access.
+
+  3.  Return |violation|.
 </section>
 
 <!-- Big Text: Delivery -->
@@ -756,8 +844,9 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
           |request|'s <a for="request">url</a> is `Matches`, then skip
           to the next |policy|.
 
-      4.  Execute [[#report-violation-for-request]] on |policy|, |directive|,
-          and |request|.
+      4.  Execute [[#report-violation]] on the result of executing
+          [[#create-violation-for-request]] on |request|, |policy|, and
+          |directive|.
 
       5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
           set |result| to "`Blocked`".
@@ -792,8 +881,9 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
           |response|'s <a for="response">url</a> is `Matches`, then skip
           to the next |policy|.
 
-      4.  Execute [[#report-violation-for-request]] on |policy|, |directive|,
-          and |request|.
+      4.  Execute [[#report-violation]] on the result of executing
+          [[#create-violation-for-request]] on |request|, |policy|, and
+          |directive|.
 
       5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
           set |result| to "`Blocked`".
@@ -823,8 +913,10 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
                   <a for="Document">URL</a> and |source list|, skip
                   to the next |ancestor|.
 
-              2.  Execute [[#report-violation-for-request]] on |policy|,
-                  "<a>`frame-ancestors`</a>" and |request|.
+
+              2.  Execute [[#report-violation]] on the result of executing
+                  [[#create-violation-for-request]] on |request|, |policy|, and
+                  "<a>`frame-ancestors`</a>".
 
               3.  If |policy|'s <a for="policy">disposition</a> is
                   "`enforce`", set |result| to "`Blocked`".
@@ -943,25 +1035,137 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   report</dfn> may be generated and sent out to a reporting endpoint associated
   with the <a>policy</a>.
 
-  <h3 id="report-violation-for-request">
-    Report a violation for |policy|, |directive|, and |request|
+  <h3 id="violation-events">
+    Violation DOM Events
   </h3>
 
-  Given a <a>policy</a> (|policy|), a directive name (|directive|), and a
-  <a>request</a> (|request|), this algorithm reports a violation to an endpoint
-  specified by |policy|.
+  <pre class="idl">
+    [Constructor(DOMString type, optional SecurityPolicyViolationEventInit eventInitDict)]
+    interface SecurityPolicyViolationEvent : Event {
+        readonly    attribute DOMString documentURI;
+        readonly    attribute DOMString referrer;
+        readonly    attribute DOMString blockedURI;
+        readonly    attribute DOMString violatedDirective;
+        readonly    attribute DOMString effectiveDirective;
+        readonly    attribute DOMString originalPolicy;
+        readonly    attribute DOMString sourceFile;
+        readonly    attribute DOMString statusCode;
+        readonly    attribute long      lineNumber;
+        readonly    attribute long      columnNumber;
+    };
 
-  ISSUE: Need an algorithm here, right? :)
+    dictionary SecurityPolicyViolationEventInit : EventInit {
+        DOMString documentURI;
+        DOMString referrer;
+        DOMString blockedURI;
+        DOMString violatedDirective;
+        DOMString effectiveDirective;
+        DOMString originalPolicy;
+        DOMString sourceFile;
+        long      lineNumber;
+        long      columnNumber;
+    };
+  </pre>
 
-  <h3 id="report-violation-for-global">
-    Report a violation for |policy|, |directive|, and |global|
+  <h3 id="serialize-violation">
+    Serialize a |violation|
   </h3>
 
-  Given a <a>policy</a> (|policy|), a directive name (|directive|), and a
-  <a>global object</a> (|global|), this algorithm reports a violation to an
-  endpoint specified by |policy|.
+  Given a <a>violation</a> (|violation|), this algorithm returns a serialized
+  string representation of the violation, suitable for submission to a reporting
+  endpoint.
 
-  ISSUE: Need an algorithm here, right? :)
+  ISSUE: Write a serialization algorithm.
+
+  <h3 id="report-violation">
+    Report a |violation|
+  </h3>
+
+  Given a <a>violation</a> (|violation|), this algorithm reports it to the
+  endpoint specified in |violation|'s <a for="violation">policy</a>, and
+  fires a <dfn interface>SecurityPolicyViolationEvent</dfn> at |violation|'s
+  <a for="violation">global object</a>.
+
+  1.  <a>Fire</a> a <a>trusted</a> event with the name `securitypolicyviolation`
+      that uses the {{SecurityPolicyViolationEvent}} interface, with its
+      attributes initialized as follows:
+
+      1.  {{SecurityPolicyViolationEvent/documentURI}} is |violation|'s
+          <a for="violation">url</a>.
+      2.  {{SecurityPolicyViolationEvent/referrer}} is |violation|'s
+          <a for="violation">referrer</a>.
+      3.  {{SecurityPolicyViolationEvent/blockedURI}} is |violation|'s
+          <a for="violation">resource</a>.
+      4.  {{SecurityPolicyViolationEvent/effectiveDirective}} is |violation|'s
+          <a for="violation">effective directive</a>.
+      5.  {{SecurityPolicyViolationEvent/violatedDirective}} is |violation|'s
+          <a for="violation">effective directive</a>.
+      6.  {{SecurityPolicyViolationEvent/originalPolicy}} is |violation|'s
+          <a for="violation">policy</a>
+      7.  {{SecurityPolicyViolationEvent/sourceFile}} is |violation|'s
+          <a for="violation">source file</a>
+      8.  {{SecurityPolicyViolationEvent/statusCode}} is |violation|'s
+          <a for="violation">status</a>
+      9.  {{SecurityPolicyViolationEvent/lineNumber}} is |violation|'s
+          <a for="violation">line number</a>
+      10. {{SecurityPolicyViolationEvent/columnNumber}} is |violation|'s
+          <a for="violation">column number</a>
+
+      Note: Both {{SecurityPolicyViolationEvent/effectiveDirective}} and
+      {{SecurityPolicyViolationEvent/violatedDirective}} are the same value.
+      This is intentional to maintain backwards compatibility.
+
+  2.  If |violation|'s <a for="violation">policy</a>'s <a for="policy">directive
+      set</a> contains a <a>directive</a> named "<a>`report-uri`</a>"
+      (|directive|):
+
+      1.  Let |endpoint| be the result of executing the <a>URL parser</a> on
+          |directive|'s <a for="directive">value</a>.
+
+      2.  If |endpoint| is not a valid URL, abort this algorithm.
+
+      3.  Let |request| be a new <a>request</a>, initialized as follows:
+
+          :   <a for="request">method</a>
+          ::  "`POST`"
+          :   <a for="request">url</a>
+          ::  |violation|'s <a for="violation">url</a>
+          :   <a for="request">origin</a>
+          ::  |violation|'s <a for="violation">global object</a>'s <a>origin</a>
+          :   <a for="request">window</a>
+          ::  "`no-window`"
+          :   <a for="request">client</a>
+          ::  |violation|'s <a for="violation">global object</a>'s <a>relevant
+              settings object</a>
+          :   <a for="request">destination</a>
+          ::  ""
+          :   <a for="request">initiator</a>
+          ::  ""
+          :   <a for="request">type</a>
+          ::  ""
+          :   <a for="request">cache mode</a>
+          ::  "`no-cache`"
+          :   <a for="request">credentials mode</a>
+          ::  "`same-origin`"
+          :   <a for="request">header list</a>
+          ::  A <a>header list</a> containing a single header whose name is
+              "`Content-Type`", and value is "`application/csp-report`"
+          :   <a for="request">body</a>
+          ::  The result of executing [[#serialize-violation]] on |violation|
+          :   <a for="request">redirect mode</a>
+          ::  "`error`"
+
+      4.  <a>Fetch</a> |request|.
+
+      Note: All of this should be considered deprecated. It sends a single
+      request per violation, which simply isn't scalable. As soon as this
+      behavior can be removed from user agents, it will be.
+
+  3.  Do some better reporting.
+
+      ISSUE: Define this bit. :)
+              
+              
 </section>
 
 <!-- Big Text: Directives -->
@@ -1695,10 +1899,15 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       4.  If the result of executing [[#match-url-to-source-list]] on |base| and
           |source list| is "`Does Not Match`":
          
-          1.  Execute [[#report-violation-for-global]] on |policy|,
-              "<a>`base-uri`</a>", and |document|.
+          1.  Let |violation| be the result of executing
+              [[#create-violation-for-global]] on |document|'s <a>global
+              object</a>, |policy|, and "<a>`base-uri`</a>".
+
+          2.  Set |violation|'s <a for="violation">resource</a> to "`inline`".
+
+          3.  Execute [[#report-violation]] on |violation|.
           
-          2.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
+          4.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
               return "`Blocked`".
 
   2.  Return "`Allowed`".
