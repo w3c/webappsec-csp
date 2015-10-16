@@ -1,8 +1,9 @@
-all: index.html ./api/index.html ./cookies/index.html ./pinning/index.html
+all: index.html ./api/index.html ./cookies/index.html ./embedded/index.html ./pinning/index.html
 
 force:
 	bikeshed -f spec ./index.src.html
 	bikeshed -f spec ./api/index.src.html
+	bikeshed -f spec ./embedded/index.src.html
 	bikeshed -f spec ./cookies/index.src.html
 	bikeshed -f spec ./pinning/index.src.html
 
@@ -18,6 +19,9 @@ cookies/index.html: cookies/index.src.html
 pinning/index.html: pinning/index.src.html
 	bikeshed -f spec ./pinning/index.src.html
 
+embedded/index.html: embedded/index.src.html
+	bikeshed -f spec ./embedded/index.src.html
+	
 publish:
 	git push origin master master:gh-pages
 

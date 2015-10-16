@@ -1,0 +1,262 @@
+<h1>Content Security Policy: Embedded Enforcement</h1>
+<pre class="metadata">
+Status: DREAM
+ED: https://w3c.github.io/webappsec-csp/embedded/
+Shortname: CSP-EMBEDDED-ENFORCEMENT
+Level: 1
+Editor: Mike West 56384, Google Inc., mkwst@google.com
+Abstract:
+  This document defines a mechanism by which a web page can embed a nested
+  browsing context if and only if it agrees to enforce a particular set of
+  restrictions upon itself.
+Indent: 2
+Markup Shorthands: css off, markdown on
+</pre>
+<pre class="anchors">
+spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp
+  type: dfn
+    text: content-security-policy; url: content-security-policy-header-field
+    text: content security policy; url: security-policy
+    text: parse a serialized policy; url: parse-serialized-policy 
+    text: policy list; for: response; url: response-policy-list
+    text: policy
+    text: directive set; for: policy
+    text: disposition; for: policy
+    text: directive
+    text: name; for: directive
+    text: value; for: directive
+  type: grammar
+    text: serialized-policy; url: grammardef-serialized-policy
+spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
+  type: dfn
+    text: request; url: concept-request
+    text: response; url: concept-response
+spec: HTML; urlPrefix: https://html.spec.whatwg.org/
+  type: dfn
+    text: navigate
+    text: browsing context
+    text: nested browsing context
+    text: browsing context container
+</pre>
+<pre class="link-defaults">
+spec:dom-ls; type:interface; text:Document
+</pre>
+<pre boilerplate="copyright">&copy;2015 Google, Inc.</pre>
+<!--
+████ ██    ██ ████████ ████████   ███████
+ ██  ███   ██    ██    ██     ██ ██     ██
+ ██  ████  ██    ██    ██     ██ ██     ██
+ ██  ██ ██ ██    ██    ████████  ██     ██
+ ██  ██  ████    ██    ██   ██   ██     ██
+ ██  ██   ███    ██    ██    ██  ██     ██
+████ ██    ██    ██    ██     ██  ███████
+-->
+<section>
+  <h2 id="intro">Introduction</h2>
+
+  <em>This section is not normative.</em>
+
+
+  <h3 id="examples">Examples</h3>
+
+  <div class="example">
+    MegaCorp Inc. wishes to ensure that the advertisements that run on its
+    various publications are locked down to include script from trusted origins
+    that have been audited for safety. They can do so by including the
+    advertisement via an <{iframe}> element with a <{iframe/csp}> attribute:
+
+    <pre>
+      &lt;iframe src="https://advertisements-r-us.example.com/ad1.cfm"
+              <a for="iframe" element-attr>csp</a>="script-src https://trusted-cdn.example.com/"&gt;
+      &lt;/iframe&gt;
+    </pre>
+
+    This will generate a request to `advertisements-r-us.example.com` that has
+    an <a>`Embedding-CSP`</a> header, as follows:
+
+    <pre>
+      GET / HTTP/1.1
+      Host: advertisements-r-us.example.com
+      ...
+      <a>Embedding-CSP</a>: script-src https://trusted-cdn.example.com/
+      ...
+    </pre>
+
+    The advertisment will only load if it is delivered with a Content Security
+    Policy which exactly matches the <{iframe/csp}> attribute's value. One way
+    to do so is to send the requested policy:
+   
+    <pre>
+      HTTP/1.1 200 OK
+      ...
+      <a>Content-Security-Policy</a>: script-src https://trusted-cdn.example.com/
+    </pre>
+
+    The server might want to futher restrict the document, however. Perhaps it
+    wishes to ensure that plugins will not be loaded. It can do so by sending
+    another policy with additional restrictions:
+   
+    <pre>
+      HTTP/1.1 200 OK
+      ...
+      <a>Content-Security-Policy</a>: script-src https://trusted-cdn.example.com/,
+                               object-src 'none'
+    </pre>
+
+    The "`,`" in the <a>`Content-Security-Policy`</a> header's value splits the
+    string into two serialized policies, each of which is enforced.
+  </div>
+</section>
+
+<section>
+  <h2 id="framework">Framework</h2>
+
+  <h3 id="monkey-patching-html">
+    Specifying a Policy Requirement
+  </h3>
+
+  <a>Browsing contexts</a> have an <dfn export>`iframe` security policy</dfn>
+  attribute, which is `null` unless otherwise specified.
+
+  <{iframe}> elements have a <dfn element-attr for="iframe">csp</dfn> attribute
+  which specifies the policy that an embedded document must agree to enforce
+  upon itself.
+
+  <pre class="idl">
+    partial interface HTMLIFrameElement {
+      attribute DOMString csp;
+    };
+  </pre>
+
+  {{HTMLIFrameElement}}'s {{HTMLIFrameElement/csp}} IDL attribute
+  <a>reflects</a> the value of the element's <{iframe/csp}> content attribute.
+
+  When an <{iframe}> element with a <{iframe/csp}> attribute has its <a>nested
+  browsing context</a> created (before the intial `about:blank` {{Document}} is
+  created), and when an <{iframe}> element's <{iframe/csp}> attribute is set
+  or changed while it has a <a>nested browsing context</a>, the user agent
+  must set the <a>nested browsing context</a>'s <a>`iframe` security policy</a>
+  to the result of executing the <a>parse a serialized policy</a> algorithm on
+  the <{iframe/csp}> attribute's value. 
+
+  During the <a>navigate</a> algorithm, perform the following step after the
+  current step 19. At this point, the user agent has fetched a response which it
+  is about to begin parsing, and redirects have been processed:
+
+  <ol start="20">
+    <li>
+      If the algorithm in [[#may-load-response]] returns `Blocked` when executed
+      upon the resource and the <a>browsing context</a> being navigated, abort
+      these steps. The user agent MAY indicate to the user that navigation has
+      been aborted for security reasons.
+    </li>
+  </ol>
+
+  <h3 id="embedding-csp-http-header">
+    The `Embedding-CSP` HTTP Request Header
+  </h3>
+
+  In order to ensure that the embedded resource can decide whether or not it is
+  willing to adhere to the embedder's requirements, the policy expressed in an
+  <{iframe}>'s <{iframe/csp}> attribute is communicated along with some
+  <a>requests</a> via an "<dfn export>`Embedding-CSP`</dfn>" HTTP request
+  header. The header's value is represented by the following ABNF [[!RFC5234]]:
+
+  <pre>
+    Embedding-CSP = <a grammar>serialized-policy</a>
+  </pre>
+
+  A user agent MUST NOT send more than one HTTP response header field named
+  "`Embedding-CSP`", and any such header MUST NOT contain more than one
+  <a grammar>serialized-policy</a>.
+
+  ISSUE: Step ~15 of the <a>navigate</a> algorithm needs to be adjusted to add
+  an `Embedding-CSP` header to a navigational request iff the navigation targets
+  a nested browsing context, and if the <a>browsing context container</a> is an
+  <{iframe}> element with a <{iframe/csp}> attribute. This should be pretty
+  straightforward once the algorithm is rewritten in terms of Fetch, but is a
+  bit tricky today.
+</section>
+
+<section>
+  <h2 id="algorithms">Algorithms</h2>
+
+  <h3 id="may-load-response">
+    Is <var>response</var> blocked by <var>browsing context</var>'s `iframe`
+    security policy?
+  </h3>
+
+  Given a <a>response</a> (<var>response</var>) and a <a>browsing context</a>
+  (<var>context</var>), this algorithm returns `Allowed` or `Blocked` as
+  appropriate:
+
+  1.  Let <var>embedding policy</var> be the value of <var>context</var>'s
+      <a>`iframe` security policy</a>.
+
+  2.  Let <var>policy list</var> be the value of <var>response</var>'s
+      <a for="response">policy list</a>.
+
+  3.  If the [[#subsume-policy]] algorithm returns `Subsumed` when executed
+      upon <var>policy list</var> and <var>embedding policy</var>, return
+      `Allowed`.
+
+  4.  Return `Blocked`.
+
+  <h3 id="subsume-policy">
+    Is <var>policy list</var> subsumed under <var>subsuming policy</var>?
+  </h3>
+
+  Given a list of <a>policy</a> objects (<var>policy list</var>), this algorithm
+  returns `Subsumed` if that list enforces a <a>policy</a> which is an exact
+  match for a given <a>policy</a> object (<var>subsuming policy</var>). It
+  returns `Not Subsumed` otherwise.
+
+  Note: I have delusions of someday defining a real subsumption algorithm
+  which would verify that the policy `default-src 'none'; script-src
+  https://example.com` is subsumbed under `default-src *.example.com` (as
+  there is no case in which the latter will block a request that the former
+  would allow). That calculation turns out to be hard, so the current algorithm
+  takes the significantly simpler approach of requiring an exact match.
+
+  Note: This is not an efficient algorithm. Implementers are encouraged to
+  implement something a little smarter and faster, with the same behavior.
+
+  1.  If <var>subsuming policy</var> is `null`, return `Subsumed`.
+
+  2.  For each <var>policy</var> in <var>policy list</var>:
+
+      1.  If <var>policy</var>'s <a for="policy">disposition</a> is not
+          `Enforce`, set skip to the next <var>policy</var>.
+
+      2.  If <var>policy</var>'s <a for="policy">directive set</a> is not the
+          same size as <var>subsuming policy</var>'s <a for="policy">directive
+          set</a>, skip to the next <var>policy</var>.
+
+      3.  For each <var>directive</var> in <var>policy</var>'s
+          <a for="policy">directive set</a>:
+
+          1.  Let <var>subsuming directive</var> be the <a>directive</a> in
+              <var>subsuming policy</var>'s <a for="policy">directive
+              set</a> whose <a for="directive">name</a> matches
+              <var>directive</var>'s <a for="directive">name</a>, or `null`
+              if no such <a>directive</a> is present.
+
+          2.  If <var>subsuming directive</var> is `null`, skip to the next
+              <var>policy</var>.
+
+          3.  If <var>subsuming directive</var>'s <a for="directive">value</a>
+              list is not the same size as <var>directive</var>'s
+              <a for="directive">value</a> list, skip to the next
+              <var>policy</var>.
+
+          4.  For each <var>token</var> in <var>directive</var>'s
+              <a for="directive">value</a>:
+
+              1.  If <var>token</var> is not present in <var>subsuming
+                  directive</var>'s <a for="directive">value</a>, skip to the
+                  next <var>policy</var>.
+
+      4.  Return `Subsumed`.
+
+  3.  Return `Not Subsumed`.
+</section>
