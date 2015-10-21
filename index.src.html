@@ -8,10 +8,9 @@ Level: 3
 Editor: Mike West 56384, Google Inc., mkwst@google.com
 Group: webappsec
 Abstract:
-  <p>This document defines a mechanism by which web developers can control the
+  This document defines a mechanism by which web developers can control the
   resources which a particular page can fetch or execute, as well as a number
-  of security-relevant policy decisions.</p>
-  <div class="issue">CSP3 is a work in progress, and isn't quite yet ready for anyone to look at seriously. If you have suggestions, please <a href="https://github.com/w3c/webappsec-csp/issues/new">file a bug</a>! Otherwise, you'll probably want to look at the stable document at <a href="http://w3.org/TR/CSP2/">http://w3.org/TR/CSP2/</a>.</div>
+  of security-relevant policy decisions.
 Indent: 2
 Version History: https://github.com/w3c/webappsec-csp/commits/master/index.src.html
 Boilerplate: omit conformance, omit feedback-header
@@ -241,6 +240,14 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   }
 }
 </pre>
+<style>
+  ul.toc ul ul ul {
+    margin: 0 0 0 2em;
+  }
+  ul.toc ul ul ul span.secno {
+    margin-left: -9em;
+  }
+</style>
 <!--
 ████ ██    ██ ████████ ████████   ███████
  ██  ███   ██    ██    ██     ██ ██     ██
@@ -312,6 +319,28 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   2.  The `frame-src` directive, which was deprecated in CSP Level
       2, has been removed.
+
+  <h3 id="open-questions">Open Questions</h3>
+
+  1.  Do we really want to remove `frame-src`? Though the threat model of
+      workers and frames is similar, they have distinct capabilities. Perhaps
+      it makes sense for folks to allow workers while disallowing frames, or
+      vice-versa?
+
+  2.  Can we enable `sandbox` inside <{meta}>? It's not clear what threat we're
+      preventing by dropping support for it (and Chrome and Safari support it
+      today).
+
+  3.  Reporting:
+      
+      1.  Do we still need to strip values? I think we've removed much of the
+          risk by using the original URL of a blocked resource; there shouldn't
+          be anything in the report JSON that script can't gather on its own by
+          walking the DOM.
+
+      2.  Sketching out a reporting framework at <a href="http://mikewest.github.io/error-reporting/">http://mikewest.github.io/error-reporting/</a>
+          that we should probably use to resolve some of the issues with
+          reporting in CSP2.
 </section>
 
 <!-- Big Text: Framework -->
