@@ -43,6 +43,7 @@ spec: HTML5; urlPrefix: http://www.w3.org/TR/html5/
       text: browsing context
       text: create a document object
       text: creator document
+      text: opener browsing context
       text: nested browsing context
       text: nested through; url: browsing-context-nested-through
       text: forced sandboxing flag set
@@ -1044,10 +1045,18 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
       1.  Let |documents| be an empty list.
 
-      2.  If |global| is a {{Window}} object, and |global|'s
-          {{Window/document}} has an <a>embedding document</a>
-          (|document|), then add |document| to
-          |documents|.
+      2.  If |global| is a {{Window}} object:
+      
+          1.  If |global|'s {{Window/document}} has an <a>embedding document</a>
+              (|document|), then add |document| to |documents|.
+
+          2.  If |global|'s {{Window/document}} has an <a>opener browsing
+              context</a>, then add its <a>active document</a> to |documents|.
+
+          Note: For {{Document}}s, we want to ensure that a page cannot bypass
+          its <a>policy</a> by embedding a frame or popping up a new window
+          containing content it controls (`blob:` resources, or
+          `document.write()`).
 
       3.  Otherwise |global| is a {{WorkerGlobalScope}} object, so, add 
           each of |global|'s
