@@ -1108,7 +1108,7 @@ of security-relevant policy decisions.</p>
      <a href="#reporting"><span class="secno">5</span> <span class="content"> Reporting </span></a>
      <ul class="toc">
       <li><a href="#violation-events"><span class="secno">5.1</span> <span class="content"> Violation DOM Events </span></a>
-      <li><a href="#serialize-violation"><span class="secno">5.2</span> <span class="content"> Serialize a <var>violation</var> </span></a>
+      <li><a href="#deprecated-serialize-violation"><span class="secno">5.2</span> <span class="content"> Obtain the deprecated serialization of <var>violation</var> </span></a>
       <li><a href="#report-violation"><span class="secno">5.3</span> <span class="content"> Report a <var>violation</var> </span></a>
      </ul>
     <li>
@@ -1838,11 +1838,59 @@ dictionary <dfn class="idl-code" data-dfn-type="dictionary" data-export="" id="d
     long      <dfn class="idl-code" data-dfn-for="SecurityPolicyViolationEventInit" data-dfn-type="dict-member" data-export="" data-type="long      " id="dom-securitypolicyviolationeventinit-columnnumber">columnNumber<a class="self-link" href="#dom-securitypolicyviolationeventinit-columnnumber"></a></dfn>;
 };
 </pre>
-    <h3 class="heading settled" data-level="5.2" id="serialize-violation"><span class="secno">5.2. </span><span class="content"> Serialize a <var>violation</var> </span><a class="self-link" href="#serialize-violation"></a></h3>
-    <p>Given a <a data-link-type="dfn" href="#violation">violation</a> (<var>violation</var>), this algorithm returns a serialized
+    <h3 class="heading settled" data-level="5.2" id="deprecated-serialize-violation"><span class="secno">5.2. </span><span class="content"> Obtain the deprecated serialization of <var>violation</var> </span><a class="self-link" href="#deprecated-serialize-violation"></a></h3>
+    <p>Given a <a data-link-type="dfn" href="#violation">violation</a> (<var>violation</var>), this algorithm returns a JSON text
   string representation of the violation, suitable for submission to a reporting
-  endpoint.</p>
-    <p class="issue" id="issue-a329a9d7"><a class="self-link" href="#issue-a329a9d7"></a> Write a serialization algorithm.</p>
+  endpoint associated with the deprecated <a data-link-type="dfn" href="#report-uri"><code>report-uri</code></a> directive.</p>
+    <ol>
+     <li data-md="">
+      <p>Let <var>object</var> be a new JavaScript object with properties initialized as
+  follows:</p>
+      <dl>
+       <dt data-md="">
+        <p>"<code>document-uri</code>"</p>
+       <dd data-md="">
+        <p>The result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer">URL serializer</a> on <var>violation</var>'s <a data-link-type="dfn" href="#violation-url">url</a>, with the <code>exclude fragment</code> flag set.</p>
+       <dt data-md="">
+        <p>"<code>referrer</code>"</p>
+       <dd data-md="">
+        <p>The result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer">URL serializer</a> on <var>violation</var>'s <a data-link-type="dfn" href="#violation-referrer">referrer</a>, with the <code>exclude fragment</code> flag set.</p>
+       <dt data-md="">
+        <p>"<code>blocked-uri</code>"</p>
+       <dd data-md="">
+        <p>The result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer">URL serializer</a> on <var>violation</var>'s <a data-link-type="dfn" href="#violation-resource">resource</a>, with the <code>exclude fragment</code> flag set.</p>
+       <dt data-md="">
+        <p>"<code>effective-directive</code>"</p>
+       <dd data-md="">
+        <p><var>violation</var>'s <a data-link-type="dfn" href="#violation-effective-directive">effective directive</a></p>
+       <dt data-md="">
+        <p>"<code>violated-directive</code>"</p>
+       <dd data-md="">
+        <p><var>violation</var>'s <a data-link-type="dfn" href="#violation-effective-directive">effective directive</a></p>
+       <dt data-md="">
+        <p>"<code>original-policy</code>"</p>
+       <dd data-md="">
+        <p>The <a data-link-type="dfn" href="#serialized-policy">serialization</a> of <var>violation</var>'s <a data-link-type="dfn" href="#violation-policy">policy</a></p>
+       <dt data-md="">
+        <p>"<code>status-code</code>"</p>
+       <dd data-md="">
+        <p><var>violation</var>'s <a data-link-type="dfn" href="#violation-status">status</a></p>
+      </dl>
+     <li data-md="">
+      <p>If <var>violation</var>'s <a data-link-type="dfn" href="#violation-source-file">source file</a> is not <code>null</code>:</p>
+      <ol>
+       <li data-md="">
+        <p>Set <var>object</var>'s "<code>source-file</code>" property to the result of executing
+  the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer">URL serializer</a> on <var>violation</var>'s <a data-link-type="dfn" href="#violation-source-file">source
+  file</a>, with the <code>exclude fragment</code> flag set.</p>
+       <li data-md="">
+        <p>Set <var>object</var>'s "<code>line-number</code>" property to <var>violation</var>'s <a data-link-type="dfn" href="#violation-line-number">line number</a>.</p>
+       <li data-md="">
+        <p>Set <var>object</var>'s "<code>column-number</code>" property to <var>violation</var>'s <a data-link-type="dfn" href="#violation-column-number">column number</a>.</p>
+      </ol>
+     <li data-md="">
+      <p>Return the result of executing <code class="idl"><a data-link-type="idl" href="http://www.ecma-international.org/ecma-262/6.0/index.html#sec-json.stringify">JSON.stringify()</a></code> on <var>object</var>.</p>
+    </ol>
     <h3 class="heading settled" data-level="5.3" id="report-violation"><span class="secno">5.3. </span><span class="content"> Report a <var>violation</var> </span><a class="self-link" href="#report-violation"></a></h3>
     <p>Given a <a data-link-type="dfn" href="#violation">violation</a> (<var>violation</var>), this algorithm reports it to the
   endpoint specified in <var>violation</var>'s <a data-link-type="dfn" href="#violation-policy">policy</a>, and
@@ -1851,28 +1899,48 @@ dictionary <dfn class="idl-code" data-dfn-type="dictionary" data-export="" id="d
      <li data-md="">
       <p><a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#concept-event-fire">Fire</a> a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#concept-event-trusted">trusted</a> event with the name <code>securitypolicyviolation</code> that uses the <code class="idl"><a data-link-type="idl" href="#securitypolicyviolationevent">SecurityPolicyViolationEvent</a></code> interface, with its
   attributes initialized as follows:</p>
-      <ol>
-       <li data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-documenturi">documentURI</a></code> is <var>violation</var>'s <a data-link-type="dfn" href="#violation-url">url</a>.</p>
-       <li data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-referrer">referrer</a></code> is <var>violation</var>'s <a data-link-type="dfn" href="#violation-referrer">referrer</a>.</p>
-       <li data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-blockeduri">blockedURI</a></code> is <var>violation</var>'s <a data-link-type="dfn" href="#violation-resource">resource</a>.</p>
-       <li data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-effectivedirective">effectiveDirective</a></code> is <var>violation</var>'s <a data-link-type="dfn" href="#violation-effective-directive">effective directive</a>.</p>
-       <li data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-violateddirective">violatedDirective</a></code> is <var>violation</var>'s <a data-link-type="dfn" href="#violation-effective-directive">effective directive</a>.</p>
-       <li data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-originalpolicy">originalPolicy</a></code> is <var>violation</var>'s <a data-link-type="dfn" href="#violation-policy">policy</a></p>
-       <li data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-sourcefile">sourceFile</a></code> is <var>violation</var>'s <a data-link-type="dfn" href="#violation-source-file">source file</a></p>
-       <li data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-statuscode">statusCode</a></code> is <var>violation</var>'s <a data-link-type="dfn" href="#violation-status">status</a></p>
-       <li data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-linenumber">lineNumber</a></code> is <var>violation</var>'s <a data-link-type="dfn" href="#violation-line-number">line number</a></p>
-       <li data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-columnnumber">columnNumber</a></code> is <var>violation</var>'s <a data-link-type="dfn" href="#violation-column-number">column number</a></p>
-      </ol>
+      <dl>
+       <dt data-md="">
+        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-documenturi">documentURI</a></code></p>
+       <dd data-md="">
+        <p><var>violation</var>'s <a data-link-type="dfn" href="#violation-url">url</a></p>
+       <dt data-md="">
+        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-referrer">referrer</a></code></p>
+       <dd data-md="">
+        <p><var>violation</var>'s <a data-link-type="dfn" href="#violation-referrer">referrer</a></p>
+       <dt data-md="">
+        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-blockeduri">blockedURI</a></code></p>
+       <dd data-md="">
+        <p><var>violation</var>'s <a data-link-type="dfn" href="#violation-resource">resource</a></p>
+       <dt data-md="">
+        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-effectivedirective">effectiveDirective</a></code></p>
+       <dd data-md="">
+        <p><var>violation</var>'s <a data-link-type="dfn" href="#violation-effective-directive">effective directive</a></p>
+       <dt data-md="">
+        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-violateddirective">violatedDirective</a></code></p>
+       <dd data-md="">
+        <p><var>violation</var>'s <a data-link-type="dfn" href="#violation-effective-directive">effective directive</a></p>
+       <dt data-md="">
+        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-originalpolicy">originalPolicy</a></code></p>
+       <dd data-md="">
+        <p><var>violation</var>'s <a data-link-type="dfn" href="#violation-policy">policy</a></p>
+       <dt data-md="">
+        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-sourcefile">sourceFile</a></code></p>
+       <dd data-md="">
+        <p><var>violation</var>'s <a data-link-type="dfn" href="#violation-source-file">source file</a></p>
+       <dt data-md="">
+        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-statuscode">statusCode</a></code></p>
+       <dd data-md="">
+        <p><var>violation</var>'s <a data-link-type="dfn" href="#violation-status">status</a></p>
+       <dt data-md="">
+        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-linenumber">lineNumber</a></code></p>
+       <dd data-md="">
+        <p><var>violation</var>'s <a data-link-type="dfn" href="#violation-line-number">line number</a></p>
+       <dt data-md="">
+        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-columnnumber">columnNumber</a></code></p>
+       <dd data-md="">
+        <p><var>violation</var>'s <a data-link-type="dfn" href="#violation-column-number">column number</a></p>
+      </dl>
       <p class="note" role="note">Note: Both <code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-effectivedirective">effectiveDirective</a></code> and <code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-violateddirective">violatedDirective</a></code> are the same value.
   This is intentional to maintain backwards compatibility.</p>
      <li data-md="">
@@ -1936,14 +2004,14 @@ dictionary <dfn class="idl-code" data-dfn-type="dictionary" data-export="" id="d
          <dt data-md="">
           <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-body">body</a></p>
          <dd data-md="">
-          <p>The result of executing <a href="#serialize-violation">§5.2 Serialize a violation</a> on <var>violation</var></p>
+          <p>The result of executing <a href="#deprecated-serialize-violation">§5.2 Obtain the deprecated serialization of violation</a> on <var>violation</var></p>
          <dt data-md="">
           <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-redirect-mode">redirect mode</a></p>
          <dd data-md="">
           <p>"<code>error</code>"</p>
         </dl>
        <li data-md="">
-        <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-fetch">Fetch</a> <var>request</var>.</p>
+        <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-fetch">Fetch</a> <var>request</var>. The result will be ignored.</p>
       </ol>
       <p class="note" role="note">Note: All of this should be considered deprecated. It sends a single
   request per violation, which simply isn’t scalable. As soon as this
@@ -2917,6 +2985,7 @@ Content-Security-Policy: connect-src http://example.com/;
     <a data-link-type="biblio" href="#biblio-es2015">[ES2015]</a> defines the following terms:
     <ul>
      <li><a href="http://www.ecma-international.org/ecma-262/6.0/index.html#sec-function-objects">Function()</a>
+     <li><a href="http://www.ecma-international.org/ecma-262/6.0/index.html#sec-json.stringify">JSON.stringify()</a>
      <li><a href="http://www.ecma-international.org/ecma-262/6.0/index.html#sec-eval-x">eval()</a>
     </ul>
    <li>
@@ -3064,6 +3133,7 @@ Content-Security-Policy: connect-src http://example.com/;
      <li><a href="https://url.spec.whatwg.org/#concept-url-port">port</a>
      <li><a href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a>
      <li><a href="https://url.spec.whatwg.org/#concept-url-parser">url parser</a>
+     <li><a href="https://url.spec.whatwg.org/#concept-url-serializer">url serializer</a>
     </ul>
    <li>
     <a data-link-type="biblio" href="#biblio-workers">[workers]</a> defines the following terms:
@@ -3199,7 +3269,6 @@ dictionary <a href="#dictdef-securitypolicyviolationeventinit">SecurityPolicyVio
    <div class="issue"> This processing was added to WHATWG’s HTML in <a href="https://github.com/whatwg/html/commit/5064a629f22bef29839ab4dc6f1ceef17f010bc5">whatwg/html@5064a62</a>.
   It has not yet been added to W3C’s HTML.<a href="#issue-389933ec"> ↵ </a></div>
    <div class="issue"> Need to add this to HTML.<a href="#issue-a8c27cf5"> ↵ </a></div>
-   <div class="issue"> Write a serialization algorithm.<a href="#issue-a329a9d7"> ↵ </a></div>
    <div class="issue"> Define this bit. :)<a href="#issue-0141f077"> ↵ </a></div>
   </div>
  </body>

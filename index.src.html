@@ -28,6 +28,7 @@ spec: ES2015; urlPrefix: http://www.ecma-international.org/ecma-262/6.0/index.ht
   type: method
     text: eval(); url: sec-eval-x
     text: Function(); url: sec-function-objects
+    text: JSON.stringify(); url: sec-json.stringify
 spec: DOM; urlPrefix: http://www.w3.org/TR/dom/
   type: interface
     text: Node; url: interface-node
@@ -146,6 +147,7 @@ spec: URL; urlPrefix: https://url.spec.whatwg.org/
     text: IPv6 address; url: concept-ipv6
     text: percent decode
     text: URL parser; url: concept-url-parser
+    text: URL serializer; url: concept-url-serializer
   type: attribute
     text: host; for: URL; url: concept-url-host
     text: port; for: URL; url: concept-url-port
@@ -1087,15 +1089,49 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     };
   </pre>
 
-  <h3 id="serialize-violation">
-    Serialize a |violation|
+  <h3 id="deprecated-serialize-violation">
+    Obtain the deprecated serialization of |violation|
   </h3>
 
-  Given a <a>violation</a> (|violation|), this algorithm returns a serialized
+  Given a <a>violation</a> (|violation|), this algorithm returns a JSON text
   string representation of the violation, suitable for submission to a reporting
-  endpoint.
+  endpoint associated with the deprecated <a>`report-uri`</a> directive.
 
-  ISSUE: Write a serialization algorithm.
+  1.  Let |object| be a new JavaScript object with properties initialized as
+      follows:
+      
+      :  "`document-uri`"
+      :: The result of executing the <a>URL serializer</a> on |violation|'s
+         <a for="violation">url</a>, with the `exclude fragment` flag set.
+      :  "`referrer`"
+      :: The result of executing the <a>URL serializer</a> on |violation|'s
+         <a for="violation">referrer</a>, with the `exclude fragment` flag set.
+      :  "`blocked-uri`"
+      :: The result of executing the <a>URL serializer</a> on |violation|'s
+         <a for="violation">resource</a>, with the `exclude fragment` flag set.
+      :  "`effective-directive`"
+      :: |violation|'s <a for="violation">effective directive</a>
+      :  "`violated-directive`"
+      :: |violation|'s <a for="violation">effective directive</a>
+      :  "`original-policy`"
+      :: The <a lt="serialized policy">serialization</a> of |violation|'s
+         <a for="violation">policy</a>
+      :  "`status-code`"
+      :: |violation|'s <a for="violation">status</a>
+
+  2.  If |violation|'s <a for="violation">source file</a> is not `null`:
+ 
+      1.  Set |object|'s "`source-file`" property to the result of executing
+          the <a>URL serializer</a> on |violation|'s <a for="violation">source
+          file</a>, with the `exclude fragment` flag set.
+
+      2.  Set |object|'s "`line-number`" property to |violation|'s
+          <a for="violation">line number</a>.
+
+      3.  Set |object|'s "`column-number`" property to |violation|'s
+          <a for="violation">column number</a>.
+
+  3.  Return the result of executing {{JSON.stringify()}} on |object|.
 
   <h3 id="report-violation">
     Report a |violation|
@@ -1110,26 +1146,26 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       that uses the {{SecurityPolicyViolationEvent}} interface, with its
       attributes initialized as follows:
 
-      1.  {{SecurityPolicyViolationEvent/documentURI}} is |violation|'s
-          <a for="violation">url</a>.
-      2.  {{SecurityPolicyViolationEvent/referrer}} is |violation|'s
-          <a for="violation">referrer</a>.
-      3.  {{SecurityPolicyViolationEvent/blockedURI}} is |violation|'s
-          <a for="violation">resource</a>.
-      4.  {{SecurityPolicyViolationEvent/effectiveDirective}} is |violation|'s
-          <a for="violation">effective directive</a>.
-      5.  {{SecurityPolicyViolationEvent/violatedDirective}} is |violation|'s
-          <a for="violation">effective directive</a>.
-      6.  {{SecurityPolicyViolationEvent/originalPolicy}} is |violation|'s
-          <a for="violation">policy</a>
-      7.  {{SecurityPolicyViolationEvent/sourceFile}} is |violation|'s
-          <a for="violation">source file</a>
-      8.  {{SecurityPolicyViolationEvent/statusCode}} is |violation|'s
-          <a for="violation">status</a>
-      9.  {{SecurityPolicyViolationEvent/lineNumber}} is |violation|'s
-          <a for="violation">line number</a>
-      10. {{SecurityPolicyViolationEvent/columnNumber}} is |violation|'s
-          <a for="violation">column number</a>
+      :  {{SecurityPolicyViolationEvent/documentURI}}
+      :: |violation|'s <a for="violation">url</a>
+      :  {{SecurityPolicyViolationEvent/referrer}}
+      :: |violation|'s <a for="violation">referrer</a>
+      :  {{SecurityPolicyViolationEvent/blockedURI}}
+      :: |violation|'s <a for="violation">resource</a>
+      :  {{SecurityPolicyViolationEvent/effectiveDirective}}
+      :: |violation|'s <a for="violation">effective directive</a>
+      :  {{SecurityPolicyViolationEvent/violatedDirective}}
+      :: |violation|'s <a for="violation">effective directive</a>
+      :  {{SecurityPolicyViolationEvent/originalPolicy}}
+      :: |violation|'s <a for="violation">policy</a>
+      :  {{SecurityPolicyViolationEvent/sourceFile}}
+      :: |violation|'s <a for="violation">source file</a>
+      :  {{SecurityPolicyViolationEvent/statusCode}}
+      :: |violation|'s <a for="violation">status</a>
+      :  {{SecurityPolicyViolationEvent/lineNumber}}
+      :: |violation|'s <a for="violation">line number</a>
+      :  {{SecurityPolicyViolationEvent/columnNumber}}
+      :: |violation|'s <a for="violation">column number</a>
 
       Note: Both {{SecurityPolicyViolationEvent/effectiveDirective}} and
       {{SecurityPolicyViolationEvent/violatedDirective}} are the same value.
@@ -1171,11 +1207,12 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
           ::  A <a>header list</a> containing a single header whose name is
               "`Content-Type`", and value is "`application/csp-report`"
           :   <a for="request">body</a>
-          ::  The result of executing [[#serialize-violation]] on |violation|
+          ::  The result of executing [[#deprecated-serialize-violation]] on
+              |violation|
           :   <a for="request">redirect mode</a>
           ::  "`error`"
 
-      4.  <a>Fetch</a> |request|.
+      4.  <a>Fetch</a> |request|. The result will be ignored.
 
       Note: All of this should be considered deprecated. It sends a single
       request per violation, which simply isn't scalable. As soon as this
