@@ -2267,12 +2267,12 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
     <p>The <code>script-src</code> directive governs four things:</p>
     <ol>
      <li data-md="">
-      <p>Script <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">requests</a> must pass through <a href="#should-block-request">§4.1.2 Should request be blocked by Content Security Policy?</a>.</p>
+      <p>Script <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">requests</a> MUST pass through <a href="#should-block-request">§4.1.2 Should request be blocked by Content Security Policy?</a>.</p>
      <li data-md="">
-      <p>Script <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">responses</a> must pass through <a href="#should-block-response">§4.1.3 Should response to request be blocked by Content
+      <p>Script <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">responses</a> MUST pass through <a href="#should-block-response">§4.1.3 Should response to request be blocked by Content
     Security Policy?</a>.</p>
      <li data-md="">
-      <p>Inline <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> blocks must pass through <a href="#should-block-inline">§4.2.2 Should node's inline behavior be blocked by Content Security Policy?</a>. Their
+      <p>Inline <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> blocks MUST pass through <a href="#should-block-inline">§4.2.2 Should node's inline behavior be blocked by Content Security Policy?</a>. Their
   behavior will be blocked unless every policy allows inline script, either
   implicitly by not specifying a <code>script-src</code> (or <code>default-src</code>) directive,
   or explicitly, by whitelisting "<code>unsafe-inline</code>", a <a data-link-type="grammar" href="#grammardef-nonce-source">nonce-source</a> or a <a data-link-type="grammar" href="#grammardef-hash-source">hash-source</a> that matches
@@ -2299,6 +2299,45 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 <pre>directive-name  = "style-src"
 directive-value = <a data-link-type="grammar" href="#grammardef-serialized-source-list">serialized-source-list</a>
 </pre>
+    <p>The <code>style-src</code> directive governs several things:</p>
+    <ol>
+     <li data-md="">
+      <p>Style <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">requests</a> MUST pass through <a href="#should-block-request">§4.1.2 Should request be blocked by Content Security Policy?</a>. This
+  includes:</p>
+      <ol>
+       <li data-md="">
+        <p>Stylesheet requests originating from a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-link-element">link</a></code> element.</p>
+       <li data-md="">
+        <p>Stylesheet requests originating from the <a class="css" data-link-type="at-rule" href="https://drafts.csswg.org/css-cascade-4/#at-ruledef-import"><code>@import</code></a> rule.</p>
+       <li data-md="">
+        <p>Stylesheet requests originating from a <code>Link</code> HTTP response header
+  field <a data-link-type="biblio" href="#biblio-rfc5988">[RFC5988]</a>.</p>
+      </ol>
+     <li data-md="">
+      <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">Responses</a> to style requests MUST pass through <a href="#should-block-response">§4.1.3 Should response to request be blocked by Content
+    Security Policy?</a>.</p>
+     <li data-md="">
+      <p>Inline <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-style-element">style</a></code> blocks MUST pass through <a href="#should-block-inline">§4.2.2 Should node's inline behavior be blocked by Content Security Policy?</a>. The
+  styles will be blocked unless every policy allows inline style, either
+  implicitly by not specifying a <code>script-src</code> (or <code>default-src</code>) directive,
+  or explicitly, by whitelisting "<code>unsafe-inline</code>", a <a data-link-type="grammar" href="#grammardef-nonce-source">nonce-source</a> or a <a data-link-type="grammar" href="#grammardef-hash-source">hash-source</a> that matches
+  the inline block.</p>
+     <li data-md="">
+      <p>The following CSS algorithms are gated on the <code>unsafe-eval</code> source
+  expression:</p>
+      <ol>
+       <li data-md="">
+        <p><a data-link-type="dfn" href="http://www.w3.org/TR/cssom/#insert-a-css-rule">insert a CSS rule</a></p>
+       <li data-md="">
+        <p><a data-link-type="dfn" href="http://www.w3.org/TR/cssom/#parse-a-css-rule">parse a CSS rule</a>,</p>
+       <li data-md="">
+        <p><a data-link-type="dfn" href="http://www.w3.org/TR/cssom/#parse-a-css-declaration-block">parse a CSS declaration block</a></p>
+       <li data-md="">
+        <p><a data-link-type="dfn" href="http://www.w3.org/TR/cssom/#parse-a-group-of-selectors">parse a group of selectors</a></p>
+      </ol>
+      <p>This would include, for example, all invocations of CSSOM’s various <code>cssText</code> setters and <code>insertRule</code> methods <a data-link-type="biblio" href="#biblio-cssom">[CSSOM]</a> <a data-link-type="biblio" href="#biblio-html5">[HTML5]</a>.</p>
+      <p class="issue" id="issue-ba1a0a35"><a class="self-link" href="#issue-ba1a0a35"></a> This needs to be better explained.</p>
+    </ol>
     <h4 class="heading settled" data-level="6.1.10" id="fetch-directive-matching-url"><span class="secno">6.1.10. </span><span class="content">URL Matching Algorithms</span><a class="self-link" href="#fetch-directive-matching-url"></a></h4>
     <h5 class="heading settled" data-level="6.1.10.1" id="match-request-to-policy"><span class="secno">6.1.10.1. </span><span class="content"> Does <var>request</var> match <var>policy</var>? </span><a class="self-link" href="#match-request-to-policy"></a></h5>
     <ol>
@@ -2976,6 +3015,14 @@ Content-Security-Policy: connect-src http://example.com/;
   <h3 class="no-num heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
   <ul class="indexlist">
    <li>
+    <a data-link-type="biblio" href="#biblio-cssom">[cssom]</a> defines the following terms:
+    <ul>
+     <li><a href="http://www.w3.org/TR/cssom/#insert-a-css-rule">insert a css rule</a>
+     <li><a href="http://www.w3.org/TR/cssom/#parse-a-css-declaration-block">parse a css declaration block</a>
+     <li><a href="http://www.w3.org/TR/cssom/#parse-a-css-rule">parse a css rule</a>
+     <li><a href="http://www.w3.org/TR/cssom/#parse-a-group-of-selectors">parse a group of selectors</a>
+    </ul>
+   <li>
     <a data-link-type="biblio" href="#biblio-dom">[dom]</a> defines the following terms:
     <ul>
      <li><a href="http://www.w3.org/TR/dom/#interface-node">Node</a>
@@ -3141,6 +3188,11 @@ Content-Security-Policy: connect-src http://example.com/;
      <li><a href="http://www.w3.org/TR/workers/#worker">Worker</a>
     </ul>
    <li>
+    <a data-link-type="biblio" href="#biblio-css-cascade-4">[css-cascade-4]</a> defines the following terms:
+    <ul>
+     <li><a href="https://drafts.csswg.org/css-cascade-4/#at-ruledef-import">@import</a>
+    </ul>
+   <li>
     <a data-link-type="biblio" href="#biblio-dom-ls">[dom-ls]</a> defines the following terms:
     <ul>
      <li><a href="https://dom.spec.whatwg.org/#event">Event</a>
@@ -3169,6 +3221,10 @@ Content-Security-Policy: connect-src http://example.com/;
    <dd>Ian Hickson. <a href="https://html.spec.whatwg.org/multipage/">HTML Standard</a>. Living Standard. URL: <a href="https://html.spec.whatwg.org/multipage/">https://html.spec.whatwg.org/multipage/</a>
    <dt id="biblio-sha2"><a class="self-link" href="#biblio-sha2"></a>[SHA2]
    <dd><a href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf">FIPS PUB 180-4, Secure Hash Standard</a>. URL: <a href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf">http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf</a>
+   <dt id="biblio-css-cascade-4"><a class="self-link" href="#biblio-css-cascade-4"></a>[CSS-CASCADE-4]
+   <dd>Elika Etemad; Tab Atkins Jr.. <a href="http://www.w3.org/TR/css-cascade-4/">CSS Cascading and Inheritance Level 4</a>. 8 September 2015. WD. URL: <a href="http://www.w3.org/TR/css-cascade-4/">http://www.w3.org/TR/css-cascade-4/</a>
+   <dt id="biblio-cssom"><a class="self-link" href="#biblio-cssom"></a>[CSSOM]
+   <dd>Simon Pieters; Glenn Adams. <a href="http://www.w3.org/TR/cssom/">CSS Object Model (CSSOM)</a>. 5 December 2013. WD. URL: <a href="http://www.w3.org/TR/cssom/">http://www.w3.org/TR/cssom/</a>
    <dt id="biblio-dom"><a class="self-link" href="#biblio-dom"></a>[DOM]
    <dd>Anne van Kesteren; et al. <a href="http://www.w3.org/TR/dom/">W3C DOM4</a>. 6 October 2015. PR. URL: <a href="http://www.w3.org/TR/dom/">http://www.w3.org/TR/dom/</a>
    <dt id="biblio-dom-ls"><a class="self-link" href="#biblio-dom-ls"></a>[DOM-LS]
@@ -3187,6 +3243,8 @@ Content-Security-Policy: connect-src http://example.com/;
    <dd>S. Josefsson. <a href="https://tools.ietf.org/html/rfc4648">The Base16, Base32, and Base64 Data Encodings</a>. October 2006. Proposed Standard. URL: <a href="https://tools.ietf.org/html/rfc4648">https://tools.ietf.org/html/rfc4648</a>
    <dt id="biblio-rfc5234"><a class="self-link" href="#biblio-rfc5234"></a>[RFC5234]
    <dd>D. Crocker, Ed.; P. Overell. <a href="https://tools.ietf.org/html/rfc5234">Augmented BNF for Syntax Specifications: ABNF</a>. January 2008. Internet Standard. URL: <a href="https://tools.ietf.org/html/rfc5234">https://tools.ietf.org/html/rfc5234</a>
+   <dt id="biblio-rfc5988"><a class="self-link" href="#biblio-rfc5988"></a>[RFC5988]
+   <dd>M. Nottingham. <a href="https://tools.ietf.org/html/rfc5988">Web Linking</a>. October 2010. Proposed Standard. URL: <a href="https://tools.ietf.org/html/rfc5988">https://tools.ietf.org/html/rfc5988</a>
    <dt id="biblio-rfc6454"><a class="self-link" href="#biblio-rfc6454"></a>[RFC6454]
    <dd>A. Barth. <a href="https://tools.ietf.org/html/rfc6454">The Web Origin Concept</a>. December 2011. Proposed Standard. URL: <a href="https://tools.ietf.org/html/rfc6454">https://tools.ietf.org/html/rfc6454</a>
    <dt id="biblio-rfc7230"><a class="self-link" href="#biblio-rfc7230"></a>[RFC7230]
@@ -3270,6 +3328,7 @@ dictionary <a href="#dictdef-securitypolicyviolationeventinit">SecurityPolicyVio
   It has not yet been added to W3C’s HTML.<a href="#issue-389933ec"> ↵ </a></div>
    <div class="issue"> Need to add this to HTML.<a href="#issue-a8c27cf5"> ↵ </a></div>
    <div class="issue"> Define this bit. :)<a href="#issue-0141f077"> ↵ </a></div>
+   <div class="issue"> This needs to be better explained.<a href="#issue-ba1a0a35"> ↵ </a></div>
   </div>
  </body>
 </html>

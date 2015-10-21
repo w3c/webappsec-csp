@@ -166,6 +166,12 @@ spec: SERVICE-WORKERS; urlPrefix: http://www.w3.org/TR/service-workers/
 spec: WORKERS; urlPrefix: http://www.w3.org/TR/workers/
   type: interface
     text: Worker
+spec: CSSOM; urlPrefix: http://www.w3.org/TR/cssom/
+  type: dfn
+    text: insert a css rule
+    text: parse a css declaration block
+    text: parse a css rule
+    text: parse a group of selectors
 spec: RFC3986; urlPrefix: https://tools.ietf.org/html/rfc3986
   type: grammar
     text: path; url: section-3.3
@@ -1584,9 +1590,9 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   The `script-src` directive governs four things:
   
-  1.  Script <a>requests</a> must pass through [[#should-block-request]].
-  2.  Script <a>responses</a> must pass through [[#should-block-response]].
-  3.  Inline <{script}> blocks must pass through [[#should-block-inline]]. Their
+  1.  Script <a>requests</a> MUST pass through [[#should-block-request]].
+  2.  Script <a>responses</a> MUST pass through [[#should-block-response]].
+  3.  Inline <{script}> blocks MUST pass through [[#should-block-inline]]. Their
       behavior will be blocked unless every policy allows inline script, either
       implicitly by not specifying a `script-src` (or `default-src`) directive,
       or explicitly, by whitelisting "`unsafe-inline`", a
@@ -1613,6 +1619,41 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     directive-name  = "style-src"
     directive-value = <a grammar>serialized-source-list</a>
   </pre>
+
+  The `style-src` directive governs several things:
+
+  1.  Style <a>requests</a> MUST pass through [[#should-block-request]]. This
+      includes:
+
+      1.  Stylesheet requests originating from a <{link}> element.
+      2.  Stylesheet requests originating from the <a at-rule>`@import`</a>
+          rule.
+      3.  Stylesheet requests originating from a `Link` HTTP response header
+          field [[!RFC5988]].
+  
+  2.  <a>Responses</a> to style requests MUST pass through
+      [[#should-block-response]].
+
+  3.  Inline <{style}> blocks MUST pass through [[#should-block-inline]]. The
+      styles will be blocked unless every policy allows inline style, either
+      implicitly by not specifying a `script-src` (or `default-src`) directive,
+      or explicitly, by whitelisting "`unsafe-inline`", a
+      <a grammar>nonce-source</a> or a <a grammar>hash-source</a> that matches
+      the inline block.
+
+  4.  The following CSS algorithms are gated on the `unsafe-eval` source
+      expression:
+
+      1.  <a>insert a CSS rule</a>
+      2.  <a>parse a CSS rule</a>,
+      3.  <a>parse a CSS declaration block</a>
+      4.  <a>parse a group of selectors</a>
+
+      This would include, for example, all invocations of CSSOM's various
+      <code>cssText</code> setters and <code>insertRule</code> methods
+      [[!CSSOM]] [[!HTML5]].
+
+      ISSUE: This needs to be better explained.
 
   <h4 id="fetch-directive-matching-url">URL Matching Algorithms</h4>
 
