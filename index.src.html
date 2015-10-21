@@ -341,7 +341,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
                         ; <a>OWS</a> is defined in section 3.2.3 of RFC 7230
   </pre>
 
-  <h4 id="parse-serialized-policy" dfn lt="parse a serialized policy">
+  <h4 id="parse-serialized-policy" dfn lt="parse a serialized policy" algorithm>
     Parse a |serialized policy|
   </h4>
 
@@ -385,7 +385,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   3.  Return |policy|.
 
-  <h4 id="parse-serialized-policy-list">
+  <h4 id="parse-serialized-policy-list" algorithm>
     Parse a serialized policy list
   </h4>
 
@@ -559,7 +559,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   <dfn for="violation" id="violation-column-number">column number</dfn>, which
   is a non-negative integer.
 
-  <h4 id="create-violation-for-global">
+  <h4 id="create-violation-for-global" algorithm>
     Create a violation object for |global|, |policy|, and |directive|
   </h4>
   
@@ -593,7 +593,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   5.  Return |violation|.
 
-  <h4 id="create-violation-for-request">
+  <h4 id="create-violation-for-request" algorithm>
     Create a violation object for |request|, |policy|, and |directive|
   </h4> 
 
@@ -795,7 +795,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       we'll process its <a for="response">CSP list</a> before handing the
       response back to our caller.
 
-  <h4 id="set-response-csp-list">
+  <h4 id="set-response-csp-list" algorithm>
     Set |response|'s `csp list`
   </h4>
 
@@ -833,7 +833,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       2.  Insert |policy| into |response|'s
           <a for="response">csp list</a>.
 
-  <h4 id="should-block-request">
+  <h4 id="should-block-request" algorithm>
     Should |request| be blocked by Content Security Policy?
   </h4>
 
@@ -861,14 +861,15 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
       4.  Execute [[#report-violation]] on the result of executing
           [[#create-violation-for-request]] on |request|, |policy|, and
-          |directive|.
+          the result of executing [[#effective-directive-for-a-request]]
+          on |request|.
 
       5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
           set |result| to "`Blocked`".
 
   4.  Return |result|.
 
-  <h4 id="should-block-response">
+  <h4 id="should-block-response" algorithm>
     Should |response| to |request| be blocked by Content
     Security Policy?
   </h4>
@@ -898,12 +899,13 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
       4.  Execute [[#report-violation]] on the result of executing
           [[#create-violation-for-request]] on |request|, |policy|, and
-          |directive|.
+          the result of executing [[#effective-directive-for-a-request]]
+          on |request|.
 
       5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
           set |result| to "`Blocked`".
 
-  4.  If |result|is "`Blocked`", return "`Blocked`".
+  4.  If |result| is "`Blocked`", return "`Blocked`".
 
   5.  If |request|'s <a for="request">destination</a> is "`document`"
       <em>and</em> the |request|'s <a for="request">target browsing
@@ -1000,8 +1002,8 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
       ISSUE: Need to add this to HTML.
 
-  <h4 id="initialise-global-object-csp">
-    Initialise |global object|'s `csp list`
+  <h4 id="initialise-global-object-csp" algorithm>
+    Initialise a global object's `csp list`
   </h4>
 
   Given a <a>global object</a> (|global|), and a <a>response</a>
@@ -1041,7 +1043,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   3.  If |global| is a {{Window}} object, execute [[#directive-sandbox-apply]]
       on |global|'s {{Window/document}}.
 
-  <h4 id="should-block-inline">
+  <h4 id="should-block-inline" algorithm>
     Should |node|'s inline behavior be blocked by Content Security Policy?
   </h4>
 
@@ -1058,8 +1060,6 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
           executed upon |node| and |policy|, set |result| to "`Blocked`".
 
   2.  Return |result|. 
-
-
 </section>
 
 <!-- Big Text: Reporting -->
@@ -1678,7 +1678,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   <h4 id="fetch-directive-matching-url">URL Matching Algorithms</h4>
 
-  <h5 id="match-request-to-policy">
+  <h5 id="match-request-to-policy" algorithm>
     Does |request| match |policy|?
   </h5>
 
@@ -1688,7 +1688,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   2.  Return the result of executing [[#match-url-to-source-list]] on
       |request|'s <a for="request">url</a> and |source list|.
 
-  <h5 id="match-url-to-source-list">
+  <h5 id="match-url-to-source-list" algorithm>
     Does |url| match |source list|?
   </h5>
 
@@ -1708,7 +1708,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   4.  Return "`Does Not Match`".
 
-  <h5 id="match-url-to-source-expression">
+  <h5 id="match-url-to-source-expression" algorithm>
     Does |url| match |expression| in |origin| with |redirect count|?
   </h5>
 
@@ -1824,7 +1824,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   5.  Return "`Does Not Match`".
 
-  <h5 id="effective-directive-for-a-request">
+  <h5 id="effective-directive-for-a-request" algorithm>
     Get the effective directive for |request|
   </h5>
 
@@ -1886,7 +1886,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   2.  Return `null`.
 
-  <h5 id="effective-source-list-for-request">
+  <h5 id="effective-source-list-for-request" algorithm>
     Get the effective source list for |request| and |policy|
   </h5>
 
@@ -1915,7 +1915,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   <h4 id="fetch-directive-matching-nodes">Node Matching Algorithms</h4>
 
-  <h5 id="match-node-to-policy">
+  <h5 id="match-node-to-policy" algorithm>
     Does |node| match |policy|?
   </h5>
 
@@ -1944,7 +1944,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   8.  Return the result of executing [[#match-node-to-source-list]] on |node|
       and |source list|.
 
-  <h5 id="match-node-to-source-list">
+  <h5 id="match-node-to-source-list" algorthm>
     Does |node| match source |list|?
   </h5>
 
@@ -2019,7 +2019,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   The following algorithm is called during HTML's <a>set the frozen base url</a>
   algorithm in order to monitor and enforce this directive:
 
-  <h5 id="allow-base-for-document">
+  <h5 id="allow-base-for-document" algorithm>
     Is |base| allowed for |document|?
   </h5>
 
@@ -2143,8 +2143,18 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   <h4 id="directive-report-uri">`report-uri`</h4>
 
-  The <dfn>report-uri</dfn> directive is deprecated. Please use the
+  Note: The <a>`report-uri`</a> directive is deprecated. Please use the
   <a>reports</a> directive instead.
+
+  The <dfn>`report-uri`</dfn> directive defines a set of endpoints to which
+  <a>violation reports</a> will be sent when particular behaviors are prevented.
+  The directive has no effect in and of itself, but only gains meaning in
+  combination with other directives.
+
+  Various algorithms in this document hook into the reporting process by
+  constructing a <a>violation</a> object via [[#create-violation-for-request]]
+  or [[#create-violation-for-global]], and passing that object to
+  [[#report-violation]] to deliver the report.
 
   <h4 id="directive-report">`reports`</h4>
 
@@ -2157,37 +2167,9 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     directive-value = &lt;URL&gt; ; TODO: Figure out what to use here.
   </pre>
 
-</section>
-
-<!-- Big Text: Algorithms -->
-<section>
-  <h2 id="algorithms">Algorithms</h2>
-
-  <h3 id="algorithms-matching">Matching Algorithms</h3>
-
-
-  <h3 id="internal-helpers">Internal Helpers</h3>
-
-  These algorithms are part of the internal processing model of Content Security
-  Policy, and are not meant to be called from other specifications.
-
-  <h4 id="get-policies">
-    Gather policies for |global object| and |disposition|
-  </h4>
-
-  Given a <a>global object</a> (|global|), and a |disposition|
-  of either `enforce` or `monitor` this algorithm returns a list of
-  <a>policies</a> which ought to be considered.
-
-  1.  Let |policies| be an empty list.
-
-  2.  For each |policy| in |global|'s
-      <a for="global object">csp list</a>:
-
-      1.  If |policy|'s <a for="policy">disposition</a> is
-          |disposition|, add |policy| to |policies|.
-
-  3.  Return |policies|.
+  ISSUE: Finish stubbing out
+  <a href="https://mikewest.github.io/error-reporting/">Not Just Error
+  Reporting</a> with Ilya so we can integrate that work here.
 </section>
 
 <!-- Big text: Security -->
