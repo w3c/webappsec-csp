@@ -46,6 +46,8 @@ spec: HTML5; urlPrefix: http://www.w3.org/TR/html5/
       text: creator document
       text: nested browsing context
       text: nested through; url: browsing-context-nested-through
+      text: forced sandboxing flag set
+      text: parse a sandboxing directive
     urlPrefix: webappapis.html
       text: environment settings object; url: settings-object
       text: global object
@@ -1036,6 +1038,9 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       <a for="response">csp list</a>, insert |policy| into
       |global|'s <a for="global object">csp list</a>.
 
+  3.  If |global| is a {{Window}} object, execute [[#directive-sandbox-apply]]
+      on |global|'s {{Window/document}}.
+
   <h4 id="should-block-inline">
     Should |node|'s inline behavior be blocked by Content Security Policy?
   </h4>
@@ -1325,7 +1330,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   This directive controls <a>requests</a> which transmit or receive data from
   other origins. More formally, <a>requests</a> falling into one of the
-  following categories: 
+  following categories [[FETCH]]: 
  
   *   <a for="request">initiator</a> is "`fetch`" (e.g. `fetch()`)
   *   <a for="request">type</a> is "", and whose
@@ -1455,6 +1460,10 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     directive-value = <a grammar>serialized-source-list</a>
   </pre>
 
+  This directive controls <a>requests</a> which load fonts. More formally, this
+  includes <a>requests</a> whose <a for="request">type</a> is "`font`"
+  [[FETCH]].
+
   <div class="example">
     Given a page with the following Content Security Policy:
 
@@ -1489,6 +1498,10 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     directive-value = <a grammar>serialized-source-list</a>
   </pre>
 
+  This directive controls <a>requests</a> which load images. More formally, this
+  includes <a>requests</a> whose <a for="request">type</a> is "`image`"
+  [[FETCH]].
+
   <div class="example">
     Given a page with the following Content Security Policy:
 
@@ -1515,6 +1528,10 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     directive-value = <a grammar>serialized-source-list</a>
   </pre>
 
+  This directive controls <a>requests</a> which load images. More formally, this
+  includes <a>requests</a> whose <a for="request">type</a> is "`track`",
+  "`video`", or "`audio`" [[FETCH]].
+
   <div class="example">
     Given a page with the following Content Security Policy:
 
@@ -1522,14 +1539,14 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       Content-Security-Policy: <a>media-src</a> https://example.com/
     </pre>
 
-    
-
-
     Fetches for the following code will return a network errors, as the URL
     provided do not match `media-src`'s <a>source list</a>:
 
     <pre>
-      &lt;img src="https://not-example.com/img"&gt;
+      &lt;audio src="https://not-example.com/audio"&gt;&lt;/audio&gt;
+      &lt;video src="https://not-example.com/video"&gt;
+          &lt;track kind="subtitles" src="https://not-example.com/subtitles"&gt;
+      &lt;/video&gt;
     </pre>
   </div>
 
@@ -1543,6 +1560,10 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     directive-name  = "object-src"
     directive-value = <a grammar>serialized-source-list</a>
   </pre>
+
+  This directive controls <a>requests</a> which load plugin content. More
+  formally, this includes <a>requests</a> whose
+  <a for="request">destination</a> is "`unknown`" [[FETCH]].
 
   <div class="example">
     Given a page with the following Content Security Policy:
@@ -2035,6 +2056,12 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   2.  Return "`Allowed`".
 
   <h4 id="directive-form-action">`form-action`</h4>
+
+  The <dfn>form-action</dfn> directive restricts the {{URL}}s which can be used
+  as the target of a form submissions.
+
+  ISSUE: Define the hooks into HTML's navigation and form submission algorithms.
+
   <h4 id="directive-frame-ancestors">`frame-ancestors`</h4>
 
   The <dfn>frame-ancestors</dfn> directive restricts the {{URL}}s which can
@@ -2070,7 +2097,45 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   <h4 id="directive-sandbox">`sandbox`</h4>
 
-  <dfn>sandbox</dfn>
+  The <dfn>sandbox</dfn> directive specifies an HTML sandbox policy which the
+  user agent will apply to a resource, just as though it had been included in
+  an <{iframe}> with a <{iframe/sandbox}> property.
+
+  The directive's syntax is described by the following ABNF grammar:
+
+  <pre dfn-type="grammar" link-type="grammar">
+    directive-name  = "sandbox"
+    directive-value = "" / <a>token</a> *( <a>RWS</a> <a>token</a> )
+  </pre>
+
+  This directive has no reporting requirements; it will be ignored entirely when
+  delivered in a <a>`Content-Security-Policy-Report-Only`</a> header, or within
+  a <{meta}> element.
+
+  <h5 id="directive-sandbox-apply" algorithm>
+    Apply the `sandbox` directive to |document|
+  </h5>
+
+  Given a |document|, this algorithm adjusts its <a>forced sandboxing flag
+  set</a> according to the <a>`sandbox`</a> values present in its policies.
+
+  Note: This algorithm is executed during [[#initialise-global-object-csp]]
+  (which is executed during HTML's <a>initialising a new `Document` object</a>
+  algorithm).
+
+  1.  For each |policy| in |document|'s <a>global object</a>'s
+      <a for="global object">CSP list</a>:
+
+      1.  If |policy|'s <a for="policy">disposition</a> is not "`Enforce`", skip
+          to the next |policy|.
+
+      2.  If |policy|'s <a for="policy">directive set</a> does not contain a
+          <a>directive</a> (|directive|) whose <a for="directive">name</a> is
+          "`sandbox`", skip to the next |policy|.
+
+      3.  <a>Parse a sandboxing directive</a> using |directive|'s
+          <a for="directive">value</a> as the input, and |document|'s <a>forced
+          sandboxing flag set</a> as the output.
 
   <h3 id="directives-reporting">
     Reporting Directives

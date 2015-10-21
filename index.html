@@ -1153,7 +1153,11 @@ of security-relevant policy decisions.</p>
         <li><a href="#directive-form-action"><span class="secno">6.2.2</span> <span class="content"><code>form-action</code></span></a>
         <li><a href="#directive-frame-ancestors"><span class="secno">6.2.3</span> <span class="content"><code>frame-ancestors</code></span></a>
         <li><a href="#directive-plugin-types"><span class="secno">6.2.4</span> <span class="content"><code>plugin-types</code></span></a>
-        <li><a href="#directive-sandbox"><span class="secno">6.2.5</span> <span class="content"><code>sandbox</code></span></a>
+        <li>
+         <a href="#directive-sandbox"><span class="secno">6.2.5</span> <span class="content"><code>sandbox</code></span></a>
+         <ul class="toc">
+          <li><a href="#directive-sandbox-apply"><span class="secno">6.2.5.1</span> <span class="content"> Apply the <code>sandbox</code> directive to <var>document</var> </span></a>
+         </ul>
        </ul>
       <li>
        <a href="#directives-reporting"><span class="secno">6.3</span> <span class="content"> Reporting Directives </span></a>
@@ -1787,6 +1791,8 @@ of security-relevant policy decisions.</p>
   therefore alias the <a data-link-type="dfn" href="#embedding-document">embedding document</a>’s policies for <a data-link-type="dfn" href="http://www.w3.org/TR/html5/embedded-content-0.html#an-iframe-srcdoc-document">an iframe <code>srcdoc</code> <code>Document</code></a>.</p>
      <li data-md="">
       <p>For each <var>policy</var> in <var>response</var>'s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">csp list</a>, insert <var>policy</var> into <var>global</var>'s <a data-link-type="dfn" href="#global-object-csp-list">csp list</a>.</p>
+     <li data-md="">
+      <p>If <var>global</var> is a <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/html5/browsers.html#dom-window">Window</a></code> object, execute <a href="#directive-sandbox-apply">§6.2.5.1 Apply the sandbox directive to document</a> on <var>global</var>'s <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/html5/browsers.html#dom-document-2">document</a></code>.</p>
     </ol>
     <h4 class="heading settled" data-level="4.2.2" id="should-block-inline"><span class="secno">4.2.2. </span><span class="content"> Should <var>node</var>'s inline behavior be blocked by Content Security Policy? </span><a class="self-link" href="#should-block-inline"></a></h4>
     <p>Given a <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/dom/#interface-node">Node</a></code> (<var>node</var>), this algorithm returns "<code>Allowed</code>" if the node
@@ -2086,7 +2092,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 </pre>
     <p>This directive controls <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">requests</a> which transmit or receive data from
   other origins. More formally, <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">requests</a> falling into one of the
-  following categories:</p>
+  following categories <a data-link-type="biblio" href="#biblio-fetch">[FETCH]</a>:</p>
     <ul>
      <li data-md="">
       <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-initiator">initiator</a> is "<code>fetch</code>" (e.g. <code>fetch()</code>)</p>
@@ -2180,6 +2186,8 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 <pre>directive-name  = "font-src"
 directive-value = <a data-link-type="grammar" href="#grammardef-serialized-source-list">serialized-source-list</a>
 </pre>
+    <p>This directive controls <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">requests</a> which load fonts. More formally, this
+  includes <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">requests</a> whose <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-type">type</a> is "<code>font</code>" <a data-link-type="biblio" href="#biblio-fetch">[FETCH]</a>.</p>
     <div class="example" id="example-38056220">
      <a class="self-link" href="#example-38056220"></a> Given a page with the following Content Security Policy: 
 <pre>Content-Security-Policy: <a data-link-type="dfn" href="#font-src">font-src</a> https://example.com/
@@ -2204,6 +2212,8 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 <pre>directive-name  = "img-src"
 directive-value = <a data-link-type="grammar" href="#grammardef-serialized-source-list">serialized-source-list</a>
 </pre>
+    <p>This directive controls <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">requests</a> which load images. More formally, this
+  includes <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">requests</a> whose <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-type">type</a> is "<code>image</code>" <a data-link-type="biblio" href="#biblio-fetch">[FETCH]</a>.</p>
     <div class="example" id="example-8e5ffeae">
      <a class="self-link" href="#example-8e5ffeae"></a> Given a page with the following Content Security Policy: 
 <pre>Content-Security-Policy: <a data-link-type="dfn" href="#img-src">img-src</a> https://example.com/
@@ -2220,13 +2230,19 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 <pre>directive-name  = "media-src"
 directive-value = <a data-link-type="grammar" href="#grammardef-serialized-source-list">serialized-source-list</a>
 </pre>
-    <div class="example" id="example-17388154">
-     <a class="self-link" href="#example-17388154"></a> Given a page with the following Content Security Policy: 
+    <p>This directive controls <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">requests</a> which load images. More formally, this
+  includes <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">requests</a> whose <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-type">type</a> is "<code>track</code>",
+  "<code>video</code>", or "<code>audio</code>" <a data-link-type="biblio" href="#biblio-fetch">[FETCH]</a>.</p>
+    <div class="example" id="example-557d9dba">
+     <a class="self-link" href="#example-557d9dba"></a> Given a page with the following Content Security Policy: 
 <pre>Content-Security-Policy: <a data-link-type="dfn" href="#media-src">media-src</a> https://example.com/
 </pre>
      <p>Fetches for the following code will return a network errors, as the URL
     provided do not match <code>media-src</code>'s <a data-link-type="dfn" href="#source-lists">source list</a>:</p>
-<pre>&lt;img src="https://not-example.com/img">
+<pre>&lt;audio src="https://not-example.com/audio">&lt;/audio>
+&lt;video src="https://not-example.com/video">
+    &lt;track kind="subtitles" src="https://not-example.com/subtitles">
+&lt;/video>
 </pre>
     </div>
     <h4 class="heading settled" data-level="6.1.7" id="directive-object-src"><span class="secno">6.1.7. </span><span class="content"><code>object-src</code></span><a class="self-link" href="#directive-object-src"></a></h4>
@@ -2236,6 +2252,8 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 <pre>directive-name  = "object-src"
 directive-value = <a data-link-type="grammar" href="#grammardef-serialized-source-list">serialized-source-list</a>
 </pre>
+    <p>This directive controls <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">requests</a> which load plugin content. More
+  formally, this includes <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">requests</a> whose <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-destination">destination</a> is "<code>unknown</code>" <a data-link-type="biblio" href="#biblio-fetch">[FETCH]</a>.</p>
     <div class="example" id="example-3469e20e">
      <a class="self-link" href="#example-3469e20e"></a> Given a page with the following Content Security Policy: 
 <pre>Content-Security-Policy: <a data-link-type="dfn" href="#object-src">object-src</a> https://example.com/
@@ -2694,6 +2712,9 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <p>Return "<code>Allowed</code>".</p>
     </ol>
     <h4 class="heading settled" data-level="6.2.2" id="directive-form-action"><span class="secno">6.2.2. </span><span class="content"><code>form-action</code></span><a class="self-link" href="#directive-form-action"></a></h4>
+    <p>The <dfn data-dfn-type="dfn" data-noexport="" id="form-action">form-action<a class="self-link" href="#form-action"></a></dfn> directive restricts the <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url">URL</a></code>s which can be used
+  as the target of a form submissions.</p>
+    <p class="issue" id="issue-15904ee9"><a class="self-link" href="#issue-15904ee9"></a> Define the hooks into HTML’s navigation and form submission algorithms.</p>
     <h4 class="heading settled" data-level="6.2.3" id="directive-frame-ancestors"><span class="secno">6.2.3. </span><span class="content"><code>frame-ancestors</code></span><a class="self-link" href="#directive-frame-ancestors"></a></h4>
     <p>The <dfn data-dfn-type="dfn" data-noexport="" id="frame-ancestors">frame-ancestors<a class="self-link" href="#frame-ancestors"></a></dfn> directive restricts the <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url">URL</a></code>s which can
   embed the resource using <code><a data-link-type="element" href="http://www.w3.org/TR/html5/obsolete.html#frame">frame</a></code>, <code><a data-link-type="element" href="http://www.w3.org/TR/html5/embedded-content-0.html#the-iframe-element">iframe</a></code>, <code><a data-link-type="element" href="http://www.w3.org/TR/html5/embedded-content-0.html#the-object-element">object</a></code>, <code><a data-link-type="element" href="http://www.w3.org/TR/html5/embedded-content-0.html#the-embed-element">embed</a></code>, or <code><a data-link-type="element" href="http://www.w3.org/TR/html5/obsolete.html#the-applet-element">applet</a></code> element. Resources can use this directive to avoid many UI
@@ -2715,7 +2736,35 @@ directive-value = <a data-link-type="grammar" href="#grammardef-ancestor-source-
     <h4 class="heading settled" data-level="6.2.4" id="directive-plugin-types"><span class="secno">6.2.4. </span><span class="content"><code>plugin-types</code></span><a class="self-link" href="#directive-plugin-types"></a></h4>
     <p><dfn data-dfn-type="dfn" data-noexport="" id="plugin-types">plugin-types<a class="self-link" href="#plugin-types"></a></dfn></p>
     <h4 class="heading settled" data-level="6.2.5" id="directive-sandbox"><span class="secno">6.2.5. </span><span class="content"><code>sandbox</code></span><a class="self-link" href="#directive-sandbox"></a></h4>
-    <p><dfn data-dfn-type="dfn" data-noexport="" id="sandbox">sandbox<a class="self-link" href="#sandbox"></a></dfn></p>
+    <p>The <dfn data-dfn-type="dfn" data-noexport="" id="sandbox">sandbox<a class="self-link" href="#sandbox"></a></dfn> directive specifies an HTML sandbox policy which the
+  user agent will apply to a resource, just as though it had been included in
+  an <code><a data-link-type="element" href="http://www.w3.org/TR/html5/embedded-content-0.html#the-iframe-element">iframe</a></code> with a <code><a data-link-type="element-attr" href="https://html.spec.whatwg.org/multipage/embedded-content.html#attr-iframe-sandbox">sandbox</a></code> property.</p>
+    <p>The directive’s syntax is described by the following ABNF grammar:</p>
+<pre>directive-name  = "sandbox"
+directive-value = "" / <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc7230#section-3.2.6">token</a> *( <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc7230#section-3.2.3">RWS</a> <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc7230#section-3.2.6">token</a> )
+</pre>
+    <p>This directive has no reporting requirements; it will be ignored entirely when
+  delivered in a <a data-link-type="dfn" href="#content-security-policy-report-only"><code>Content-Security-Policy-Report-Only</code></a> header, or within
+  a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-meta-element">meta</a></code> element.</p>
+    <h5 class="heading settled" data-algorithm="Apply the sandbox directive to document" data-level="6.2.5.1" id="directive-sandbox-apply"><span class="secno">6.2.5.1. </span><span class="content"> Apply the <code>sandbox</code> directive to <var>document</var> </span><a class="self-link" href="#directive-sandbox-apply"></a></h5>
+    <p>Given a <var>document</var>, this algorithm adjusts its <a data-link-type="dfn" href="http://www.w3.org/TR/html5/browsers.html#forced-sandboxing-flag-set">forced sandboxing flag
+  set</a> according to the <a data-link-type="dfn" href="#sandbox"><code>sandbox</code></a> values present in its policies.</p>
+    <p class="note" role="note">Note: This algorithm is executed during <a href="#initialise-global-object-csp">§4.2.1 Initialise global object's csp list</a> (which is executed during HTML’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/#initialising-a-new-document-object">initialising a new <code>Document</code> object</a> algorithm).</p>
+    <ol>
+     <li data-md="">
+      <p>For each <var>policy</var> in <var>document</var>'s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list">CSP list</a>:</p>
+      <ol>
+       <li data-md="">
+        <p>If <var>policy</var>'s <a data-link-type="dfn" href="#disposition">disposition</a> is not "<code>Enforce</code>", skip
+  to the next <var>policy</var>.</p>
+       <li data-md="">
+        <p>If <var>policy</var>'s <a data-link-type="dfn" href="#directive-set">directive set</a> does not contain a <a data-link-type="dfn" href="#directives">directive</a> (<var>directive</var>) whose <a data-link-type="dfn" href="#name">name</a> is
+  "<code>sandbox</code>", skip to the next <var>policy</var>.</p>
+       <li data-md="">
+        <p><a data-link-type="dfn" href="http://www.w3.org/TR/html5/browsers.html#parse-a-sandboxing-directive">Parse a sandboxing directive</a> using <var>directive</var>'s <a data-link-type="dfn" href="#value">value</a> as the input, and <var>document</var>'s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/browsers.html#forced-sandboxing-flag-set">forced
+  sandboxing flag set</a> as the output.</p>
+      </ol>
+    </ol>
     <h3 class="heading settled" data-level="6.3" id="directives-reporting"><span class="secno">6.3. </span><span class="content"> Reporting Directives </span><a class="self-link" href="#directives-reporting"></a></h3>
     <h4 class="heading settled" data-level="6.3.1" id="directive-report-uri"><span class="secno">6.3.1. </span><span class="content"><code>report-uri</code></span><a class="self-link" href="#directive-report-uri"></a></h4>
     <p>The <dfn data-dfn-type="dfn" data-noexport="" id="report-uri">report-uri<a class="self-link" href="#report-uri"></a></dfn> directive is deprecated. Please use the <a data-link-type="dfn" href="#reports">reports</a> directive instead.</p>
@@ -2919,6 +2968,7 @@ Content-Security-Policy: connect-src http://example.com/;
    <li><a href="#dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-eventinitdict">eventInitDict</a><span>, in §5.1</span>
    <li><a href="#fetch-directives">Fetch directives</a><span>, in §6.1</span>
    <li><a href="#font-src">font-src</a><span>, in §6.1.4</span>
+   <li><a href="#form-action">form-action</a><span>, in §6.2.2</span>
    <li><a href="#frame-ancestors">frame-ancestors</a><span>, in §6.2.3</span>
    <li><a href="#violation-global-object">global object</a><span>, in §2.3</span>
    <li><a href="#grammardef-hash-algorithm">hash-algorithm</a><span>, in §2.2.1</span>
@@ -3094,6 +3144,7 @@ Content-Security-Policy: connect-src http://example.com/;
      <li><a href="http://www.w3.org/TR/html5/browsers.html#dom-document-2">document</a>
      <li><a href="http://www.w3.org/TR/html5/embedded-content-0.html#the-embed-element">embed</a>
      <li><a href="http://www.w3.org/TR/html5/infrastructure.html#concept-event-fire">fire</a>
+     <li><a href="http://www.w3.org/TR/html5/browsers.html#forced-sandboxing-flag-set">forced sandboxing flag set</a>
      <li><a href="http://www.w3.org/TR/html5/obsolete.html#frame">frame</a>
      <li><a href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>
      <li><a href="http://www.w3.org/TR/html5/document-metadata.html#attr-meta-http-equiv">http-equiv</a>
@@ -3103,6 +3154,7 @@ Content-Security-Policy: connect-src http://example.com/;
      <li><a href="http://www.w3.org/TR/html5/browsers.html#nested-browsing-context">nested browsing context</a>
      <li><a href="http://www.w3.org/TR/html5/browsers.html#browsing-context-nested-through">nested through</a>
      <li><a href="http://www.w3.org/TR/html5/embedded-content-0.html#the-object-element">object</a>
+     <li><a href="http://www.w3.org/TR/html5/browsers.html#parse-a-sandboxing-directive">parse a sandboxing directive</a>
      <li><a href="http://www.w3.org/TR/html5/scripting-1.html#prepare-a-script">prepare a script</a>
      <li><a href="http://www.w3.org/TR/html5/dom.html#dom-document-referrer">referrer</a>
      <li><a href="http://www.w3.org/TR/html5/webappapis.html#relevant-settings-object-for-a-global-object">relevant settings object</a>
@@ -3147,6 +3199,7 @@ Content-Security-Policy: connect-src http://example.com/;
     <ul>
      <li><a href="https://tools.ietf.org/html/rfc7230#section-3.2.3">ows</a>
      <li><a href="https://tools.ietf.org/html/rfc7230#section-3.2.3">rws</a>
+     <li><a href="https://tools.ietf.org/html/rfc7230#section-3.2.6">token</a>
     </ul>
    <li>
     <a data-link-type="biblio" href="#biblio-rfc7231">[rfc7231]</a> defines the following terms:
@@ -3206,6 +3259,7 @@ Content-Security-Policy: connect-src http://example.com/;
      <li><a href="https://html.spec.whatwg.org/multipage/workers.html#workerglobalscope">WorkerGlobalScope</a>
      <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#attr-object-data">data</a>
      <li><a href="https://html.spec.whatwg.org/multipage/semantics.html#attr-base-href">href</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#attr-iframe-sandbox">sandbox</a>
      <li><a href="https://html.spec.whatwg.org/multipage/webappapis.html#dom-windowtimers-setinterval">setInterval()</a>
      <li><a href="https://html.spec.whatwg.org/multipage/webappapis.html#dom-windowtimers-settimeout">setTimeout()</a>
     </ul>
@@ -3329,6 +3383,7 @@ dictionary <a href="#dictdef-securitypolicyviolationeventinit">SecurityPolicyVio
    <div class="issue"> Need to add this to HTML.<a href="#issue-a8c27cf5"> ↵ </a></div>
    <div class="issue"> Define this bit. :)<a href="#issue-0141f077"> ↵ </a></div>
    <div class="issue"> This needs to be better explained.<a href="#issue-ba1a0a35"> ↵ </a></div>
+   <div class="issue"> Define the hooks into HTML’s navigation and form submission algorithms.<a href="#issue-15904ee9"> ↵ </a></div>
   </div>
  </body>
 </html>
