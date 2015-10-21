@@ -993,7 +993,7 @@
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="http://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/Icons/w3c_home" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">Content Security Policy Level 3</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2015-10-15">15 October 2015</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2015-10-21">21 October 2015</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1101,6 +1101,7 @@ of security-relevant policy decisions.</p>
        <a href="#html-integration"><span class="secno">4.2</span> <span class="content"> Integration with HTML </span></a>
        <ul class="toc">
         <li><a href="#initialise-global-object-csp"><span class="secno">4.2.1</span> <span class="content"> Initialise <var>global object</var>'s <code>csp list</code> </span></a>
+        <li><a href="#should-block-inline"><span class="secno">4.2.2</span> <span class="content"> Should <var>node</var>'s inline behavior be blocked by Content Security Policy? </span></a>
        </ul>
      </ul>
     <li>
@@ -1735,15 +1736,15 @@ of security-relevant policy decisions.</p>
       <p class="issue" id="issue-1e5f494a"><a class="self-link" href="#issue-1e5f494a"></a> Need to monkey-patch these in: something like "Set the <code>Window</code> object’s <code>csp list</code> to the <code>csp list</code> of the resource used to
   generate the document.</p>
      <li data-md="">
-      <p><a href="#match-node-to-policy">§6.1.11.1 Does node match policy?</a> is called during the <a data-link-type="dfn" href="http://www.w3.org/TR/html5/scripting-1.html#prepare-a-script">prepare a script</a> and <a data-link-type="dfn" href="https://html.spec.whatwg.org/#update-a-style-block">update a <code>style</code> block</a> algorithms in order to determine whether or
+      <p><a href="#should-block-inline">§4.2.2 Should node's inline behavior be blocked by Content Security Policy?</a> is called during the <a data-link-type="dfn" href="http://www.w3.org/TR/html5/scripting-1.html#prepare-a-script">prepare a script</a> and <a data-link-type="dfn" href="https://html.spec.whatwg.org/#update-a-style-block">update a <code>style</code> block</a> algorithms in order to determine whether or
   not an inline script or style block is allowed to execute.</p>
       <p class="issue" id="issue-f40dd242"><a class="self-link" href="#issue-f40dd242"></a> The <a data-link-type="dfn" href="https://html.spec.whatwg.org/#update-a-style-block">update a <code>style</code> block</a> algorithm does not exist in
   W3C’s HTML.</p>
       <p class="issue" id="issue-80f81a73"><a class="self-link" href="#issue-80f81a73"></a> The <code>nonce</code> attribute for <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> and <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-style-element">style</a></code> were added to
   WHATWG’s HTML in <a href="https://github.com/whatwg/html/commit/882803c4cc8fba2fa5472b76f628d95cc82c421d">whatwg/html@882803c</a>.
   They have not yet been added to W3C’s HTML.</p>
-      <p class="issue" id="issue-18f0a7e9"><a class="self-link" href="#issue-18f0a7e9"></a> Need to monkey-patch these in: something like "If <a href="#match-node-to-policy">§6.1.11.1 Does node match policy?</a> returns <code>Does Not Match</code> when executed upon the
-  element and the element’s <code>Document</code>'s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <code>csp list</code>, abort these steps."</p>
+      <p class="issue" id="issue-b6b49e31"><a class="self-link" href="#issue-b6b49e31"></a> Need to monkey-patch these in: something like "If <a href="#should-block-inline">§4.2.2 Should node's inline behavior be blocked by Content Security Policy?</a> returns <code>Blocked</code> when executed upon the
+  element, then abort these steps."</p>
      <li data-md="">
       <p><a data-link-type="dfn" href="#policy">Policies</a> are <a data-link-type="dfn" href="#enforced">enforced</a> during processing of the <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-meta-element">meta</a></code> element’s <code><a data-link-type="element-attr" href="http://www.w3.org/TR/html5/document-metadata.html#attr-meta-http-equiv">http-equiv</a></code>.</p>
       <p class="issue" id="issue-389933ec"><a class="self-link" href="#issue-389933ec"></a> This processing was added to WHATWG’s HTML in <a href="https://github.com/whatwg/html/commit/5064a629f22bef29839ab4dc6f1ceef17f010bc5">whatwg/html@5064a62</a>.
@@ -1786,6 +1787,23 @@ of security-relevant policy decisions.</p>
   therefore alias the <a data-link-type="dfn" href="#embedding-document">embedding document</a>’s policies for <a data-link-type="dfn" href="http://www.w3.org/TR/html5/embedded-content-0.html#an-iframe-srcdoc-document">an iframe <code>srcdoc</code> <code>Document</code></a>.</p>
      <li data-md="">
       <p>For each <var>policy</var> in <var>response</var>'s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">csp list</a>, insert <var>policy</var> into <var>global</var>'s <a data-link-type="dfn" href="#global-object-csp-list">csp list</a>.</p>
+    </ol>
+    <h4 class="heading settled" data-level="4.2.2" id="should-block-inline"><span class="secno">4.2.2. </span><span class="content"> Should <var>node</var>'s inline behavior be blocked by Content Security Policy? </span><a class="self-link" href="#should-block-inline"></a></h4>
+    <p>Given a <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/dom/#interface-node">Node</a></code> (<var>node</var>), this algorithm returns "<code>Allowed</code>" if the node
+  can is allowed to have inline definition of behavior (script execution,
+  style application, event handlers, etc.), and "<code>Blocked</code>" otherwise:</p>
+    <ol>
+     <li data-md="">
+      <p>Let <var>result</var> be "<code>Allowed</code>".</p>
+     <li data-md="">
+      <p>For each <var>policy</var> in <var>node</var>'s <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/html5/dom.html#document">Document</a></code>'s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list">CSP list</a>:</p>
+      <ol>
+       <li data-md="">
+        <p>If <a href="#match-node-to-policy">§6.1.11.1 Does node match policy?</a> returns "<code>Does Not Match</code>" when
+  executed upon <var>node</var> and <var>policy</var>, set <var>result</var> to "<code>Blocked</code>".</p>
+      </ol>
+     <li data-md="">
+      <p>Return <var>result</var>.</p>
     </ol>
    </section>
    <section>
@@ -2178,6 +2196,34 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 <pre>directive-name  = "script-src"
 directive-value = <a data-link-type="grammar" href="#grammardef-serialized-source-list">serialized-source-list</a>
 </pre>
+    <p>The <code>script-src</code> directive governs four things:</p>
+    <ol>
+     <li data-md="">
+      <p>Script <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">requests</a> must pass through <a href="#should-block-request">§4.1.2 Should request be blocked by Content Security Policy?</a>.</p>
+     <li data-md="">
+      <p>Script <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">responses</a> must pass through <a href="#should-block-response">§4.1.3 Should response to request be blocked by Content
+    Security Policy?</a>.</p>
+     <li data-md="">
+      <p>Inline <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> blocks must pass through <a href="#should-block-inline">§4.2.2 Should node's inline behavior be blocked by Content Security Policy?</a>. Their
+  behavior will be blocked unless every policy allows inline script, either
+  implicitly by not specifying a <code>script-src</code> (or <code>default-src</code>) directive,
+  or explicitly, by whitelisting "<code>unsafe-inline</code>", a <a data-link-type="grammar" href="#grammardef-nonce-source">nonce-source</a> or a <a data-link-type="grammar" href="#grammardef-hash-source">hash-source</a> that matches
+  the inline block.</p>
+     <li data-md="">
+      <p>The following JavaScript execution sinks are gated on the "<code>unsafe-eval</code>"
+  source expression:</p>
+      <ul>
+       <li data-md="">
+        <p><code class="idl"><a data-link-type="idl" href="http://www.ecma-international.org/ecma-262/6.0/index.html#sec-eval-x">eval()</a></code></p>
+       <li data-md="">
+        <p><code class="idl"><a data-link-type="idl" href="http://www.ecma-international.org/ecma-262/6.0/index.html#sec-function-objects">Function()</a></code></p>
+       <li data-md="">
+        <p><code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/webappapis.html#dom-windowtimers-settimeout">setTimeout()</a></code> with an initial argument which is not callable.</p>
+       <li data-md="">
+        <p><code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/webappapis.html#dom-windowtimers-setinterval">setInterval()</a></code> with an initial argument which is not callable.</p>
+      </ul>
+      <p class="note" role="note">Note: If a user agent implements non-standard sinks like <code>setImmediate()</code> or <code>execScript()</code>, they SHOULD also be gated on "<code>unsafe-eval</code>".</p>
+    </ol>
     <h4 class="heading settled" data-level="6.1.9" id="directive-style-src"><span class="secno">6.1.9. </span><span class="content"><code>style-src</code></span><a class="self-link" href="#directive-style-src"></a></h4>
     <p>The <dfn data-dfn-type="dfn" data-noexport="" id="style-src">style-src<a class="self-link" href="#style-src"></a></dfn> directive restricts the locations from which style
   may be applied to a <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/html5/dom.html#document">Document</a></code>. The syntax for the directive’s name and
@@ -2553,8 +2599,8 @@ directive-value = <a data-link-type="grammar" href="#grammardef-ancestor-source-
 <dfn data-dfn-type="grammar" data-export="" id="grammardef-ancestor-source-list">ancestor-source-list<a class="self-link" href="#grammardef-ancestor-source-list"></a></dfn> = ( <a data-link-type="grammar" href="#grammardef-ancestor-source">ancestor-source</a> *( <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc7230#section-3.2.3">RWS</a> <a data-link-type="grammar" href="#grammardef-ancestor-source">ancestor-source</a>) ) / "<a data-link-type="grammar" href="#grammardef-none">'none'</a>"
 <dfn data-dfn-type="grammar" data-export="" id="grammardef-ancestor-source">ancestor-source<a class="self-link" href="#grammardef-ancestor-source"></a></dfn>      = <a data-link-type="grammar" href="#grammardef-scheme-source">scheme-source</a> / <a data-link-type="grammar" href="#grammardef-host-source">host-source</a>
 </pre>
-    <p class="issue" id="issue-6fe8f1f6"><a class="self-link" href="#issue-6fe8f1f6"></a> TODO: "To enforce the <code>frame-ancestors</code> directive...". Will need to be
-  called from Fetch, probably right after parsing the policy.</p>
+    <p>The <code>frame-ancestors</code> directive is enforced as part of <a href="#should-block-response">§4.1.3 Should response to request be blocked by Content
+    Security Policy?</a>.</p>
     <p>The <code>frame-ancestors</code> directive MUST be ignored when contained in a policy
   declared via a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-meta-element">meta</a></code> element.</p>
     <p class="note" role="note">Note: The <code>frame-ancestors</code> directive’s syntax is similar to a <a data-link-type="dfn" href="#source-lists">source
@@ -2870,6 +2916,7 @@ Content-Security-Policy: connect-src http://example.com/;
    <li>
     <a data-link-type="biblio" href="#biblio-es2015">[ES2015]</a> defines the following terms:
     <ul>
+     <li><a href="http://www.ecma-international.org/ecma-262/6.0/index.html#sec-function-objects">Function()</a>
      <li><a href="http://www.ecma-international.org/ecma-262/6.0/index.html#sec-eval-x">eval()</a>
     </ul>
    <li>
@@ -3037,6 +3084,8 @@ Content-Security-Policy: connect-src http://example.com/;
      <li><a href="https://html.spec.whatwg.org/multipage/workers.html#workerglobalscope">WorkerGlobalScope</a>
      <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#attr-object-data">data</a>
      <li><a href="https://html.spec.whatwg.org/multipage/semantics.html#attr-base-href">href</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/webappapis.html#dom-windowtimers-setinterval">setInterval()</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/webappapis.html#dom-windowtimers-settimeout">setTimeout()</a>
     </ul>
   </ul>
   <h2 class="no-num heading settled" id="references"><span class="content">References</span><a class="self-link" href="#references"></a></h2>
@@ -3051,7 +3100,7 @@ Content-Security-Policy: connect-src http://example.com/;
    <dt id="biblio-sha2"><a class="self-link" href="#biblio-sha2"></a>[SHA2]
    <dd><a href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf">FIPS PUB 180-4, Secure Hash Standard</a>. URL: <a href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf">http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf</a>
    <dt id="biblio-dom"><a class="self-link" href="#biblio-dom"></a>[DOM]
-   <dd>Anne van Kesteren; et al. <a href="http://www.w3.org/TR/dom/">W3C DOM4</a>. 18 June 2015. LCWD. URL: <a href="http://www.w3.org/TR/dom/">http://www.w3.org/TR/dom/</a>
+   <dd>Anne van Kesteren; et al. <a href="http://www.w3.org/TR/dom/">W3C DOM4</a>. 6 October 2015. PR. URL: <a href="http://www.w3.org/TR/dom/">http://www.w3.org/TR/dom/</a>
    <dt id="biblio-dom-ls"><a class="self-link" href="#biblio-dom-ls"></a>[DOM-LS]
    <dd>Document Object Model URL: <a href="https://dom.spec.whatwg.org/">https://dom.spec.whatwg.org/</a>
    <dt id="biblio-html5"><a class="self-link" href="#biblio-html5"></a>[HTML5]
@@ -3079,7 +3128,7 @@ Content-Security-Policy: connect-src http://example.com/;
    <dt id="biblio-url"><a class="self-link" href="#biblio-url"></a>[URL]
    <dd>Anne van Kesteren; Sam Ruby. <a href="http://www.w3.org/TR/url-1/">URL</a>. 9 December 2014. WD. URL: <a href="http://www.w3.org/TR/url-1/">http://www.w3.org/TR/url-1/</a>
    <dt id="biblio-workers"><a class="self-link" href="#biblio-workers"></a>[WORKERS]
-   <dd>Ian Hickson. <a href="http://www.w3.org/TR/workers/">Web Workers</a>. 1 May 2012. CR. URL: <a href="http://www.w3.org/TR/workers/">http://www.w3.org/TR/workers/</a>
+   <dd>Ian Hickson. <a href="http://www.w3.org/TR/workers/">Web Workers</a>. 24 September 2015. WD. URL: <a href="http://www.w3.org/TR/workers/">http://www.w3.org/TR/workers/</a>
   </dl>
   <h3 class="no-num heading settled" id="informative"><span class="content">Informative References</span><a class="self-link" href="#informative"></a></h3>
   <dl>
@@ -3092,7 +3141,7 @@ Content-Security-Policy: connect-src http://example.com/;
    <dt id="biblio-xhr"><a class="self-link" href="#biblio-xhr"></a>[XHR]
    <dd>Anne van Kesteren. <a href="https://xhr.spec.whatwg.org/">XMLHttpRequest Standard</a>. Living Standard. URL: <a href="https://xhr.spec.whatwg.org/">https://xhr.spec.whatwg.org/</a>
    <dt id="biblio-beacon"><a class="self-link" href="#biblio-beacon"></a>[BEACON]
-   <dd>Arvind Jain; Jatinder Mann. <a href="http://www.w3.org/TR/beacon/">Beacon</a>. 24 June 2014. LCWD. URL: <a href="http://www.w3.org/TR/beacon/">http://www.w3.org/TR/beacon/</a>
+   <dd>Ilya Grigorik; et al. <a href="http://www.w3.org/TR/beacon/">Beacon</a>. 29 September 2015. WD. URL: <a href="http://www.w3.org/TR/beacon/">http://www.w3.org/TR/beacon/</a>
    <dt id="biblio-eventsource"><a class="self-link" href="#biblio-eventsource"></a>[EVENTSOURCE]
    <dd>Ian Hickson. <a href="http://www.w3.org/TR/eventsource/">Server-Sent Events</a>. 3 February 2015. REC. URL: <a href="http://www.w3.org/TR/eventsource/">http://www.w3.org/TR/eventsource/</a>
    <dt id="biblio-websockets"><a class="self-link" href="#biblio-websockets"></a>[WEBSOCKETS]
@@ -3145,15 +3194,13 @@ dictionary <a href="#dictdef-securitypolicyviolationeventinit">SecurityPolicyVio
    <div class="issue"> The <code>nonce</code> attribute for <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> and <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-style-element">style</a></code> were added to
   WHATWG’s HTML in <a href="https://github.com/whatwg/html/commit/882803c4cc8fba2fa5472b76f628d95cc82c421d">whatwg/html@882803c</a>.
   They have not yet been added to W3C’s HTML.<a href="#issue-80f81a73"> ↵ </a></div>
-   <div class="issue"> Need to monkey-patch these in: something like "If <a href="#match-node-to-policy">§6.1.11.1 Does node match policy?</a> returns <code>Does Not Match</code> when executed upon the
-  element and the element’s <code>Document</code>'s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <code>csp list</code>, abort these steps."<a href="#issue-18f0a7e9"> ↵ </a></div>
+   <div class="issue"> Need to monkey-patch these in: something like "If <a href="#should-block-inline">§4.2.2 Should node's inline behavior be blocked by Content Security Policy?</a> returns <code>Blocked</code> when executed upon the
+  element, then abort these steps."<a href="#issue-b6b49e31"> ↵ </a></div>
    <div class="issue"> This processing was added to WHATWG’s HTML in <a href="https://github.com/whatwg/html/commit/5064a629f22bef29839ab4dc6f1ceef17f010bc5">whatwg/html@5064a62</a>.
   It has not yet been added to W3C’s HTML.<a href="#issue-389933ec"> ↵ </a></div>
    <div class="issue"> Need to add this to HTML.<a href="#issue-a8c27cf5"> ↵ </a></div>
    <div class="issue"> Write a serialization algorithm.<a href="#issue-a329a9d7"> ↵ </a></div>
    <div class="issue"> Define this bit. :)<a href="#issue-0141f077"> ↵ </a></div>
-   <div class="issue"> TODO: "To enforce the <code>frame-ancestors</code> directive...". Will need to be
-  called from Fetch, probably right after parsing the policy.<a href="#issue-6fe8f1f6"> ↵ </a></div>
   </div>
  </body>
 </html>

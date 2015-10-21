@@ -27,6 +27,7 @@ spec: RFC6454; urlPrefix: https://tools.ietf.org/html/rfc6454
 spec: ES2015; urlPrefix: http://www.ecma-international.org/ecma-262/6.0/index.html
   type: method
     text: eval(); url: sec-eval-x
+    text: Function(); url: sec-function-objects
 spec: DOM; urlPrefix: http://www.w3.org/TR/dom/
   type: interface
     text: Node; url: interface-node
@@ -952,7 +953,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       object's `csp list` to the `csp list` of the resource used to
       generate the document.
 
-  4.  [[#match-node-to-policy]] is called during the <a>prepare a script</a> and
+  4.  [[#should-block-inline]] is called during the <a>prepare a script</a> and
       <a>update a `style` block</a> algorithms in order to determine whether or
       not an inline script or style block is allowed to execute.
 
@@ -965,9 +966,8 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       They have not yet been added to W3C's HTML.
 
       ISSUE: Need to monkey-patch these in: something like "If
-      [[#match-node-to-policy]] returns `Does Not Match` when executed upon the
-      element and the element's `Document`'s <a>global object</a>'s
-      `csp list`, abort these steps."
+      [[#should-block-inline]] returns `Blocked` when executed upon the
+      element, then abort these steps."
 
   5.  <a>Policies</a> are <a>enforced</a> during processing of the <{meta}>
       element's <{meta/http-equiv}>.
@@ -1023,6 +1023,26 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   2.  For each |policy| in |response|'s
       <a for="response">csp list</a>, insert |policy| into
       |global|'s <a for="global object">csp list</a>.
+
+  <h4 id="should-block-inline">
+    Should |node|'s inline behavior be blocked by Content Security Policy?
+  </h4>
+
+  Given a {{Node}} (|node|), this algorithm returns "`Allowed`" if the node
+  can is allowed to have inline definition of behavior (script execution,
+  style application, event handlers, etc.), and "`Blocked`" otherwise:
+
+  1.  Let |result| be "`Allowed`".
+
+  2.  For each |policy| in |node|'s {{Document}}'s <a>global object</a>'s
+      <a for="global object">CSP list</a>:
+
+      1.  If [[#match-node-to-policy]] returns "`Does Not Match`" when
+          executed upon |node| and |policy|, set |result| to "`Blocked`".
+
+  2.  Return |result|. 
+
+
 </section>
 
 <!-- Big Text: Reporting -->
@@ -1521,6 +1541,26 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     directive-value = <a grammar>serialized-source-list</a>
   </pre>
 
+  The `script-src` directive governs four things:
+  
+  1.  Script <a>requests</a> must pass through [[#should-block-request]].
+  2.  Script <a>responses</a> must pass through [[#should-block-response]].
+  3.  Inline <{script}> blocks must pass through [[#should-block-inline]]. Their
+      behavior will be blocked unless every policy allows inline script, either
+      implicitly by not specifying a `script-src` (or `default-src`) directive,
+      or explicitly, by whitelisting "`unsafe-inline`", a
+      <a grammar>nonce-source</a> or a <a grammar>hash-source</a> that matches
+      the inline block.
+  4.  The following JavaScript execution sinks are gated on the "`unsafe-eval`"
+      source expression:
+
+      *   {{eval()}}
+      *   {{Function()}}
+      *   {{setTimeout()}} with an initial argument which is not callable.
+      *   {{setInterval()}} with an initial argument which is not callable.
+
+      Note: If a user agent implements non-standard sinks like `setImmediate()`
+      or `execScript()`, they SHOULD also be gated on "`unsafe-eval`".
 
   <h4 id="directive-style-src">`style-src`</h4>
 
@@ -1931,8 +1971,8 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     <dfn>ancestor-source</dfn>      = <a>scheme-source</a> / <a>host-source</a>
   </pre>
 
-  ISSUE: TODO: "To enforce the `frame-ancestors` directive...". Will need to be
-  called from Fetch, probably right after parsing the policy.
+  The `frame-ancestors` directive is enforced as part of
+  [[#should-block-response]].
 
   The `frame-ancestors` directive MUST be ignored when contained in a policy
   declared via a <{meta}> element.
