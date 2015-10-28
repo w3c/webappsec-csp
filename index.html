@@ -1001,7 +1001,7 @@
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="http://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/Icons/w3c_home" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">Content Security Policy Level 3</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2015-10-21">21 October 2015</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2015-10-28">28 October 2015</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -2429,34 +2429,46 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
      <li data-md="">
       <p>If <var>expression</var> is the string "*", and <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code> is not a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#local-scheme">local scheme</a>, return "<code>Matches</code>".</p>
      <li data-md="">
-      <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-scheme-source"><code>scheme-source</code></a> grammar:</p>
+      <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-scheme-source"><code>scheme-source</code></a> or <a data-link-type="grammar" href="#grammardef-host-source"><code>host-source</code></a> grammar:</p>
       <ol>
        <li data-md="">
-        <p>If <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code> is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for <var>expression</var>'s <a data-link-type="grammar" href="#grammardef-scheme-part"><code>scheme-part</code></a>, return "<code>Matches</code>".</p>
+        <p>If <var>expression</var> has a <a data-link-type="grammar" href="#grammardef-scheme-part"><code>scheme-part</code></a> that is not an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code>, then
+  return "<code>Does Not Match</code>" unless one of the following conditions is
+  met:</p>
+        <ol>
+         <li data-md="">
+          <p><var>expression</var>'s <a data-link-type="grammar" href="#grammardef-scheme-part"><code>scheme-part</code></a> is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII
+  case-insensitive match</a> for "<code>http</code>" and <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code> is "<code>https</code>"</p>
+         <li data-md="">
+          <p><var>expression</var>'s <a data-link-type="grammar" href="#grammardef-scheme-part"><code>scheme-part</code></a> is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII
+  case-insensitive match</a> for "<code>ws</code>" and <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code> is "<code>wss</code>"</p>
+        </ol>
        <li data-md="">
-        <p>Return "<code>Does Not Match</code>".</p>
+        <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-scheme-source"><code>scheme-source</code></a> grammar,
+  return "<code>Matches</code>".</p>
       </ol>
+      <p class="note" role="note">Note: This logic effectively means that <code>script-src http:</code> is
+  equivalent to <code>script-src http: https:</code>, and <code>script-src http://example.com/</code> is equivalent to <code>script-src http://example.com https://example.com</code>. In short, we always allow a
+  secure upgrade from an explicitly insecure expression.</p>
      <li data-md="">
       <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-host-source"><code>host-source</code></a> grammar:</p>
       <ol>
        <li data-md="">
         <p>If <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-host">host</a></code> is <code>null</code>, return "<code>Does Not Match</code>".</p>
        <li data-md="">
-        <p>If <var>expression</var> has a <a data-link-type="grammar" href="#grammardef-scheme-part"><code>scheme-part</code></a> that is not an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code>, return
-  "<code>Does Not Match</code>".</p>
-       <li data-md="">
         <p>If <var>expression</var> does not have a <a data-link-type="grammar" href="#grammardef-scheme-part"><code>scheme-part</code></a>, then
   return "<code>Does Not Match</code>" unless one of the following conditions is
   met:</p>
         <ol>
          <li data-md="">
-          <p><var>origin</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code> is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive
-  match</a> for "<code>HTTP</code>", and <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code> is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII
-  case-insensitive match</a> for either "<code>HTTP</code>" or "<code>HTTPS</code>".</p>
+          <p><var>origin</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code> is <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code></p>
          <li data-md="">
-          <p><var>origin</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code> is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive
-  match</a> for <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code>.</p>
+          <p><var>origin</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code> is "<code>http</code>", and <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code> one of "<code>https</code>", "<code>ws</code>", or "<code>wss</code>".</p>
+         <li data-md="">
+          <p><var>origin</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code> is "<code>https</code>", and <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code> is "<code>wss</code>".</p>
         </ol>
+        <p class="note" role="note">Note: As with <a data-link-type="grammar" href="#grammardef-scheme-part"><code>scheme-part</code></a> above, we allow schemeless <a data-link-type="grammar" href="#grammardef-host-source"><code>host-source</code></a> expressions to be upgraded from insecure
+  schemes to secure schemes.</p>
        <li data-md="">
         <p>If the first character of <var>expression</var>'s <a data-link-type="grammar" href="#grammardef-host-part"><code>host-part</code></a> is an U+002A ASTERISK character (<code>*</code>):</p>
         <ol>
@@ -2520,7 +2532,27 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       </ol>
      <li data-md="">
       <p>If <var>expression</var> is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for "<code>'self'</code>",
-  and <var>origin</var> is the same as <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-origin">origin</a></code>, return "<code>Matches</code>".</p>
+  return "<code>Matches</code>" if one or more of the following conditions is met:</p>
+      <ol>
+       <li data-md="">
+        <p><var>origin</var> is the same as <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-origin">origin</a></code></p>
+       <li data-md="">
+        <p><var>origin</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-host">host</a></code> is the same as <var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-host">host</a></code>, <var>origin</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-port">port</a></code> and <var>url</var>'s {{URL/port} are either the same
+  or the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#default-port">default ports</a> for their respective <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code>s, and
+  one or more of the following conditions is met:</p>
+        <ol>
+         <li data-md="">
+          <p><var>url</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code> is "<code>https</code>" or "<code>wss</code>"</p>
+         <li data-md="">
+          <p><var>origin</var>'s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code> is "<code>http</code>"</p>
+        </ol>
+      </ol>
+      <p class="note" role="note">Note: Like the <a data-link-type="grammar" href="#grammardef-scheme-part"><code>scheme-part</code></a> logic above, the "<code>'self'</code>"
+  matching algorithm allows upgrades to secure schemes when it is safe to do
+  so. We limit these upgrades to endpoints running on the default port for a
+  particular scheme or a port that matches the origin of the protected
+  resource, as this seems sufficient to deal with upgrades that can be
+  reasonably expected to succeed.</p>
      <li data-md="">
       <p>Return "<code>Does Not Match</code>".</p>
     </ol>
