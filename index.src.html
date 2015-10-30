@@ -1768,9 +1768,24 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   1.  If |expression| is the string "*", and |url|'s {{URL/scheme}} is not a
       <a>local scheme</a>, return "`Matches`".
+      
+  2.  If |expression| matches the <a grammar>`scheme-source`</a> grammar
+      that is not an <a>ASCII case-insensitive match</a> for |url|'s {{URL/scheme}},
+      then return "`Does Not Match`" unless one of the following conditions is
+      met:
+      1.  |expression|'s <a grammar>`scheme-source`</a> is an <a>ASCII
+          case-insensitive match</a> for "`http:`" and |url|'s {{URL/scheme}}
+          is "`https`"
+              
+      2.  |expression|'s <a grammar>`scheme-source`</a> is an <a>ASCII
+          case-insensitive match</a> for "`ws:`" and |url|'s {{URL/scheme}}
+          is "`wss`"
+              
+  Note: This makes `script-src http:` semantically equivalent to `script-src http: https:`
+  and `script-src ws:` semantically equivalent to `script-src wss:`, among others.
+  A secure upgrade is always allowed from an explicitly insecure expression.
 
-  2.  If |expression| matches the <a grammar>`scheme-source`</a> or
-      <a grammar>`host-source`</a> grammar:
+  3.  If |expression| matches the <a grammar>`host-source`</a> grammar:
 
       1.  If |expression| has a <a grammar>`scheme-part`</a> that is not an
           <a>ASCII case-insensitive match</a> for |url|'s {{URL/scheme}}, then
@@ -1785,20 +1800,9 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
               case-insensitive match</a> for "`ws`" and |url|'s {{URL/scheme}}
               is "`wss`"
 
-      2.  If |expression| matches the <a grammar>`scheme-source`</a> grammar,
-          return "`Matches`".
+      2.  If |url|'s {{URL/host}} is missing, return "`Does Not Match`".
 
-      Note: This logic effectively means that `script-src http:` is
-      equivalent to `script-src http: https:`, and
-      `script-src http://example.com/` is equivalent to `script-src
-      http://example.com https://example.com`. In short, we always allow a
-      secure upgrade from an explicitly insecure expression.
-
-  3.  If |expression| matches the <a grammar>`host-source`</a> grammar:
-  
-      1.  If |url|'s {{URL/host}} is `null`, return "`Does Not Match`".
-
-      2.  If |expression| does not have a <a grammar>`scheme-part`</a>, then
+      3.  If |expression| does not have a <a grammar>`scheme-part`</a>, then
           return "`Does Not Match`" unless one of the following conditions is
           met:
 
@@ -1882,6 +1886,12 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
                   match</a> for |url piece|, return "`Does Not Match`".
 
       10. Return "`Matches`".
+
+      Note: This makes `script-src http://example.com/` semantically
+      equivalent to `script-src http://example.com https://example.com`,
+      and `script-src ws://example.com/` semantically equivalent to
+      `script-src ws://example.com wss://example.com`, among others.
+      A secure upgrade is always allowed from an explicitly insecure expression.
 
   4.  If |expression| is an <a>ASCII case-insensitive match</a> for "`'self'`",
       return "`Matches`" if one or more of the following conditions is met:
