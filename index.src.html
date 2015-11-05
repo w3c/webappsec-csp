@@ -48,6 +48,8 @@ spec: HTML5; urlPrefix: http://www.w3.org/TR/html5/
       text: nested through; url: browsing-context-nested-through
       text: forced sandboxing flag set
       text: parse a sandboxing directive
+    urlPrefix: dom.html
+      text: CSP list; for: document; url: concept-document-csp-list
     urlPrefix: webappapis.html
       text: environment settings object; url: settings-object
       text: global object
@@ -1039,34 +1041,59 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
       ISSUE: Need to add this to HTML.
 
-  <h4 id="initialise-global-object-csp" algorithm>
-    Initialise a global object's `csp list`
+  <h4 id="initialise-document-csp" algorithm>
+    Initialise a `Document`'s `CSP list`
   </h4>
 
-  Given a <a>global object</a> (|global|), and a <a>response</a>
-  (|response|), the user agent performs the following steps in order
-  to initialize |global|'s <a for="global object">csp list</a>:
+  Given a {{Document}} (|document|), and a <a>response</a> (|response|), the
+  user agent performs the following steps in order to initialize |document|'s
+  <a for="document">CSP list</a>:
 
   1.  If |response|'s <a for="response">url</a>'s {{URL/scheme}} is a
       <a>local scheme</a>:
 
       1.  Let |documents| be an empty list.
 
-      2.  If |global| is a {{Window}} object:
-      
-          1.  If |global|'s {{Window/document}} has an <a>embedding document</a>
-              (|document|), then add |document| to |documents|.
+      2.  If |document| has an <a>embedding document</a> (|embedding|), then add
+          |embedding| to |documents|.
 
-          2.  If |global|'s {{Window/document}} has an <a>opener browsing
-              context</a>, then add its <a>active document</a> to |documents|.
+      3.  If |document| has an <a>opener browsing context</a>, then add its
+          <a>active document</a> to |documents|.
 
-          Note: For {{Document}}s, we want to ensure that a page cannot bypass
-          its <a>policy</a> by embedding a frame or popping up a new window
-          containing content it controls (`blob:` resources, or
-          `document.write()`).
+      4.  For each |doc| in |documents|:
 
-      3.  Otherwise |global| is a {{WorkerGlobalScope}} object, so, add 
-          each of |global|'s
+          1.  For each |policy| in |doc|'s <a for="document">CSP list</a>:
+
+              1.  Insert an alias to |policy| in |document|'s
+                  <a for="document">CSP list</a>.
+
+      Note: <a>local scheme</a> includes `about:`, and this algorithm will
+      therefore alias the <a>embedding document</a>'s policies for <a>an iframe
+      `srcdoc` `Document`</a>.
+
+      Note: We do all this to ensure that a page cannot bypass its <a>policy</a>
+      by embedding a frame or popping up a new window containing content it
+      controls (`blob:` resources, or `document.write()`).
+
+  2.  For each |policy| in |response|'s <a for="response">CSP list</a>, insert
+      |policy| into |document|'s <a for="document">CSP list</a>.
+
+  3.  Execute [[#directive-sandbox-apply]] on |document|.
+
+  <h4 id="initialise-global-object-csp" algorithm>
+    Initialise a global object's `CSP list`
+  </h4>
+
+  Given a <a>global object</a> (|global|), and a <a>response</a>
+  (|response|), the user agent performs the following steps in order
+  to initialize |global|'s <a for="global object">CSP list</a>:
+
+  1.  If |response|'s <a for="response">url</a>'s {{URL/scheme}} is a
+      <a>local scheme</a>:
+
+      1.  Let |documents| be an empty list.
+
+      2.  Add each of |global|'s
           <a lt="the worker's documents">document</a>s to |documents|.
 
       4.  For each |document| in |documents|:
@@ -1084,9 +1111,6 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   2.  For each |policy| in |response|'s
       <a for="response">csp list</a>, insert |policy| into
       |global|'s <a for="global object">csp list</a>.
-
-  3.  If |global| is a {{Window}} object, execute [[#directive-sandbox-apply]]
-      on |global|'s {{Window/document}}.
 
   <h4 id="should-block-inline" algorithm>
     Should |node|'s inline behavior be blocked by Content Security Policy?
