@@ -872,6 +872,37 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       2.  Insert |policy| into |response|'s
           <a for="response">csp list</a>.
 
+  <h4 id="report-for-request" algorithm>
+    Report Content Security Policy violations for |request|
+  </h4>
+
+  Given a <a>request</a> (|request|), this algorithm reports violations based
+  on <a for="request">client</a>'s "report only" policies.
+
+  1.  Let |csp list| be |request|'s
+      <a for="request">client</a>'s <a>global object</a>'s
+      <a for="global object">csp list</a>.
+
+  2.  For each |policy| in |csp list|:
+    
+      1.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
+          then skip to the next |policy|.
+
+      2.  Let |source list| be the <a>effective source list</a> for
+          |request| and |policy|.
+
+      3.  If |source list| is `null`, then skip to the next
+          |policy|.
+
+      4.  If the result of executing [[#match-url-to-source-list]] on
+          |request|'s <a for="request">url</a> is `Matches`, then skip
+          to the next |policy|.
+
+      5.  Execute [[#report-violation]] on the result of executing
+          [[#create-violation-for-request]] on |request|, |policy|, and
+          the result of executing [[#effective-directive-for-a-request]]
+          on |request|.
+
   <h4 id="should-block-request" algorithm>
     Should |request| be blocked by Content Security Policy?
   </h4>
@@ -888,23 +919,25 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   3.  For each |policy| in |csp list|:
 
-      1.  Let |source list| be the <a>effective source list</a> for
+      1.  If |policy|'s <a for="policy">disposition</a> is "`report`",
+          then skip to the next |policy|.
+
+      2.  Let |source list| be the <a>effective source list</a> for
           |request| and |policy|.
 
-      2.  If |source list| is `null`, then skip to the next
+      3.  If |source list| is `null`, then skip to the next
           |policy|.
 
-      3.  If the result of executing [[#match-url-to-source-list]] on
+      4.  If the result of executing [[#match-url-to-source-list]] on
           |request|'s <a for="request">url</a> is `Matches`, then skip
           to the next |policy|.
 
-      4.  Execute [[#report-violation]] on the result of executing
+      5.  Execute [[#report-violation]] on the result of executing
           [[#create-violation-for-request]] on |request|, |policy|, and
           the result of executing [[#effective-directive-for-a-request]]
           on |request|.
 
-      5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
-          set |result| to "`Blocked`".
+      6.  Set |result| to "`Blocked`".
 
   4.  Return |result|.
 
