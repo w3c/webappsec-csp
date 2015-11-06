@@ -30,7 +30,7 @@ spec: ES2015; urlPrefix: http://www.ecma-international.org/ecma-262/6.0/index.ht
     text: JSON.stringify(); url: sec-json.stringify
 spec: DOM; urlPrefix: http://www.w3.org/TR/dom/
   type: interface
-    text: Node; url: interface-node
+    text: Element; url: interface-element
   type: attribute
     text: textContent; for: Node; url: dom-node-textcontent
 spec: HTML5; urlPrefix: http://www.w3.org/TR/html5/
@@ -1146,20 +1146,20 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       |global|'s <a for="global object">csp list</a>.
 
   <h4 id="should-block-inline" algorithm>
-    Should |node|'s inline behavior be blocked by Content Security Policy?
+    Should |element|'s inline behavior be blocked by Content Security Policy?
   </h4>
 
-  Given a {{Node}} (|node|), this algorithm returns "`Allowed`" if the node
-  can is allowed to have inline definition of behavior (script execution,
+  Given an {{Element}} (|element|), this algorithm returns "`Allowed`" if the
+  element is allowed to have inline definition of behavior (script execution,
   style application, event handlers, etc.), and "`Blocked`" otherwise:
 
   1.  Let |result| be "`Allowed`".
 
-  2.  For each |policy| in |node|'s {{Document}}'s <a>global object</a>'s
+  2.  For each |policy| in |element|'s {{Document}}'s <a>global object</a>'s
       <a for="global object">CSP list</a>:
 
-      1.  If [[#match-node-to-policy]] returns "`Does Not Match`" when
-          executed upon |node| and |policy|, set |result| to "`Blocked`".
+      1.  If [[#match-element-to-policy]] returns "`Does Not Match`" when
+          executed upon |element| and |policy|, set |result| to "`Blocked`".
 
   2.  Return |result|. 
 </section>
@@ -2051,20 +2051,22 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   5.  Return `null`.
 
 
-  <h4 id="fetch-directive-matching-nodes">Node Matching Algorithms</h4>
+  <h4 id="fetch-directive-matching-element">Element Matching Algorithms</h4>
 
-  <h5 id="match-node-to-policy" algorithm>
-    Does |node| match |policy|?
+  <h5 id="match-element-to-policy" algorithm>
+    Does |element| match |policy|?
   </h5>
 
-  Given a {{Node}} (|node|) and a <a>policy</a> (|policy|), this algorithm
-  returns "`Matches`" or "`Does Not Match`".
+  Given an {{Element}} (|element|) and a <a>policy</a> (|policy|), this
+  algorithm returns "`Matches`" or "`Does Not Match`".
 
   1.  Let |directive name| be `null`.
 
-  2.  If |node| is a <{script}> element, set |directive name| to "`script-src`".
+  2.  If |element| is a <{script}> element, set |directive name| to
+      "`script-src`".
 
-  3.  If |node| is a <{style}> element, set |directive name| to "`style-src`".
+  3.  If |element| is a <{style}> element, set |directive name| to
+      "`style-src`".
 
   4.  If |directive name| is `null`, return "`Matches`".
 
@@ -2079,23 +2081,23 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       <a for="policy">directive set</a>, set |source list| to that
       <a>directive</a>'s <a for="directive">value</a>.
 
-  8.  Return the result of executing [[#match-node-to-source-list]] on |node|
+  8.  Return the result of executing [[#match-element-to-source-list]] on |element|
       and |source list|.
 
-  <h5 id="match-node-to-source-list" algorthm>
-    Does |node| match source |list|?
+  <h5 id="match-element-to-source-list" algorthm>
+    Does |element| match source |list|?
   </h5>
 
-  Given a {{Node}} (|node|) and a <a>source list</a> (|list|),
+  Given an {{Element}} (|element|) and a <a>source list</a> (|list|),
   this algorithm returns "`Matches`" or "`Does Not Match`".
 
-  1.  If |node| is a <{script}> element, and has a <{script/src}> attribute,
+  1.  If |element| is a <{script}> element, and has a <{script/src}> attribute,
       then return "`Matches`".
 
   2.  Let |contains nonce or hash| be `false`.
 
-  3.  Let |content| be <a>the script block's source</a> if |node| is a
-      <{script}> element, or the value of |node|'s {{Node/textContent}}
+  3.  Let |content| be <a>the script block's source</a> if |element| is a
+      <{script}> element, or the value of |element|'s {{Node/textContent}}
       IDL attribute for any other element.
 
   4.  For each |expression| in |list|:
@@ -2111,7 +2113,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
           "`Matches`".
 
       2.  If |expression| matches the <a grammar>`nonce-source`</a> grammar,
-          and |node| has a <{script/nonce}> attribute whose value is a
+          and |element| has a <{script/nonce}> attribute whose value is a
           <a>case-sensitive</a> match for |expression|'s
           <a grammar>`base64-value`</a> part, return "`Matches`".
 
