@@ -1,7 +1,7 @@
 ---
-title: Content Security Policy Directive Registry
+title: Initial Assignment for a Content Security Policy Directive Registry
 abbrev: webappsec-csp-reg
-docname: draft-west-webappsec-csp-reg-03
+docname: draft-west-webappsec-csp-reg-04
 date: 2015
 category: info
 
@@ -21,12 +21,16 @@ author:
 
 normative:
   CSP:
-    target: https://w3c.github.io/webappsec-csp/
-    title: Content Security Policy
+    target: https://www.w3.org/TR/CSP2
+    title: Content Security Policy Level 2
     author:
     -
       ins: M. West
       name: Mike West
+      organization: Google, Inc.
+    -
+      ins: A. Barth
+      name: Adam Barth
       organization: Google, Inc.
     -
       ins: D. Veditz
@@ -41,8 +45,8 @@ informative:
 --- abstract
 
 This document establishes an Internet Assigned Number Authority (IANA) registry
-for Content Security Policy directives. It populates the registry with the
-directives defined in the CSP specification.
+for Content Security Policy directives, and populates that registry with the
+directives defined in the Content Security Policy Level 2 specification.
 
 --- middle
 
@@ -118,10 +122,13 @@ The registration policy for Content Security Policy directives is "Specification
 Required" {{RFC5226}}, which uses a designated expert to review the
 specification.
 
+When appointing an Expert (or Experts), the IESG SHOULD draw from the W3C's
+security community, coordinating through the liaison.
+
 The designated expert, when deliberating on whether to include a new directive
 in the registry, should consider the following criteria. This is not an
 exhaustive list, but representative of the issues to consider when rendering a
-decision):
+decision:
 
 * Content Security Policy is a restrictive feature, which allows web developers
   to deny themselves access to resources and APIs which would otherwise be
