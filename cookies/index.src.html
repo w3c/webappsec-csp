@@ -107,9 +107,6 @@ spec: RFC7230; urlPrefix: https://tools.ietf.org/html/rfc7230
   This document defines mechanisms which allow developers to limit the ways in
   which cookies can be set for a given <a>protected resource</a>.
 
-  Note: [[ORIGIN-COOKIES]] could resolve some of the issues here in a different
-  way, but it's unclear if those will ever be adopted.
-
   <h3 id="examples">Examples</h3>
 
   <div class="example">
@@ -180,24 +177,28 @@ spec: RFC7230; urlPrefix: https://tools.ietf.org/html/rfc7230
   <h2 id="cookie-scope-directive">The `cookie-scope` directive</h2>
 
   <dfn export>`cookie-scope`</dfn> is a Content Security Policy
-  <a>directive</a> [[!CSP]] which restricts the scope in which <a>cookies</a>
-  [[!RFC6265]] can be set. The syntax is described by the following ABNF
-  grammar [[!RFC5234]] (including the <a grammar>RWS</a> rule from [[!RFC7230]]:
+  <a>directive</a> [[!CSP]] which restricts the <a>cookies</a> [[!RFC6265]]
+  which can be set in a particular context. The syntax is described by the
+  following ABNF grammar [[!RFC5234]] (including the <a grammar>RWS</a> rule
+  from [[!RFC7230]]):
 
   <pre link-type="grammar" dfn-type="grammar">
     directive-name = "cookie-scope"
     directive-value = <a>scoping-rules</a> *( <a>RWS</a> <a>scoping-rules</a> )
-    <dfn>scoping-rules</dfn> = "<dfn>host</dfn>" / "<dfn>none</dfn>" / "<dfn>secure</dfn>"
+    <dfn>scoping-rules</dfn> = "<dfn>host</dfn>" / "<dfn>http</dfn>" / "<dfn>none</dfn>" / "<dfn>secure</dfn>"
   </pre>
 
-  The directive has one of three values:
+  The directive has one of four values:
 
   1.  "<a grammar>host</a>" allows "host only" cookies to be set, but will block
       setting cookies which set a `domain` attribute.
 
-  2.  "<a grammar>none</a>" blocks all cookies.
+  2.  "<a grammar>http</a>" allows cookies to be set via the `Set-Cookie` HTTP
+      header, but not via `document.cookie`.
 
-  3.  "<a grammar>secure</a>" allows cookies to be set with a `secure`
+  3.  "<a grammar>none</a>" blocks all cookies.
+
+  4.  "<a grammar>secure</a>" allows cookies to be set with a `secure`
       attribute, and will block setting any non-secure cookies.
 
   These values MAY be combined in order to tighten the restrictions on a cookie.
@@ -227,13 +228,18 @@ spec: RFC7230; urlPrefix: https://tools.ietf.org/html/rfc7230
 
   ISSUE: Monkey patching! Hey, maybe it's time to reopen that cookie RFC after
   all, eh @mnot? :)
+
+  ISSUE(w3c/webappsec-csp#42): We'll need a mechanism to restrict reading from
+  `document.cookie`, but I'd like something less specific than `cookie-scope
+  disable-dom-access` or something similar. The linked GitHub bug is a proposal
+  that's a bit more general and widely applicable.
 </section>
 
 <section>
   <h2 id="algorithms">Algorithms</h2>
 
   <h3 id="block-cookie">
-    Is <var>cookie</var> blocked for <var>settings object</var>?
+    Is <var>cookie</var> blocked for |settings|?
   </h3>
 
   Given a <a>cookie</a> (<var>cookie</var>), and an <a>environment settings
@@ -273,9 +279,12 @@ spec: RFC7230; urlPrefix: https://tools.ietf.org/html/rfc7230
       1.  <var>scope</var> contains "<a grammar>host</a>", and the cookie's
           `host-only-flag` is `false`.
 
-      2.  <var>scope</var> contains "<a grammar>none</a>".
+      2.  <var>scope</var> contains "<a grammar>http</a>", and the cookie
+          was received from a "non-HTTP" API.
 
-      3.  <var>scope</var> contains "<a grammar>secure</a>", and the
+      3.  <var>scope</var> contains "<a grammar>none</a>".
+
+      4.  <var>scope</var> contains "<a grammar>secure</a>", and the
           cookie's `secure-only-flag` is `false`.
 
   3.  Return "`Does not violate`".
