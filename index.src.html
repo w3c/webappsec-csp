@@ -1053,9 +1053,9 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       <a href="https://github.com/whatwg/html/commit/882803c4cc8fba2fa5472b76f628d95cc82c421d">whatwg/html@882803c</a>.
       They have not yet been added to W3C's HTML.
 
-      ISSUE: Need to monkey-patch these in: something like "If
-      [[#should-block-inline]] returns `Blocked` when executed upon the
-      element, then abort these steps."
+      ISSUE: The [[#should-block-inline]] hooks were added to WHATWG's HTML in
+      <a href="https://github.com/whatwg/html/commit/ee3486eb129bc350b5ca684d0c91dff23453ac1a">whatwg/html@ee3486e</a>.
+      They aren't yet in W3C's HTML.
 
   5.  <a>Policies</a> are <a>enforced</a> during processing of the <{meta}>
       element's <{meta/http-equiv}>.
@@ -1159,9 +1159,21 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       <a for="global object">CSP list</a>:
 
       1.  If [[#match-element-to-policy]] returns "`Does Not Match`" when
-          executed upon |element| and |policy|, set |result| to "`Blocked`".
+          executed upon |element| and |policy|:
+         
+          1.  Let |violation| be the result of executing
+              [[#create-violation-for-global]] on the <a>incumbent settings
+              object</a>, |policy|, and "`style-src`" if |element| is a
+              <{style}> element, and "`script-src`" otherwise.
 
-  2.  Return |result|. 
+          2.  Set |violation|'s <a for="violation">resource</a> to "`inline`".
+
+          3.  Execute [[#report-violation]] on |violation|.
+
+          4.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
+              set |result| to "`Blocked`".
+
+  3.  Return |result|. 
 </section>
 
 <!-- Big Text: Reporting -->
