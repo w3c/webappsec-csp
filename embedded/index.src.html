@@ -18,7 +18,6 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp
     text: content-security-policy; url: content-security-policy-header-field
     text: content security policy; url: security-policy
     text: parse a serialized policy; url: parse-serialized-policy 
-    text: policy list; for: response; url: response-policy-list
     text: policy
     text: directive set; for: policy
     text: disposition; for: policy
@@ -31,6 +30,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   type: dfn
     text: request; url: concept-request
     text: response; url: concept-response
+    text: CSP list; for: response; url: concept-response-policy-list
 spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   type: dfn
     text: navigate
@@ -56,6 +56,32 @@ spec:dom-ls; type:interface; text:Document
 
   <em>This section is not normative.</em>
 
+  Content Security Policy is a great defense against cross-site scripting
+  attacks, allowing developers to harden their own sites against injection of
+  malicious script, style, and other resource types. It does not, however,
+  give developers the ability to apply restrictions to third-party content
+  loaded in via `<iframe>`. Allowing CSP to apply directly to these third-party
+  contexts would be dangerous; CSP gives quite granular control over resource
+  loading, and it's very possible to introduce vulnerabilities into an otherwise
+  secure page by denying it access to particular scripts. We've seen these kinds
+  of issues in past features such as `X-XSS-Protection`, so we must be careful
+  to avoid reintroducing them in a new form.
+
+  That said, it would be quite useful to be able to place restrictions upon
+  widgets, advertisements, and other kinds of third-party content. This document
+  proposes a mechanism which relies on an explicit opt-in from the embedded
+  content, which ought to make it possible for widgets to cooperate with their
+  embedders to negotiate a reasonable set of restrictions.
+
+  In short, the embedder proposes a Content Security Policy as an attribute on
+  the `<iframe>` element. This policy is transmitted along with the HTTP request
+  for the framed content in an `Embedding-CSP` header. If the embedded content
+  can accept that policy, it may do so by returning the proposed policy in a
+  `Content-Security-Policy` header along with the response.
+
+  If the response contains a policy identical to the policy which the embedder
+  requested, the user agent will render the embedded content. If no such policy
+  is present, the response will be blocked.
 
   <h3 id="examples">Examples</h3>
 
@@ -114,6 +140,8 @@ spec:dom-ls; type:interface; text:Document
   <h3 id="monkey-patching-html">
     Specifying a Policy Requirement
   </h3>
+
+  ISSUE: Monkey-patching HTML.
 
   <a>Browsing contexts</a> have an <dfn export>`iframe` security policy</dfn>
   attribute, which is `null` unless otherwise specified.
@@ -182,36 +210,34 @@ spec:dom-ls; type:interface; text:Document
   <h2 id="algorithms">Algorithms</h2>
 
   <h3 id="may-load-response">
-    Is <var>response</var> blocked by <var>browsing context</var>'s `iframe`
-    security policy?
+    Is |response| blocked by |context|'s `iframe` security policy?
   </h3>
 
-  Given a <a>response</a> (<var>response</var>) and a <a>browsing context</a>
-  (<var>context</var>), this algorithm returns `Allowed` or `Blocked` as
+  Given a <a>response</a> (|response|) and a <a>browsing context</a>
+  (|context|), this algorithm returns `Allowed` or `Blocked` as
   appropriate:
 
-  1.  Let <var>embedding policy</var> be the value of <var>context</var>'s
-      <a>`iframe` security policy</a>.
+  1.  Let |embedding policy| be the value of |context|'s <a>`iframe`
+      security policy</a>.
 
-  2.  Let <var>policy list</var> be the value of <var>response</var>'s
-      <a for="response">policy list</a>.
+  2.  Let |policy list| be the value of |response|'s
+      <a for="response">CSP list</a>.
 
   3.  If the [[#subsume-policy]] algorithm returns `Subsumed` when executed
-      upon <var>policy list</var> and <var>embedding policy</var>, return
-      `Allowed`.
+      upon |policy list| and |embedding policy|, return `Allowed`.
 
   4.  Return `Blocked`.
 
   <h3 id="subsume-policy">
-    Is <var>policy list</var> subsumed under <var>subsuming policy</var>?
+    Is |policy list| subsumed under |subsuming policy|?
   </h3>
 
-  Given a list of <a>policy</a> objects (<var>policy list</var>), this algorithm
-  returns `Subsumed` if that list enforces a <a>policy</a> which is an exact
-  match for a given <a>policy</a> object (<var>subsuming policy</var>). It
-  returns `Not Subsumed` otherwise.
+  Given a list of <a>policy</a> objects (|policy list|), this algorithm returns
+  `Subsumed` if that list enforces a <a>policy</a> which is an exact match for a
+  given <a>policy</a> object (|subsuming policy|). It returns `Not Subsumed`
+  otherwise.
 
-  Note: I have delusions of someday defining a real subsumption algorithm
+  Note: Ideally, we'll someday define a real subsumption algorithm
   which would verify that the policy `default-src 'none'; script-src
   https://example.com` is subsumbed under `default-src *.example.com` (as
   there is no case in which the latter will block a request that the former
@@ -221,42 +247,94 @@ spec:dom-ls; type:interface; text:Document
   Note: This is not an efficient algorithm. Implementers are encouraged to
   implement something a little smarter and faster, with the same behavior.
 
-  1.  If <var>subsuming policy</var> is `null`, return `Subsumed`.
+  1.  If |subsuming policy| is `null`, return `Subsumed`.
 
-  2.  For each <var>policy</var> in <var>policy list</var>:
+  2.  For each |policy| in |policy list|:
 
-      1.  If <var>policy</var>'s <a for="policy">disposition</a> is not
-          `Enforce`, set skip to the next <var>policy</var>.
+      1.  If |policy|'s <a for="policy">disposition</a> is not
+          `Enforce`, set skip to the next |policy|.
 
-      2.  If <var>policy</var>'s <a for="policy">directive set</a> is not the
-          same size as <var>subsuming policy</var>'s <a for="policy">directive
-          set</a>, skip to the next <var>policy</var>.
+      2.  If |policy|'s <a for="policy">directive set</a> is not the
+          same size as |subsuming policy|'s <a for="policy">directive
+          set</a>, skip to the next |policy|.
 
-      3.  For each <var>directive</var> in <var>policy</var>'s
+      3.  For each |directive| in |policy|'s
           <a for="policy">directive set</a>:
 
-          1.  Let <var>subsuming directive</var> be the <a>directive</a> in
-              <var>subsuming policy</var>'s <a for="policy">directive
+          1.  Let |subsuming directive| be the <a>directive</a> in
+              |subsuming policy|'s <a for="policy">directive
               set</a> whose <a for="directive">name</a> matches
-              <var>directive</var>'s <a for="directive">name</a>, or `null`
+              |directive|'s <a for="directive">name</a>, or `null`
               if no such <a>directive</a> is present.
 
-          2.  If <var>subsuming directive</var> is `null`, skip to the next
-              <var>policy</var>.
+          2.  If |subsuming directive| is `null`, skip to the next
+              |policy|.
 
-          3.  If <var>subsuming directive</var>'s <a for="directive">value</a>
-              list is not the same size as <var>directive</var>'s
+          3.  If |subsuming directive|'s <a for="directive">value</a>
+              list is not the same size as |directive|'s
               <a for="directive">value</a> list, skip to the next
-              <var>policy</var>.
+              |policy|.
 
-          4.  For each <var>token</var> in <var>directive</var>'s
+          4.  For each |token| in |directive|'s
               <a for="directive">value</a>:
 
-              1.  If <var>token</var> is not present in <var>subsuming
-                  directive</var>'s <a for="directive">value</a>, skip to the
-                  next <var>policy</var>.
+              1.  If |token| is not present in |subsuming
+                  directive|'s <a for="directive">value</a>, skip to the
+                  next |policy|.
 
       4.  Return `Subsumed`.
 
   3.  Return `Not Subsumed`.
+</section>
+
+<section>
+  <h2 id="security-considerations">Security Considerations</h2>
+
+  Embedded documents should be careful to evaluate the proposed Content Security
+  Policy, and not simply to reflect whatever policy an embedder suggests. Doing
+  so may enable a clever attacker to selectively disable pieces of a website's
+  code which are essential for its own protection.
+
+  In particular, documents which do not expect to be embedded should continue to
+  respond to any such request with a Content Security Policy containing an
+  appropriate `frame-ancestors` directive.
+</section>
+
+<section>
+  <h2 id="privacy-considerations">Privacy Considerations</h2>
+
+  This feature allows an embedder to send information to a third-party endpoint
+  via the <a>`Embedding-CSP`</a> HTTP header. This doesn't seem to expose any
+  information that couldn't be tunneled in the HTTP request itself (via GET
+  parameters, etc), and embedders remain in control over the endpoints to which
+  such requests may be made by enforcing a Content Security Policy with an
+  appropriate `child-src` directive.
+</section>
+
+<section>
+  <h2 id="iana-considerations">IANA Considerations</h2>
+
+  The permanent message header field registry should be updated
+  with the following registration: [[!RFC3864]]
+
+  <h3 id="iana-csp">
+    Embedding-CSP
+  </h3>
+
+  <dl>
+    <dt>Header field name</dt>
+    <dd>Embedding-CSP</dd>
+
+    <dt>Applicable protocol</dt>
+    <dd>http</dd>
+
+    <dt>Status</dt>
+    <dd>standard</dd>
+
+    <dt>Author/Change controller</dt>
+    <dd>W3C</dd>
+
+    <dt>Specification document</dt>
+    <dd>This specification (See [[#embedding-csp-http-header]])</dd>
+  </dl>
 </section>
