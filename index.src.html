@@ -1032,15 +1032,15 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     Integration with HTML
   </h3>
   
-  1.  The {{Window}} and {{WorkerGlobalScope}} objects have a
-      <dfn for="global object" id="global-object-csp-list">csp list</dfn>,
+  1.  The {{Document}} and {{WorkerGlobalScope}} objects have a
+      <dfn for="global object" id="global-object-csp-list">CSP list</dfn>,
       which holds all the <a>policy</a> objects which are active for a given
       context. This list is empty unless otherwise specified, and is populated
       via the [[#initialise-global-object-csp]] algorithm.
 
   2.  A <a>policy</a> is <dfn>enforced</dfn> or <dfn>monitored</dfn> for an
       <a>global object</a> by inserting it into the <a>global object</a>'s
-      <a for="global object">csp list</a>.
+      <a for="global object">CSP list</a>.
 
   3.  [[#initialise-global-object-csp]] is called during the <a>initialising a
       new `Document` object</a> and <a>run a worker</a> algorithms in order to
@@ -1080,12 +1080,6 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   6.  A {{Document}}'s <dfn>embedding document</dfn> is the {{Document}}
       <a lt="nested through">through which</a> the {{Document}}'s
       <a>browsing context</a> is nested.
-
-  7.  [[#allow-base-for-document]] is called during <{base}>'s <a>set the frozen
-      base URL</a> algorithm to ensure that the <{base/href}> attribute's value
-      is valid.
-
-      ISSUE: Need to add this to HTML.
 
   <h4 id="initialise-document-csp" algorithm>
     Initialise a `Document`'s `CSP list`
@@ -2171,136 +2165,6 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   </h3>
 
   <h4 id="directive-base-uri">`base-uri`</h4>
-
-  The <dfn>base-uri</dfn> directive restricts the {{URL}}s which can be used in
-  a {{Document}}'s <{base}> element. The syntax for the directive's name and
-  value is described by the following ABNF:
-
-  <pre>
-    directive-name  = "base-uri"
-    directive-value = <a grammar>serialized-source-list</a>
-  </pre>
-
-  The following algorithm is called during HTML's <a>set the frozen base url</a>
-  algorithm in order to monitor and enforce this directive:
-
-  <h5 id="allow-base-for-document" algorithm>
-    Is |base| allowed for |document|?
-  </h5>
-
-  Given a {{URL}} (|base|), and a {{Document}} (|document|), this algorithm
-  returns "`Allowed`" if |base| may be used as the value of a <{base}>
-  element's <{base/href}> attribute, and "`Blocked`" otherwise:
-
-  1.  For each |policy| in |document|'s <a>global object</a>'s
-      <a for="global object">csp list</a>:
-
-      1.  Let |source list| be `null`.
-
-      2.  If a <a>directive</a> whose <a for="directive">name</a> is
-          "`base-uri`" is present in |policy|'s <a for="policy">directive
-          set</a>, set |source list| to that <a>directive</a>'s
-          <a for="directive">value</a>.
-
-      3.  If |source list| is `null`, skip to the next |policy|.
-
-      4.  If the result of executing [[#match-url-to-source-list]] on |base| and
-          |source list| is "`Does Not Match`":
-         
-          1.  Let |violation| be the result of executing
-              [[#create-violation-for-global]] on |document|'s <a>global
-              object</a>, |policy|, and "<a>`base-uri`</a>".
-
-          2.  Set |violation|'s <a for="violation">resource</a> to "`inline`".
-
-          3.  Execute [[#report-violation]] on |violation|.
-          
-          4.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
-              return "`Blocked`".
-
-  2.  Return "`Allowed`".
-
-  <h4 id="directive-form-action">`form-action`</h4>
-
-  The <dfn>form-action</dfn> directive restricts the {{URL}}s which can be used
-  as the target of a form submissions.
-
-  ISSUE: Define the hooks into HTML's navigation and form submission algorithms.
-
-  <h4 id="directive-frame-ancestors">`frame-ancestors`</h4>
-
-  The <dfn>frame-ancestors</dfn> directive restricts the {{URL}}s which can
-  embed the resource using <{frame}>, <{iframe}>, <{object}>, <{embed}>, or
-  <{applet}> element. Resources can use this directive to avoid many UI
-  Redressing [[UISECURITY]] attacks, by avoiding the risk of being embedded into
-  potentially hostile contexts.
-
-  The directive's syntax is described by the following ABNF grammar:
-
-  <pre dfn-type="grammar" link-type="grammar">
-    directive-name  = "frame-ancestors"
-    directive-value = <a>ancestor-source-list</a>
-
-    <dfn>ancestor-source-list</dfn> = ( <a>ancestor-source</a> *( <a>RWS</a> <a>ancestor-source</a>) ) / "<a>'none'</a>"
-    <dfn>ancestor-source</dfn>      = <a>scheme-source</a> / <a>host-source</a> / "<a>'self'</a>"
-  </pre>
-
-  The `frame-ancestors` directive is enforced as part of
-  [[#should-block-response]].
-
-  The `frame-ancestors` directive MUST be ignored when contained in a policy
-  declared via a <{meta}> element.
-
-  Note: The `frame-ancestors` directive's syntax is similar to a <a>source
-  list</a>, but `frame-ancestors` will not fall back to the `default-src`
-  directive's value if one is specified. That is, a policy that declares
-  `default-src 'none'` will still allow the resource to be embedded by anyone.
-
-  <h4 id="directive-plugin-types">`plugin-types`</h4>
-
-  <dfn>plugin-types</dfn>
-
-  <h4 id="directive-sandbox">`sandbox`</h4>
-
-  The <dfn>sandbox</dfn> directive specifies an HTML sandbox policy which the
-  user agent will apply to a resource, just as though it had been included in
-  an <{iframe}> with a <{iframe/sandbox}> property.
-
-  The directive's syntax is described by the following ABNF grammar:
-
-  <pre dfn-type="grammar" link-type="grammar">
-    directive-name  = "sandbox"
-    directive-value = "" / <a>token</a> *( <a>RWS</a> <a>token</a> )
-  </pre>
-
-  This directive has no reporting requirements; it will be ignored entirely when
-  delivered in a <a>`Content-Security-Policy-Report-Only`</a> header, or within
-  a <{meta}> element.
-
-  <h5 id="directive-sandbox-apply" algorithm>
-    Apply the `sandbox` directive to |document|
-  </h5>
-
-  Given a |document|, this algorithm adjusts its <a>forced sandboxing flag
-  set</a> according to the <a>`sandbox`</a> values present in its policies.
-
-  Note: This algorithm is executed during [[#initialise-global-object-csp]]
-  (which is executed during HTML's <a>initialising a new `Document` object</a>
-  algorithm).
-
-  1.  For each |policy| in |document|'s <a>global object</a>'s
-      <a for="global object">CSP list</a>:
-
-      1.  If |policy|'s <a for="policy">disposition</a> is not "`Enforce`", skip
-          to the next |policy|.
-
-      2.  If |policy|'s <a for="policy">directive set</a> does not contain a
-          <a>directive</a> (|directive|) whose <a for="directive">name</a> is
-          "`sandbox`", skip to the next |policy|.
-
-      3.  <a>Parse a sandboxing directive</a> using |directive|'s
-          <a for="directive">value</a> as the input, and |document|'s <a>forced
-          sandboxing flag set</a> as the output.
 
   <h3 id="directives-reporting">
     Reporting Directives
