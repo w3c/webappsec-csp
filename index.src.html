@@ -148,6 +148,8 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
       text: window; url:concept-request-window
   type: interface
     text: Request
+spec: MIX; urlPrefix: http://www.w3.org/TR/mixed-content/
+  type: dfn; text: block-all-mixed-content
 spec: URL; urlPrefix: https://url.spec.whatwg.org/
   type: dfn
     text: local scheme
@@ -265,8 +267,15 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   <em>This section is not normative.</em>
 
-  [INTRODUCTION GOES HERE]
+  This document defines Content Security Policy (CSP), a tool which developers
+  can use to lock down their applications in various ways, mitigating the risk
+  of content injection vulnerabilities such as cross-site scripting, and
+  reducing the privilege with which their applications execute.
 
+  CSP is not intended as a first line of defense against content injection
+  vulnerabilities. Instead, CSP is best used as defense-in-depth. It reduces
+  the harm that a malicious injection can cause, but it is not a replacement for
+  careful input validation and output encoding.
 
   <h3 id="examples">Examples</h3>
 
@@ -304,8 +313,8 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       in a malicious context ("Pixel Perfect", etc) by giving developers
       granular control over the origins which can embed a given resource.
 
-  3.  Provide a policy framework which allows developers to tweak
-      security-relevant settings.
+  3.  Provide a policy framework which allows developers to reduce the privilege
+      of their applications.
 
   4.  Provide a reporting mechanism which allows developers to detect flaws
       being exploited in the wild.
@@ -329,6 +338,10 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
       Likewise, `'self'` now matches `https` and `wss` variants of the page's
       origin, even on pages whose scheme is `http`.
+
+  4.  Violation reports generated from inline script or style will now report
+      "`inline`" as the blocked resource. Likewise, blocked `eval()` execution
+      will report "`eval`" as the blocked resource.
 
   <h3 id="open-questions">Open Questions</h3>
 
@@ -2307,6 +2320,21 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   constructing a <a>violation</a> object via [[#create-violation-for-request]]
   or [[#create-violation-for-global]], and passing that object to
   [[#report-violation]] to deliver the report.
+
+  <h3 id="directives-elsewhere">
+    Directives Defined in Other Documents
+  </h3>
+
+  This document defines a core set of directives, and sets up a framework for
+  modular extension by other specifications. At the time this document was
+  produced, the following stable documents extend CSP:
+
+  * [[MIX]] defines `block-all-mixed-content`
+  * [[UPGRADE]] defines `upgrade-insecure-requests`
+
+  Extensions to CSP should register themselves via the process outlined in
+  <a href="https://tools.ietf.org/html/draft-west-webappsec-csp-reg">draft-west-webappsec-csp-reg</a>.
+  In particular, note the criteria discussed in Section 3.2 of that document.
 
   <h4 id="directive-report">`reports`</h4>
 
