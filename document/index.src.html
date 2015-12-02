@@ -1,4 +1,4 @@
-<h1>Content Security Policy: </h1>
+<h1>Content Security Policy: Document Features</h1>
 <pre class="metadata">
 Status: ED
 ED: https://w3c.github.io/webappsec-csp/embedded/
@@ -26,11 +26,16 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp
     text: policy
     text: directive set; for: policy
     text: disposition; for: policy
-    text: directive
-    text: name; for: directive
-    text: value; for: directive
     text: CSP list; for: global object; url: global-object-csp-list
     text: source lists
+    text: directive
+    for: directive
+      text: name
+      text: value
+      text: pre-request check
+      text: post-request check
+      text: response check
+      text: initialization
     for: violation
       text: resource; url: violation-resource
   type: grammar
@@ -45,11 +50,16 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp
 spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   type: dfn
     text: request; url: concept-request
+    for: request
+      text: target browsing context; url: concept-request-target-browsing-context
+      text: destination; url: concept-request-destination
     text: response; url: concept-response
     text: CSP list; for: response; url: concept-response-policy-list
 spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   type: dfn
     text: navigate
+    text: active document
+    text: ancestor browsing context
     text: browsing context
     text: nested browsing context
     text: browsing context container
@@ -59,6 +69,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     text: parse a sandboxing directive
     text: initialising a new document object; url: initialise-the-document-object
     text: CSP list; for: document; url: concept-document-csp-list
+    text: sandboxed scripts browsing context flag
+    text: sandboxed origin browsing context flag
   type: element
     text: frame
 spec: URL; urlPrefix: https://url.spec.whatwg.org/
@@ -82,7 +94,14 @@ spec: RFC7230; urlPrefix: https://tools.ietf.org/html/rfc7230
 <pre class="link-defaults">
 spec:dom-ls; type:interface; text:Document
 </pre>
-<pre boilerplate="copyright">&copy;2015 Google, Inc.</pre>
+<style>
+  ul.toc ul ul ul {
+    margin: 0 0 0 2em;
+  }
+  ul.toc ul ul ul span.secno {
+    margin-left: -9em;
+  }
+</style>
 <!--
 ████ ██    ██ ████████ ████████   ███████
  ██  ███   ██    ██    ██     ██ ██     ██
@@ -97,8 +116,8 @@ spec:dom-ls; type:interface; text:Document
 
   <em>This section is not normative.</em>
 
-  This document defines a number of Content Security Policy directives which
-  allow developers to lock down properties of the environment in which a policy
+  This document defines a module of Content Security Policy which allows
+  developers to lock down properties of the environment in which a policy
   applies.
 </section>
 
@@ -178,12 +197,50 @@ spec:dom-ls; type:interface; text:Document
   delivered in a <a>`Content-Security-Policy-Report-Only`</a> header, or within
   a <{meta}> element.
 
+  <h5 id="sandbox-algorithms">Algorithms</h5>
+
+  This directive's <a for="directive">response check</a> algorithm is as
+  follows:
+
+  Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
+  <a>policy</a> (|policy|):
+
+  1.  If |request|'s <a for="request">destination</a> is one of
+      "`serviceworker`", "`sharedworker`", or "`worker`":
+
+      1.  If the result of the <a>Parse a sandboxing directive</a> algorithm
+          using this directive's <a for="directive">value</a> as the input
+          contains either the <a>sandboxed scripts browsing context flag</a> or
+          the <a>sandboxed origin browsing context flag</a> flags, return
+          "`Blocked`".
+
+          Note: This will need to change if we allow Workers to be sandboxed into
+          unique origins, which seems like a pretty reasonable thing to do.
+
+  2.  Return "`Allowed`".
+
+  This directive's <a for="directive">initialization</a> algorithm is
+  responsible for adjusting a {{Document}}'s <a>forced sandboxing flag set</a>
+  according to the <a>`sandbox`</a> values present in its policies, as
+  follows:
+
+  Given a {{Document}} or <a>global object</a> (|context|), a <a>response</a>
+  (|response|), and a <a>policy</a> (|policy|):
+
+  1.  If |policy|'s <a for="policy">disposition</a> is not "`Enforce`", or
+      |context| is not a {{Document}}, then abort this algorithm.
+
+      Note: This will need to change if we allow Workers to be sandboxed,
+      which seems like a pretty reasonable thing to do.
+
+  2.  <a>Parse a sandboxing directive</a> using this directive's
+      <a for="directive">value</a> as the input, and |context|'s <a>forced
+      sandboxing flag set</a> as the output.
+
   <h5 id="directive-sandbox-apply" algorithm>
     Apply the `sandbox` directive to |document|
   </h5>
 
-  Given a |document|, this algorithm adjusts its <a>forced sandboxing flag
-  set</a> according to the <a>`sandbox`</a> values present in its policies.
 
   Note: This algorithm is executed during [[#initialise-global-object-csp]]
   (which is executed during HTML's <a>initialising a new `Document` object</a>
@@ -192,16 +249,6 @@ spec:dom-ls; type:interface; text:Document
   1.  For each |policy| in |document|'s <a>global object</a>'s
       <a for="global object">CSP list</a>:
 
-      1.  If |policy|'s <a for="policy">disposition</a> is not "`Enforce`", skip
-          to the next |policy|.
-
-      2.  If |policy|'s <a for="policy">directive set</a> does not contain a
-          <a>directive</a> (|directive|) whose <a for="directive">name</a> is
-          "`sandbox`", skip to the next |policy|.
-
-      3.  <a>Parse a sandboxing directive</a> using |directive|'s
-          <a for="directive">value</a> as the input, and |document|'s <a>forced
-          sandboxing flag set</a> as the output.
 
   <h3 id="directives-navigation">Navigation Directives</h3>
 
@@ -240,6 +287,41 @@ spec:dom-ls; type:interface; text:Document
   list</a>, but `frame-ancestors` will not fall back to the `default-src`
   directive's value if one is specified. That is, a policy that declares
   `default-src 'none'` will still allow the resource to be embedded by anyone.
+
+  <h5 id="frame-ancestors-post-fetch-check" algorithm>Post-fetch check</h5>
+
+  1.  If |request|'s <a for="request">destination</a> is "`document`"
+      <em>and</em> the |request|'s <a for="request">target browsing
+      context</a> is a <a>nested browsing context</a>:
+
+      1.  For each |policy| in |response|'s
+          <a for="response">csp list</a>:
+
+          1.  Let |source list| be the value of |policy|'s
+              <a for="policy">directive set</a>'s <a>`frame-ancestors`</a>
+              directive.
+
+          2.  If |source list| is `null`, then skip to the next
+              |policy|.
+
+          3.  For each |ancestor| of the |request|'s
+              <a for="request">target browsing context</a>'s <a>ancestor
+              browsing context</a>s:
+
+              1.  If [[#match-url-to-source-list]] returns `Matches` when
+                  executed upon |ancestor|'s <a>active document</a>'s
+                  <a for="Document">URL</a> and |source list|, skip
+                  to the next |ancestor|.
+
+
+              2.  Execute [[#report-violation]] on the result of executing
+                  [[#create-violation-for-request]] on |request|, |policy|, and
+                  "<a>`frame-ancestors`</a>".
+
+              3.  If |policy|'s <a for="policy">disposition</a> is
+                  "`enforce`", set |result| to "`Blocked`".
+
+              4.  Skip to the next |policy|.
 
 </section>
 

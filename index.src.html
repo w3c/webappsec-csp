@@ -17,6 +17,9 @@ Boilerplate: omit conformance, omit feedback-header
 !Participate: <a href="https://github.com/w3c/webappsec-csp/issues/new">File an issue</a> (<a href="https://github.com/w3c/webappsec-csp/issues">open issues</a>)
 Markup Shorthands: css off, markdown on
 </pre>
+<pre class="link-defaults">
+spec:dom-ls; type:interface; text:Event
+</pre>
 <pre class="anchors">
 spec: RFC6454; urlPrefix: https://tools.ietf.org/html/rfc6454
   type: dfn
@@ -227,6 +230,12 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 </pre>
 <pre class="biblio">
 {
+  "CSP-DOCUMENT": {
+    "authors": [ "Mike West" ],
+    "href": "https://w3c.github.io/webappsec-csp/document/",
+    "title": "Content Security Policy: Document Features",
+    "publisher": "W3C"
+  },
   "HTML-DESIGN": {
     "authors": [ "Anne Van Kesteren", "Maciej Stachowiak" ],
     "href": "http://www.w3.org/TR/html-design-principles/",
@@ -343,6 +352,13 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       "`inline`" as the blocked resource. Likewise, blocked `eval()` execution
       will report "`eval`" as the blocked resource.
 
+  5.  Directives with effects on a {{Document}} or {{Worker}} itself (as opposed
+      to the resources such a context can load) have moved out into a separate
+      [[CSP-DOCUMENT]] module. This includes `base-uri`, `form-action`,
+      `frame-ancestors`, `plugin-types`, `sandbox`.
+
+  6.  The `manifest-src` directive has been added.
+
   <h3 id="open-questions">Open Questions</h3>
 
   1.  Do we really want to remove `frame-src`? Though the threat model of
@@ -374,7 +390,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   A <dfn local-lt="policies" export>policy</dfn> defines a set of allowed and
   restricted behaviors, and may be applied to a {{Window}} or
-  {{WorkerGlobalScope}} as described in [[#initialise-global-object-csp]].
+  {{WorkerGlobalScope}} as described in [[#initialize-global-object-csp]].
   
   Each policy has an associated <dfn for="policy">directive set</dfn>, which
   is a set of <a>directives</a> that define the policy's implications when
@@ -484,6 +500,28 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     ; <a>RWS</a> is defined in section 3.2.3 of RFC7230. <a>ALPHA</a>, <a>DIGIT</a>, and
     ; <a>VCHAR</a> are defined in Appendix B.1 of RFC 5234.
   </pre>
+
+  <a>Directives</a> have four associated algorithms:
+
+  1.  A <dfn for="directive">pre-request check</dfn>, which takes a
+      <a>request</a> and a <a>policy</a> as an argument, and is executed during
+      [[#should-block-request]]. This algorithm returns "`Allowed`" unless
+      otherwise specified.
+
+  2.  A <dfn for="directive">post-request check</dfn>, which takes a
+      <a>request</a>, a <a>response</a>, and a <a>policy</a> as arguments, and
+      is executed during [[#should-block-response]]. This algorithm returns
+      "`Allowed`" unless otherwise specified.
+
+  3.  A <dfn for="directive">response check</dfn>, which takes a
+      <a>request</a>, a <a>response</a>, and a <a>policy</a> as arguments, and
+      is executed during [[#should-block-response]]. This algorithm returns
+      "`Allowed`" unless otherwise specified.
+
+  4.  An <dfn for="directive">initialization</dfn>, which takes a {{Document}}
+      or <a>global object</a>, a <a>response</a>, and a <a>policy</a> as
+      arguments. This algorithm is executed during [[#initialize-document-csp]],
+      and has no effect unless otherwise specified.
 
   <h4 id="framework-directive-source-list">Source Lists</h4>
 
@@ -823,14 +861,11 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   2.  [[#should-block-response]] is called as part of step #12 of its <a>Main
       Fetch</a> algorithm.
 
-      Note: The <a>`frame-ancestors`</a> check is handled here, inside
-      [[#should-block-response]].
-
   A <a>policy</a> is generally enforced upon a <a>global object</a>, but the
   user agent needs to <a lt="parse a serialized policy">parse</a> any policy
   delivered via an HTTP response header field before any <a>global object</a>
-  is created in order to handle directives like <a>frame-ancestors</a>. To
-  that end:
+  is created in order to handle directives that require knowledge of a
+  <a>response</a>'s details. To that end:
   
   1.  A <a>response</a> has an associated <a for="response">CSP list</a> which
       contains any policy objects delivered in the <a>response</a>'s
@@ -901,20 +936,13 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       1.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
           then skip to the next |policy|.
 
-      2.  Let |source list| be the <a>effective source list</a> for
-          |request| and |policy|.
+      2.  Let |violates| be the result of executing
+          [[#does-request-violate-policy]] on |request| and |policy|.
 
-      3.  If |source list| is `null`, then skip to the next
-          |policy|.
-
-      4.  If the result of executing [[#match-url-to-source-list]] on
-          |request|'s <a for="request">url</a> is `Matches`, then skip
-          to the next |policy|.
-
-      5.  Execute [[#report-violation]] on the result of executing
+      3.  If |violates| is not "`Does Not Violate`", then execute
+          [[#report-violation]] on the result of executing
           [[#create-violation-for-request]] on |request|, |policy|, and
-          the result of executing [[#effective-directive-for-a-request]]
-          on |request|.
+          |violates|.
 
   <h4 id="should-block-request" algorithm>
     Should |request| be blocked by Content Security Policy?
@@ -935,22 +963,16 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       1.  If |policy|'s <a for="policy">disposition</a> is "`report`",
           then skip to the next |policy|.
 
-      2.  Let |source list| be the <a>effective source list</a> for
-          |request| and |policy|.
+      2.  Let |violates| be the result of executing
+          [[#does-request-violate-policy]] on |request| and |policy|.
 
-      3.  If |source list| is `null`, then skip to the next
-          |policy|.
+      3.  If |violates| is not "`Does Not Violate`", then:
+     
+          1.  Execute [[#report-violation]] on the result of executing
+              [[#create-violation-for-request]] on |request|, |policy|, and
+              |violates|.
 
-      4.  If the result of executing [[#match-url-to-source-list]] on
-          |request|'s <a for="request">url</a> is `Matches`, then skip
-          to the next |policy|.
-
-      5.  Execute [[#report-violation]] on the result of executing
-          [[#create-violation-for-request]] on |request|, |policy|, and
-          the result of executing [[#effective-directive-for-a-request]]
-          on |request|.
-
-      6.  Set |result| to "`Blocked`".
+          2.  Set |result| to "`Blocked`".
 
   4.  Return |result|.
 
@@ -972,60 +994,41 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   3.  For each |policy| in |csp list|:
 
-      1.  Let |source list| be the <a>effective source list</a> for
-          |request| and |policy|.
+      1.  For each |directive| in |policy|:
 
-      2.  If |source list| is `null`, then skip to the next
-          |policy|.
+          1.  If the result of executing |directive|'s
+              <a for="directive">post-request check</a> is "`Blocked`", then:
 
-      3.  If the result of executing [[#match-url-to-source-list]] on
-          |response|'s <a for="response">url</a> is `Matches`, then skip
-          to the next |policy|.
-
-      4.  Execute [[#report-violation]] on the result of executing
-          [[#create-violation-for-request]] on |request|, |policy|, and
-          the result of executing [[#effective-directive-for-a-request]]
-          on |request|.
-
-      5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
-          set |result| to "`Blocked`".
-
-  4.  If |result| is "`Blocked`", return "`Blocked`".
-
-  5.  If |request|'s <a for="request">destination</a> is "`document`"
-      <em>and</em> the |request|'s <a for="request">target browsing
-      context</a> is a <a>nested browsing context</a>:
-
-      1.  For each |policy| in |response|'s
-          <a for="response">csp list</a>:
-
-          1.  Let |source list| be the value of |policy|'s
-              <a for="policy">directive set</a>'s <a>`frame-ancestors`</a>
-              directive.
-
-          2.  If |source list| is `null`, then skip to the next
-              |policy|.
-
-          3.  For each |ancestor| of the |request|'s
-              <a for="request">target browsing context</a>'s <a>ancestor
-              browsing context</a>s:
-
-              1.  If [[#match-url-to-source-list]] returns `Matches` when
-                  executed upon |ancestor|'s <a>active document</a>'s
-                  <a for="Document">URL</a> and |source list|, skip
-                  to the next |ancestor|.
-
-
-              2.  Execute [[#report-violation]] on the result of executing
+              1.  Execute [[#report-violation]] on the result of executing
                   [[#create-violation-for-request]] on |request|, |policy|, and
-                  "<a>`frame-ancestors`</a>".
+                  |directive|.
 
-              3.  If |policy|'s <a for="policy">disposition</a> is
-                  "`enforce`", set |result| to "`Blocked`".
+              2.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
+                  then set |result| to "`Blocked`".
 
-              4.  Skip to the next |policy|.
+      Note: This portion of the check verifies that the page can load the
+      response. That is, that a Service Worker hasn't substituted a file which
+      would violated the page's CSP.
 
-  6.  Return |result|.
+  4.  For each |policy| in |response|'s <a for="response">CSP list</a>:
+
+      1.  For each |directive| in |policy|:
+
+          1.  If the result of executing |directive|'s
+              <a for="directive">response check</a> on |request|, |response|,
+              and |policy| is "`Blocked`", then:
+
+              1.  Execute [[#report-violation]] on the result of executing
+                  [[#create-violation-for-request]] on |request|, |policy|, and
+                  |directive|.
+
+              2.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
+                  then set |result| to "`Blocked`".
+
+      Note: This portion of the check allows policies delivered with the
+      response to determine whether the response is allowed to be delivered.
+
+  5.  Return |result|.
 
 
   <h3 id="html-integration">
@@ -1036,13 +1039,13 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       <dfn for="global object" id="global-object-csp-list">CSP list</dfn>,
       which holds all the <a>policy</a> objects which are active for a given
       context. This list is empty unless otherwise specified, and is populated
-      via the [[#initialise-global-object-csp]] algorithm.
+      via the [[#initialize-global-object-csp]] algorithm.
 
   2.  A <a>policy</a> is <dfn>enforced</dfn> or <dfn>monitored</dfn> for an
       <a>global object</a> by inserting it into the <a>global object</a>'s
       <a for="global object">CSP list</a>.
 
-  3.  [[#initialise-global-object-csp]] is called during the <a>initialising a
+  3.  [[#initialize-global-object-csp]] is called during the <a>initialising a
       new `Document` object</a> and <a>run a worker</a> algorithms in order to
       bind a set of <a>policy</a> objects associated with a <a>response</a> to a
       newly created <a>global object</a>.
@@ -1081,8 +1084,8 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       <a lt="nested through">through which</a> the {{Document}}'s
       <a>browsing context</a> is nested.
 
-  <h4 id="initialise-document-csp" algorithm>
-    Initialise a `Document`'s `CSP list`
+  <h4 id="initialize-document-csp" algorithm>
+    Initialize a `Document`'s `CSP list`
   </h4>
 
   Given a {{Document}} (|document|), and a <a>response</a> (|response|), the
@@ -1118,10 +1121,15 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   2.  For each |policy| in |response|'s <a for="response">CSP list</a>, insert
       |policy| into |document|'s <a for="document">CSP list</a>.
 
-  3.  Execute [[#directive-sandbox-apply]] on |document|.
+  3.  For each |policy| in |document|'s <a for="document">CSP list</a>:
 
-  <h4 id="initialise-global-object-csp" algorithm>
-    Initialise a global object's `CSP list`
+      1.  For each |directive| in |policy|:
+
+          1.  Execute |directive|'s <a for="directive">initialization</a>
+              algorithm on |document| and |response|.
+
+  <h4 id="initialize-global-object-csp" algorithm>
+    Initialize a global object's `CSP list`
   </h4>
 
   Given a <a>global object</a> (|global|), and a <a>response</a>
@@ -1398,8 +1406,9 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   <h4 id="directive-child-src">`child-src`</h4>
 
   The <dfn>child-src</dfn> directive governs the creation of <a>nested browsing
-  contexts</a> and Worker execution contexts. The syntax for the directive's
-  name and value is described by the following ABNF:
+  contexts</a> (e.g. <{iframe}> and <{frame}> navigations) and Worker execution
+  contexts. The syntax for the directive's name and value is described by the
+  following ABNF:
 
   <pre>
     directive-name  = "child-src"
@@ -1438,6 +1447,18 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     </pre>
   </div>
 
+  <h5 id="child-src-algorithms">Algorithms</h5>
+
+  This directive's <a for="directive">pre-request check</a> is as follows:
+
+  Given a <a>request</a> (|request|):
+
+  ISSUE: TODO.
+
+  This directive's <a for="directive">post-request check</a> is as follows:
+
+  ISSUE: TODO.
+
   <h4 id="directive-connect-src">`connect-src`</h4>
 
   The <dfn>connect-src</dfn> directive restricts the URLs which can be loaded
@@ -1450,16 +1471,10 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   </pre>
 
   This directive controls <a>requests</a> which transmit or receive data from
-  other origins. More formally, <a>requests</a> falling into one of the
-  following categories [[FETCH]]: 
- 
-  *   <a for="request">initiator</a> is "`fetch`" (e.g. `fetch()`)
-  *   <a for="request">type</a> is "", and whose
-      <a for="request">destination</a> is "`subresource`". (e.g. [[XHR]],
-      [[EVENTSOURCE]], <{a}>'s <{a/ping}>, and [[BEACON]]
-
-  This directive <em>also</em> controls WebSocket [[WEBSOCKETS]] connections,
-  though those aren't technically part of Fetch.  
+  other origins. This includes APIs like `fetch()`, [[XHR]], [[EVENTSOURCE]],
+  [[BEACON]], and <{a}>'s <{a/ping}>. This directive <em>also</em> controls
+  WebSocket [[WEBSOCKETS]] connections, though those aren't technically part
+  of Fetch.
 
   <div class="example">
     JavaScript offers a few mechanisms that directly connect to an external
@@ -1499,6 +1514,39 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     </pre>
   </div>
 
+  <h5 id="connect-src-algorithms">Algorithms</h5>
+
+  This directive's <a for="directive">pre-request check</a> is as follows:
+
+  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
+
+  1.  If |request|'s <a for="request">initiator</a> is "`fetch`", or its
+      <a for="request">type</a> is "" and <a for="request">destination</a> is
+      "`subresource`":
+
+      1.  If the result of executing [[#match-url-to-source-list]] on
+          |request|'s <a for="request">url</a> and this directive's
+          <a for="directive">value</a> is "`Does Not Match`",
+          return "`Blocked`".
+
+  2.  Return "`Allowed`".
+
+  This directive's <a for="directive">post-request check</a> is as follows:
+
+  Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
+  <a>policy</a> (|policy|):
+
+  1.  If |request|'s <a for="request">initiator</a> is "`fetch`", or its
+      <a for="request">type</a> is "" and <a for="request">destination</a> is
+      "`subresource`":
+
+      1.  If the result of executing [[#match-url-to-source-list]] on
+          |response|'s <a for="response">url</a> and this directive's
+          <a for="directive">value</a> is "`Does Not Match`",
+          return "`Blocked`".
+
+  2.  Return "`Allowed`".
+
   <h4 id="directive-default-src">`default-src`</h4>
 
   The <dfn>default-src</dfn> directive serves as a fallback for the other 
@@ -1510,14 +1558,12 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     directive-value = <a grammar>serialized-source-list</a>
   </pre>
 
-  If a <a>default-src</a> directive is present, its value will be used as the
-  <a>effective source list</a> for any <a>fetch directive</a> which is not
-  explicitly present in the policy.
-
-  That is, given `default-src 'none'; script-src 'self'`, script requests will
-  use `'self'` as the <a>effective source list</a> to match against. Other
-  requests will use `'none'`. This is spelled out in more detail in the
-  [[#match-request-to-policy]] algorithm.
+  If a <a>default-src</a> directive is present in a policy, its value will be
+  used as the policy's default source list. That is, given `default-src 'none';
+  script-src 'self'`, script requests will use `'self'` as the <a>source
+  list</a> to match against. Other requests will use `'none'`. This is spelled
+  out in more detail in the [[#should-block-request]] and
+  [[#should-block-response]] algorithms.
 
   <div class="example">
     The following header:
@@ -1570,6 +1616,45 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     particular page the policy will apply to.
   </div>
 
+  <h5 id="default-src-algorithms">Algorithms</h5>
+
+  This directive's <a for="directive">pre-request check</a> is as follows:
+
+  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
+
+  1.  Let |name| be the result of executing
+      [[#effective-directive-for-a-request]] on |request|.
+
+  2.  If |name| is `null`, return "`Allowed`".
+
+  3.  If |policy| contains a <a>directive</a> whose <a for="directive">name</a>
+      is |name|, return "`Allowed`".
+
+  4.  If the result of executing [[#match-url-to-source-list]] on |request|'s
+      <a for="request">url</a> and this directive's <a for="directive">value</a>
+      is "`Does Not Match`", return "`Blocked`".
+
+  5.  Return "`Allowed`".
+
+  This directive's <a for="directive">post-request check</a> is as follows:
+
+  Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
+  <a>policy</a> (|policy|):
+
+  1.  Let |name| be the result of executing
+      [[#effective-directive-for-a-request]] on |request|.
+
+  2.  If |name| is `null`, return "`Allowed`".
+
+  3.  If |policy| contains a <a>directive</a> whose <a for="directive">name</a>
+      is |name|, return "`Allowed`".
+
+  4.  If the result of executing [[#match-url-to-source-list]] on |response|'s
+      <a for="response">url</a> and this directive's <a for="directive">value</a>
+      is "`Does Not Match`", return "`Blocked`".
+
+  5.  Return "`Allowed`".
+
   <h4 id="directive-font-src">`font-src`</h4>
 
   The <dfn>font-src</dfn> directive restricts the URLs from which font resources
@@ -1580,11 +1665,6 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     directive-name  = "font-src"
     directive-value = <a grammar>serialized-source-list</a>
   </pre>
-
-  This directive controls <a>requests</a> which load fonts. More formally, this
-  includes <a>requests</a> whose <a for="request">type</a> is "`font`"
-  [[FETCH]].
-
   <div class="example">
     Given a page with the following Content Security Policy:
 
@@ -1607,6 +1687,35 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       &lt;/style&gt;
     </pre>
   </div>
+
+  <h5 id="font-src-algorithms">Algorithms</h5>
+
+  This directive's <a for="directive">pre-request check</a> is as follows:
+
+  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
+
+  1.  If |request|'s <a for="request">type</a> is "`font`":
+
+      1.  If the result of executing [[#match-url-to-source-list]] on
+          |request|'s <a for="request">url</a> and this directive's
+          <a for="directive">value</a> is "`Does Not Match`",
+          return "`Blocked`".
+
+  2.  Return "`Allowed`".
+
+  This directive's <a for="directive">post-request check</a> is as follows:
+
+  Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
+  <a>policy</a> (|policy|):
+
+  1.  If |request|'s <a for="request">type</a> is "`font`":
+
+      1.  If the result of executing [[#match-url-to-source-list]] on
+          |response|'s <a for="response">url</a> and this directive's
+          <a for="directive">value</a> is "`Does Not Match`",
+          return "`Blocked`".
+
+  2.  Return "`Allowed`".
 
   <h4 id="directive-img-src">`img-src`</h4>
 
@@ -1638,6 +1747,92 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     </pre>
   </div>
 
+  <h5 id="img-src-algorithms">Algorithms</h5>
+
+  This directive's <a for="directive">pre-request check</a> is as follows:
+
+  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
+
+  1.  If |request|'s <a for="request">type</a> is "`image`":
+
+      1.  If the result of executing [[#match-url-to-source-list]] on
+          |request|'s <a for="request">url</a> and this directive's
+          <a for="directive">value</a> is "`Does Not Match`",
+          return "`Blocked`".
+
+  2.  Return "`Allowed`".
+
+  This directive's <a for="directive">post-request check</a> is as follows:
+
+  Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
+  <a>policy</a> (|policy|):
+
+  1.  If |request|'s <a for="request">type</a> is "`image`":
+
+      1.  If the result of executing [[#match-url-to-source-list]] on
+          |response|'s <a for="response">url</a> and this directive's
+          <a for="directive">value</a> is "`Does Not Match`",
+          return "`Blocked`".
+
+  2.  Return "`Allowed`".
+
+  <h4 id="directive-manifest-src">`manifest-src`</h4>
+
+  The <dfn>manifest-src</dfn> directive restricts the URLs from which application
+  manifests may be loaded [[APPMANIFEST]]. The syntax for the directive's name
+  and value is described by the following ABNF:
+
+  <pre>
+    directive-name  = "manifest-src"
+    directive-value = <a grammar>serialized-source-list</a>
+  </pre>
+
+  <div class="example">
+    Given a page with the following Content Security Policy:
+
+    <pre>
+      Content-Security-Policy: <a>manifest-src</a> https://example.com/
+    </pre>
+
+    Fetches for the following code will return a network errors, as the URL
+    provided do not match `manifest-src`'s <a>source list</a>:
+
+    <pre>
+      &lt;link rel="manifest" href="https://not-example.com/manifest"&gt;
+    </pre>
+  </div>
+
+  <h5 id="manifest-src-algorithms">Algorithms</h5>
+
+  This directive's <a for="directive">pre-request check</a> is as follows:
+
+  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
+
+  1.  If |request|'s <a for="request">type</a> is "", and its
+      <a for="request">initiator</a> is "`manifest`":
+
+      1.  If the result of executing [[#match-url-to-source-list]] on
+          |request|'s <a for="request">url</a> and this directive's
+          <a for="directive">value</a> is "`Does Not Match`",
+          return "`Blocked`".
+
+  2.  Return "`Allowed`".
+
+  This directive's <a for="directive">post-request check</a> is as follows:
+
+  Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
+  <a>policy</a> (|policy|):
+
+  1.  If |request|'s <a for="request">type</a> is "", and its
+      <a for="request">initiator</a> is "`manifest`":
+
+      1.  If the result of executing [[#match-url-to-source-list]] on
+          |response|'s <a for="response">url</a> and this directive's
+          <a for="directive">value</a> is "`Does Not Match`",
+          return "`Blocked`".
+
+  2.  Return "`Allowed`".
+
   <h4 id="directive-media-src">`media-src`</h4>
 
   The <dfn>media-src</dfn> directive restricts the URLs from which video, audio,
@@ -1648,10 +1843,6 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     directive-name  = "media-src"
     directive-value = <a grammar>serialized-source-list</a>
   </pre>
-
-  This directive controls <a>requests</a> which load images. More formally, this
-  includes <a>requests</a> whose <a for="request">type</a> is "`track`",
-  "`video`", or "`audio`" [[FETCH]].
 
   <div class="example">
     Given a page with the following Content Security Policy:
@@ -1671,20 +1862,47 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     </pre>
   </div>
 
+  <h5 id="media-src-algorithms">Algorithms</h5>
+
+  This directive's <a for="directive">pre-request check</a> is as follows:
+
+  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
+
+  1.  If |request|'s <a for="request">type</a> is one of "`audio`", "`video`",
+      or "`track`":
+
+      1.  If the result of executing [[#match-url-to-source-list]] on
+          |request|'s <a for="request">url</a> and this directive's
+          <a for="directive">value</a> is "`Does Not Match`",
+          return "`Blocked`".
+
+  2.  Return "`Allowed`".
+
+  This directive's <a for="directive">post-request check</a> is as follows:
+
+  Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
+  <a>policy</a> (|policy|):
+
+  1.  If |request|'s <a for="request">type</a> is one of "`audio`", "`video`",
+      or "`track`":
+
+      1.  If the result of executing [[#match-url-to-source-list]] on
+          |response|'s <a for="response">url</a> and this directive's
+          <a for="directive">value</a> is "`Does Not Match`",
+          return "`Blocked`".
+
+  2.  Return "`Allowed`".
+
   <h4 id="directive-object-src">`object-src`</h4>
 
-  The <dfn>object-src</dfn> directive restricts the URLs from which plugins may
-  be loaded. The syntax for the directive's name and value is described by the
-  following ABNF:
+  The <dfn>object-src</dfn> directive restricts the URLs from which plugin
+  content may be loaded. The syntax for the directive's name and value is
+  described by the following ABNF:
 
   <pre>
     directive-name  = "object-src"
     directive-value = <a grammar>serialized-source-list</a>
   </pre>
-
-  This directive controls <a>requests</a> which load plugin content. More
-  formally, this includes <a>requests</a> whose
-  <a for="request">destination</a> is "`unknown`" [[FETCH]].
 
   <div class="example">
     Given a page with the following Content Security Policy:
@@ -1706,8 +1924,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   If plugin content is loaded without an associated URL (perhaps an <{object}>
   element lacks a <{object/data}> attribute, but loads some default plugin based
   on the specified `type`), it MUST be blocked if `object-src`'s value is
-  `'none'`, but will otherwise be allowed. The <a>`plugin-types`</a> directive
-  can be used to control these kinds of plugins with more granularity.
+  `'none'`, but will otherwise be allowed.
 
   Note: The `object-src` directive acts upon any request made on behalf of
   an <{object}>, <{embed}>, or <{applet}> element. This includes requests
@@ -1716,6 +1933,37 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   semantically equivalent to content which would otherwise be restricted by
   another directive, such as an <{object}> element with a `text/html` MIME
   type.
+
+  <h5 id="object-src-algorithms">Algorithms</h5>
+
+  This directive's <a for="directive">pre-request check</a> is as follows:
+
+  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
+
+  1.  If |request|'s <a for="request">type</a> is "", and its
+      <a for="request">destination</a> is "`unknown`":
+
+      1.  If the result of executing [[#match-url-to-source-list]] on
+          |request|'s <a for="request">url</a> and this directive's
+          <a for="directive">value</a> is "`Does Not Match`",
+          return "`Blocked`".
+
+  2.  Return "`Allowed`".
+
+  This directive's <a for="directive">post-request check</a> is as follows:
+
+  Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
+  <a>policy</a> (|policy|):
+
+  1.  If |request|'s <a for="request">type</a> is "", and its
+      <a for="request">destination</a> is "`unknown`":
+
+      1.  If the result of executing [[#match-url-to-source-list]] on
+          |response|'s <a for="response">url</a> and this directive's
+          <a for="directive">value</a> is "`Does Not Match`",
+          return "`Blocked`".
+
+  2.  Return "`Allowed`".
 
   <h4 id="directive-script-src">`script-src`</h4>
 
@@ -1733,13 +1981,16 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   The `script-src` directive governs four things:
   
   1.  Script <a>requests</a> MUST pass through [[#should-block-request]].
+
   2.  Script <a>responses</a> MUST pass through [[#should-block-response]].
+
   3.  Inline <{script}> blocks MUST pass through [[#should-block-inline]]. Their
       behavior will be blocked unless every policy allows inline script, either
       implicitly by not specifying a `script-src` (or `default-src`) directive,
       or explicitly, by whitelisting "`unsafe-inline`", a
       <a grammar>nonce-source</a> or a <a grammar>hash-source</a> that matches
       the inline block.
+
   4.  The following JavaScript execution sinks are gated on the "`unsafe-eval`"
       source expression:
 
@@ -1750,6 +2001,43 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
       Note: If a user agent implements non-standard sinks like `setImmediate()`
       or `execScript()`, they SHOULD also be gated on "`unsafe-eval`".
+
+  <h5 id="script-src-algorithms">Algorithms</h5>
+
+  This directive's <a for="directive">pre-request check</a> is as follows:
+
+  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
+
+  1.  If |request|'s <a for="request">type</a> is "`script`", and its
+      <a for="request">destination</a> is "`subresource`":
+
+      1.  If the result of executing [[#match-url-to-source-list]] on
+          |request|'s <a for="request">url</a> and this directive's
+          <a for="directive">value</a> is "`Does Not Match`",
+          return "`Blocked`".
+
+  2.  Return "`Allowed`".
+
+  This directive's <a for="directive">post-request check</a> is as follows:
+
+  Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
+  <a>policy</a> (|policy|):
+
+  1.  If |request|'s <a for="request">type</a> is "`script`", and its
+      <a for="request">destination</a> is "`subresource`":
+
+      1.  If the result of executing [[#match-url-to-source-list]] on
+          |response|'s <a for="response">url</a> and this directive's
+          <a for="directive">value</a> is "`Does Not Match`",
+          return "`Blocked`".
+
+  2.  Return "`Allowed`".
+
+  This directive's <a for="directive">initialization</a> algorithm is as follows:
+
+  ISSUE: Do something interesting to the execution context in order to lock down
+  `eval()`, et al. I don't think ECMA gives us any hooks here, so let's work
+  with them to put something reasonable together.
 
   <h4 id="directive-style-src">`style-src`</h4>
 
@@ -1797,17 +2085,61 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
       ISSUE: This needs to be better explained.
 
+  <h5 id="style-src-algorithms">Algorithms</h5>
+
+  This directive's <a for="directive">pre-request check</a> is as follows:
+
+  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
+
+  1.  If |request|'s <a for="request">type</a> is "`style`":
+
+      1.  If the result of executing [[#match-url-to-source-list]] on
+          |request|'s <a for="request">url</a> and this directive's
+          <a for="directive">value</a> is "`Does Not Match`",
+          return "`Blocked`".
+
+  2.  Return "`Allowed`".
+
+  This directive's <a for="directive">post-request check</a> is as follows:
+
+  Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
+  <a>policy</a> (|policy|):
+
+  1.  If |request|'s <a for="request">type</a> is "`style`":
+
+      1.  If the result of executing [[#match-url-to-source-list]] on
+          |response|'s <a for="response">url</a> and this directive's
+          <a for="directive">value</a> is "`Does Not Match`",
+          return "`Blocked`".
+
+  2.  Return "`Allowed`".
+
+  This directive's <a for="directive">initialization</a> algorithm is as follows:
+
+  ISSUE: Do something interesting to the execution context in order to lock down
+  interesting CSSOM algorithms. I don't think CSSOM gives us any hooks here, so
+  let's work with them to put something reasonable together.
+
   <h4 id="fetch-directive-matching-url">URL Matching Algorithms</h4>
 
-  <h5 id="match-request-to-policy" algorithm>
-    Does |request| match |policy|?
+  <h5 id="does-request-violate-policy" algorithm>
+    Does |request| violate |policy|?
   </h5>
 
-  1.  Let |source list| be the result of executing
-      [[#effective-source-list-for-request]] on |request| and |policy|.
+  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|), this
+  algorithm returns the violated <a>directive</a> if the request violates the
+  policy, and "`Does Not Violate`" otherwise.
 
-  2.  Return the result of executing [[#match-url-to-source-list]] on
-      |request|'s <a for="request">url</a> and |source list|.
+  1.  Let |violates| be "`Does Not Violate`".
+
+  2.  For each |directive| in |policy|:
+
+      1.  Let |result| be the result of executing |directive|'s
+          <a for="directive">pre-request check</a> on |request| and |policy|.
+
+      2.  If |result| is "`Blocked`", then let |violates| be |directive|.
+
+  3.  Return |violates|.
 
   <h5 id="match-url-to-source-list" algorithm>
     Does |url| match |source list|?
@@ -2043,33 +2375,6 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   2.  Return `null`.
 
-  <h5 id="effective-source-list-for-request" algorithm>
-    Get the effective source list for |request| and |policy|
-  </h5>
-
-  If the <a for="request">effective directive</a> for a <a>request</a> is not
-  present in a <a>policy</a>, <a>fetch directives</a> will fall back to using
-  the value of <a>`default-src`</a>, if present. The <dfn>effective source
-  list</dfn> for a <a>request</a> (|request|) and <a>policy</a>
-  (|policy|) is therefore determined by the following algorithm:
-
-  1.  Let |effective| be the result of executing
-      [[#effective-directive-for-a-request]] on |request|.
-
-  2.  If |effective| is `null`, return `null`.
-
-  3.  If a <a>directive</a> whose <a for="directive">name</a> is
-      |effective| is present in |policy|'s
-      <a for="policy">directive set</a>, return that <a>directive</a>'s
-      <a for="directive">value</a>.
-
-  4.  If a <a>directive</a> whose <a for="directive">name</a> is
-      `default-src` is present in |policy|'s <a for="policy">directive
-      set</a>, return that <a>directive</a>'s <a for="directive">value</a>.
-
-  5.  Return `null`.
-
-
   <h4 id="fetch-directive-matching-element">Element Matching Algorithms</h4>
 
   <h5 id="match-element-to-policy" algorithm>
@@ -2194,11 +2499,16 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   produced, the following stable documents extend CSP:
 
   * [[MIX]] defines `block-all-mixed-content`
-  * [[UPGRADE]] defines `upgrade-insecure-requests`
+  * [[UPGRADE-INSECURE-REQUESTS]] defines `upgrade-insecure-requests`
 
-  Extensions to CSP should register themselves via the process outlined in
+  Extensions to CSP MUST register themselves via the process outlined in
   <a href="https://tools.ietf.org/html/draft-west-webappsec-csp-reg">draft-west-webappsec-csp-reg</a>.
   In particular, note the criteria discussed in Section 3.2 of that document.
+
+  New directives SHOULD use the <a for="directive">pre-request check</a>,
+  <a for="directive">post-request check</a>, <a for="directive">response
+  check</a>, and <a for="directive">initialization</a> hooks in order to
+  integrate themselves into Fetch and HTML.
 
   <h4 id="directive-report">`reports`</h4>
 
