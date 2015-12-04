@@ -1008,7 +1008,7 @@
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="http://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/Icons/w3c_home" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">Content Security Policy Level 3</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2015-12-02">2 December 2015</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2015-12-04">4 December 2015</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1209,6 +1209,7 @@ of security-relevant policy decisions.</p>
        <a href="#directives-reporting"><span class="secno">6.3</span> <span class="content"> Reporting Directives </span></a>
        <ul class="toc">
         <li><a href="#directive-report-uri"><span class="secno">6.3.1</span> <span class="content"><code>report-uri</code></span></a>
+        <li><a href="#directive-report-to"><span class="secno">6.3.2</span> <span class="content"><code>report-to</code></span></a>
        </ul>
       <li>
        <a href="#directives-elsewhere"><span class="secno">6.4</span> <span class="content"> Directives Defined in Other Documents </span></a>
@@ -2180,8 +2181,37 @@ dictionary <dfn class="idl-code" data-dfn-type="dictionary" data-export="" id="d
   request per violation, which simply isn’t scalable. As soon as this
   behavior can be removed from user agents, it will be.</p>
      <li data-md="">
-      <p>Do some better reporting.</p>
-      <p class="issue" id="issue-0141f077"><a class="self-link" href="#issue-0141f077"></a> Define this bit. :)</p>
+      <p>If <var>violation</var>’s <a data-link-type="dfn" href="#violation-policy">policy</a>’s <a data-link-type="dfn" href="#directive-set">directive
+  set</a> contains a <a data-link-type="dfn" href="#directives">directive</a> named "<a data-link-type="dfn" href="#report-to"><code>report-to</code></a>"
+  (<var>directive</var>):</p>
+      <ol>
+       <li data-md="">
+        <p>Let <var>group</var> be <var>directive</var>’s <a data-link-type="dfn" href="#value">value</a>.</p>
+       <li data-md="">
+        <p>Let <var>settings object</var> be <var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object">global
+  object</a>’s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#relevant-settings-object-for-a-global-object">relevant settings object</a>.</p>
+       <li data-md="">
+        <p>Execute <a data-link-type="biblio" href="#biblio-oob-reporting">[OOB-REPORTING]</a>'s <a data-link-type="dfn" href="https://mikewest.github.io/error-reporting/#queue-report">Queue <var>data</var> as <var>type</var> for <var>endpoint group</var> on <var>settings</var></a> algorithm with the
+  following arguments:</p>
+        <dl>
+         <dt data-md="">
+          <p><var>data</var></p>
+         <dd data-md="">
+          <p><var>violation</var></p>
+         <dt data-md="">
+          <p><var>type</var></p>
+         <dd data-md="">
+          <p>"CSP"</p>
+         <dt data-md="">
+          <p><var>endpoint group</var></p>
+         <dd data-md="">
+          <p><var>group</var></p>
+         <dt data-md="">
+          <p><var>settings</var></p>
+         <dd data-md="">
+          <p><var>settings object</var></p>
+        </dl>
+      </ol>
     </ol>
    </section>
    <section>
@@ -3121,12 +3151,20 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
     <h4 class="heading settled" data-level="6.2.1" id="directive-base-uri"><span class="secno">6.2.1. </span><span class="content"><code>base-uri</code></span><a class="self-link" href="#directive-base-uri"></a></h4>
     <h3 class="heading settled" data-level="6.3" id="directives-reporting"><span class="secno">6.3. </span><span class="content"> Reporting Directives </span><a class="self-link" href="#directives-reporting"></a></h3>
     <h4 class="heading settled" data-level="6.3.1" id="directive-report-uri"><span class="secno">6.3.1. </span><span class="content"><code>report-uri</code></span><a class="self-link" href="#directive-report-uri"></a></h4>
-    <p class="note" role="note">Note: The <a data-link-type="dfn" href="#report-uri"><code>report-uri</code></a> directive is deprecated. Please use the <a data-link-type="dfn" href="#reports">reports</a> directive instead.</p>
+    <p class="note" role="note">Note: The <a data-link-type="dfn" href="#report-uri"><code>report-uri</code></a> directive is deprecated. Please use the <a data-link-type="dfn" href="#report-to"><code>report-to</code></a> directive instead.</p>
     <p>The <dfn data-dfn-type="dfn" data-noexport="" id="report-uri"><code>report-uri</code><a class="self-link" href="#report-uri"></a></dfn> directive defines a set of endpoints to which <a data-link-type="dfn" href="#violation-report">violation reports</a> will be sent when particular behaviors are prevented.
   The directive has no effect in and of itself, but only gains meaning in
   combination with other directives.</p>
     <p>Various algorithms in this document hook into the reporting process by
   constructing a <a data-link-type="dfn" href="#violation">violation</a> object via <a href="#create-violation-for-request">§2.3.2 Create a violation object for request, policy, and directive</a> or <a href="#create-violation-for-global">§2.3.1 Create a violation object for global, policy, and directive</a>, and passing that object to <a href="#report-violation">§5.3 Report a violation</a> to deliver the report.</p>
+    <h4 class="heading settled" data-level="6.3.2" id="directive-report-to"><span class="secno">6.3.2. </span><span class="content"><code>report-to</code></span><a class="self-link" href="#directive-report-to"></a></h4>
+    <p>The <dfn data-dfn-type="dfn" data-noexport="" id="report-to"><code>report-to</code><a class="self-link" href="#report-to"></a></dfn> directive defines a <a data-link-type="dfn" href="https://mikewest.github.io/error-reporting/#group">reporting
+  group</a> to which violation reports ought to be sent <a data-link-type="biblio" href="#biblio-oob-reporting">[OOB-REPORTING]</a>. The
+  directive’s behavior is defined in <a href="#report-violation">§5.3 Report a violation</a>. The directive’s name
+  and value are described by the following ABNF:</p>
+<pre>directive-name  = "report-to"
+directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc7230#section-3.2.6">token</a>
+</pre>
     <h3 class="heading settled" data-level="6.4" id="directives-elsewhere"><span class="secno">6.4. </span><span class="content"> Directives Defined in Other Documents </span><a class="self-link" href="#directives-elsewhere"></a></h3>
     <p>This document defines a core set of directives, and sets up a framework for
   modular extension by other specifications. At the time this document was
@@ -3368,6 +3406,7 @@ Content-Security-Policy: connect-src http://example.com/;
      <li><a href="#dom-securitypolicyviolationeventinit-referrer">dict-member for SecurityPolicyViolationEventInit</a><span>, in §5.1</span>
     </ul>
    <li><a href="#reports">reports</a><span>, in §6.4.1</span>
+   <li><a href="#report-to">report-to</a><span>, in §6.3.2</span>
    <li><a href="#report-uri">report-uri</a><span>, in §6.3.1</span>
    <li><a href="#violation-resource">resource</a><span>, in §2.3</span>
    <li><a href="#response-check">response check</a><span>, in §2.2</span>
@@ -3520,6 +3559,12 @@ Content-Security-Policy: connect-src http://example.com/;
      <li><a href="http://www.w3.org/TR/html5/infrastructure.html#concept-event-trusted">trusted</a>
     </ul>
    <li>
+    <a data-link-type="biblio" href="#biblio-oob-reporting">[OOB-REPORTING]</a> defines the following terms:
+    <ul>
+     <li><a href="https://mikewest.github.io/error-reporting/#group">group</a>
+     <li><a href="https://mikewest.github.io/error-reporting/#queue-report">queue report</a>
+    </ul>
+   <li>
     <a data-link-type="biblio" href="#biblio-rfc3986">[rfc3986]</a> defines the following terms:
     <ul>
      <li><a href="https://tools.ietf.org/html/rfc3986#section-3.2.2">ipv4address</a>
@@ -3548,6 +3593,7 @@ Content-Security-Policy: connect-src http://example.com/;
     <ul>
      <li><a href="https://tools.ietf.org/html/rfc7230#section-3.2.3">ows</a>
      <li><a href="https://tools.ietf.org/html/rfc7230#section-3.2.3">rws</a>
+     <li><a href="https://tools.ietf.org/html/rfc7230#section-3.2.6">token</a>
     </ul>
    <li>
     <a data-link-type="biblio" href="#biblio-rfc7231">[rfc7231]</a> defines the following terms:
@@ -3618,6 +3664,8 @@ Content-Security-Policy: connect-src http://example.com/;
    <dd>Anne van Kesteren. <a href="https://fetch.spec.whatwg.org/">Fetch Standard</a>. Living Standard. URL: <a href="https://fetch.spec.whatwg.org/">https://fetch.spec.whatwg.org/</a>
    <dt id="biblio-html"><a class="self-link" href="#biblio-html"></a>[HTML]
    <dd>Ian Hickson. <a href="https://html.spec.whatwg.org/multipage/">HTML Standard</a>. Living Standard. URL: <a href="https://html.spec.whatwg.org/multipage/">https://html.spec.whatwg.org/multipage/</a>
+   <dt id="biblio-oob-reporting"><a class="self-link" href="#biblio-oob-reporting"></a>[OOB-REPORTING]
+   <dd>Ilya Gregorik; Mike West. <a href="https://mikewest.github.io/error-reporting/">Out-of-band Reporting</a>. URL: <a href="https://mikewest.github.io/error-reporting/">https://mikewest.github.io/error-reporting/</a>
    <dt id="biblio-sha2"><a class="self-link" href="#biblio-sha2"></a>[SHA2]
    <dd><a href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf">FIPS PUB 180-4, Secure Hash Standard</a>. URL: <a href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf">http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf</a>
    <dt id="biblio-css-cascade-4"><a class="self-link" href="#biblio-css-cascade-4"></a>[CSS-CASCADE-4]
@@ -3730,7 +3778,6 @@ dictionary <a href="#dictdef-securitypolicyviolationeventinit">SecurityPolicyVio
   They aren’t yet in W3C’s HTML.<a href="#issue-af0c6074"> ↵ </a></div>
    <div class="issue"> This processing was added to WHATWG’s HTML in <a href="https://github.com/whatwg/html/commit/5064a629f22bef29839ab4dc6f1ceef17f010bc5">whatwg/html@5064a62</a>.
   It has not yet been added to W3C’s HTML.<a href="#issue-389933ec"> ↵ </a></div>
-   <div class="issue"> Define this bit. :)<a href="#issue-0141f077"> ↵ </a></div>
    <div class="issue"> TODO.<a href="#issue-95f2d23a"> ↵ </a></div>
    <div class="issue"> TODO.<a href="#issue-95f2d23a0"> ↵ </a></div>
    <div class="issue"> Do something interesting to the execution context in order to lock down <code>eval()</code>, et al. I don’t think ECMA gives us any hooks here, so let’s work
