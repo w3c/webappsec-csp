@@ -511,7 +511,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     ; <a>VCHAR</a> are defined in Appendix B.1 of RFC 5234.
   </pre>
 
-  <a>Directives</a> have four associated algorithms:
+  <a>Directives</a> have five associated algorithms:
 
   1.  A <dfn for="directive">pre-request check</dfn>, which takes a
       <a>request</a> and a <a>policy</a> as an argument, and is executed during
@@ -528,7 +528,12 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       is executed during [[#should-block-response]]. This algorithm returns
       "`Allowed`" unless otherwise specified.
 
-  4.  An <dfn for="directive">initialization</dfn>, which takes a {{Document}}
+  4.  An <dfn for="directive">inline check</dfn>, which takes an {{Element}} and
+      a type string as arguments, and is executed during
+      [[#should-block-inline]]. This algorithm returns "`Allowed`" unless
+      otherwise specified.
+
+  5.  An <dfn for="directive">initialization</dfn>, which takes a {{Document}}
       or <a>global object</a>, a <a>response</a>, and a <a>policy</a> as
       arguments. This algorithm is executed during [[#initialize-document-csp]],
       and has no effect unless otherwise specified.
@@ -1171,31 +1176,35 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       |global|'s <a for="global object">csp list</a>.
 
   <h4 id="should-block-inline" algorithm>
-    Should |element|'s inline behavior be blocked by Content Security Policy?
+    Should |element|'s inline |type| behavior be blocked by Content Security Policy?
   </h4>
 
-  Given an {{Element}} (|element|), this algorithm returns "`Allowed`" if the
-  element is allowed to have inline definition of behavior (script execution,
-  style application, event handlers, etc.), and "`Blocked`" otherwise:
+  Given an {{Element}} (|element|), and a string (|type|) this algorithm returns
+  "`Allowed`" if the element is allowed to have inline definition of a
+  particular type of behavior (script execution, style application, event handlers,
+  etc.), and "`Blocked`" otherwise:
 
   1.  Let |result| be "`Allowed`".
 
   2.  For each |policy| in |element|'s {{Document}}'s <a>global object</a>'s
       <a for="global object">CSP list</a>:
 
-      1.  If [[#match-element-to-policy]] returns "`Does Not Match`" when
-          executed upon |element| and |policy|:
-         
-          1.  Let |violation| be the result of executing
+      1.  For each |directive| in |policy|:
+
+          1.  If |directive|'s <a for="directive">inline check</a> returns
+              "`Allowed`" when executed upon |element| and |type|, skip to the
+              next |directive|.
+
+          2.  Otherwise, let |violation| be the result of executing
               [[#create-violation-for-global]] on the <a>incumbent settings
-              object</a>, |policy|, and "`style-src`" if |element| is a
-              <{style}> element, and "`script-src`" otherwise.
+              object</a>, |policy|, and "`style-src`" if |type| is "`style`"
+              and "`script-src`" otherwise.
 
-          2.  Set |violation|'s <a for="violation">resource</a> to "`inline`".
+          3.  Set |violation|'s <a for="violation">resource</a> to "`inline`".
 
-          3.  Execute [[#report-violation]] on |violation|.
+          4.  Execute [[#report-violation]] on |violation|.
 
-          4.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
+          5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
               set |result| to "`Blocked`".
 
   3.  Return |result|. 
@@ -2059,6 +2068,18 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   2.  Return "`Allowed`".
 
+  This directive's <a for="directive">inline check</a> algorithm is as follows:
+
+  Given an {{Element}} (|element|) and a string (|type|):
+
+  1.  If |type| is "`script`" or "`script attribute`":
+ 
+      1.  If the result of executing [[#match-element-to-source-list]] on
+          |element|, this directive's <a for="directive">value</a>, and
+          |type| is "`Does Not Match`", return "`Blocked`".
+
+  3.  Return "`Allowed`".
+
   This directive's <a for="directive">initialization</a> algorithm is as follows:
 
   ISSUE: Do something interesting to the execution context in order to lock down
@@ -2139,6 +2160,18 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
           return "`Blocked`".
 
   2.  Return "`Allowed`".
+
+  This directive's <a for="directive">inline check</a> algorithm is as follows:
+
+  Given an {{Element}} (|element|) and a string (|type|):
+
+  1.  If |type| is "`style`" or "`style attribute`":
+ 
+      1.  If the result of executing [[#match-element-to-source-list]] on
+          |element|, this directive's <a for="directive">value</a>, and
+          |type| is "`Does Not Match`", return "`Blocked`".
+
+  3.  Return "`Allowed`".
 
   This directive's <a for="directive">initialization</a> algorithm is as follows:
 
@@ -2403,93 +2436,64 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   <h4 id="fetch-directive-matching-element">Element Matching Algorithms</h4>
 
-  <h5 id="match-element-to-policy" algorithm>
-    Does |element| match |policy|?
-  </h5>
-
-  Given an {{Element}} (|element|) and a <a>policy</a> (|policy|), this
-  algorithm returns "`Matches`" or "`Does Not Match`".
-
-  1.  Let |directive name| be `null`.
-
-  2.  If |element| is a <{script}> element, set |directive name| to
-      "`script-src`".
-
-  3.  If |element| is a <{style}> element, set |directive name| to
-      "`style-src`".
-
-  4.  If |directive name| is `null`, return "`Matches`".
-
-  5.  Let |source list| be `null`.
-
-  6.  If a <a>directive</a> whose <a for="directive">name</a> is |directive
-      name| is present in |policy|'s <a for="policy">directive set</a>, set
-      |source list| to that <a>directive</a>'s  <a for="directive">value</a>.
-
-  7.  If |source list| is `null`, and a <a>directive</a> whose
-      <a for="directive">name</a> is "`default-src`" is present in |policy|'s
-      <a for="policy">directive set</a>, set |source list| to that
-      <a>directive</a>'s <a for="directive">value</a>.
-
-  8.  Return the result of executing [[#match-element-to-source-list]] on |element|
-      and |source list|.
-
   <h5 id="match-element-to-source-list" algorthm>
     Does |element| match source |list|?
   </h5>
 
-  Given an {{Element}} (|element|) and a <a>source list</a> (|list|),
-  this algorithm returns "`Matches`" or "`Does Not Match`".
+  Given an {{Element}} (|element|), a <a>source list</a> (|list|), and a string
+  (|type|), this algorithm returns "`Matches`" or "`Does Not Match`".
 
-  1.  If |element| is a <{script}> element, and has a <{script/src}> attribute,
-      then return "`Matches`".
+  1.  Let |contains nonce or hash| be `false`.
 
-  2.  Let |contains nonce or hash| be `false`.
-
-  3.  Let |content| be <a>the script block's source</a> if |element| is a
-      <{script}> element, or the value of |element|'s {{Node/textContent}}
-      IDL attribute for any other element.
-
-  4.  For each |expression| in |list|:
+  2.  For each |expression| in |list|:
 
       1.  If |expression| matches the <a grammar>`nonce-source`</a> or
           <a grammar>`hash-source`</a> grammar, set |contains nonce or hash|
           to `true`.
 
-  5.  For each |expression| in |list|:
+  3.  If |contains nonce or hash| is `false`, and |list| contains a
+      <a>source expression</a> which is a <a>case-sensitive</a> match for
+      the string "`unsafe-inline`", then return "`Matches`".
 
-      1.  If |contains nonce or hash| is `false`, and |expression| is a
-          <a>case-sensitive</a> match for "`'unsafe-inline'`", return
-          "`Matches`".
+  4.  If |type| is not "`script attribute`" or "`style attribute`":
 
-      2.  If |expression| matches the <a grammar>`nonce-source`</a> grammar,
-          and |element| has a <{script/nonce}> attribute whose value is a
-          <a>case-sensitive</a> match for |expression|'s
-          <a grammar>`base64-value`</a> part, return "`Matches`".
+      1.  Let |content| be <a>the script block's source</a> if |element| is a
+          <{script}> element, or the value of |element|'s {{Node/textContent}}
+          IDL attribute for any other element.
 
-      3.  If |expression| matches the <a grammar>`hash-source`</a> grammar:
-          
-          1.  Let |algorithm| be `null`.
+      2.  For each |expression| in |list|:
 
-          2.  If |expression|'s <a grammar>`hash-algorithm`</a> part is an
-              <a>ASCII case-insensitive match</a> for "sha256", set |algorithm|
-              to <a>SHA-256</a>.
-
-          3.  If |expression|'s <a grammar>`hash-algorithm`</a> part is an
-              <a>ASCII case-insensitive match</a> for "sha384", set |algorithm|
-              to <a>SHA-384</a>.
-
-          4.  If |expression|'s <a grammar>`hash-algorithm`</a> part is an
-              <a>ASCII case-insensitive match</a> for "sha512", set |algorithm|
-              to <a>SHA-512</a>.
-
-          5.  Let |actual| be the result of <a>base64 encoding</a> the result of
-              applying |algorithm| to |content|.
-
-          6.  If |actual| is a <a>case-sensitive</a> match for |expression|'s
+          1.  If |expression| matches the <a grammar>`nonce-source`</a> grammar,
+              and |element| has a <{script/nonce}> attribute whose value is a
+              <a>case-sensitive</a> match for |expression|'s
               <a grammar>`base64-value`</a> part, return "`Matches`".
 
-  6.  Return "`Does Not Match`".
+          2.  If |expression| matches the <a grammar>`hash-source`</a> grammar:
+              
+              1.  Let |algorithm| be `null`.
+
+              2.  If |expression|'s <a grammar>`hash-algorithm`</a> part is an
+                  <a>ASCII case-insensitive match</a> for "sha256", set
+                  |algorithm| to <a>SHA-256</a>.
+
+              3.  If |expression|'s <a grammar>`hash-algorithm`</a> part is an
+                  <a>ASCII case-insensitive match</a> for "sha384", set
+                  |algorithm| to <a>SHA-384</a>.
+
+              4.  If |expression|'s <a grammar>`hash-algorithm`</a> part is an
+                  <a>ASCII case-insensitive match</a> for "sha512", set
+                  |algorithm| to <a>SHA-512</a>.
+
+              5.  If |algorithm| is not `null`:
+
+                  1.  Let |actual| be the result of <a>base64 encoding</a> the
+                      result of applying |algorithm| to |content|.
+
+                  2.  If |actual| is a <a>case-sensitive</a> match for
+                      |expression|'s <a grammar>`base64-value`</a> part, return
+                      "`Matches`".
+
+  5.  Return "`Does Not Match`".
 
   <h3 id="directives-reporting">
     Reporting Directives

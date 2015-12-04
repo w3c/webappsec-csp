@@ -1119,7 +1119,7 @@ of security-relevant policy decisions.</p>
        <ul class="toc">
         <li><a href="#initialize-document-csp"><span class="secno">4.2.1</span> <span class="content"> Initialize a <code>Document</code>'s <code>CSP list</code> </span></a>
         <li><a href="#initialize-global-object-csp"><span class="secno">4.2.2</span> <span class="content"> Initialize a global object’s <code>CSP list</code> </span></a>
-        <li><a href="#should-block-inline"><span class="secno">4.2.3</span> <span class="content"> Should <var>element</var>’s inline behavior be blocked by Content Security Policy? </span></a>
+        <li><a href="#should-block-inline"><span class="secno">4.2.3</span> <span class="content"> Should <var>element</var>’s inline <var>type</var> behavior be blocked by Content Security Policy? </span></a>
        </ul>
      </ul>
     <li>
@@ -1196,8 +1196,7 @@ of security-relevant policy decisions.</p>
         <li>
          <a href="#fetch-directive-matching-element"><span class="secno">6.1.12</span> <span class="content">Element Matching Algorithms</span></a>
          <ul class="toc">
-          <li><a href="#match-element-to-policy"><span class="secno">6.1.12.1</span> <span class="content"> Does <var>element</var> match <var>policy</var>? </span></a>
-          <li><a href="#match-element-to-source-list"><span class="secno">6.1.12.2</span> <span class="content"> Does <var>element</var> match source <var>list</var>? </span></a>
+          <li><a href="#match-element-to-source-list"><span class="secno">6.1.12.1</span> <span class="content"> Does <var>element</var> match source <var>list</var>? </span></a>
          </ul>
        </ul>
       <li>
@@ -1442,7 +1441,7 @@ of security-relevant policy decisions.</p>
 ; <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc7230#section-3.2.3">RWS</a> is defined in section 3.2.3 of RFC7230. <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc5234#appendix-B.1">ALPHA</a>, <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc5234#appendix-B.1">DIGIT</a>, and
 ; <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc5234#appendix-B.1">VCHAR</a> are defined in Appendix B.1 of RFC 5234.
 </pre>
-    <p><a data-link-type="dfn" href="#directives">Directives</a> have four associated algorithms:</p>
+    <p><a data-link-type="dfn" href="#directives">Directives</a> have five associated algorithms:</p>
     <ol>
      <li data-md="">
       <p>A <dfn data-dfn-for="directive" data-dfn-type="dfn" data-noexport="" id="pre-request-check">pre-request check<a class="self-link" href="#pre-request-check"></a></dfn>, which takes a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> and a <a data-link-type="dfn" href="#policy">policy</a> as an argument, and is executed during <a href="#should-block-request">§4.1.3 Should request be blocked by Content Security Policy?</a>. This algorithm returns "<code>Allowed</code>" unless
@@ -1457,6 +1456,10 @@ of security-relevant policy decisions.</p>
   is executed during <a href="#should-block-response">§4.1.4 Should response to request be blocked by Content
     Security Policy?</a>. This algorithm returns
   "<code>Allowed</code>" unless otherwise specified.</p>
+     <li data-md="">
+      <p>An <dfn data-dfn-for="directive" data-dfn-type="dfn" data-noexport="" id="inline-check">inline check<a class="self-link" href="#inline-check"></a></dfn>, which takes an <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/dom/#interface-element">Element</a></code> and
+  a type string as arguments, and is executed during <a href="#should-block-inline">§4.2.3 Should element’s inline type behavior be blocked by Content Security Policy?</a>. This algorithm returns "<code>Allowed</code>" unless
+  otherwise specified.</p>
      <li data-md="">
       <p>An <dfn data-dfn-for="directive" data-dfn-type="dfn" data-noexport="" id="initialization">initialization<a class="self-link" href="#initialization"></a></dfn>, which takes a <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/html5/dom.html#document">Document</a></code> or <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>, a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a>, and a <a data-link-type="dfn" href="#policy">policy</a> as
   arguments. This algorithm is executed during <a href="#initialize-document-csp">§4.2.1 Initialize a Document's CSP list</a>,
@@ -1845,14 +1848,14 @@ of security-relevant policy decisions.</p>
       <p class="issue" id="issue-1e5f494a"><a class="self-link" href="#issue-1e5f494a"></a> Need to monkey-patch these in: something like "Set the <code>Window</code> object’s <code>csp list</code> to the <code>csp list</code> of the resource used to
   generate the document.</p>
      <li data-md="">
-      <p><a href="#should-block-inline">§4.2.3 Should element’s inline behavior be blocked by Content Security Policy?</a> is called during the <a data-link-type="dfn" href="http://www.w3.org/TR/html5/scripting-1.html#prepare-a-script">prepare a script</a> and <a data-link-type="dfn" href="https://html.spec.whatwg.org/#update-a-style-block">update a <code>style</code> block</a> algorithms in order to determine whether or
+      <p><a href="#should-block-inline">§4.2.3 Should element’s inline type behavior be blocked by Content Security Policy?</a> is called during the <a data-link-type="dfn" href="http://www.w3.org/TR/html5/scripting-1.html#prepare-a-script">prepare a script</a> and <a data-link-type="dfn" href="https://html.spec.whatwg.org/#update-a-style-block">update a <code>style</code> block</a> algorithms in order to determine whether or
   not an inline script or style block is allowed to execute.</p>
       <p class="issue" id="issue-f40dd242"><a class="self-link" href="#issue-f40dd242"></a> The <a data-link-type="dfn" href="https://html.spec.whatwg.org/#update-a-style-block">update a <code>style</code> block</a> algorithm does not exist in
   W3C’s HTML.</p>
       <p class="issue" id="issue-80f81a73"><a class="self-link" href="#issue-80f81a73"></a> The <code>nonce</code> attribute for <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> and <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-style-element">style</a></code> were added to
   WHATWG’s HTML in <a href="https://github.com/whatwg/html/commit/882803c4cc8fba2fa5472b76f628d95cc82c421d">whatwg/html@882803c</a>.
   They have not yet been added to W3C’s HTML.</p>
-      <p class="issue" id="issue-af0c6074"><a class="self-link" href="#issue-af0c6074"></a> The <a href="#should-block-inline">§4.2.3 Should element’s inline behavior be blocked by Content Security Policy?</a> hooks were added to WHATWG’s HTML in <a href="https://github.com/whatwg/html/commit/ee3486eb129bc350b5ca684d0c91dff23453ac1a">whatwg/html@ee3486e</a>.
+      <p class="issue" id="issue-af0c6074"><a class="self-link" href="#issue-af0c6074"></a> The <a href="#should-block-inline">§4.2.3 Should element’s inline type behavior be blocked by Content Security Policy?</a> hooks were added to WHATWG’s HTML in <a href="https://github.com/whatwg/html/commit/ee3486eb129bc350b5ca684d0c91dff23453ac1a">whatwg/html@ee3486e</a>.
   They aren’t yet in W3C’s HTML.</p>
      <li data-md="">
       <p><a data-link-type="dfn" href="#policy">Policies</a> are <a data-link-type="dfn" href="#enforced">enforced</a> during processing of the <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-meta-element">meta</a></code> element’s <code><a data-link-type="element-attr" href="http://www.w3.org/TR/html5/document-metadata.html#attr-meta-http-equiv">http-equiv</a></code>.</p>
@@ -1930,10 +1933,11 @@ of security-relevant policy decisions.</p>
      <li data-md="">
       <p>For each <var>policy</var> in <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">csp list</a>, insert <var>policy</var> into <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list">csp list</a>.</p>
     </ol>
-    <h4 class="heading settled" data-algorithm="Should element’s inline behavior be blocked by Content Security Policy?" data-level="4.2.3" id="should-block-inline"><span class="secno">4.2.3. </span><span class="content"> Should <var>element</var>’s inline behavior be blocked by Content Security Policy? </span><a class="self-link" href="#should-block-inline"></a></h4>
-    <p>Given an <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/dom/#interface-element">Element</a></code> (<var>element</var>), this algorithm returns "<code>Allowed</code>" if the
-  element is allowed to have inline definition of behavior (script execution,
-  style application, event handlers, etc.), and "<code>Blocked</code>" otherwise:</p>
+    <h4 class="heading settled" data-algorithm="Should element’s inline type behavior be blocked by Content Security Policy?" data-level="4.2.3" id="should-block-inline"><span class="secno">4.2.3. </span><span class="content"> Should <var>element</var>’s inline <var>type</var> behavior be blocked by Content Security Policy? </span><a class="self-link" href="#should-block-inline"></a></h4>
+    <p>Given an <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/dom/#interface-element">Element</a></code> (<var>element</var>), and a string (<var>type</var>) this algorithm returns
+  "<code>Allowed</code>" if the element is allowed to have inline definition of a
+  particular type of behavior (script execution, style application, event handlers,
+  etc.), and "<code>Blocked</code>" otherwise:</p>
     <ol>
      <li data-md="">
       <p>Let <var>result</var> be "<code>Allowed</code>".</p>
@@ -1941,12 +1945,16 @@ of security-relevant policy decisions.</p>
       <p>For each <var>policy</var> in <var>element</var>’s <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/html5/dom.html#document">Document</a></code>'s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list">CSP list</a>:</p>
       <ol>
        <li data-md="">
-        <p>If <a href="#match-element-to-policy">§6.1.12.1 Does element match policy?</a> returns "<code>Does Not Match</code>" when
-  executed upon <var>element</var> and <var>policy</var>:</p>
+        <p>For each <var>directive</var> in <var>policy</var>:</p>
         <ol>
          <li data-md="">
-          <p>Let <var>violation</var> be the result of executing <a href="#create-violation-for-global">§2.3.1 Create a violation object for global, policy, and directive</a> on the <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#incumbent-settings-object">incumbent settings
-  object</a>, <var>policy</var>, and "<code>style-src</code>" if <var>element</var> is a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-style-element">style</a></code> element, and "<code>script-src</code>" otherwise.</p>
+          <p>If <var>directive</var>’s <a data-link-type="dfn" href="#inline-check">inline check</a> returns
+  "<code>Allowed</code>" when executed upon <var>element</var> and <var>type</var>, skip to the
+  next <var>directive</var>.</p>
+         <li data-md="">
+          <p>Otherwise, let <var>violation</var> be the result of executing <a href="#create-violation-for-global">§2.3.1 Create a violation object for global, policy, and directive</a> on the <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#incumbent-settings-object">incumbent settings
+  object</a>, <var>policy</var>, and "<code>style-src</code>" if <var>type</var> is "<code>style</code>"
+  and "<code>script-src</code>" otherwise.</p>
          <li data-md="">
           <p>Set <var>violation</var>’s <a data-link-type="dfn" href="#violation-resource">resource</a> to "<code>inline</code>".</p>
          <li data-md="">
@@ -2670,7 +2678,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <p>Script <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">responses</a> MUST pass through <a href="#should-block-response">§4.1.4 Should response to request be blocked by Content
     Security Policy?</a>.</p>
      <li data-md="">
-      <p>Inline <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> blocks MUST pass through <a href="#should-block-inline">§4.2.3 Should element’s inline behavior be blocked by Content Security Policy?</a>. Their
+      <p>Inline <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> blocks MUST pass through <a href="#should-block-inline">§4.2.3 Should element’s inline type behavior be blocked by Content Security Policy?</a>. Their
   behavior will be blocked unless every policy allows inline script, either
   implicitly by not specifying a <code>script-src</code> (or <code>default-src</code>) directive,
   or explicitly, by whitelisting "<code>unsafe-inline</code>", a <a data-link-type="grammar" href="#grammardef-nonce-source">nonce-source</a> or a <a data-link-type="grammar" href="#grammardef-hash-source">hash-source</a> that matches
@@ -2717,6 +2725,18 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
      <li data-md="">
       <p>Return "<code>Allowed</code>".</p>
     </ol>
+    <p>This directive’s <a data-link-type="dfn" href="#inline-check">inline check</a> algorithm is as follows:</p>
+    <p>Given an <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/dom/#interface-element">Element</a></code> (<var>element</var>) and a string (<var>type</var>):</p>
+    <ol>
+     <li data-md="">
+      <p>If <var>type</var> is "<code>script</code>" or "<code>script attribute</code>":</p>
+      <ol>
+       <li data-md="">
+        <p>If the result of executing <a href="#match-element-to-source-list">§6.1.12.1 Does element match source list?</a> on <var>element</var>, this directive’s <a data-link-type="dfn" href="#value">value</a>, and <var>type</var> is "<code>Does Not Match</code>", return "<code>Blocked</code>".</p>
+      </ol>
+     <li data-md="">
+      <p>Return "<code>Allowed</code>".</p>
+    </ol>
     <p>This directive’s <a data-link-type="dfn" href="#initialization">initialization</a> algorithm is as follows:</p>
     <p class="issue" id="issue-2b1bf0aa"><a class="self-link" href="#issue-2b1bf0aa"></a> Do something interesting to the execution context in order to lock down <code>eval()</code>, et al. I don’t think ECMA gives us any hooks here, so let’s work
   with them to put something reasonable together.</p>
@@ -2745,7 +2765,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">Responses</a> to style requests MUST pass through <a href="#should-block-response">§4.1.4 Should response to request be blocked by Content
     Security Policy?</a>.</p>
      <li data-md="">
-      <p>Inline <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-style-element">style</a></code> blocks MUST pass through <a href="#should-block-inline">§4.2.3 Should element’s inline behavior be blocked by Content Security Policy?</a>. The
+      <p>Inline <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-style-element">style</a></code> blocks MUST pass through <a href="#should-block-inline">§4.2.3 Should element’s inline type behavior be blocked by Content Security Policy?</a>. The
   styles will be blocked unless every policy allows inline style, either
   implicitly by not specifying a <code>script-src</code> (or <code>default-src</code>) directive,
   or explicitly, by whitelisting "<code>unsafe-inline</code>", a <a data-link-type="grammar" href="#grammardef-nonce-source">nonce-source</a> or a <a data-link-type="grammar" href="#grammardef-hash-source">hash-source</a> that matches
@@ -2789,6 +2809,18 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
        <li data-md="">
         <p>If the result of executing <a href="#match-url-to-source-list">§6.1.11.2 Does url match source list?</a> on <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a> and this directive’s <a data-link-type="dfn" href="#value">value</a> is "<code>Does Not Match</code>",
   return "<code>Blocked</code>".</p>
+      </ol>
+     <li data-md="">
+      <p>Return "<code>Allowed</code>".</p>
+    </ol>
+    <p>This directive’s <a data-link-type="dfn" href="#inline-check">inline check</a> algorithm is as follows:</p>
+    <p>Given an <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/dom/#interface-element">Element</a></code> (<var>element</var>) and a string (<var>type</var>):</p>
+    <ol>
+     <li data-md="">
+      <p>If <var>type</var> is "<code>style</code>" or "<code>style attribute</code>":</p>
+      <ol>
+       <li data-md="">
+        <p>If the result of executing <a href="#match-element-to-source-list">§6.1.12.1 Does element match source list?</a> on <var>element</var>, this directive’s <a data-link-type="dfn" href="#value">value</a>, and <var>type</var> is "<code>Does Not Match</code>", return "<code>Blocked</code>".</p>
       </ol>
      <li data-md="">
       <p>Return "<code>Allowed</code>".</p>
@@ -3066,41 +3098,12 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <p>Return <code>null</code>.</p>
     </ol>
     <h4 class="heading settled" data-level="6.1.12" id="fetch-directive-matching-element"><span class="secno">6.1.12. </span><span class="content">Element Matching Algorithms</span><a class="self-link" href="#fetch-directive-matching-element"></a></h4>
-    <h5 class="heading settled" data-algorithm="Does element match policy?" data-level="6.1.12.1" id="match-element-to-policy"><span class="secno">6.1.12.1. </span><span class="content"> Does <var>element</var> match <var>policy</var>? </span><a class="self-link" href="#match-element-to-policy"></a></h5>
-    <p>Given an <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/dom/#interface-element">Element</a></code> (<var>element</var>) and a <a data-link-type="dfn" href="#policy">policy</a> (<var>policy</var>), this
-  algorithm returns "<code>Matches</code>" or "<code>Does Not Match</code>".</p>
+    <h5 algorthm="" class="heading settled" data-level="6.1.12.1" id="match-element-to-source-list"><span class="secno">6.1.12.1. </span><span class="content"> Does <var>element</var> match source <var>list</var>? </span><a class="self-link" href="#match-element-to-source-list"></a></h5>
+    <p>Given an <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/dom/#interface-element">Element</a></code> (<var>element</var>), a <a data-link-type="dfn" href="#source-lists">source list</a> (<var>list</var>), and a string
+  (<var>type</var>), this algorithm returns "<code>Matches</code>" or "<code>Does Not Match</code>".</p>
     <ol>
-     <li data-md="">
-      <p>Let <var>directive name</var> be <code>null</code>.</p>
-     <li data-md="">
-      <p>If <var>element</var> is a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> element, set <var>directive name</var> to
-  "<code>script-src</code>".</p>
-     <li data-md="">
-      <p>If <var>element</var> is a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-style-element">style</a></code> element, set <var>directive name</var> to
-  "<code>style-src</code>".</p>
-     <li data-md="">
-      <p>If <var>directive name</var> is <code>null</code>, return "<code>Matches</code>".</p>
-     <li data-md="">
-      <p>Let <var>source list</var> be <code>null</code>.</p>
-     <li data-md="">
-      <p>If a <a data-link-type="dfn" href="#directives">directive</a> whose <a data-link-type="dfn" href="#name">name</a> is <var>directive
-  name</var> is present in <var>policy</var>’s <a data-link-type="dfn" href="#directive-set">directive set</a>, set <var>source list</var> to that <a data-link-type="dfn" href="#directives">directive</a>’s <a data-link-type="dfn" href="#value">value</a>.</p>
-     <li data-md="">
-      <p>If <var>source list</var> is <code>null</code>, and a <a data-link-type="dfn" href="#directives">directive</a> whose <a data-link-type="dfn" href="#name">name</a> is "<code>default-src</code>" is present in <var>policy</var>’s <a data-link-type="dfn" href="#directive-set">directive set</a>, set <var>source list</var> to that <a data-link-type="dfn" href="#directives">directive</a>’s <a data-link-type="dfn" href="#value">value</a>.</p>
-     <li data-md="">
-      <p>Return the result of executing <a href="#match-element-to-source-list">§6.1.12.2 Does element match source list?</a> on <var>element</var> and <var>source list</var>.</p>
-    </ol>
-    <h5 algorthm="" class="heading settled" data-level="6.1.12.2" id="match-element-to-source-list"><span class="secno">6.1.12.2. </span><span class="content"> Does <var>element</var> match source <var>list</var>? </span><a class="self-link" href="#match-element-to-source-list"></a></h5>
-    <p>Given an <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/dom/#interface-element">Element</a></code> (<var>element</var>) and a <a data-link-type="dfn" href="#source-lists">source list</a> (<var>list</var>),
-  this algorithm returns "<code>Matches</code>" or "<code>Does Not Match</code>".</p>
-    <ol>
-     <li data-md="">
-      <p>If <var>element</var> is a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> element, and has a <code><a data-link-type="element-attr" href="http://www.w3.org/TR/html5/scripting-1.html#attr-script-src">src</a></code> attribute,
-  then return "<code>Matches</code>".</p>
      <li data-md="">
       <p>Let <var>contains nonce or hash</var> be <code>false</code>.</p>
-     <li data-md="">
-      <p>Let <var>content</var> be <a data-link-type="dfn" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-block&apos;s-source">the script block’s source</a> if <var>element</var> is a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> element, or the value of <var>element</var>’s <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/dom/#dom-node-textcontent">textContent</a></code> IDL attribute for any other element.</p>
      <li data-md="">
       <p>For each <var>expression</var> in <var>list</var>:</p>
       <ol>
@@ -3108,30 +3111,41 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
         <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-nonce-source"><code>nonce-source</code></a> or <a data-link-type="grammar" href="#grammardef-hash-source"><code>hash-source</code></a> grammar, set <var>contains nonce or hash</var> to <code>true</code>.</p>
       </ol>
      <li data-md="">
-      <p>For each <var>expression</var> in <var>list</var>:</p>
+      <p>If <var>contains nonce or hash</var> is <code>false</code>, and <var>list</var> contains a <a data-link-type="dfn" href="#source-expression">source expression</a> which is a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#case-sensitive">case-sensitive</a> match for
+  the string "<code>unsafe-inline</code>", then return "<code>Matches</code>".</p>
+     <li data-md="">
+      <p>If <var>type</var> is not "<code>script attribute</code>" or "<code>style attribute</code>":</p>
       <ol>
        <li data-md="">
-        <p>If <var>contains nonce or hash</var> is <code>false</code>, and <var>expression</var> is a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#case-sensitive">case-sensitive</a> match for "<code>'unsafe-inline'</code>", return
-  "<code>Matches</code>".</p>
+        <p>Let <var>content</var> be <a data-link-type="dfn" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-block&apos;s-source">the script block’s source</a> if <var>element</var> is a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> element, or the value of <var>element</var>’s <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/dom/#dom-node-textcontent">textContent</a></code> IDL attribute for any other element.</p>
        <li data-md="">
-        <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-nonce-source"><code>nonce-source</code></a> grammar,
-  and <var>element</var> has a <code><a data-link-type="element-attr" href="https://html.spec.whatwg.org/#attr-script-nonce">nonce</a></code> attribute whose value is a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#case-sensitive">case-sensitive</a> match for <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-base64-value"><code>base64-value</code></a> part, return "<code>Matches</code>".</p>
-       <li data-md="">
-        <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-hash-source"><code>hash-source</code></a> grammar:</p>
+        <p>For each <var>expression</var> in <var>list</var>:</p>
         <ol>
          <li data-md="">
-          <p>Let <var>algorithm</var> be <code>null</code>.</p>
+          <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-nonce-source"><code>nonce-source</code></a> grammar,
+  and <var>element</var> has a <code><a data-link-type="element-attr" href="https://html.spec.whatwg.org/#attr-script-nonce">nonce</a></code> attribute whose value is a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#case-sensitive">case-sensitive</a> match for <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-base64-value"><code>base64-value</code></a> part, return "<code>Matches</code>".</p>
          <li data-md="">
-          <p>If <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-hash-algorithm"><code>hash-algorithm</code></a> part is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for "sha256", set <var>algorithm</var> to <a data-link-type="dfn" href="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf#">SHA-256</a>.</p>
-         <li data-md="">
-          <p>If <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-hash-algorithm"><code>hash-algorithm</code></a> part is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for "sha384", set <var>algorithm</var> to <a data-link-type="dfn" href="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf#">SHA-384</a>.</p>
-         <li data-md="">
-          <p>If <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-hash-algorithm"><code>hash-algorithm</code></a> part is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for "sha512", set <var>algorithm</var> to <a data-link-type="dfn" href="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf#">SHA-512</a>.</p>
-         <li data-md="">
-          <p>Let <var>actual</var> be the result of <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc4648#section-4">base64 encoding</a> the result of
-  applying <var>algorithm</var> to <var>content</var>.</p>
-         <li data-md="">
-          <p>If <var>actual</var> is a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#case-sensitive">case-sensitive</a> match for <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-base64-value"><code>base64-value</code></a> part, return "<code>Matches</code>".</p>
+          <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-hash-source"><code>hash-source</code></a> grammar:</p>
+          <ol>
+           <li data-md="">
+            <p>Let <var>algorithm</var> be <code>null</code>.</p>
+           <li data-md="">
+            <p>If <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-hash-algorithm"><code>hash-algorithm</code></a> part is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for "sha256", set <var>algorithm</var> to <a data-link-type="dfn" href="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf#">SHA-256</a>.</p>
+           <li data-md="">
+            <p>If <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-hash-algorithm"><code>hash-algorithm</code></a> part is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for "sha384", set <var>algorithm</var> to <a data-link-type="dfn" href="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf#">SHA-384</a>.</p>
+           <li data-md="">
+            <p>If <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-hash-algorithm"><code>hash-algorithm</code></a> part is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for "sha512", set <var>algorithm</var> to <a data-link-type="dfn" href="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf#">SHA-512</a>.</p>
+           <li data-md="">
+            <p>If <var>algorithm</var> is not <code>null</code>:</p>
+            <ol>
+             <li data-md="">
+              <p>Let <var>actual</var> be the result of <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc4648#section-4">base64 encoding</a> the
+  result of applying <var>algorithm</var> to <var>content</var>.</p>
+             <li data-md="">
+              <p>If <var>actual</var> is a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#case-sensitive">case-sensitive</a> match for <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-base64-value"><code>base64-value</code></a> part, return
+  "<code>Matches</code>".</p>
+            </ol>
+          </ol>
         </ol>
       </ol>
      <li data-md="">
@@ -3350,6 +3364,7 @@ Content-Security-Policy: connect-src http://example.com/;
    <li><a href="#grammardef-host-source">host-source</a><span>, in §2.2.1</span>
    <li><a href="#img-src">img-src</a><span>, in §6.1.5</span>
    <li><a href="#initialization">initialization</a><span>, in §2.2</span>
+   <li><a href="#inline-check">inline check</a><span>, in §2.2</span>
    <li><a href="#grammardef-keyword-source">keyword-source</a><span>, in §2.2.1</span>
    <li><a href="#violation-line-number">line number</a><span>, in §2.3</span>
    <li>
@@ -3536,7 +3551,6 @@ Content-Security-Policy: connect-src http://example.com/;
      <li><a href="http://www.w3.org/TR/html5/infrastructure.html#space-characters">space characters</a>
      <li><a href="http://www.w3.org/TR/html5/infrastructure.html#split-a-string-on-commas">split a string on commas</a>
      <li><a href="http://www.w3.org/TR/html5/infrastructure.html#split-a-string-on-spaces">split a string on spaces</a>
-     <li><a href="http://www.w3.org/TR/html5/scripting-1.html#attr-script-src">src</a>
      <li><a href="http://www.w3.org/TR/html5/infrastructure.html#strictly-split-a-string">strictly split a string</a>
      <li><a href="http://www.w3.org/TR/html5/infrastructure.html#strip-leading-and-trailing-whitespace">strip leading and trailing whitespace</a>
      <li><a href="http://www.w3.org/TR/html5/document-metadata.html#the-style-element">style</a>
@@ -3760,7 +3774,7 @@ dictionary <a href="#dictdef-securitypolicyviolationeventinit">SecurityPolicyVio
    <div class="issue"> The <code>nonce</code> attribute for <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> and <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-style-element">style</a></code> were added to
   WHATWG’s HTML in <a href="https://github.com/whatwg/html/commit/882803c4cc8fba2fa5472b76f628d95cc82c421d">whatwg/html@882803c</a>.
   They have not yet been added to W3C’s HTML.<a href="#issue-80f81a73"> ↵ </a></div>
-   <div class="issue"> The <a href="#should-block-inline">§4.2.3 Should element’s inline behavior be blocked by Content Security Policy?</a> hooks were added to WHATWG’s HTML in <a href="https://github.com/whatwg/html/commit/ee3486eb129bc350b5ca684d0c91dff23453ac1a">whatwg/html@ee3486e</a>.
+   <div class="issue"> The <a href="#should-block-inline">§4.2.3 Should element’s inline type behavior be blocked by Content Security Policy?</a> hooks were added to WHATWG’s HTML in <a href="https://github.com/whatwg/html/commit/ee3486eb129bc350b5ca684d0c91dff23453ac1a">whatwg/html@ee3486e</a>.
   They aren’t yet in W3C’s HTML.<a href="#issue-af0c6074"> ↵ </a></div>
    <div class="issue"> This processing was added to WHATWG’s HTML in <a href="https://github.com/whatwg/html/commit/5064a629f22bef29839ab4dc6f1ceef17f010bc5">whatwg/html@5064a62</a>.
   It has not yet been added to W3C’s HTML.<a href="#issue-389933ec"> ↵ </a></div>
