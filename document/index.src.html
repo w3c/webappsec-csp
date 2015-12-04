@@ -1,15 +1,15 @@
 <h1>Content Security Policy: Document Features</h1>
 <pre class="metadata">
 Status: ED
-ED: https://w3c.github.io/webappsec-csp/embedded/
-Shortname: csp-embedded-enforcement
+ED: https://w3c.github.io/webappsec-csp/document/
+Shortname: csp-document
 Group: webappsec
 Level: 1
 Editor: Mike West 56384, Google Inc., mkwst@google.com
 Abstract:
-  This document defines a mechanism by which a web page can embed a nested
-  browsing context if and only if it agrees to enforce a particular set of
-  restrictions upon itself.
+  This document defines a number of Content Security Policy directives which
+  allow developers to lock down particular features of a Document (or Worker)
+  environment.
 Version History: https://github.com/w3c/webappsec-csp/commits/master/embedded/index.src.html
 !Participate: <a href="https://github.com/w3c/webappsec-csp/issues/new">File an issue</a> (<a href="https://github.com/w3c/webappsec-csp/issues">open issues</a>)
 Indent: 2
@@ -180,6 +180,8 @@ spec:dom-ls; type:interface; text:Document
 
   <dfn>plugin-types</dfn>
 
+  ISSUE: Define the hooks into HTML's plugin loading algorithms.
+
   <h4 id="directive-sandbox">`sandbox`</h4>
 
   The <dfn>sandbox</dfn> directive specifies an HTML sandbox policy which the
@@ -237,19 +239,6 @@ spec:dom-ls; type:interface; text:Document
       <a for="directive">value</a> as the input, and |context|'s <a>forced
       sandboxing flag set</a> as the output.
 
-  <h5 id="directive-sandbox-apply" algorithm>
-    Apply the `sandbox` directive to |document|
-  </h5>
-
-
-  Note: This algorithm is executed during [[#initialise-global-object-csp]]
-  (which is executed during HTML's <a>initialising a new `Document` object</a>
-  algorithm).
-
-  1.  For each |policy| in |document|'s <a>global object</a>'s
-      <a for="global object">CSP list</a>:
-
-
   <h3 id="directives-navigation">Navigation Directives</h3>
 
   <h4 id="directive-form-action">`form-action`</h4>
@@ -277,9 +266,6 @@ spec:dom-ls; type:interface; text:Document
     <dfn>ancestor-source</dfn>      = <a>scheme-source</a> / <a>host-source</a> / "<a>'self'</a>"
   </pre>
 
-  The `frame-ancestors` directive is enforced as part of
-  [[#should-block-response]].
-
   The `frame-ancestors` directive MUST be ignored when contained in a policy
   declared via a <{meta}> element.
 
@@ -288,41 +274,27 @@ spec:dom-ls; type:interface; text:Document
   directive's value if one is specified. That is, a policy that declares
   `default-src 'none'` will still allow the resource to be embedded by anyone.
 
-  <h5 id="frame-ancestors-post-fetch-check" algorithm>Post-fetch check</h5>
+  <h5 id="frame-ancestors-algorithms">Algorithms</h5>
+
+  This directive's <a for="directive">response check</a> is as follows:
+
+  Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
+  <a>policy</a> (|policy|):
 
   1.  If |request|'s <a for="request">destination</a> is "`document`"
       <em>and</em> the |request|'s <a for="request">target browsing
       context</a> is a <a>nested browsing context</a>:
+      
+      1.  For each |ancestor| of the |request|'s
+          <a for="request">target browsing context</a>'s <a>ancestor
+          browsing context</a>s:
 
-      1.  For each |policy| in |response|'s
-          <a for="response">csp list</a>:
+          1.  If [[#match-url-to-source-list]] returns `Does Not Match` when
+              executed upon |ancestor|'s <a>active document</a>'s
+              <a for="Document">URL</a> and this directive's
+              <a for="directive">value</a>, return "`Blocked`".
 
-          1.  Let |source list| be the value of |policy|'s
-              <a for="policy">directive set</a>'s <a>`frame-ancestors`</a>
-              directive.
-
-          2.  If |source list| is `null`, then skip to the next
-              |policy|.
-
-          3.  For each |ancestor| of the |request|'s
-              <a for="request">target browsing context</a>'s <a>ancestor
-              browsing context</a>s:
-
-              1.  If [[#match-url-to-source-list]] returns `Matches` when
-                  executed upon |ancestor|'s <a>active document</a>'s
-                  <a for="Document">URL</a> and |source list|, skip
-                  to the next |ancestor|.
-
-
-              2.  Execute [[#report-violation]] on the result of executing
-                  [[#create-violation-for-request]] on |request|, |policy|, and
-                  "<a>`frame-ancestors`</a>".
-
-              3.  If |policy|'s <a for="policy">disposition</a> is
-                  "`enforce`", set |result| to "`Blocked`".
-
-              4.  Skip to the next |policy|.
-
+  2.  Return "`Allowed`".
 </section>
 
 <section>
