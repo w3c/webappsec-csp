@@ -186,6 +186,7 @@ spec: RFC3986; urlPrefix: https://tools.ietf.org/html/rfc3986
     text: path; url: section-3.3
     text: scheme; url: section-3.1
     text: IPv4address; url: section-3.2.2
+    text: uri-reference; url: section-4.1
 spec: RFC4648; urlPrefix: https://tools.ietf.org/html/rfc4648
   type: dfn
     text: base64 encoding; url: section-4
@@ -2490,15 +2491,14 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   6.  Return "`Does Not Match`".
 
-  <h3 id="directives-other">
-    Grabbag
-  </h3>
-
-  <h4 id="directive-base-uri">`base-uri`</h4>
-
   <h3 id="directives-reporting">
     Reporting Directives
   </h3>
+
+  Various algorithms in this document hook into the reporting process by
+  constructing a <a>violation</a> object via [[#create-violation-for-request]]
+  or [[#create-violation-for-global]], and passing that object to
+  [[#report-violation]] to deliver the report.
 
   <h4 id="directive-report-uri">`report-uri`</h4>
 
@@ -2507,13 +2507,16 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   The <dfn>`report-uri`</dfn> directive defines a set of endpoints to which
   <a>violation reports</a> will be sent when particular behaviors are prevented.
+
+  <pre link-type="grammar">
+    directive-name  = "report-uri"
+    directive-value = <a>uri-reference</a> *( <a>RWS</a> <a>uri-reference</a> )
+
+    ; The <a>uri-reference</a> grammar is defined in Section 4.1 of RFC 3986.
+  </pre>
+
   The directive has no effect in and of itself, but only gains meaning in
   combination with other directives.
-
-  Various algorithms in this document hook into the reporting process by
-  constructing a <a>violation</a> object via [[#create-violation-for-request]]
-  or [[#create-violation-for-global]], and passing that object to
-  [[#report-violation]] to deliver the report.
 
   <h4 id="directive-report-to">`report-to`</h4>
 
@@ -2537,6 +2540,8 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   * [[MIX]] defines `block-all-mixed-content`
   * [[UPGRADE-INSECURE-REQUESTS]] defines `upgrade-insecure-requests`
+  * [[CSP-DOCUMENT]] defines `base-uri`, `form-action`, `frame-ancestors`,
+    `plugin-types`, and `sandbox`.
 
   Extensions to CSP MUST register themselves via the process outlined in
   <a href="https://tools.ietf.org/html/draft-west-webappsec-csp-reg">draft-west-webappsec-csp-reg</a>.
