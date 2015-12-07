@@ -1008,7 +1008,7 @@
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="http://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/Icons/w3c_home" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">Content Security Policy: Document Features</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2015-12-04">4 December 2015</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2015-12-07">7 December 2015</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1072,11 +1072,12 @@ environment.</p>
          <ul class="toc">
           <li><a href="#allow-base-for-document"><span class="secno">2.1.1.1</span> <span class="content"> Is <var>base</var> allowed for <var>document</var>? </span></a>
          </ul>
-        <li><a href="#directive-plugin-types"><span class="secno">2.1.2</span> <span class="content"><code>plugin-types</code></span></a>
+        <li><a href="#directive-disable"><span class="secno">2.1.2</span> <span class="content"><code>disable</code></span></a>
+        <li><a href="#directive-plugin-types"><span class="secno">2.1.3</span> <span class="content"><code>plugin-types</code></span></a>
         <li>
-         <a href="#directive-sandbox"><span class="secno">2.1.3</span> <span class="content"><code>sandbox</code></span></a>
+         <a href="#directive-sandbox"><span class="secno">2.1.4</span> <span class="content"><code>sandbox</code></span></a>
          <ul class="toc">
-          <li><a href="#sandbox-algorithms"><span class="secno">2.1.3.1</span> <span class="content">Algorithms</span></a>
+          <li><a href="#sandbox-algorithms"><span class="secno">2.1.4.1</span> <span class="content">Algorithms</span></a>
          </ul>
        </ul>
       <li>
@@ -1175,10 +1176,37 @@ directive-value = <a data-link-type="grammar" href="https://w3c.github.io/webapp
      <li data-md="">
       <p>Return "<code>Allowed</code>".</p>
     </ol>
-    <h4 class="heading settled" data-level="2.1.2" id="directive-plugin-types"><span class="secno">2.1.2. </span><span class="content"><code>plugin-types</code></span><a class="self-link" href="#directive-plugin-types"></a></h4>
+    <h4 class="heading settled" data-level="2.1.2" id="directive-disable"><span class="secno">2.1.2. </span><span class="content"><code>disable</code></span><a class="self-link" href="#directive-disable"></a></h4>
+    <p>The <dfn data-dfn-type="dfn" data-noexport="" id="disable">disable<a class="self-link" href="#disable"></a></dfn> directive allows a developer to turn off certain
+  features for a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document">Document</a></code> or <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#worker">Worker</a></code>. The syntax for the directive’s
+  name and value is described by the following ABNF:</p>
+<pre>directive-name  = "disable"
+directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc7230#section-3.2.6">token</a> *( <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc7230#section-3.2.3">RWS</a> <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc7230#section-3.2.6">token</a> )
+</pre>
+    <p>The directive recognizes a number of potential token values:</p>
+    <ul>
+     <li data-md="">
+      <p><code>cookie</code> disables <code>document.cookie</code></p>
+     <li data-md="">
+      <p><code>domain</code> disables <code>document.domain</code></p>
+     <li data-md="">
+      <p><code>geolocation</code> disables <a data-link-type="biblio" href="#biblio-geolocation-api">[GEOLOCATION-API]</a></p>
+     <li data-md="">
+      <p><code>midi</code> disables <a data-link-type="biblio" href="#biblio-webmidi">[WEBMIDI]</a></p>
+     <li data-md="">
+      <p><code>notifications</code> disables <a data-link-type="biblio" href="#biblio-notifications">[NOTIFICATIONS]</a></p>
+     <li data-md="">
+      <p><code>push</code> disables <a data-link-type="biblio" href="#biblio-push-api">[PUSH-API]</a></p>
+     <li data-md="">
+      <p><code>webrtc</code> disables <a data-link-type="biblio" href="#biblio-webrtc">[WEBRTC]</a></p>
+    </ul>
+    <p class="issue" id="issue-daa753ee"><a class="self-link" href="#issue-daa753ee"></a> Moar. Also, do we need an <code>enable</code> counterpart to whitelist rather than
+  blacklist?</p>
+    <p class="issue" id="issue-877f6c12"><a class="self-link" href="#issue-877f6c12"></a> Define an algorithm and monkey-patch the relevant specs.</p>
+    <h4 class="heading settled" data-level="2.1.3" id="directive-plugin-types"><span class="secno">2.1.3. </span><span class="content"><code>plugin-types</code></span><a class="self-link" href="#directive-plugin-types"></a></h4>
     <p><dfn data-dfn-type="dfn" data-noexport="" id="plugin-types">plugin-types<a class="self-link" href="#plugin-types"></a></dfn></p>
     <p class="issue" id="issue-4d81caf0"><a class="self-link" href="#issue-4d81caf0"></a> Define the hooks into HTML’s plugin loading algorithms.</p>
-    <h4 class="heading settled" data-level="2.1.3" id="directive-sandbox"><span class="secno">2.1.3. </span><span class="content"><code>sandbox</code></span><a class="self-link" href="#directive-sandbox"></a></h4>
+    <h4 class="heading settled" data-level="2.1.4" id="directive-sandbox"><span class="secno">2.1.4. </span><span class="content"><code>sandbox</code></span><a class="self-link" href="#directive-sandbox"></a></h4>
     <p>The <dfn data-dfn-type="dfn" data-noexport="" id="sandbox">sandbox<a class="self-link" href="#sandbox"></a></dfn> directive specifies an HTML sandbox policy which the
   user agent will apply to a resource, just as though it had been included in
   an <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a></code> with a <code><a data-link-type="element-attr" href="https://html.spec.whatwg.org/multipage/embedded-content.html#attr-iframe-sandbox">sandbox</a></code> property.</p>
@@ -1189,7 +1217,7 @@ directive-value = "" / <a data-link-type="grammar" href="https://tools.ietf.org/
     <p>This directive has no reporting requirements; it will be ignored entirely when
   delivered in a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#content-security-policy-report-only-header-field"><code>Content-Security-Policy-Report-Only</code></a> header, or within
   a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#meta">meta</a></code> element.</p>
-    <h5 class="heading settled" data-level="2.1.3.1" id="sandbox-algorithms"><span class="secno">2.1.3.1. </span><span class="content">Algorithms</span><a class="self-link" href="#sandbox-algorithms"></a></h5>
+    <h5 class="heading settled" data-level="2.1.4.1" id="sandbox-algorithms"><span class="secno">2.1.4.1. </span><span class="content">Algorithms</span><a class="self-link" href="#sandbox-algorithms"></a></h5>
     <p>This directive’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#response-check">response check</a> algorithm is as
   follows:</p>
     <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), and a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#policy">policy</a> (<var>policy</var>):</p>
@@ -1306,11 +1334,11 @@ directive-value = <a data-link-type="grammar" href="#grammardef-ancestor-source-
      <dt data-md="">
       <p><a data-link-type="dfn" href="#plugin-types"><code>plugin-types</code></a></p>
      <dd data-md="">
-      <p>This document (see <a href="#directive-plugin-types">§2.1.2 plugin-types</a>)</p>
+      <p>This document (see <a href="#directive-plugin-types">§2.1.3 plugin-types</a>)</p>
      <dt data-md="">
       <p><a data-link-type="dfn" href="#sandbox"><code>sandbox</code></a></p>
      <dd data-md="">
-      <p>This document (see <a href="#directive-sandbox">§2.1.3 sandbox</a>)</p>
+      <p>This document (see <a href="#directive-sandbox">§2.1.4 sandbox</a>)</p>
     </dl>
    </section>
   </main>
@@ -1351,10 +1379,11 @@ directive-value = <a data-link-type="grammar" href="#grammardef-ancestor-source-
    <li><a href="#grammardef-ancestor-source">ancestor-source</a><span>, in §2.2.2</span>
    <li><a href="#grammardef-ancestor-source-list">ancestor-source-list</a><span>, in §2.2.2</span>
    <li><a href="#base-uri">base-uri</a><span>, in §2.1.1</span>
+   <li><a href="#disable">disable</a><span>, in §2.1.2</span>
    <li><a href="#form-action">form-action</a><span>, in §2.2.1</span>
    <li><a href="#frame-ancestors">frame-ancestors</a><span>, in §2.2.2</span>
-   <li><a href="#plugin-types">plugin-types</a><span>, in §2.1.2</span>
-   <li><a href="#sandbox">sandbox</a><span>, in §2.1.3</span>
+   <li><a href="#plugin-types">plugin-types</a><span>, in §2.1.3</span>
+   <li><a href="#sandbox">sandbox</a><span>, in §2.1.4</span>
   </ul>
   <h3 class="no-num heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
   <ul class="indexlist">
@@ -1421,6 +1450,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-ancestor-source-
    <li>
     <a data-link-type="biblio" href="#biblio-html">[HTML]</a> defines the following terms:
     <ul>
+     <li><a href="https://html.spec.whatwg.org/multipage/workers.html#worker">Worker</a>
      <li><a href="https://html.spec.whatwg.org/multipage/obsolete.html#the-applet-element">applet</a>
      <li><a href="https://html.spec.whatwg.org/multipage/semantics.html#the-base-element">base</a>
      <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-embed-element">embed</a>
@@ -1455,9 +1485,22 @@ directive-value = <a data-link-type="grammar" href="#grammardef-ancestor-source-
   <dl>
    <dt id="biblio-uisecurity"><a class="self-link" href="#biblio-uisecurity"></a>[UISecurity]
    <dd>Giorgio Maone; et al. <a href="http://www.w3.org/TR/UISecurity/">User Interface Security Directives for Content Security Policy</a>. 18 March 2014. LCWD. URL: <a href="http://www.w3.org/TR/UISecurity/">http://www.w3.org/TR/UISecurity/</a>
+   <dt id="biblio-geolocation-api"><a class="self-link" href="#biblio-geolocation-api"></a>[geolocation-API]
+   <dd>Andrei Popescu. <a href="http://www.w3.org/TR/geolocation-API/">Geolocation API Specification</a>. 28 May 2015. PER. URL: <a href="http://www.w3.org/TR/geolocation-API/">http://www.w3.org/TR/geolocation-API/</a>
+   <dt id="biblio-notifications"><a class="self-link" href="#biblio-notifications"></a>[NOTIFICATIONS]
+   <dd>John Gregg; Anne van Kesteren. <a href="http://www.w3.org/TR/notifications/">Web Notifications</a>. 10 September 2015. PR. URL: <a href="http://www.w3.org/TR/notifications/">http://www.w3.org/TR/notifications/</a>
+   <dt id="biblio-push-api"><a class="self-link" href="#biblio-push-api"></a>[PUSH-API]
+   <dd>Bryan Sullivan; Eduardo Fullea; Michael van Ouwerkerk. <a href="http://www.w3.org/TR/push-api/">Push API</a>. 27 April 2015. WD. URL: <a href="http://www.w3.org/TR/push-api/">http://www.w3.org/TR/push-api/</a>
+   <dt id="biblio-webmidi"><a class="self-link" href="#biblio-webmidi"></a>[WEBMIDI]
+   <dd>Chris Wilson; Jussi Kalliokoski. <a href="http://www.w3.org/TR/webmidi/">Web MIDI API</a>. 17 March 2015. WD. URL: <a href="http://www.w3.org/TR/webmidi/">http://www.w3.org/TR/webmidi/</a>
+   <dt id="biblio-webrtc"><a class="self-link" href="#biblio-webrtc"></a>[WEBRTC]
+   <dd>Adam Bergkvist; et al. <a href="http://www.w3.org/TR/webrtc/">WebRTC 1.0: Real-time Communication Between Browsers</a>. 10 February 2015. WD. URL: <a href="http://www.w3.org/TR/webrtc/">http://www.w3.org/TR/webrtc/</a>
   </dl>
   <h2 class="no-num heading settled" id="issues-index"><span class="content">Issues Index</span><a class="self-link" href="#issues-index"></a></h2>
   <div style="counter-reset:issue">
+   <div class="issue"> Moar. Also, do we need an <code>enable</code> counterpart to whitelist rather than
+  blacklist?<a href="#issue-daa753ee"> ↵ </a></div>
+   <div class="issue"> Define an algorithm and monkey-patch the relevant specs.<a href="#issue-877f6c12"> ↵ </a></div>
    <div class="issue"> Define the hooks into HTML’s plugin loading algorithms.<a href="#issue-4d81caf0"> ↵ </a></div>
    <div class="issue"> Define the hooks into HTML’s navigation and form submission algorithms.<a href="#issue-15904ee9"> ↵ </a></div>
    <div class="issue"> Need to add this to HTML.<a href="#issue-a8c27cf5"> ↵ </a></div>
