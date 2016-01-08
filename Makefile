@@ -10,6 +10,9 @@ force:
 index.html: index.src.html
 	bikeshed -f spec ./index.src.html
 
+FPWD:
+	bikeshed -f spec --md-status=FPWD --md-date=2015-01-19 ./index.src.html ./published/FPWD-2015-01.html
+
 api/index.html: api/index.src.html
 	bikeshed -f spec ./api/index.src.html
 
