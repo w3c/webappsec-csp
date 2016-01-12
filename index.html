@@ -1606,10 +1606,10 @@ of security-relevant policy decisions.</p>
   The header’s value is represented by the following ABNF <a data-link-type="biblio" href="#biblio-rfc5234">[RFC5234]</a>:</p>
 <pre>Content-Security-Policy = 1#<a data-link-type="grammar" href="#grammardef-serialized-policy">serialized-policy</a>
 </pre>
-    <div class="example" id="example-731af1ba">
-     <a class="self-link" href="#example-731af1ba"></a> 
+    <div class="example" id="example-30ac7d45">
+     <a class="self-link" href="#example-30ac7d45"></a> 
 <pre><a data-link-type="dfn" href="#content-security-policy">Content-Security-Policy</a>: script-src 'self';
-                         reports /csp-reporting-endpoint
+                         report-to csp-reporting-endpoint
 </pre>
     </div>
     <p>A server MAY send different <code>Content-Security-Policy</code> header field
@@ -1630,10 +1630,10 @@ of security-relevant policy decisions.</p>
   an iterative fashion, deploying a report-only policy based on their best
   estimate of how their site behaves, watching for violation reports, and then
   moving to an enforced policy once they’ve gained confidence in that behavior.</p>
-    <div class="example" id="example-89c50ad6">
-     <a class="self-link" href="#example-89c50ad6"></a> 
+    <div class="example" id="example-d1b5cb79">
+     <a class="self-link" href="#example-d1b5cb79"></a> 
 <pre><a data-link-type="dfn" href="#content-security-policy-report-only">Content-Security-Policy-Report-Only</a>: script-src 'self';
-                                     reports /csp-reporting-endpoint
+                                     report-to csp-reporting-endpoint
 </pre>
     </div>
     <p>A server MAY send different <code>Content-Security-Policy-Report-Only</code> header field values with different <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7231#section-3">representations</a> of the same
@@ -1643,7 +1643,7 @@ of security-relevant policy decisions.</p>
   representation</a>.</p>
     <p>When the user agent receives a <code>Content-Security-Policy-Report-Only</code> header
   field, it MUST <a data-link-type="dfn" href="#parse-serialized-policy">parse</a> and <a data-link-type="dfn" href="#monitored">monitor</a> each <a data-link-type="dfn" href="#serialized-csp">serialized CSP</a> it contains as described in <a href="#fetch-integration">§4.1 Integration with Fetch</a> and <a href="#html-integration">§4.2 Integration with HTML</a>.</p>
-    <p class="note" role="note">Note: The <code>&lt;a>Content-Security-Policy-Report-Only&lt;/a></code> header is <strong>not</strong> supported inside a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-meta-element">meta</a></code> element.</p>
+    <p class="note" role="note">Note: The <a data-link-type="dfn" href="#content-security-policy-report-only"><code>Content-Security-Policy-Report-Only</code></a> header is <strong>not</strong> supported inside a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-meta-element">meta</a></code> element.</p>
     <h3 class="heading settled" data-level="3.3" id="meta-element"><span class="secno">3.3. </span><span class="content"> The <code>&lt;meta></code> element </span><a class="self-link" href="#meta-element"></a></h3>
     <p>A <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/html5/dom.html#document">Document</a></code> may deliver a policy via one or more HTML <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-meta-element">meta</a></code> elements
   whose <code><a data-link-type="element-attr" href="http://www.w3.org/TR/html5/document-metadata.html#attr-meta-http-equiv">http-equiv</a></code> attributes are an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive
@@ -1654,7 +1654,7 @@ of security-relevant policy decisions.</p>
 </pre>
     </div>
     <p>Implementation details can be found in HTML’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/#attr-meta-http-equiv-content-security-policy"><code>Content-Security-Policy</code> <code>http-equiv</code> processing instructions</a> <a data-link-type="biblio" href="#biblio-html">[HTML]</a>.</p>
-    <p class="note" role="note">Note: The <code>&lt;a>Content-Security-Policy-Report-Only&lt;/a></code> header is <em>not</em> supported inside a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-meta-element">meta</a></code> element. Neither are the <code>report-uri</code>, <code>frame-ancestors</code>, and <code>sandbox</code> directives.</p>
+    <p class="note" role="note">Note: The <a data-link-type="dfn" href="#content-security-policy-report-only"><code>Content-Security-Policy-Report-Only</code></a> header is <em>not</em> supported inside a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-meta-element">meta</a></code> element. Neither are the <code>report-uri</code>, <code>frame-ancestors</code>, and <code>sandbox</code> directives.</p>
     <p class="issue" id="issue-6521ca1c"><a class="self-link" href="#issue-6521ca1c"></a> Why <code>sandbox</code>? Can we loosen that?</p>
     <p>Authors are <em>strongly encouraged</em> to place <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-meta-element">meta</a></code> elements as early
   in the document as possible, because policies in <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-meta-element">meta</a></code> elements are not
@@ -2289,8 +2289,8 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
   other origins. This includes APIs like <code>fetch()</code>, <a data-link-type="biblio" href="#biblio-xhr">[XHR]</a>, <a data-link-type="biblio" href="#biblio-eventsource">[EVENTSOURCE]</a>, <a data-link-type="biblio" href="#biblio-beacon">[BEACON]</a>, and <code><a data-link-type="element" href="http://www.w3.org/TR/html5/text-level-semantics.html#the-a-element">a</a></code>'s <code><a data-link-type="element-attr" href="https://html.spec.whatwg.org/#ping">ping</a></code>. This directive <em>also</em> controls
   WebSocket <a data-link-type="biblio" href="#biblio-websockets">[WEBSOCKETS]</a> connections, though those aren’t technically part
   of Fetch.</p>
-    <div class="example" id="example-d5093ed3">
-     <a class="self-link" href="#example-d5093ed3"></a> JavaScript offers a few mechanisms that directly connect to an external
+    <div class="example" id="example-ab3c2745">
+     <a class="self-link" href="#example-ab3c2745"></a> JavaScript offers a few mechanisms that directly connect to an external
     server to send or receive information. <code>EventSource</code> maintains an open
     HTTP connection to a server in order to receive push notifications, <code>WebSockets</code> open a bidirectional communication channel between your
     browser and a server, and <code>XMLHttpRequest</code> makes arbitrary HTTP requests
@@ -2315,7 +2315,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
   var es = new EventSource("https://not-example.com/");
 
   navigator.sendBeacon("https://not-example.com/", { ... });
->/script>
+&lt;/script>
 </pre>
     </div>
     <h5 class="heading settled" data-level="6.1.2.1" id="connect-src-algorithms"><span class="secno">6.1.2.1. </span><span class="content">Algorithms</span><a class="self-link" href="#connect-src-algorithms"></a></h5>
@@ -2358,37 +2358,37 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
   list</a> to match against. Other requests will use <code>'none'</code>. This is spelled
   out in more detail in the <a href="#should-block-request">§4.1.3 Should request be blocked by Content Security Policy?</a> and <a href="#should-block-response">§4.1.4 Should response to request be blocked by Content
     Security Policy?</a> algorithms.</p>
-    <div class="example" id="example-cd6e259c">
-     <a class="self-link" href="#example-cd6e259c"></a> The following header: 
+    <div class="example" id="example-565ff700">
+     <a class="self-link" href="#example-565ff700"></a> The following header: 
 <pre><a data-link-type="dfn" href="#content-security-policy">Content-Security-Policy</a>: <a data-link-type="dfn" href="#default-src">default-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>
 </pre>
      <p>will have the same behavior as the following header:</p>
-<pre><a data-link-type="dfn" href="#content-security-policy">Content-Security-Policy</a>: <a data-link-type="dfn" href="#child-src">child-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>
-                         <a data-link-type="dfn" href="#connect-src">connect-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>
-                         <a data-link-type="dfn" href="#font-src">font-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>
-                         <a data-link-type="dfn" href="#img-src">img-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>
-                         <a data-link-type="dfn" href="#media-src">media-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>
-                         <a data-link-type="dfn" href="#object-src">object-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>
-                         <a data-link-type="dfn" href="#script-src">script-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>
+<pre><a data-link-type="dfn" href="#content-security-policy">Content-Security-Policy</a>: <a data-link-type="dfn" href="#child-src">child-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>;
+                         <a data-link-type="dfn" href="#connect-src">connect-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>;
+                         <a data-link-type="dfn" href="#font-src">font-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>;
+                         <a data-link-type="dfn" href="#img-src">img-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>;
+                         <a data-link-type="dfn" href="#media-src">media-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>;
+                         <a data-link-type="dfn" href="#object-src">object-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>;
+                         <a data-link-type="dfn" href="#script-src">script-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>;
                          <a data-link-type="dfn" href="#style-src">style-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>
 </pre>
      <p>That is, when <code>default-src</code> is set, every <a data-link-type="dfn" href="#fetch-directives">fetch directive</a> that isn’t
     explicitly set will fall back to the value <code>default-src</code> specifies.</p>
     </div>
-    <div class="example" id="example-3e3c915b">
-     <a class="self-link" href="#example-3e3c915b"></a> There is no inheritance. If a <code>script-src</code> directive is explicitly
+    <div class="example" id="example-82b3ca5f">
+     <a class="self-link" href="#example-82b3ca5f"></a> There is no inheritance. If a <code>script-src</code> directive is explicitly
     specified, for example, then the value of <code>default-src</code> has no influence on
     script requests. That is, the following header: 
-<pre><a data-link-type="dfn" href="#content-security-policy">Content-Security-Policy</a>: <a data-link-type="dfn" href="#default-src">default-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>, <a data-link-type="dfn" href="#script-src">script-src</a> https://example.com
+<pre><a data-link-type="dfn" href="#content-security-policy">Content-Security-Policy</a>: <a data-link-type="dfn" href="#default-src">default-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>; <a data-link-type="dfn" href="#script-src">script-src</a> https://example.com
 </pre>
      <p>will have the same behavior as the following header:</p>
-<pre><a data-link-type="dfn" href="#content-security-policy">Content-Security-Policy</a>: <a data-link-type="dfn" href="#child-src">child-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>
-                         <a data-link-type="dfn" href="#connect-src">connect-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>
-                         <a data-link-type="dfn" href="#font-src">font-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>
-                         <a data-link-type="dfn" href="#img-src">img-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>
-                         <a data-link-type="dfn" href="#media-src">media-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>
-                         <a data-link-type="dfn" href="#object-src">object-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>
-                         <a data-link-type="dfn" href="#script-src">script-src</a> https://example.com
+<pre><a data-link-type="dfn" href="#content-security-policy">Content-Security-Policy</a>: <a data-link-type="dfn" href="#child-src">child-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>;
+                         <a data-link-type="dfn" href="#connect-src">connect-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>;
+                         <a data-link-type="dfn" href="#font-src">font-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>;
+                         <a data-link-type="dfn" href="#img-src">img-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>;
+                         <a data-link-type="dfn" href="#media-src">media-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>;
+                         <a data-link-type="dfn" href="#object-src">object-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>;
+                         <a data-link-type="dfn" href="#script-src">script-src</a> https://example.com;
                          <a data-link-type="dfn" href="#style-src">style-src</a> <a data-link-type="grammar" href="#grammardef-self">'self'</a>
 </pre>
      <p>Given this behavior, one good way to build a policy for a site would be to
@@ -2859,7 +2859,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
      <li data-md="">
       <p>If <var>source list</var> is <code>null</code>, return "<code>Matches</code>".</p>
      <li data-md="">
-      <p>If <var>source list</var> contains a single item which is a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#case-sensitive">case-sensitive</a> match for the string "<code>'none'</code>", return <code>Does Not Match</code>.</p>
+      <p>If <var>source list</var> contains a single item which is a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#case-sensitive">case-sensitive</a> match for the string "<code>'none'</code>", return "<code>Does Not Match</code>".</p>
      <li data-md="">
       <p>For each <var>expression</var> in <var>source list</var>:</p>
       <ol>
