@@ -1348,13 +1348,17 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   2.  If |violation|'s <a for="violation">policy</a>'s <a for="policy">directive
       set</a> contains a <a>directive</a> named "<a>`report-uri`</a>"
       (|directive|):
+    
+      1.  If |violation|'s <a for="violation">policy</a>'s
+          <a for="policy">directive set</a> contains a <a>directive</a> named
+          "<a>`report-to`</a>", skip the remaining substeps.
 
-      1.  Let |endpoint| be the result of executing the <a>URL parser</a> on
+      2.  Let |endpoint| be the result of executing the <a>URL parser</a> on
           |directive|'s <a for="directive">value</a>.
 
-      2.  If |endpoint| is not a valid URL, abort this algorithm.
+      3.  If |endpoint| is not a valid URL, skip the remaining substeps.
 
-      3.  Let |request| be a new <a>request</a>, initialized as follows:
+      4.  Let |request| be a new <a>request</a>, initialized as follows:
 
           :   <a for="request">method</a>
           ::  "`POST`"
@@ -1386,11 +1390,15 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
           :   <a for="request">redirect mode</a>
           ::  "`error`"
 
-      4.  <a>Fetch</a> |request|. The result will be ignored.
+      5.  <a>Fetch</a> |request|. The result will be ignored.
 
       Note: All of this should be considered deprecated. It sends a single
       request per violation, which simply isn't scalable. As soon as this
       behavior can be removed from user agents, it will be.
+
+      Note: `report-uri` only takes effect if `report-to` is not present. That'
+      is, the latter overrides the former, allowing for backwards compatibility
+      with browsers that don't support the new mechanism.
 
   3.  If |violation|'s <a for="violation">policy</a>'s <a for="policy">directive
       set</a> contains a <a>directive</a> named "<a>`report-to`</a>"
@@ -2518,8 +2526,18 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   <h4 id="directive-report-uri">`report-uri`</h4>
 
-  Note: The <a>`report-uri`</a> directive is deprecated. Please use the
-  <a>`report-to`</a> directive instead.
+  <div class="note">
+    Note: The <a>`report-uri`</a> directive is deprecated. Please use the
+    <a>`report-to`</a> directive instead. If the latter directive is present,
+    this directive will be ignored. To ensure backwards compatibility, we
+    suggest specifying both, like this:
+
+    <div class="example">
+      <pre>
+        <a>Content-Security-Policy</a>: ...; <a>report-uri</a> https://endpoint.com; <a>report-to</a> groupname
+      </pre>
+    </div>
+  </div>
 
   The <dfn>`report-uri`</dfn> directive defines a set of endpoints to which
   <a>violation reports</a> will be sent when particular behaviors are prevented.

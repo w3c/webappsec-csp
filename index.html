@@ -2108,9 +2108,12 @@ dictionary <dfn class="idl-code" data-dfn-type="dictionary" data-export="" id="d
   (<var>directive</var>):</p>
       <ol>
        <li data-md="">
+        <p>If <var>violation</var>’s <a data-link-type="dfn" href="#violation-policy">policy</a>’s <a data-link-type="dfn" href="#policy-directive-set">directive set</a> contains a <a data-link-type="dfn" href="#directives">directive</a> named
+  "<a data-link-type="dfn" href="#report-to"><code>report-to</code></a>", skip the remaining substeps.</p>
+       <li data-md="">
         <p>Let <var>endpoint</var> be the result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser">URL parser</a> on <var>directive</var>’s <a data-link-type="dfn" href="#directive-value">value</a>.</p>
        <li data-md="">
-        <p>If <var>endpoint</var> is not a valid URL, abort this algorithm.</p>
+        <p>If <var>endpoint</var> is not a valid URL, skip the remaining substeps.</p>
        <li data-md="">
         <p>Let <var>request</var> be a new <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a>, initialized as follows:</p>
         <dl>
@@ -2175,6 +2178,9 @@ dictionary <dfn class="idl-code" data-dfn-type="dictionary" data-export="" id="d
       <p class="note" role="note">Note: All of this should be considered deprecated. It sends a single
   request per violation, which simply isn’t scalable. As soon as this
   behavior can be removed from user agents, it will be.</p>
+      <p class="note" role="note">Note: <code>report-uri</code> only takes effect if <code>report-to</code> is not present. That'
+  is, the latter overrides the former, allowing for backwards compatibility
+  with browsers that don’t support the new mechanism.</p>
      <li data-md="">
       <p>If <var>violation</var>’s <a data-link-type="dfn" href="#violation-policy">policy</a>’s <a data-link-type="dfn" href="#policy-directive-set">directive
   set</a> contains a <a data-link-type="dfn" href="#directives">directive</a> named "<a data-link-type="dfn" href="#report-to"><code>report-to</code></a>"
@@ -3152,7 +3158,16 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
     <p>Various algorithms in this document hook into the reporting process by
   constructing a <a data-link-type="dfn" href="#violation">violation</a> object via <a href="#create-violation-for-request">§2.3.2 Create a violation object for request, policy, and directive</a> or <a href="#create-violation-for-global">§2.3.1 Create a violation object for global, policy, and directive</a>, and passing that object to <a href="#report-violation">§5.3 Report a violation</a> to deliver the report.</p>
     <h4 class="heading settled" data-level="6.2.1" id="directive-report-uri"><span class="secno">6.2.1. </span><span class="content"><code>report-uri</code></span><a class="self-link" href="#directive-report-uri"></a></h4>
-    <p class="note" role="note">Note: The <a data-link-type="dfn" href="#report-uri"><code>report-uri</code></a> directive is deprecated. Please use the <a data-link-type="dfn" href="#report-to"><code>report-to</code></a> directive instead.</p>
+    <div class="note" role="note">
+      Note: The <a data-link-type="dfn" href="#report-uri"><code>report-uri</code></a> directive is deprecated. Please use the <a data-link-type="dfn" href="#report-to"><code>report-to</code></a> directive instead. If the latter directive is present,
+    this directive will be ignored. To ensure backwards compatibility, we
+    suggest specifying both, like this: 
+     <div class="example" id="example-9d2ef57e">
+      <a class="self-link" href="#example-9d2ef57e"></a> 
+<pre><a data-link-type="dfn" href="#content-security-policy">Content-Security-Policy</a>: ...; <a data-link-type="dfn" href="#report-uri">report-uri</a> https://endpoint.com; <a data-link-type="dfn" href="#report-to">report-to</a> groupname
+</pre>
+     </div>
+    </div>
     <p>The <dfn data-dfn-type="dfn" data-noexport="" id="report-uri"><code>report-uri</code><a class="self-link" href="#report-uri"></a></dfn> directive defines a set of endpoints to which <a data-link-type="dfn" href="#violation-report">violation reports</a> will be sent when particular behaviors are prevented.</p>
 <pre>directive-name  = "report-uri"
 directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc3986#section-4.1">uri-reference</a> *( <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc7230#section-3.2.3">RWS</a> <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc3986#section-4.1">uri-reference</a> )
