@@ -1008,7 +1008,7 @@
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="http://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/Icons/w3c_home" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">Content Security Policy Level 3</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-01-11">11 January 2016</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-01-12">12 January 2016</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1080,8 +1080,8 @@ of security-relevant policy decisions.</p>
       <li>
        <a href="#framework-policy"><span class="secno">2.1</span> <span class="content">Policies</span></a>
        <ul class="toc">
-        <li><a href="#parse-serialized-policy"><span class="secno">2.1.1</span> <span class="content"> Parse a <var>serialized policy</var> </span></a>
-        <li><a href="#parse-serialized-policy-list"><span class="secno">2.1.2</span> <span class="content"> Parse a serialized policy list </span></a>
+        <li><a href="#parse-serialized-policy"><span class="secno">2.1.1</span> <span class="content"> Parse a <var>serialized CSP</var> </span></a>
+        <li><a href="#parse-serialized-policy-list"><span class="secno">2.1.2</span> <span class="content"> Parse a serialized CSP list </span></a>
        </ul>
       <li>
        <a href="#framework-directives"><span class="secno">2.2</span> <span class="content">Directives</span></a>
@@ -1108,7 +1108,7 @@ of security-relevant policy decisions.</p>
       <li>
        <a href="#fetch-integration"><span class="secno">4.1</span> <span class="content"> Integration with Fetch </span></a>
        <ul class="toc">
-        <li><a href="#set-response-csp-list"><span class="secno">4.1.1</span> <span class="content"> Set <var>response</var>’s <code>csp list</code> </span></a>
+        <li><a href="#set-response-csp-list"><span class="secno">4.1.1</span> <span class="content"> Set <var>response</var>’s <code>CSP list</code> </span></a>
         <li><a href="#report-for-request"><span class="secno">4.1.2</span> <span class="content"> Report Content Security Policy violations for <var>request</var> </span></a>
         <li><a href="#should-block-request"><span class="secno">4.1.3</span> <span class="content"> Should <var>request</var> be blocked by Content Security Policy? </span></a>
         <li><a href="#should-block-response"><span class="secno">4.1.4</span> <span class="content"> Should <var>response</var> to <var>request</var> be blocked by Content
@@ -1367,14 +1367,14 @@ of security-relevant policy decisions.</p>
     <p>Each policy has an associated <dfn data-dfn-for="policy" data-dfn-type="dfn" data-noexport="" id="policy-disposition">disposition<a class="self-link" href="#policy-disposition"></a></dfn>, which is
   one of <code>null</code>, "<code>enforce</code>", or "<code>report</code>". The value is <code>null</code> unless
   otherwise specified.</p>
-    <p>A <dfn data-dfn-type="dfn" data-export="" id="serialized-policy">serialized policy<a class="self-link" href="#serialized-policy"></a></dfn> is an ASCII string, consisting of a
+    <p>A <dfn data-dfn-type="dfn" data-export="" id="serialized-csp">serialized CSP<a class="self-link" href="#serialized-csp"></a></dfn> is an ASCII string, consisting of a
   semicolon-delimited series of <a data-link-type="dfn" href="#serialized-directive">serialized directives</a>, adhering to the
   following ABNF grammar <a data-link-type="biblio" href="#biblio-rfc5234">[RFC5234]</a>:</p>
 <pre><dfn data-dfn-type="grammar" data-export="" id="grammardef-serialized-policy">serialized-policy<a class="self-link" href="#grammardef-serialized-policy"></a></dfn> = <a data-link-type="grammar" href="#grammardef-serialized-directive">serialized-directive</a> *( <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc7230#section-3.2.3">OWS</a> ";" [ <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc7230#section-3.2.3">OWS</a> <a data-link-type="grammar" href="#grammardef-serialized-directive">serialized-directive</a> ] )
                     ; <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc7230#section-3.2.3">OWS</a> is defined in section 3.2.3 of RFC 7230
 </pre>
-    <h4 class="heading settled" data-algorithm="Parse a serialized policy" data-dfn-type="dfn" data-level="2.1.1" data-lt="parse a serialized policy" data-noexport="" id="parse-serialized-policy"><span class="secno">2.1.1. </span><span class="content"> Parse a <var>serialized policy</var> </span><a class="self-link" href="#parse-serialized-policy"></a></h4>
-    <p>Given a <a data-link-type="dfn" href="#serialized-policy">serialized policy</a> (<var>serialized policy</var>), this
+    <h4 class="heading settled" data-algorithm="Parse a serialized CSP" data-dfn-type="dfn" data-level="2.1.1" data-lt="parse a serialized CSP" data-noexport="" id="parse-serialized-policy"><span class="secno">2.1.1. </span><span class="content"> Parse a <var>serialized CSP</var> </span><a class="self-link" href="#parse-serialized-policy"></a></h4>
+    <p>Given a <a data-link-type="dfn" href="#serialized-csp">serialized CSP</a> (<var>serialized CSP</var>), this
   algorithm will return a <a data-link-type="dfn" href="#policy">policy</a> object. If the string cannot be parsed,
   the resulting <a data-link-type="dfn" href="#policy">policy</a>’s <a data-link-type="dfn" href="#policy-directive-set">directive set</a> will be empty.</p>
     <ol>
@@ -1383,7 +1383,7 @@ of security-relevant policy decisions.</p>
   set</a>, and a <code>null</code> <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-type">type</a>.</p>
      <li data-md="">
       <p>For each <var>token</var> returned by <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#strictly-split-a-string">strictly splitting</a> <var>serialized
-  policy</var> on the U+003B SEMICOLON character (<code>;</code>):</p>
+  CSP</var> on the U+003B SEMICOLON character (<code>;</code>):</p>
       <ol>
        <li data-md="">
         <p><a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#strip-leading-and-trailing-whitespace">Strip leading and trailing whitespace</a> from <var>token</var>.</p>
@@ -1410,8 +1410,8 @@ of security-relevant policy decisions.</p>
      <li data-md="">
       <p>Return <var>policy</var>.</p>
     </ol>
-    <h4 class="heading settled" data-algorithm="Parse a serialized policy list" data-level="2.1.2" id="parse-serialized-policy-list"><span class="secno">2.1.2. </span><span class="content"> Parse a serialized policy list </span><a class="self-link" href="#parse-serialized-policy-list"></a></h4>
-    <p>Given a string (<var>list</var>) which contains a comma-delimited series of <a data-link-type="dfn" href="#serialized-policy">serialized policies</a>, the following algorithm will return a list of <a data-link-type="dfn" href="#policy">policies</a>:</p>
+    <h4 class="heading settled" data-algorithm="Parse a serialized CSP list" data-level="2.1.2" id="parse-serialized-policy-list"><span class="secno">2.1.2. </span><span class="content"> Parse a serialized CSP list </span><a class="self-link" href="#parse-serialized-policy-list"></a></h4>
+    <p>Given a string (<var>list</var>) which contains a comma-delimited series of <a data-link-type="dfn" href="#serialized-csp">serialized CSP</a> strings, the following algorithm will return a list of <a data-link-type="dfn" href="#policy">policies</a>:</p>
     <ol>
      <li data-md="">
       <p>Let <var>policies</var> be an empty list.</p>
@@ -1419,7 +1419,7 @@ of security-relevant policy decisions.</p>
       <p>For each <var>token</var> returned by <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#split-a-string-on-commas">splitting <var>list</var> on commas</a>:</p>
       <ol>
        <li data-md="">
-        <p>Let <var>policy</var> be the result of executing <a href="#parse-serialized-policy">§2.1.1 Parse a serialized policy</a> on <var>token</var>.</p>
+        <p>Let <var>policy</var> be the result of executing <a href="#parse-serialized-policy">§2.1.1 Parse a serialized CSP</a> on <var>token</var>.</p>
        <li data-md="">
         <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-directive-set">directive set</a> is empty, skip the
   remaining substeps, and continue to the next item.</p>
@@ -1529,7 +1529,7 @@ of security-relevant policy decisions.</p>
 </pre>
     <p>The <a data-link-type="grammar" href="#grammardef-host-char">host-char</a> production intentionally contains only ASCII
   characters; internationalized domain names cannot be entered directly as part
-  of a <a data-link-type="dfn" href="#serialized-policy">serialized policy</a>, but instead MUST be Punycode-encoded <a data-link-type="biblio" href="#biblio-rfc3492">[RFC3492]</a>. For example, the domain <code>üüüüüü.de</code> MUST be represented as <code>xn--tdaaaaaa.de</code>.</p>
+  of a <a data-link-type="dfn" href="#serialized-csp">serialized CSP</a>, but instead MUST be Punycode-encoded <a data-link-type="biblio" href="#biblio-rfc3492">[RFC3492]</a>. For example, the domain <code>üüüüüü.de</code> MUST be represented as <code>xn--tdaaaaaa.de</code>.</p>
     <p class="note" role="note">Note: Though IP address do match the grammar above, only <code>127.0.0.1</code> will actually match a URL when used in a source
   expression (see <a href="#match-url-to-source-list">§6.1.11.2 Does url match source list?</a> for details). The security
   properties of IP addresses are suspect, and authors ought to prefer hostnames
@@ -1599,7 +1599,7 @@ of security-relevant policy decisions.</p>
    <section>
     <h2 class="heading settled" data-level="3" id="policy-delivery"><span class="secno">3. </span><span class="content"> Policy Delivery </span><a class="self-link" href="#policy-delivery"></a></h2>
     <p>A server MAY declare a <a data-link-type="dfn" href="#policy">policy</a> for a particular <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7231#section-3">resource
-  representation</a> via an HTTP response header field whose value is a <a data-link-type="dfn" href="#serialized-policy">serialized policy</a>. This mechanism is defined in detail in <a href="#csp-header">§3.1 The Content-Security-Policy HTTP Response Header Field</a> and <a href="#cspro-header">§3.2 The Content-Security-Policy-Report-Only HTTP Response Header Field</a>, and the integration with Fetch
+  representation</a> via an HTTP response header field whose value is a <a data-link-type="dfn" href="#serialized-csp">serialized CSP</a>. This mechanism is defined in detail in <a href="#csp-header">§3.1 The Content-Security-Policy HTTP Response Header Field</a> and <a href="#cspro-header">§3.2 The Content-Security-Policy-Report-Only HTTP Response Header Field</a>, and the integration with Fetch
   and HTML is described in <a href="#fetch-integration">§4.1 Integration with Fetch</a> and <a href="#html-integration">§4.2 Integration with HTML</a>.</p>
     <p>A <a data-link-type="dfn" href="#policy">policy</a> may also be declared inline in an HTML document via a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-meta-element">meta</a></code> element’s <code><a data-link-type="element-attr" href="http://www.w3.org/TR/html5/document-metadata.html#attr-meta-http-equiv">http-equiv</a></code> attribute, as described in <a href="#meta-element">§3.3 The &lt;meta> element</a>.</p>
     <h3 class="heading settled" data-level="3.1" id="csp-header"><span class="secno">3.1. </span><span class="content"> The <code>Content-Security-Policy</code> HTTP Response Header Field </span><a class="self-link" href="#csp-header"></a></h3>
@@ -1620,7 +1620,7 @@ of security-relevant policy decisions.</p>
   "<code>Content-Security-Policy</code>" with a given <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7231#section-3">resource
   representation</a>.</p>
     <p>When the user agent receives a <code>Content-Security-Policy</code> header field, it
-  MUST <a data-link-type="dfn" href="#parse-serialized-policy">parse</a> and <a data-link-type="dfn" href="#enforced">enforce</a> each <a data-link-type="dfn" href="#serialized-policy">serialized policy</a> it contains as described in <a href="#fetch-integration">§4.1 Integration with Fetch</a>, <a href="#html-integration">§4.2 Integration with HTML</a>.</p>
+  MUST <a data-link-type="dfn" href="#parse-serialized-policy">parse</a> and <a data-link-type="dfn" href="#enforced">enforce</a> each <a data-link-type="dfn" href="#serialized-csp">serialized CSP</a> it contains as described in <a href="#fetch-integration">§4.1 Integration with Fetch</a>, <a href="#html-integration">§4.2 Integration with HTML</a>.</p>
     <h3 class="heading settled" data-level="3.2" id="cspro-header"><span class="secno">3.2. </span><span class="content"> The <code>Content-Security-Policy-Report-Only</code> HTTP Response Header Field </span><a class="self-link" href="#cspro-header"></a></h3>
     <p>The <dfn data-dfn-type="dfn" data-noexport="" id="content-security-policy-report-only"><code>Content-Security-Policy-Report-Only</code><a class="self-link" href="#content-security-policy-report-only"></a></dfn> HTTP response
   header field allows web developers to experiment with policies by monitoring
@@ -1644,7 +1644,7 @@ of security-relevant policy decisions.</p>
   "<code>Content-Security-Policy-Report-Only</code>" with a given <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc7231#section-3">resource
   representation</a>.</p>
     <p>When the user agent receives a <code>Content-Security-Policy-Report-Only</code> header
-  field, it MUST <a data-link-type="dfn" href="#parse-serialized-policy">parse</a> and <a data-link-type="dfn" href="#monitored">monitor</a> each <a data-link-type="dfn" href="#serialized-policy">serialized policy</a> it contains as described in <a href="#fetch-integration">§4.1 Integration with Fetch</a> and <a href="#html-integration">§4.2 Integration with HTML</a>.</p>
+  field, it MUST <a data-link-type="dfn" href="#parse-serialized-policy">parse</a> and <a data-link-type="dfn" href="#monitored">monitor</a> each <a data-link-type="dfn" href="#serialized-csp">serialized CSP</a> it contains as described in <a href="#fetch-integration">§4.1 Integration with Fetch</a> and <a href="#html-integration">§4.2 Integration with HTML</a>.</p>
     <p class="note" role="note">Note: The <code>&lt;a>Content-Security-Policy-Report-Only&lt;/a></code> header is <strong>not</strong> supported inside a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-meta-element">meta</a></code> element.</p>
     <h3 class="heading settled" data-level="3.3" id="meta-element"><span class="secno">3.3. </span><span class="content"> The <code>&lt;meta></code> element </span><a class="self-link" href="#meta-element"></a></h3>
     <p>A <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/html5/dom.html#document">Document</a></code> may deliver a policy via one or more HTML <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-meta-element">meta</a></code> elements
@@ -1701,21 +1701,21 @@ of security-relevant policy decisions.</p>
       <p>A <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> has an associated <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">CSP list</a> which
   contains any policy objects delivered in the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a>.</p>
      <li data-md="">
-      <p><a href="#set-response-csp-list">§4.1.1 Set response’s csp list</a> is called in the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-fetch">HTTP fetch</a> and <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-network-fetch">HTTP-network fetch</a> algorithms.</p>
+      <p><a href="#set-response-csp-list">§4.1.1 Set response’s CSP list</a> is called in the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-fetch">HTTP fetch</a> and <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-network-fetch">HTTP-network fetch</a> algorithms.</p>
       <p class="note" role="note">Note: These two calls should ensure that a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">CSP list</a> is set, regardless of how the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> is created. If we hit the network (via <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-network-fetch">HTTP-network
   fetch</a>, then we parse the policy before we handle the <code>Set-Cookie</code> header. If we get a response from a Service Worker (via <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-fetch">HTTP fetch</a>,
   we’ll process its <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">CSP list</a> before handing the
   response back to our caller.</p>
     </ol>
-    <h4 class="heading settled" data-algorithm="Set response’s csp list" data-level="4.1.1" id="set-response-csp-list"><span class="secno">4.1.1. </span><span class="content"> Set <var>response</var>’s <code>csp list</code> </span><a class="self-link" href="#set-response-csp-list"></a></h4>
-    <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), this algorithm evaluates its <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a> for <a data-link-type="dfn" href="#serialized-policy">serialized policy</a> values, and
-  populates its <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">csp list</a> accordingly:</p>
+    <h4 class="heading settled" data-algorithm="Set response’s CSP list" data-level="4.1.1" id="set-response-csp-list"><span class="secno">4.1.1. </span><span class="content"> Set <var>response</var>’s <code>CSP list</code> </span><a class="self-link" href="#set-response-csp-list"></a></h4>
+    <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), this algorithm evaluates its <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a> for <a data-link-type="dfn" href="#serialized-csp">serialized CSP</a> values, and
+  populates its <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">CSP list</a> accordingly:</p>
     <ol>
      <li data-md="">
       <p>Set <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">CSP list</a> to the
   empty list.</p>
      <li data-md="">
-      <p>Let <var>policies to enforce</var> be the result of executing <a href="#parse-serialized-policy-list">§2.1.2 Parse a serialized policy list</a> on the result of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-header-parse">parsing</a> <code>Content-Security-Policy</code> in <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a>.</p>
+      <p>Let <var>policies to enforce</var> be the result of executing <a href="#parse-serialized-policy-list">§2.1.2 Parse a serialized CSP list</a> on the result of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-header-parse">parsing</a> <code>Content-Security-Policy</code> in <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a>.</p>
      <li data-md="">
       <p>For each <var>policy</var> in <var>policies to enforce</var>:</p>
       <ol>
@@ -1723,10 +1723,10 @@ of security-relevant policy decisions.</p>
         <p>Set <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition">disposition</a> to
   "<code>enforce</code>".</p>
        <li data-md="">
-        <p>Insert <var>policy</var> into <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">csp list</a>.</p>
+        <p>Insert <var>policy</var> into <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">CSP list</a>.</p>
       </ol>
      <li data-md="">
-      <p>Let <var>policies to report</var> be the result of executing <a href="#parse-serialized-policy-list">§2.1.2 Parse a serialized policy list</a> on the result of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-header-parse">parsing</a> <code>Content-Security-Policy-Report-Only</code> in <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a>.</p>
+      <p>Let <var>policies to report</var> be the result of executing <a href="#parse-serialized-policy-list">§2.1.2 Parse a serialized CSP list</a> on the result of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-header-parse">parsing</a> <code>Content-Security-Policy-Report-Only</code> in <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a>.</p>
      <li data-md="">
       <p>For each <var>policy</var> in <var>policies to report</var>:</p>
       <ol>
@@ -1734,7 +1734,7 @@ of security-relevant policy decisions.</p>
         <p>Set <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition">disposition</a> to
   "<code>report</code>".</p>
        <li data-md="">
-        <p>Insert <var>policy</var> into <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">csp list</a>.</p>
+        <p>Insert <var>policy</var> into <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">CSP list</a>.</p>
       </ol>
     </ol>
     <h4 class="heading settled" data-algorithm="Report Content Security Policy violations for request" data-level="4.1.2" id="report-for-request"><span class="secno">4.1.2. </span><span class="content"> Report Content Security Policy violations for <var>request</var> </span><a class="self-link" href="#report-for-request"></a></h4>
@@ -1742,9 +1742,9 @@ of security-relevant policy decisions.</p>
   on <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>’s "report only" policies.</p>
     <ol>
      <li data-md="">
-      <p>Let <var>csp list</var> be <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>’s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list">csp list</a>.</p>
+      <p>Let <var>CSP list</var> be <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>’s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list">CSP list</a>.</p>
      <li data-md="">
-      <p>For each <var>policy</var> in <var>csp list</var>:</p>
+      <p>For each <var>policy</var> in <var>CSP list</var>:</p>
       <ol>
        <li data-md="">
         <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition">disposition</a> is "<code>enforce</code>",
@@ -1759,11 +1759,11 @@ of security-relevant policy decisions.</p>
     <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>), this algorithm returns <code>Blocked</code> or <code>Allowed</code> and reports violations based on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>’s Content Security Policy.</p>
     <ol>
      <li data-md="">
-      <p>Let <var>csp list</var> be <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>’s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list">csp list</a>.</p>
+      <p>Let <var>CSP list</var> be <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>’s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list">CSP list</a>.</p>
      <li data-md="">
       <p>Let <var>result</var> be "<code>Allowed</code>".</p>
      <li data-md="">
-      <p>For each <var>policy</var> in <var>csp list</var>:</p>
+      <p>For each <var>policy</var> in <var>CSP list</var>:</p>
       <ol>
        <li data-md="">
         <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition">disposition</a> is "<code>report</code>",
@@ -1788,11 +1788,11 @@ of security-relevant policy decisions.</p>
     <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>) and a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>), this algorithm returns <code>Blocked</code> or <code>Allowed</code>, and reports violations based on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>’s Content Security Policy.</p>
     <ol>
      <li data-md="">
-      <p>Let <var>csp list</var> be <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>’s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list">csp list</a>.</p>
+      <p>Let <var>CSP list</var> be <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>’s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list">CSP list</a>.</p>
      <li data-md="">
       <p>Let <var>result</var> be "<code>Allowed</code>".</p>
      <li data-md="">
-      <p>For each <var>policy</var> in <var>csp list</var>:</p>
+      <p>For each <var>policy</var> in <var>CSP list</var>:</p>
       <ol>
        <li data-md="">
         <p>For each <var>directive</var> in <var>policy</var>:</p>
@@ -1850,7 +1850,7 @@ of security-relevant policy decisions.</p>
   newly created <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>.</p>
       <p class="issue" id="issue-106a0c5c"><a class="self-link" href="#issue-106a0c5c"></a> The algorithm is named "creating a new <code>Document</code> object" in W3C’s
   HTML, and isn’t well-integrated with Fetch.</p>
-      <p class="issue" id="issue-1e5f494a"><a class="self-link" href="#issue-1e5f494a"></a> Need to monkey-patch these in: something like "Set the <code>Window</code> object’s <code>csp list</code> to the <code>csp list</code> of the resource used to
+      <p class="issue" id="issue-7fd49562"><a class="self-link" href="#issue-7fd49562"></a> Need to monkey-patch these in: something like "Set the <code>Window</code> object’s <code>CSP list</code> to the <code>CSP list</code> of the resource used to
   generate the document.</p>
      <li data-md="">
       <p><a href="#should-block-inline">§4.2.3 Should element’s inline type behavior be blocked by Content Security Policy?</a> is called during the <a data-link-type="dfn" href="http://www.w3.org/TR/html5/scripting-1.html#prepare-a-script">prepare a script</a> and <a data-link-type="dfn" href="https://html.spec.whatwg.org/#update-a-style-block">update a <code>style</code> block</a> algorithms in order to determine whether or
@@ -1931,17 +1931,17 @@ of security-relevant policy decisions.</p>
         <ol>
          <li data-md="">
           <p>For each <var>policy</var> in <var>document</var>’s <a data-link-type="dfn" href="http://www.w3.org/TR/html5/webappapis.html#global-object">global
-  object</a>’s <a data-link-type="dfn" href="#global-object-csp-list">csp list</a>:</p>
+  object</a>’s <a data-link-type="dfn" href="#global-object-csp-list">CSP list</a>:</p>
           <ol>
            <li data-md="">
-            <p>Insert an alias to <var>policy</var> in <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list">csp list</a>.</p>
+            <p>Insert an alias to <var>policy</var> in <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list">CSP list</a>.</p>
           </ol>
         </ol>
       </ol>
       <p class="note" role="note">Note: <a data-link-type="dfn" href="https://url.spec.whatwg.org/#local-scheme">local scheme</a> includes <code>about:</code>, and this algorithm will
   therefore alias the <a data-link-type="dfn" href="#embedding-document">embedding document</a>’s policies for <a data-link-type="dfn" href="http://www.w3.org/TR/html5/embedded-content-0.html#an-iframe-srcdoc-document">an iframe <code>srcdoc</code> <code>Document</code></a>.</p>
      <li data-md="">
-      <p>For each <var>policy</var> in <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">csp list</a>, insert <var>policy</var> into <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list">csp list</a>.</p>
+      <p>For each <var>policy</var> in <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">CSP list</a>, insert <var>policy</var> into <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list">CSP list</a>.</p>
     </ol>
     <h4 class="heading settled" data-algorithm="Should element’s inline type behavior be blocked by Content Security Policy?" data-level="4.2.3" id="should-block-inline"><span class="secno">4.2.3. </span><span class="content"> Should <var>element</var>’s inline <var>type</var> behavior be blocked by Content Security Policy? </span><a class="self-link" href="#should-block-inline"></a></h4>
     <p>Given an <code class="idl"><a data-link-type="idl" href="http://www.w3.org/TR/dom/#interface-element">Element</a></code> (<var>element</var>), and a string (<var>type</var>) this algorithm returns
@@ -2042,7 +2042,7 @@ dictionary <dfn class="idl-code" data-dfn-type="dictionary" data-export="" id="d
        <dt data-md="">
         <p>"<code>original-policy</code>"</p>
        <dd data-md="">
-        <p>The <a data-link-type="dfn" href="#serialized-policy">serialization</a> of <var>violation</var>’s <a data-link-type="dfn" href="#violation-policy">policy</a></p>
+        <p>The <a data-link-type="dfn" href="#serialized-csp">serialization</a> of <var>violation</var>’s <a data-link-type="dfn" href="#violation-policy">policy</a></p>
        <dt data-md="">
         <p>"<code>status-code</code>"</p>
        <dd data-md="">
@@ -3396,7 +3396,7 @@ Content-Security-Policy: connect-src http://example.com/;
      <li><a href="#dom-securitypolicyviolationevent-originalpolicy">attribute for SecurityPolicyViolationEvent</a><span>, in §5.1</span>
      <li><a href="#dom-securitypolicyviolationeventinit-originalpolicy">dict-member for SecurityPolicyViolationEventInit</a><span>, in §5.1</span>
     </ul>
-   <li><a href="#parse-serialized-policy">parse a serialized policy</a><span>, in §2.1</span>
+   <li><a href="#parse-serialized-policy">parse a serialized CSP</a><span>, in §2.1</span>
    <li><a href="#grammardef-path-part">path-part</a><span>, in §2.2.1</span>
    <li><a href="#policy">policies</a><span>, in §2.1</span>
    <li>
@@ -3426,9 +3426,9 @@ Content-Security-Policy: connect-src http://example.com/;
    <li><a href="#dictdef-securitypolicyviolationeventinit">SecurityPolicyViolationEventInit</a><span>, in §5.1</span>
    <li><a href="#dom-securitypolicyviolationevent-securitypolicyviolationevent">SecurityPolicyViolationEvent(type, eventInitDict)</a><span>, in §5.1</span>
    <li><a href="#grammardef-self">'self'</a><span>, in §2.2.1</span>
+   <li><a href="#serialized-csp">serialized CSP</a><span>, in §2.1</span>
    <li><a href="#grammardef-serialized-directive">serialized-directive</a><span>, in §2.2</span>
    <li><a href="#serialized-directive">serialized directive</a><span>, in §2.2</span>
-   <li><a href="#serialized-policy">serialized policy</a><span>, in §2.1</span>
    <li><a href="#grammardef-serialized-policy">serialized-policy</a><span>, in §2.1</span>
    <li><a href="#serialized-source-list">serialized source list</a><span>, in §2.2.1</span>
    <li><a href="#grammardef-serialized-source-list">serialized-source-list</a><span>, in §2.2.1</span>
@@ -3775,8 +3775,8 @@ dictionary <a href="#dictdef-securitypolicyviolationeventinit">SecurityPolicyVio
    <div class="issue"> Why <code>sandbox</code>? Can we loosen that?<a href="#issue-6521ca1c"> ↵ </a></div>
    <div class="issue"> The algorithm is named "creating a new <code>Document</code> object" in W3C’s
   HTML, and isn’t well-integrated with Fetch.<a href="#issue-106a0c5c"> ↵ </a></div>
-   <div class="issue"> Need to monkey-patch these in: something like "Set the <code>Window</code> object’s <code>csp list</code> to the <code>csp list</code> of the resource used to
-  generate the document.<a href="#issue-1e5f494a"> ↵ </a></div>
+   <div class="issue"> Need to monkey-patch these in: something like "Set the <code>Window</code> object’s <code>CSP list</code> to the <code>CSP list</code> of the resource used to
+  generate the document.<a href="#issue-7fd49562"> ↵ </a></div>
    <div class="issue"> The <a data-link-type="dfn" href="https://html.spec.whatwg.org/#update-a-style-block">update a <code>style</code> block</a> algorithm does not exist in
   W3C’s HTML.<a href="#issue-f40dd242"> ↵ </a></div>
    <div class="issue"> The <code>nonce</code> attribute for <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> and <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-style-element">style</a></code> were added to

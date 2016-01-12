@@ -416,7 +416,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   one of `null`, "`enforce`", or "`report`". The value is `null` unless
   otherwise specified.
 
-  A <dfn export>serialized policy</dfn> is an ASCII string, consisting of a
+  A <dfn export>serialized CSP</dfn> is an ASCII string, consisting of a
   semicolon-delimited series of <a>serialized directives</a>, adhering to the
   following ABNF grammar [[!RFC5234]]:
  
@@ -425,11 +425,11 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
                         ; <a>OWS</a> is defined in section 3.2.3 of RFC 7230
   </pre>
 
-  <h4 id="parse-serialized-policy" dfn lt="parse a serialized policy" algorithm>
-    Parse a |serialized policy|
+  <h4 id="parse-serialized-policy" dfn lt="parse a serialized CSP" algorithm>
+    Parse a |serialized CSP|
   </h4>
 
-  Given a <a>serialized policy</a> (|serialized policy|), this
+  Given a <a>serialized CSP</a> (|serialized CSP|), this
   algorithm will return a <a>policy</a> object. If the string cannot be parsed,
   the resulting <a>policy</a>'s <a>directive set</a> will be empty.
 
@@ -438,7 +438,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   2.  For each |token| returned by
       <a lt="strictly split a string">strictly splitting</a> |serialized
-      policy| on the U+003B SEMICOLON character (`;`):
+      CSP| on the U+003B SEMICOLON character (`;`):
 
       1.  <a>Strip leading and trailing whitespace</a> from |token|.
 
@@ -470,11 +470,11 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   3.  Return |policy|.
 
   <h4 id="parse-serialized-policy-list" algorithm>
-    Parse a serialized policy list
+    Parse a serialized CSP list
   </h4>
 
   Given a string (|list|) which contains a comma-delimited series of
-  <a>serialized policies</a>, the following algorithm will return a list of
+  <a>serialized CSP</a> strings, the following algorithm will return a list of
   <a>policies</a>:
 
   1.  Let |policies| be an empty list.
@@ -609,7 +609,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   The <a grammar>host-char</a> production intentionally contains only ASCII
   characters; internationalized domain names cannot be entered directly as part
-  of a <a>serialized policy</a>, but instead MUST be Punycode-encoded
+  of a <a>serialized CSP</a>, but instead MUST be Punycode-encoded
   [[!RFC3492]]. For example, the domain `üüüüüü.de` MUST be represented as
   `xn--tdaaaaaa.de`.
 
@@ -735,7 +735,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   A server MAY declare a <a>policy</a> for a particular <a>resource
   representation</a> via an HTTP response header field whose value is a
-  <a>serialized policy</a>. This mechanism is defined in detail in
+  <a>serialized CSP</a>. This mechanism is defined in detail in
   [[#csp-header]] and [[#cspro-header]], and the integration with Fetch
   and HTML is described in [[#fetch-integration]] and [[#html-integration]].
 
@@ -770,8 +770,8 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   representation</a>.
 
   When the user agent receives a `Content-Security-Policy` header field, it
-  MUST <a lt="parse a serialized policy">parse</a> and <a>enforce</a> each
-  <a>serialized policy</a> it contains as described in [[#fetch-integration]],
+  MUST <a lt="parse a serialized CSP">parse</a> and <a>enforce</a> each
+  <a>serialized CSP</a> it contains as described in [[#fetch-integration]],
   [[#html-integration]].
 
   <h3 id="cspro-header">
@@ -808,8 +808,8 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   representation</a>.
 
   When the user agent receives a `Content-Security-Policy-Report-Only` header
-  field, it MUST <a lt="parse a serialized policy">parse</a> and <a>monitor</a>
-  each <a>serialized policy</a> it contains as described in
+  field, it MUST <a lt="parse a serialized CSP">parse</a> and <a>monitor</a>
+  each <a>serialized CSP</a> it contains as described in
   [[#fetch-integration]] and [[#html-integration]].
 
   Note: The `<a>Content-Security-Policy-Report-Only</a>` header is
@@ -883,7 +883,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       Fetch</a> algorithm.
 
   A <a>policy</a> is generally enforced upon a <a>global object</a>, but the
-  user agent needs to <a lt="parse a serialized policy">parse</a> any policy
+  user agent needs to <a lt="parse a serialized CSP">parse</a> any policy
   delivered via an HTTP response header field before any <a>global object</a>
   is created in order to handle directives that require knowledge of a
   <a>response</a>'s details. To that end:
@@ -904,12 +904,12 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       response back to our caller.
 
   <h4 id="set-response-csp-list" algorithm>
-    Set |response|'s `csp list`
+    Set |response|'s `CSP list`
   </h4>
 
   Given a <a>response</a> (|response|), this algorithm evaluates its
-  <a for="response">header list</a> for <a>serialized policy</a> values, and
-  populates its <a for="response">csp list</a> accordingly:
+  <a for="response">header list</a> for <a>serialized CSP</a> values, and
+  populates its <a for="response">CSP list</a> accordingly:
 
   1.  Set |response|'s <a for="response">CSP list</a> to the
       empty list.
@@ -925,7 +925,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
           "`enforce`".
 
       2.  Insert |policy| into |response|'s
-          <a for="response">csp list</a>.
+          <a for="response">CSP list</a>.
 
   4.  Let |policies to report| be the result of executing
       [[#parse-serialized-policy-list]] on the result of
@@ -939,7 +939,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
           "`report`".
 
       2.  Insert |policy| into |response|'s
-          <a for="response">csp list</a>.
+          <a for="response">CSP list</a>.
 
   <h4 id="report-for-request" algorithm>
     Report Content Security Policy violations for |request|
@@ -948,11 +948,11 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   Given a <a>request</a> (|request|), this algorithm reports violations based
   on <a for="request">client</a>'s "report only" policies.
 
-  1.  Let |csp list| be |request|'s
+  1.  Let |CSP list| be |request|'s
       <a for="request">client</a>'s <a>global object</a>'s
-      <a for="global object">csp list</a>.
+      <a for="global object">CSP list</a>.
 
-  2.  For each |policy| in |csp list|:
+  2.  For each |policy| in |CSP list|:
     
       1.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
           then skip to the next |policy|.
@@ -973,13 +973,13 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   `Blocked` or `Allowed` and reports violations based on |request|'s
   <a for="request">client</a>'s Content Security Policy.
 
-  1.  Let |csp list| be |request|'s
+  1.  Let |CSP list| be |request|'s
       <a for="request">client</a>'s <a>global object</a>'s
-      <a for="global object">csp list</a>.
+      <a for="global object">CSP list</a>.
 
   2.  Let |result| be "`Allowed`".
 
-  3.  For each |policy| in |csp list|:
+  3.  For each |policy| in |CSP list|:
 
       1.  If |policy|'s <a for="policy">disposition</a> is "`report`",
           then skip to the next |policy|.
@@ -1007,13 +1007,13 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   `Allowed`, and reports violations based on |request|'s
   <a for="request">client</a>'s Content Security Policy.
 
-  1.  Let |csp list| be |request|'s
+  1.  Let |CSP list| be |request|'s
       <a for="request">client</a>'s <a>global object</a>'s
-      <a for="global object">csp list</a>.
+      <a for="global object">CSP list</a>.
 
   2.  Let |result| be "`Allowed`".
 
-  3.  For each |policy| in |csp list|:
+  3.  For each |policy| in |CSP list|:
 
       1.  For each |directive| in |policy|:
 
@@ -1075,7 +1075,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       HTML, and isn't well-integrated with Fetch.
 
       ISSUE: Need to monkey-patch these in: something like "Set the `Window`
-      object's `csp list` to the `csp list` of the resource used to
+      object's `CSP list` to the `CSP list` of the resource used to
       generate the document.
 
   4.  [[#should-block-inline]] is called during the <a>prepare a script</a> and
@@ -1174,18 +1174,18 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       4.  For each |document| in |documents|:
 
           1.  For each |policy| in |document|'s <a>global
-              object</a>'s <a for="global object">csp list</a>:
+              object</a>'s <a for="global object">CSP list</a>:
 
               1.  Insert an alias to |policy| in |global|'s
-                  <a for="global object">csp list</a>.
+                  <a for="global object">CSP list</a>.
 
       Note: <a>local scheme</a> includes `about:`, and this algorithm will
       therefore alias the <a>embedding document</a>'s policies for <a>an iframe
       `srcdoc` `Document`</a>.
 
   2.  For each |policy| in |response|'s
-      <a for="response">csp list</a>, insert |policy| into
-      |global|'s <a for="global object">csp list</a>.
+      <a for="response">CSP list</a>, insert |policy| into
+      |global|'s <a for="global object">CSP list</a>.
 
   <h4 id="should-block-inline" algorithm>
     Should |element|'s inline |type| behavior be blocked by Content Security Policy?
@@ -1289,7 +1289,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       :  "`violated-directive`"
       :: |violation|'s <a for="violation">effective directive</a>
       :  "`original-policy`"
-      :: The <a lt="serialized policy">serialization</a> of |violation|'s
+      :: The <a lt="serialized CSP">serialization</a> of |violation|'s
          <a for="violation">policy</a>
       :  "`status-code`"
       :: |violation|'s <a for="violation">status</a>
