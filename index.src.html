@@ -420,8 +420,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   applied.
 
   Each policy has an associated <dfn for="policy">disposition</dfn>, which is
-  one of `null`, "`enforce`", or "`report`". The value is `null` unless
-  otherwise specified.
+  either "`enforce`" or "`report`".
 
   A <dfn export>serialized CSP</dfn> is an ASCII string, consisting of a
   semicolon-delimited series of <a>serialized directives</a>, adhering to the
@@ -433,15 +432,17 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   </pre>
 
   <h4 id="parse-serialized-policy" dfn lt="parse a serialized CSP" algorithm>
-    Parse a |serialized CSP|
+    Parse a |serialized CSP| as |disposition|
   </h4>
 
-  Given a <a>serialized CSP</a> (|serialized CSP|), this
-  algorithm will return a <a>policy</a> object. If the string cannot be parsed,
-  the resulting <a>policy</a>'s <a>directive set</a> will be empty.
+  Given a <a>serialized CSP</a> (|serialized CSP|), and a
+  <a for="policy">disposition</a> (|disposition|), this algorithm will return a
+  <a>policy</a> object. If the string cannot be parsed, the resulting
+  <a>policy</a>'s <a>directive set</a> will be empty.
 
-  1.  Let |policy| be a new <a>policy</a> with an empty <a>directive
-      set</a>, and a `null` <a>type</a>.
+  1.  Let |policy| be a new <a>policy</a> with an empty
+      <a for="policy">directive set</a>, and a <a for="policy">disposition</a>
+      of |disposition|.
 
   2.  For each |token| returned by
       <a lt="strictly split a string">strictly splitting</a> |serialized
@@ -477,12 +478,12 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   3.  Return |policy|.
 
   <h4 id="parse-serialized-policy-list" algorithm>
-    Parse a serialized CSP list
+    Parse a serialized CSP |list| as |disposition|
   </h4>
 
-  Given a string (|list|) which contains a comma-delimited series of
-  <a>serialized CSP</a> strings, the following algorithm will return a list of
-  <a>policies</a>:
+  Given a string (|list|) and a <a for="policy">disposition</a> (|disposition|)
+  which contains a comma-delimited series of <a>serialized CSP</a> strings, the
+  following algorithm will return a list of <a>policies</a>:
 
   1.  Let |policies| be an empty list.
 
@@ -490,7 +491,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       <a lt="split a string on commas">splitting |list| on commas</a>:
 
       1.  Let |policy| be the result of executing
-          [[#parse-serialized-policy]] on |token|.
+          [[#parse-serialized-policy]] on |token| with |disposition|.
 
       2.  If |policy|'s <a>directive set</a> is empty, skip the
           remaining substeps, and continue to the next item.
@@ -921,31 +922,22 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   1.  Set |response|'s <a for="response">CSP list</a> to the
       empty list.
 
-  2.  Let |policies to enforce| be the result of executing
+  2.  Let |policies| be the result of executing
       [[#parse-serialized-policy-list]] on the result of
       <a lt="parse a header value">parsing</a> `Content-Security-Policy`
-      in |response|'s <a for="response">header list</a>.
+      in |response|'s <a for="response">header list</a>, with a disposition
+      of "`enforce`".
 
-  3.  For each |policy| in |policies to enforce|:
-
-      1.  Set |policy|'s <a for="policy">disposition</a> to
-          "`enforce`".
-
-      2.  Insert |policy| into |response|'s
-          <a for="response">CSP list</a>.
-
-  4.  Let |policies to report| be the result of executing
+  3.  Append to |policies| the result of executing 
       [[#parse-serialized-policy-list]] on the result of
       <a lt="parse a header value">parsing</a>
       `Content-Security-Policy-Report-Only` in |response|'s
-      <a for="response">header list</a>.
+      <a for="response">header list</a>, with a disposition of "`report`".
 
-  5.  For each |policy| in |policies to report|:
 
-      1.  Set |policy|'s <a for="policy">disposition</a> to
-          "`report`".
+  4.  For each |policy| in |policies|:
 
-      2.  Insert |policy| into |response|'s
+      1.  Insert |policy| into |response|'s
           <a for="response">CSP list</a>.
 
   <h4 id="report-for-request" algorithm>
