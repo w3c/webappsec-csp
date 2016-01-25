@@ -74,8 +74,13 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   type: element
     text: frame
 spec: URL; urlPrefix: https://url.spec.whatwg.org/
+  type: dfn
+    text: URL parser; url: concept-url-parser
   type: interface
     text: URL; url: concept-url
+spec: RFC6454; urlPrefix: https://tools.ietf.org/html/rfc6454
+  type: dfn
+    text: unicode serialization; url: section-6.1
 spec: RFC7230; urlPrefix: https://tools.ietf.org/html/rfc7230
   type: grammar
     text: RWS; url: section-3.2.3
@@ -315,10 +320,15 @@ spec:dom-ls; type:interface; text:Document
           <a for="request">target browsing context</a>'s <a>ancestor
           browsing context</a>s:
 
-          1.  If [[#match-url-to-source-list]] returns `Does Not Match` when
-              executed upon |ancestor|'s <a>active document</a>'s
-              <a for="Document">URL</a> and this directive's
+          1.  Let |origin-as-url| be the result of executing the <a>URL
+              parser</a> on the <a>unicode serialization</a> of |ancestor|'s
+              <a>active document</a>'s origin.
+
+          2.  If [[#match-url-to-source-list]] returns `Does Not Match` when
+              executed upon |origin-as-url| and this directive's
               <a for="directive">value</a>, return "`Blocked`".
+
+              ISSUE: Do we need syntax to allow matching a unique origin?
 
   2.  Return "`Allowed`".
 </section>
