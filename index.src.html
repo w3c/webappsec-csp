@@ -2483,11 +2483,17 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   4.  If |type| is not "`script attribute`" or "`style attribute`":
 
-      1.  Let |content| be <a>the script block's source</a> if |element| is a
+      1.  If |type| is "`script`" and |element| has an attribute whose name is
+          an <a>ASCII case-insensitive match</a> for the string "`<script`", or
+          |type| is "`style`" and |element| has an attribute whose name is an
+          <a>ASCII case-insensitive match</a> for the string "`<style`", then
+          return "`Does Not Match`".
+
+      2.  Let |content| be <a>the script block's source</a> if |element| is a
           <{script}> element, or the value of |element|'s {{Node/textContent}}
           IDL attribute for any other element.
 
-      2.  For each |expression| in |list|:
+      3.  For each |expression| in |list|:
 
           1.  If |expression| matches the <a grammar>`nonce-source`</a> grammar,
               and |element| has a <{script/nonce}> attribute whose value is a
