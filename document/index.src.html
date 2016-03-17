@@ -182,6 +182,37 @@ spec:dom-ls; type:interface; text:Document
 
   2.  Return "`Allowed`".
 
+  <h4 id="directive-block-non-sri-resources">`block-non-sri-resources`</h4>
+
+  The <dfn>block-non-sri-resources</dfn> restricts loading resources that do not
+  contain an integrity attribute specified by Subresrouce Integrity. (TODO how to link.
+  The syntax for the directive's name and value is described by the following
+  ABNF:
+
+  <pre>
+    directive-name  = "block-non-sri-resources"
+    directive-value = "" / token *( RWS token )
+  </pre>
+
+  The directive recognizes a number of potential token values:
+
+  * `script` requires SRI for scripts
+  * `style` requires SRI for style sheets
+
+  <h5 id="sandbox-algorithms">Algorithms</h5>
+
+  This directive's <a for="directive">response check</a> is as follows:
+
+  Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
+  <a>policy</a> (|policy|):
+
+  1.  For each resource in document:
+
+      1.  If the resource's type aligns with the token values and that resource
+          type is contained in the directive, return "`Blocked`".
+
+      2.  Return "`Allowed`".
+
   <h4 id="directive-disable">`disable`</h4>
 
   The <dfn>disable</dfn> directive allows a developer to turn off certain
@@ -374,6 +405,8 @@ spec:dom-ls; type:interface; text:Document
 
   :   <a>`base-uri`</a>
   ::  This document (see [[#directive-base-uri]])
+  :   <a>`block-non-sri-resources`</a>
+  ::  This document (see [[#block-non-sri-resources]])
   :   <a>`form-action`</a>
   ::  This document (see [[#directive-form-action]])
   :   <a>`frame-ancestors`</a>
