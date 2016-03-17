@@ -3,6 +3,7 @@ all: index.html ./api/index.html ./cookies/index.html ./embedded/index.html ./pi
 force:
 	bikeshed -f spec ./index.src.html
 	bikeshed -f spec ./api/index.src.html
+	bikeshed -f spec ./document/index.src.html
 	bikeshed -f spec ./embedded/index.src.html
 	bikeshed -f spec ./cookies/index.src.html
 	bikeshed -f spec ./pinning/index.src.html
@@ -15,6 +16,9 @@ FPWD:
 
 api/index.html: api/index.src.html
 	bikeshed -f spec ./api/index.src.html
+
+document/index.html: document/index.src.html
+	bikeshed -f spec ./document/index.src.html
 
 cookies/index.html: cookies/index.src.html
 	bikeshed -f spec ./cookies/index.src.html
