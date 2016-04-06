@@ -26,8 +26,11 @@ spec: RFC6454; urlPrefix: https://tools.ietf.org/html/rfc6454
     text: globally unique identifier; url: section-2.3
     text: origin; url: section-3.2
     text: the same; url: section-5
-spec: ES2015; urlPrefix: http://www.ecma-international.org/ecma-262/6.0/index.html
+spec: ECMA262; urlPrefix: https://tc39.github.io/ecma262
+  type: dfn
+    text: realm
   type: method
+    text: HostEnsureCanCompileStrings(); url: sec-hostensurecancompilestrings
     text: eval(); url: sec-eval-x
     text: Function(); url: sec-function-objects
     text: JSON.stringify(); url: sec-json.stringify
@@ -224,6 +227,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     text: update a style block
     text: the worker's documents
     text: Content-Security-Policy http-equiv processing instructions; url: attr-meta-http-equiv-content-security-policy
+    text: realm's global object; url: concept-realm-global-object
   type: element-attr
     text: ping; for: a
     text: nonce; for: script; url: attr-script-nonce
@@ -248,10 +252,10 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     "title": "HTML Design Principles",
     "publisher": "W3C"
   },
-  "ES2015": {
-    "authors": [ "Allen Wirfs-Brock" ],
-    "href": "http://www.ecma-international.org/ecma-262/6.0/index.html",
-    "title": "ECMAScript® 2015 Language Specification",
+  "ECMA262": {
+    "authors": [ "Brian Terlson", "Allen Wirfs-Brock" ],
+    "href": "https://tc39.github.io/ecma262/",
+    "title": "ECMAScript® Language Specification",
     "publisher": "ECMA"
   },
   "SHA2": {
@@ -695,7 +699,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       number</a>, and <a for="violation">column number</a> accordingly.
 
       ISSUE: Is this kind of thing specified anywhere? I didn't see anything
-      that looked useful in [[ES2015]].
+      that looked useful in [[ECMA262]].
 
   3.  If |global| is a {{Window}} object, set |violation|'s
       <a for="violation">referrer</a> to |global|'s {{Window/document}}'s
@@ -1217,6 +1221,42 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
               set |result| to "`Blocked`".
 
   3.  Return |result|. 
+
+  <h3 id="ecma-integration">Integration with ECMAScript</h3>
+
+  ECMAScript defines a {{HostEnsureCanCompileStrings()}} operation which allows
+  the host environment to block the compilation of strings into ECMAScript code.
+  This document defines an implementation of that operation which examines the
+  relevant <a for="global object">CSP list</a> to determine whether such
+  compilation ought to be blocked.
+
+  <h4 id="can-compile-strings" algorithm dfn method>
+    EnsureCSPDoesNotBlockStringCompilation(|callerRealm|, |calleeRealm|)
+  </h4>
+
+  Given two <a>realms</a> (|callerRealm| and |calleeRealm|), this algorithm
+  returns normally if string compilation is allowed, and throws an "`EvalError`"
+  if not:
+
+  1.  Let |global| be |callerRealm|'s <a lt="Realm's global object">global
+      object</a>.
+
+  2.  For each |policy| in |global|'s <a for="global object">CSP list</a>:
+
+      1.  Let |source-list| be null.
+
+      2.  If |policy| contains a <a>directive</a> whose
+          <a for="directive">name</a> is "`script-src`", then set |source-list|
+          to that <a>directive</a>'s <a for="directive">value</a>.
+
+          Otherwise if |policy| contains a <a>directive</a> whose
+          <a for="directive">name</a> is "`default-src`", then set |source-list|
+          to that directive's <a for="directive">value</a>.
+
+      3.  If |source-list| is non-null, and does not contain a <a>source
+          expression</a> which is an <a>ASCII case-insensitive</a> match for the
+          string "<a grammar>`'unsafe-eval'`</a>", then throw an `EvalError`
+          exception.
 </section>
 
 <!-- Big Text: Reporting -->
