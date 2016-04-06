@@ -1220,15 +1220,15 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
           5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
               set |result| to "`Blocked`".
 
-  3.  Return |result|. 
+  3.  Return |result|.
 
   <h3 id="ecma-integration">Integration with ECMAScript</h3>
 
-  ECMAScript defines a {{HostEnsureCanCompileStrings()}} operation which allows
-  the host environment to block the compilation of strings into ECMAScript code.
-  This document defines an implementation of that operation which examines the
-  relevant <a for="global object">CSP list</a> to determine whether such
-  compilation ought to be blocked.
+  ECMAScript defines a {{HostEnsureCanCompileStrings()}} abstract operation
+  which allows the host environment to block the compilation of strings into
+  ECMAScript code. This document defines an implementation of that abstract
+  operation thich examines the relevant <a for="global object">CSP list</a>
+  to determine whether such compilation ought to be blocked.
 
   <h4 id="can-compile-strings" algorithm dfn method>
     EnsureCSPDoesNotBlockStringCompilation(|callerRealm|, |calleeRealm|)
@@ -1238,25 +1238,28 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   returns normally if string compilation is allowed, and throws an "`EvalError`"
   if not:
 
-  1.  Let |global| be |callerRealm|'s <a lt="Realm's global object">global
-      object</a>.
+  1.  Let |globals| be a list containing |callerRealm|'s
+      <a lt="Realm's global object">global object</a> and |calleeRealm|'s
+      <a lt="Realm's global object">global object</a>.
 
-  2.  For each |policy| in |global|'s <a for="global object">CSP list</a>:
+  2.  For each |global| in |globals|:
 
-      1.  Let |source-list| be null.
+      1.  For each |policy| in |global|'s <a for="global object">CSP list</a>:
 
-      2.  If |policy| contains a <a>directive</a> whose
-          <a for="directive">name</a> is "`script-src`", then set |source-list|
-          to that <a>directive</a>'s <a for="directive">value</a>.
+          1.  Let |source-list| be null.
 
-          Otherwise if |policy| contains a <a>directive</a> whose
-          <a for="directive">name</a> is "`default-src`", then set |source-list|
-          to that directive's <a for="directive">value</a>.
+          2.  If |policy| contains a <a>directive</a> whose
+              <a for="directive">name</a> is "`script-src`", then set |source-list|
+              to that <a>directive</a>'s <a for="directive">value</a>.
 
-      3.  If |source-list| is non-null, and does not contain a <a>source
-          expression</a> which is an <a>ASCII case-insensitive</a> match for the
-          string "<a grammar>`'unsafe-eval'`</a>", then throw an `EvalError`
-          exception.
+              Otherwise if |policy| contains a <a>directive</a> whose
+              <a for="directive">name</a> is "`default-src`", then set |source-list|
+              to that directive's <a for="directive">value</a>.
+
+          3.  If |source-list| is non-null, and does not contain a <a>source
+              expression</a> which is an <a>ASCII case-insensitive</a> match for the
+              string "<a grammar>`'unsafe-eval'`</a>", then throw an `EvalError`
+              exception.
 </section>
 
 <!-- Big Text: Reporting -->
