@@ -140,6 +140,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
       text: cache mode; url:concept-request-cache-mode
       text: client; url: concept-request-client
       text: credentials mode; url:concept-request-credentials-mode
+      text: cryptographic nonce metadata; url: concept-request-nonce-metadata
       text: current url; url: concept-request-current-url
       text: destination;  url: concept-request-destination
       text: global object; url: concept-request-global-object
@@ -1111,6 +1112,18 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   6.  A {{Document}}'s <dfn>embedding document</dfn> is the {{Document}}
       <a lt="nested through">through which</a> the {{Document}}'s
       <a>browsing context</a> is nested.
+
+  7.  HTML populates each <a>request</a>'s <a for="request">cryptographic nonce
+      metadata</a> with relevant data from the elements responsible for script
+      loading.
+      
+      ISSUE(w3c/html#183): This processing was added to WHATWG's HTML in
+      <a href="https://github.com/whatwg/html/commit/5479e07a6f6e01062b85b5fe6799752b0370336c">whatwg/html@5479e07</a>.
+      It has not yet been added to W3C's HTML.
+
+      ISSUE(whatwg/html#968): Stylesheet loading is not yet integrated with
+      Fetch.
+
 
   <h4 id="initialize-document-csp" algorithm>
     Initialize a `Document`'s `CSP list`
@@ -2110,7 +2123,12 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   1.  If |request|'s <a for="request">type</a> is "`script`", and its
       <a for="request">destination</a> is "`subresource`":
 
-      1.  If the result of executing [[#match-url-to-source-list]] on
+      1.  If the result of executing [[#match-nonce-to-source-list]] on
+          |request|'s <a for="request">cryptographic nonce metadata</a> and this
+          directive's <a for="directive">value</a> is "`Matches`", return
+          "`Allowed`".
+
+      2.  If the result of executing [[#match-url-to-source-list]] on
           |request|'s <a for="request">url</a> and this directive's
           <a for="directive">value</a> is "`Does Not Match`",
           return "`Blocked`".
@@ -2125,7 +2143,12 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   1.  If |request|'s <a for="request">type</a> is "`script`", and its
       <a for="request">destination</a> is "`subresource`":
 
-      1.  If the result of executing [[#match-url-to-source-list]] on
+      1.  If the result of executing [[#match-nonce-to-source-list]] on
+          |request|'s <a for="request">cryptographic nonce metadata</a> and this
+          directive's <a for="directive">value</a> is "`Matches`", return
+          "`Allowed`".
+
+      2.  If the result of executing [[#match-url-to-source-list]] on
           |response|'s <a for="response">url</a> and this directive's
           <a for="directive">value</a> is "`Does Not Match`",
           return "`Blocked`".
@@ -2204,7 +2227,12 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   1.  If |request|'s <a for="request">type</a> is "`style`":
 
-      1.  If the result of executing [[#match-url-to-source-list]] on
+      1.  If the result of executing [[#match-nonce-to-source-list]] on
+          |request|'s <a for="request">cryptographic nonce metadata</a> and this
+          directive's <a for="directive">value</a> is "`Matches`", return
+          "`Allowed`".
+
+      2.  If the result of executing [[#match-url-to-source-list]] on
           |request|'s <a for="request">url</a> and this directive's
           <a for="directive">value</a> is "`Does Not Match`",
           return "`Blocked`".
@@ -2218,7 +2246,12 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   1.  If |request|'s <a for="request">type</a> is "`style`":
 
-      1.  If the result of executing [[#match-url-to-source-list]] on
+      1.  If the result of executing [[#match-nonce-to-source-list]] on
+          |request|'s <a for="request">cryptographic nonce metadata</a> and this
+          directive's <a for="directive">value</a> is "`Matches`", return
+          "`Allowed`".
+
+      2.  If the result of executing [[#match-url-to-source-list]] on
           |response|'s <a for="response">url</a> and this directive's
           <a for="directive">value</a> is "`Does Not Match`",
           return "`Blocked`".
@@ -2263,6 +2296,26 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       2.  If |result| is "`Blocked`", then let |violates| be |directive|.
 
   3.  Return |violates|.
+
+  <h5 id="match-nonce-to-source-list" algorithm>
+    Does |nonce| match |source list|?
+  </h5>
+
+  Given a <a>request</a>'s <a for="request">cryptographic nonce metadata</a>
+  (|nonce|) and a <a>source list</a> (|source list|), this algorithm returns
+  "`Matches`" if the nonce matches one or more source expressions in the list,
+  and "`Does Not Match`" otherwise:
+
+  1.  If |sorurce list| is `null`, or |nonce| is the empty string, return
+      "`Does Not Match`".
+
+  2.  For each |expression| in |source list|:
+
+      1.  If |expression| matches the <a grammar>`nonce-source`</a> grammar,
+          and |nonce| is a <a>case-sensitive</a> match for |expression|'s
+          <a grammar>`base64-value`</a> part, return "`Matches`".
+
+  3.  Return "`Does Not Match`".
 
   <h5 id="match-url-to-source-list" algorithm>
     Does |url| match |source list|?
