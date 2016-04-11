@@ -847,8 +847,6 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   supported inside a <{meta}> element. Neither are the `report-uri`,
   `frame-ancestors`, and `sandbox` directives.
 
-  ISSUE: Why `sandbox`? Can we loosen that?
-
   Authors are <em>strongly encouraged</em> to place <{meta}> elements as early
   in the document as possible, because policies in <{meta}> elements are not
   applied to content which precedes them. In particular, note that resources
@@ -1064,6 +1062,9 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       context. This list is empty unless otherwise specified, and is populated
       via the [[#initialize-global-object-csp]] algorithm.
 
+      ISSUE(w3c/html#187): This concept has been added to WHATWG's HTML, but is
+      missing from W3C's version.
+
   2.  A <a>policy</a> is <dfn>enforced</dfn> or <dfn>monitored</dfn> for an
       <a>global object</a> by inserting it into the <a>global object</a>'s
       <a for="global object">CSP list</a>.
@@ -1073,26 +1074,19 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       bind a set of <a>policy</a> objects associated with a <a>response</a> to a
       newly created <a>global object</a>.
 
-      ISSUE: The algorithm is named "creating a new `Document` object" in W3C's
-      HTML, and isn't well-integrated with Fetch.
-
-      ISSUE: Need to monkey-patch these in: something like "Set the `Window`
-      object's `CSP list` to the `CSP list` of the resource used to
-      generate the document.
+      ISSUE(w3c/html#188): This landed in WHATWG's HTML, but is missing from
+      W3C's version.
 
   4.  [[#should-block-inline]] is called during the <a>prepare a script</a> and
       <a>update a `style` block</a> algorithms in order to determine whether or
       not an inline script or style block is allowed to execute/render.
 
-      ISSUE: The <a>update a `style` block</a> algorithm does not exist in
-      W3C's HTML.
-
-      ISSUE: The `nonce` attribute for <{script}> and <{style}> were added to
+      ISSUE(w3c/html#186): The `nonce` attribute for <{script}> and <{style}> were added to
       WHATWG's HTML in
       <a href="https://github.com/whatwg/html/commit/882803c4cc8fba2fa5472b76f628d95cc82c421d">whatwg/html@882803c</a>.
       They have not yet been added to W3C's HTML.
 
-      ISSUE: The [[#should-block-inline]] hooks were added to WHATWG's HTML in
+      ISSUE(w3c/html#185): The [[#should-block-inline]] hooks were added to WHATWG's HTML in
       <a href="https://github.com/whatwg/html/commit/ee3486eb129bc350b5ca684d0c91dff23453ac1a">whatwg/html@ee3486e</a>.
       They aren't yet in W3C's HTML.
 
@@ -1100,12 +1094,14 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       handlers (like `onclick`) and inline `style` attributes in order to
       determine whether or not they ought to be allowed to execute/render.
 
-      ISSUE(WHATWG/html#384): This hook is in-flight for WHATWG's HTML.
+      ISSUE(w3c/html#185): This hook landed in WHATWG's HTML in
+      <a href="https://github.com/whatwg/html/commit/920c9183a7990968ecac1aeedae22391f3438791">whatwg/html@920c918</a>.
+      It has been partially added to W3C's HTML.
 
   5.  <a>Policies</a> are <a>enforced</a> during processing of the <{meta}>
       element's <{meta/http-equiv}>.
 
-      ISSUE: This processing was added to WHATWG's HTML in
+      ISSUE(w3c/html#184): This processing was added to WHATWG's HTML in
       <a href="https://github.com/whatwg/html/commit/5064a629f22bef29839ab4dc6f1ceef17f010bc5">whatwg/html@5064a62</a>.
       It has not yet been added to W3C's HTML.
 
@@ -1242,6 +1238,9 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   ECMAScript code. This document defines an implementation of that abstract
   operation thich examines the relevant <a for="global object">CSP list</a>
   to determine whether such compilation ought to be blocked.
+
+  ISSUE(w3c/html#189): This has landed in WHATWG's HTML, but hasn't yet made
+  it to W3C's version.
 
   <h4 id="can-compile-strings" algorithm dfn method>
     EnsureCSPDoesNotBlockStringCompilation(|callerRealm|, |calleeRealm|)
@@ -2306,7 +2305,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   "`Matches`" if the nonce matches one or more source expressions in the list,
   and "`Does Not Match`" otherwise:
 
-  1.  If |sorurce list| is `null`, or |nonce| is the empty string, return
+  1.  If |source list| is `null`, or |nonce| is the empty string, return
       "`Does Not Match`".
 
   2.  For each |expression| in |source list|:
