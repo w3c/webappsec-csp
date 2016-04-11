@@ -1567,6 +1567,7 @@ of security-relevant policy decisions.</p>
      <a href="#authoring-considerations"><span class="secno">8</span> <span class="content">Authoring Considerations</span></a>
      <ol class="toc">
       <li><a href="#multiple-policies"><span class="secno">8.1</span> <span class="content"> The effect of multiple policies </span></a>
+      <li><a href="#unsafe-dynamic-usage"><span class="secno">8.2</span> <span class="content"> Usage of "<code>'unsafe-dynamic'</code>" </span></a>
      </ol>
     <li>
      <a href="#implementation-considerations"><span class="secno">9</span> <span class="content">Implementation Considerations</span></a>
@@ -1684,6 +1685,9 @@ of security-relevant policy decisions.</p>
       <p>The <code>manifest-src</code> directive has been added.</p>
      <li data-md="">
       <p>The <code>report-uri</code> directive is deprecated in favor of the new <code>report-to</code> directive, which relies on <a data-link-type="biblio" href="#biblio-oob-reporting">[OOB-REPORTING]</a> as infrastructure.</p>
+     <li data-md="">
+      <p>The <code>'unsafe-dynamic'</code> source expression will now allow script which
+  executes on a page to load more script via non-<a data-link-type="dfn">parser-inserted</a> <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> elements. Details are in <a href="#unsafe-dynamic-usage">§8.2 Usage of "'unsafe-dynamic'"</a>.</p>
     </ol>
     <h3 class="heading settled" data-level="1.4" id="open-questions"><span class="secno">1.4. </span><span class="content">Open Questions</span><a class="self-link" href="#open-questions"></a></h3>
     <p class="issue" id="issue-091030d4"><a class="self-link" href="#issue-091030d4"></a> Do we really want to remove <code>frame-src</code>? Though the threat model of
@@ -1694,7 +1698,6 @@ of security-relevant policy decisions.</p>
   much of the risk by using the original URL of a blocked resource; there
   shouldn’t be anything in the report JSON that script can’t gather on its own
   by walking the DOM.</p>
-    <p class="issue" id="issue-cdec18fd"><a class="self-link" href="#issue-cdec18fd"></a> Should we add <a href="https://lists.w3.org/Archives/Public/public-webappsec/2016Feb/0048.html"><code>'unsafe-dynamic'</code></a>?</p>
     <p class="issue" id="issue-c8939acb"><a class="self-link" href="#issue-c8939acb"></a> Should we allow hashes to whitelist inline event handlers? <a href="https://github.com/w3c/webappsec-csp/issues/13">&lt;https://github.com/w3c/webappsec-csp/issues/13></a></p>
    </section>
    <section>
@@ -1819,7 +1822,7 @@ of security-relevant policy decisions.</p>
     Get the effective directive for request </a></span></span></dfn> / <dfn class="dfn-paneled" data-dfn-for="directive" data-dfn-type="dfn" data-lt="value" data-noexport="" id="directive-value">value<span class="dfn-panel" data-deco=""><b><a href="#directive-value">#directive-value</a></b><b>Referenced in:</b><span><a href="#ref-for-directive-value-1">2.1.1. 
     Parse a serialized CSP as disposition </a></span><span><a href="#ref-for-directive-value-2">2.2. Directives</a> <a href="#ref-for-directive-value-3">(2)</a></span><span><a href="#ref-for-directive-value-4">2.2.1. Source Lists</a></span><span><a href="#ref-for-directive-value-5">4.3.1. 
     EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm) </a> <a href="#ref-for-directive-value-6">(2)</a></span><span><a href="#ref-for-directive-value-7">5.3. 
-    Report a violation </a> <a href="#ref-for-directive-value-8">(2)</a></span><span><a href="#ref-for-directive-value-9">6.1.2.1. Algorithms</a> <a href="#ref-for-directive-value-10">(2)</a></span><span><a href="#ref-for-directive-value-11">6.1.3.1. Algorithms</a> <a href="#ref-for-directive-value-12">(2)</a></span><span><a href="#ref-for-directive-value-13">6.1.4.1. Algorithms</a> <a href="#ref-for-directive-value-14">(2)</a></span><span><a href="#ref-for-directive-value-15">6.1.5.1. Algorithms</a> <a href="#ref-for-directive-value-16">(2)</a></span><span><a href="#ref-for-directive-value-17">6.1.6.1. Algorithms</a> <a href="#ref-for-directive-value-18">(2)</a></span><span><a href="#ref-for-directive-value-19">6.1.7.1. Algorithms</a> <a href="#ref-for-directive-value-20">(2)</a></span><span><a href="#ref-for-directive-value-21">6.1.8.1. Algorithms</a> <a href="#ref-for-directive-value-22">(2)</a></span><span><a href="#ref-for-directive-value-23">6.1.9.1. Algorithms</a> <a href="#ref-for-directive-value-24">(2)</a> <a href="#ref-for-directive-value-25">(3)</a> <a href="#ref-for-directive-value-26">(4)</a> <a href="#ref-for-directive-value-27">(5)</a></span><span><a href="#ref-for-directive-value-28">6.1.10.1. Algorithms</a> <a href="#ref-for-directive-value-29">(2)</a> <a href="#ref-for-directive-value-30">(3)</a> <a href="#ref-for-directive-value-31">(4)</a> <a href="#ref-for-directive-value-32">(5)</a></span></span></dfn> pair. The <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name-3">name</a> is a
+    Report a violation </a> <a href="#ref-for-directive-value-8">(2)</a></span><span><a href="#ref-for-directive-value-9">6.1.2.1. Algorithms</a> <a href="#ref-for-directive-value-10">(2)</a></span><span><a href="#ref-for-directive-value-11">6.1.3.1. Algorithms</a> <a href="#ref-for-directive-value-12">(2)</a></span><span><a href="#ref-for-directive-value-13">6.1.4.1. Algorithms</a> <a href="#ref-for-directive-value-14">(2)</a></span><span><a href="#ref-for-directive-value-15">6.1.5.1. Algorithms</a> <a href="#ref-for-directive-value-16">(2)</a></span><span><a href="#ref-for-directive-value-17">6.1.6.1. Algorithms</a> <a href="#ref-for-directive-value-18">(2)</a></span><span><a href="#ref-for-directive-value-19">6.1.7.1. Algorithms</a> <a href="#ref-for-directive-value-20">(2)</a></span><span><a href="#ref-for-directive-value-21">6.1.8.1. Algorithms</a> <a href="#ref-for-directive-value-22">(2)</a></span><span><a href="#ref-for-directive-value-23">6.1.9.1. Algorithms</a> <a href="#ref-for-directive-value-24">(2)</a> <a href="#ref-for-directive-value-25">(3)</a> <a href="#ref-for-directive-value-26">(4)</a> <a href="#ref-for-directive-value-27">(5)</a> <a href="#ref-for-directive-value-28">(6)</a> <a href="#ref-for-directive-value-29">(7)</a></span><span><a href="#ref-for-directive-value-30">6.1.10.1. Algorithms</a> <a href="#ref-for-directive-value-31">(2)</a> <a href="#ref-for-directive-value-32">(3)</a> <a href="#ref-for-directive-value-33">(4)</a> <a href="#ref-for-directive-value-34">(5)</a></span></span></dfn> pair. The <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name-3">name</a> is a
   non-empty string, and the <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-2">value</a> is a set of non-empty strings. The <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-3">value</a> set MAY be empty.</p>
     <p>A <dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="serialized directive" data-noexport="" id="serialized-directive">serialized directive<span class="dfn-panel" data-deco=""><b><a href="#serialized-directive">#serialized-directive</a></b><b>Referenced in:</b><span><a href="#ref-for-serialized-directive-1">2.1. Policies</a></span></span></dfn> is an ASCII string, consisting of one or more
   whitespace-delimited tokens, and adhering to the following ABNF <a data-link-type="biblio" href="#biblio-rfc5234">[RFC5234]</a>:</p>
@@ -1876,8 +1879,8 @@ of security-relevant policy decisions.</p>
   or executed. These tokens represent one of the following types of <dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="source
   expression" data-noexport="" id="source-expression">source
   expression<span class="dfn-panel" data-deco=""><b><a href="#source-expression">#source-expression</a></b><b>Referenced in:</b><span><a href="#ref-for-source-expression-1">2.2.1. Source Lists</a></span><span><a href="#ref-for-source-expression-2">4.3.1. 
-    EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm) </a></span><span><a href="#ref-for-source-expression-3">6.1.11.4. 
-    Does url match expression in origin with redirect count? </a></span><span><a href="#ref-for-source-expression-4">6.1.12.1. 
+    EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm) </a></span><span><a href="#ref-for-source-expression-3">6.1.9.1. Algorithms</a> <a href="#ref-for-source-expression-4">(2)</a></span><span><a href="#ref-for-source-expression-5">6.1.11.4. 
+    Does url match expression in origin with redirect count? </a></span><span><a href="#ref-for-source-expression-6">6.1.12.1. 
     Does element match source list? </a></span></span></dfn>:</p>
     <ol>
      <li data-md="">
@@ -1910,13 +1913,17 @@ of security-relevant policy decisions.</p>
 ; Schemes:
 <dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" data-lt="scheme-source" id="grammardef-scheme-source">scheme-source<span class="dfn-panel" data-deco=""><b><a href="#grammardef-scheme-source">#grammardef-scheme-source</a></b><b>Referenced in:</b><span><a href="#ref-for-grammardef-scheme-source-1">2.2.1. Source Lists</a></span><span><a href="#ref-for-grammardef-scheme-source-2">6.1.11.4. 
     Does url match expression in origin with redirect count?
-  </a> <a href="#ref-for-grammardef-scheme-source-3">(2)</a></span></span></dfn> = <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc3986#section-3.1">scheme</a> ":"
+  </a> <a href="#ref-for-grammardef-scheme-source-3">(2)</a></span><span><a href="#ref-for-grammardef-scheme-source-4">8.2. 
+    Usage of "'unsafe-dynamic'"
+  </a></span></span></dfn> = <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc3986#section-3.1">scheme</a> ":"
                 ; <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc3986#section-3.1">scheme</a> is defined in section 3.1 of RFC 3986.
 
 ; Hosts: "example.com" / "*.example.com" / "https://*.example.com:12/path/to/file.js"
 <dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" data-lt="host-source" id="grammardef-host-source">host-source<span class="dfn-panel" data-deco=""><b><a href="#grammardef-host-source">#grammardef-host-source</a></b><b>Referenced in:</b><span><a href="#ref-for-grammardef-host-source-1">2.2.1. Source Lists</a></span><span><a href="#ref-for-grammardef-host-source-2">6.1.11.4. 
     Does url match expression in origin with redirect count?
-  </a> <a href="#ref-for-grammardef-host-source-3">(2)</a> <a href="#ref-for-grammardef-host-source-4">(3)</a></span></span></dfn> = [ <a data-link-type="grammar" href="#grammardef-scheme-part" id="ref-for-grammardef-scheme-part-1">scheme-part</a> "://" ] <a data-link-type="grammar" href="#grammardef-host-part" id="ref-for-grammardef-host-part-1">host-part</a> [ <a data-link-type="grammar" href="#grammardef-port-part" id="ref-for-grammardef-port-part-1">port-part</a> ] [ <a data-link-type="grammar" href="#grammardef-path-part" id="ref-for-grammardef-path-part-1">path-part</a> ]
+  </a> <a href="#ref-for-grammardef-host-source-3">(2)</a> <a href="#ref-for-grammardef-host-source-4">(3)</a></span><span><a href="#ref-for-grammardef-host-source-5">8.2. 
+    Usage of "'unsafe-dynamic'"
+  </a></span></span></dfn> = [ <a data-link-type="grammar" href="#grammardef-scheme-part" id="ref-for-grammardef-scheme-part-1">scheme-part</a> "://" ] <a data-link-type="grammar" href="#grammardef-host-part" id="ref-for-grammardef-host-part-1">host-part</a> [ <a data-link-type="grammar" href="#grammardef-port-part" id="ref-for-grammardef-port-part-1">port-part</a> ] [ <a data-link-type="grammar" href="#grammardef-path-part" id="ref-for-grammardef-path-part-1">path-part</a> ]
 <dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" data-lt="scheme-part" id="grammardef-scheme-part">scheme-part<span class="dfn-panel" data-deco=""><b><a href="#grammardef-scheme-part">#grammardef-scheme-part</a></b><b>Referenced in:</b><span><a href="#ref-for-grammardef-scheme-part-1">2.2.1. Source Lists</a></span><span><a href="#ref-for-grammardef-scheme-part-2">6.1.11.4. 
     Does url match expression in origin with redirect count?
   </a> <a href="#ref-for-grammardef-scheme-part-3">(2)</a> <a href="#ref-for-grammardef-scheme-part-4">(3)</a> <a href="#ref-for-grammardef-scheme-part-5">(4)</a> <a href="#ref-for-grammardef-scheme-part-6">(5)</a> <a href="#ref-for-grammardef-scheme-part-7">(6)</a></span></span></dfn> = <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc3986#section-3.1">scheme</a>
@@ -1933,11 +1940,17 @@ of security-relevant policy decisions.</p>
               ; <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc3986#section-3.3">path</a> is defined in section 3.3 of RFC 3986.
    
 ; Keywords:
-<dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" data-lt="keyword-source" id="grammardef-keyword-source">keyword-source<span class="dfn-panel" data-deco=""><b><a href="#grammardef-keyword-source">#grammardef-keyword-source</a></b><b>Referenced in:</b><span><a href="#ref-for-grammardef-keyword-source-1">2.2.1. Source Lists</a></span></span></dfn> = "<dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" data-lt="&apos;self&apos;" id="grammardef-self">'self'<span class="dfn-panel" data-deco=""><b><a href="#grammardef-self">#grammardef-self</a></b><b>Referenced in:</b><span><a href="#ref-for-grammardef-self-1">2.2.1. Source Lists</a></span><span><a href="#ref-for-grammardef-self-2">6.1.3. default-src</a> <a href="#ref-for-grammardef-self-3">(2)</a> <a href="#ref-for-grammardef-self-4">(3)</a> <a href="#ref-for-grammardef-self-5">(4)</a> <a href="#ref-for-grammardef-self-6">(5)</a> <a href="#ref-for-grammardef-self-7">(6)</a> <a href="#ref-for-grammardef-self-8">(7)</a> <a href="#ref-for-grammardef-self-9">(8)</a> <a href="#ref-for-grammardef-self-10">(9)</a> <a href="#ref-for-grammardef-self-11">(10)</a> <a href="#ref-for-grammardef-self-12">(11)</a> <a href="#ref-for-grammardef-self-13">(12)</a> <a href="#ref-for-grammardef-self-14">(13)</a> <a href="#ref-for-grammardef-self-15">(14)</a> <a href="#ref-for-grammardef-self-16">(15)</a> <a href="#ref-for-grammardef-self-17">(16)</a> <a href="#ref-for-grammardef-self-18">(17)</a> <a href="#ref-for-grammardef-self-19">(18)</a> <a href="#ref-for-grammardef-self-20">(19)</a></span></span></dfn>" / "<dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" data-lt="&apos;unsafe-inline&apos;" id="grammardef-unsafe-inline">'unsafe-inline'<span class="dfn-panel" data-deco=""><b><a href="#grammardef-unsafe-inline">#grammardef-unsafe-inline</a></b><b>Referenced in:</b><span><a href="#ref-for-grammardef-unsafe-inline-1">6. 
+<dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" data-lt="keyword-source" id="grammardef-keyword-source">keyword-source<span class="dfn-panel" data-deco=""><b><a href="#grammardef-keyword-source">#grammardef-keyword-source</a></b><b>Referenced in:</b><span><a href="#ref-for-grammardef-keyword-source-1">2.2.1. Source Lists</a></span><span><a href="#ref-for-grammardef-keyword-source-2">6.1.9.1. Algorithms</a> <a href="#ref-for-grammardef-keyword-source-3">(2)</a></span><span><a href="#ref-for-grammardef-keyword-source-4">8.2. 
+    Usage of "'unsafe-dynamic'"
+  </a></span></span></dfn> = "<dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" data-lt="&apos;self&apos;" id="grammardef-self">'self'<span class="dfn-panel" data-deco=""><b><a href="#grammardef-self">#grammardef-self</a></b><b>Referenced in:</b><span><a href="#ref-for-grammardef-self-1">2.2.1. Source Lists</a></span><span><a href="#ref-for-grammardef-self-2">6.1.3. default-src</a> <a href="#ref-for-grammardef-self-3">(2)</a> <a href="#ref-for-grammardef-self-4">(3)</a> <a href="#ref-for-grammardef-self-5">(4)</a> <a href="#ref-for-grammardef-self-6">(5)</a> <a href="#ref-for-grammardef-self-7">(6)</a> <a href="#ref-for-grammardef-self-8">(7)</a> <a href="#ref-for-grammardef-self-9">(8)</a> <a href="#ref-for-grammardef-self-10">(9)</a> <a href="#ref-for-grammardef-self-11">(10)</a> <a href="#ref-for-grammardef-self-12">(11)</a> <a href="#ref-for-grammardef-self-13">(12)</a> <a href="#ref-for-grammardef-self-14">(13)</a> <a href="#ref-for-grammardef-self-15">(14)</a> <a href="#ref-for-grammardef-self-16">(15)</a> <a href="#ref-for-grammardef-self-17">(16)</a> <a href="#ref-for-grammardef-self-18">(17)</a> <a href="#ref-for-grammardef-self-19">(18)</a> <a href="#ref-for-grammardef-self-20">(19)</a></span></span></dfn>" / "<dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" data-lt="&apos;unsafe-inline&apos;" id="grammardef-unsafe-inline">'unsafe-inline'<span class="dfn-panel" data-deco=""><b><a href="#grammardef-unsafe-inline">#grammardef-unsafe-inline</a></b><b>Referenced in:</b><span><a href="#ref-for-grammardef-unsafe-inline-1">6. 
     Content Security Policy Directives
-  </a></span><span><a href="#ref-for-grammardef-unsafe-inline-2">7.1. Nonce Reuse</a> <a href="#ref-for-grammardef-unsafe-inline-3">(2)</a></span></span></dfn>" / "<dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" data-lt="&apos;unsafe-eval&apos;" id="grammardef-unsafe-eval">'unsafe-eval'<span class="dfn-panel" data-deco=""><b><a href="#grammardef-unsafe-eval">#grammardef-unsafe-eval</a></b><b>Referenced in:</b><span><a href="#ref-for-grammardef-unsafe-eval-1">4.3.1. 
+  </a></span><span><a href="#ref-for-grammardef-unsafe-inline-2">7.1. Nonce Reuse</a> <a href="#ref-for-grammardef-unsafe-inline-3">(2)</a></span><span><a href="#ref-for-grammardef-unsafe-inline-4">8.2. 
+    Usage of "'unsafe-dynamic'"
+  </a></span></span></dfn>" / "<dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" data-lt="&apos;unsafe-eval&apos;" id="grammardef-unsafe-eval">'unsafe-eval'<span class="dfn-panel" data-deco=""><b><a href="#grammardef-unsafe-eval">#grammardef-unsafe-eval</a></b><b>Referenced in:</b><span><a href="#ref-for-grammardef-unsafe-eval-1">4.3.1. 
     EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm)
-  </a></span></span></dfn>" 
+  </a></span></span></dfn>" / "<dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" data-lt="&apos;unsafe-dynamic&apos;" id="grammardef-unsafe-dynamic">'unsafe-dynamic'<span class="dfn-panel" data-deco=""><b><a href="#grammardef-unsafe-dynamic">#grammardef-unsafe-dynamic</a></b><b>Referenced in:</b><span><a href="#ref-for-grammardef-unsafe-dynamic-1">6.1.9.1. Algorithms</a> <a href="#ref-for-grammardef-unsafe-dynamic-2">(2)</a> <a href="#ref-for-grammardef-unsafe-dynamic-3">(3)</a> <a href="#ref-for-grammardef-unsafe-dynamic-4">(4)</a> <a href="#ref-for-grammardef-unsafe-dynamic-5">(5)</a></span><span><a href="#ref-for-grammardef-unsafe-dynamic-6">8.2. 
+    Usage of "'unsafe-dynamic'"
+  </a> <a href="#ref-for-grammardef-unsafe-dynamic-7">(2)</a> <a href="#ref-for-grammardef-unsafe-dynamic-8">(3)</a></span></span></dfn>"
 
 ; Nonces: 'nonce-[nonce goes here]'
 <dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" data-lt="nonce-source" id="grammardef-nonce-source">nonce-source<span class="dfn-panel" data-deco=""><b><a href="#grammardef-nonce-source">#grammardef-nonce-source</a></b><b>Referenced in:</b><span><a href="#ref-for-grammardef-nonce-source-1">2.2.1. Source Lists</a></span><span><a href="#ref-for-grammardef-nonce-source-2">6.1.9. script-src</a></span><span><a href="#ref-for-grammardef-nonce-source-3">6.1.10. style-src</a></span><span><a href="#ref-for-grammardef-nonce-source-4">6.1.11.2. 
@@ -2071,7 +2084,8 @@ of security-relevant policy decisions.</p>
     <p>A <a data-link-type="dfn" href="#policy" id="ref-for-policy-16">policy</a> may also be declared inline in an HTML document via a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-meta-element">meta</a></code> element’s <code><a data-link-type="element-sub" href="http://www.w3.org/TR/html5/document-metadata.html#attr-meta-http-equiv">http-equiv</a></code> attribute, as described in <a href="#meta-element">§3.3 The &lt;meta> element</a>.</p>
     <h3 class="heading settled" data-level="3.1" id="csp-header"><span class="secno">3.1. </span><span class="content"> The <code>Content-Security-Policy</code> HTTP Response Header Field </span><a class="self-link" href="#csp-header"></a></h3>
     <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="Content-Security-Policy" data-noexport="" id="content-security-policy"><code>Content-Security-Policy</code><span class="dfn-panel" data-deco=""><b><a href="#content-security-policy">#content-security-policy</a></b><b>Referenced in:</b><span><a href="#ref-for-content-security-policy-1">3.1. 
-    The Content-Security-Policy HTTP Response Header Field </a></span><span><a href="#ref-for-content-security-policy-2">6.1.3. default-src</a> <a href="#ref-for-content-security-policy-3">(2)</a> <a href="#ref-for-content-security-policy-4">(3)</a> <a href="#ref-for-content-security-policy-5">(4)</a></span><span><a href="#ref-for-content-security-policy-6">6.2.1. report-uri</a></span></span></dfn> HTTP response header field
+    The Content-Security-Policy HTTP Response Header Field </a></span><span><a href="#ref-for-content-security-policy-2">6.1.3. default-src</a> <a href="#ref-for-content-security-policy-3">(2)</a> <a href="#ref-for-content-security-policy-4">(3)</a> <a href="#ref-for-content-security-policy-5">(4)</a></span><span><a href="#ref-for-content-security-policy-6">6.2.1. report-uri</a></span><span><a href="#ref-for-content-security-policy-7">8.2. 
+    Usage of "'unsafe-dynamic'" </a></span></span></dfn> HTTP response header field
   is the preferred mechanism for delivering a policy from a server to a client.
   The header’s value is represented by the following ABNF <a data-link-type="biblio" href="#biblio-rfc5234">[RFC5234]</a>:</p>
 <pre>Content-Security-Policy = 1#<a data-link-type="grammar" href="#grammardef-serialized-policy" id="ref-for-grammardef-serialized-policy-1">serialized-policy</a>
@@ -2899,7 +2913,8 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
     </ol>
     <h4 class="heading settled" data-level="6.1.3" id="directive-default-src"><span class="secno">6.1.3. </span><span class="content"><code>default-src</code></span><a class="self-link" href="#directive-default-src"></a></h4>
     <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="default-src" data-noexport="" id="default-src">default-src<span class="dfn-panel" data-deco=""><b><a href="#default-src">#default-src</a></b><b>Referenced in:</b><span><a href="#ref-for-default-src-1">6. 
-    Content Security Policy Directives </a></span><span><a href="#ref-for-default-src-2">6.1.3. default-src</a> <a href="#ref-for-default-src-3">(2)</a> <a href="#ref-for-default-src-4">(3)</a></span></span></dfn> directive serves as a fallback for the other <a data-link-type="dfn" href="#fetch-directives" id="ref-for-fetch-directives-1">fetch directives</a>. The syntax for the directive’s name and value is described by
+    Content Security Policy Directives </a></span><span><a href="#ref-for-default-src-2">6.1.3. default-src</a> <a href="#ref-for-default-src-3">(2)</a> <a href="#ref-for-default-src-4">(3)</a></span><span><a href="#ref-for-default-src-5">8.2. 
+    Usage of "'unsafe-dynamic'" </a></span></span></dfn> directive serves as a fallback for the other <a data-link-type="dfn" href="#fetch-directives" id="ref-for-fetch-directives-1">fetch directives</a>. The syntax for the directive’s name and value is described by
   the following ABNF:</p>
 <pre>directive-name  = "default-src"
 directive-value = <a data-link-type="grammar" href="#grammardef-serialized-source-list" id="ref-for-grammardef-serialized-source-list-3">serialized-source-list</a>
@@ -3222,7 +3237,8 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
     <h4 class="heading settled" data-level="6.1.9" id="directive-script-src"><span class="secno">6.1.9. </span><span class="content"><code>script-src</code></span><a class="self-link" href="#directive-script-src"></a></h4>
     <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="script-src" data-noexport="" id="script-src">script-src<span class="dfn-panel" data-deco=""><b><a href="#script-src">#script-src</a></b><b>Referenced in:</b><span><a href="#ref-for-script-src-1">6. 
     Content Security Policy Directives </a></span><span><a href="#ref-for-script-src-2">6.1. 
-    Fetch Directives </a></span><span><a href="#ref-for-script-src-3">6.1.3. default-src</a> <a href="#ref-for-script-src-4">(2)</a> <a href="#ref-for-script-src-5">(3)</a></span></span></dfn> directive restricts the locations from which scripts
+    Fetch Directives </a></span><span><a href="#ref-for-script-src-3">6.1.3. default-src</a> <a href="#ref-for-script-src-4">(2)</a> <a href="#ref-for-script-src-5">(3)</a></span><span><a href="#ref-for-script-src-6">8.2. 
+    Usage of "'unsafe-dynamic'" </a> <a href="#ref-for-script-src-7">(2)</a></span></span></dfn> directive restricts the locations from which scripts
   may be executed. This includes not only URLs loaded directly into <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> elements, but also things like inline script blocks and XSLT stylesheets <a data-link-type="biblio" href="#biblio-xslt">[XSLT]</a> which can trigger script execution. The syntax for the directive’s
   name and value is described by the following ABNF:</p>
 <pre>directive-name  = "script-src"
@@ -3268,7 +3284,20 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
   directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-23">value</a> is "<code>Matches</code>", return
   "<code>Allowed</code>".</p>
        <li data-md="">
-        <p>If the result of executing <a href="#match-url-to-source-list">§6.1.11.3 Does url match source list?</a> on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url">url</a> and this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-24">value</a> is "<code>Does Not Match</code>",
+        <p>If this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-24">value</a> contains a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-3">source
+  expression</a> that is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for
+  the "<a data-link-type="grammar" href="#grammardef-unsafe-dynamic" id="ref-for-grammardef-unsafe-dynamic-1"><code>'unsafe-dynamic'</code></a>" <a data-link-type="grammar" href="#grammardef-keyword-source" id="ref-for-grammardef-keyword-source-2">keyword-source</a>:</p>
+        <ol>
+         <li data-md="">
+          <p>If the <var>request</var> was triggered by a <a data-link-type="dfn">parser-inserted</a> <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> element, return "<code>Blocked</code>".</p>
+          <p>Otherwise, return "<code>Allowed</code>".</p>
+          <p class="note" role="note">Note: "<a data-link-type="grammar" href="#grammardef-unsafe-dynamic" id="ref-for-grammardef-unsafe-dynamic-2"><code>'unsafe-dynamic'</code></a>" is explained in more detail
+  in <a href="#unsafe-dynamic-usage">§8.2 Usage of "'unsafe-dynamic'"</a>.</p>
+          <p class="issue" id="issue-19689d44"><a class="self-link" href="#issue-19689d44"></a> We don’t currently have a mechanism for
+  determining whether or not a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> was triggered from a <a data-link-type="dfn">parser-inserted</a> element from within Fetch. Talk to Anne. <a href="https://github.com/w3c/webappsec-csp/issues/70">&lt;https://github.com/w3c/webappsec-csp/issues/70></a></p>
+        </ol>
+       <li data-md="">
+        <p>If the result of executing <a href="#match-url-to-source-list">§6.1.11.3 Does url match source list?</a> on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url">url</a> and this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-25">value</a> is "<code>Does Not Match</code>",
   return "<code>Blocked</code>".</p>
       </ol>
      <li data-md="">
@@ -3282,10 +3311,13 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <ol>
        <li data-md="">
         <p>If the result of executing <a href="#match-nonce-to-source-list">§6.1.11.2 Does nonce match source list?</a> on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-nonce-metadata">cryptographic nonce metadata</a> and this
-  directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-25">value</a> is "<code>Matches</code>", return
+  directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-26">value</a> is "<code>Matches</code>", return
   "<code>Allowed</code>".</p>
        <li data-md="">
-        <p>If the result of executing <a href="#match-url-to-source-list">§6.1.11.3 Does url match source list?</a> on <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a> and this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-26">value</a> is "<code>Does Not Match</code>",
+        <p><strong>Assert</strong>: This directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-27">value</a> does not contain "<a data-link-type="grammar" href="#grammardef-unsafe-dynamic" id="ref-for-grammardef-unsafe-dynamic-3"><code>'unsafe-dynamic'</code></a>", or <var>request</var> was
+  not triggered by a <a data-link-type="dfn">parser-inserted</a> <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> element.</p>
+       <li data-md="">
+        <p>If the result of executing <a href="#match-url-to-source-list">§6.1.11.3 Does url match source list?</a> on <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a> and this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-28">value</a> is "<code>Does Not Match</code>",
   return "<code>Blocked</code>".</p>
       </ol>
      <li data-md="">
@@ -3298,7 +3330,12 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <p>If <var>type</var> is "<code>script</code>" or "<code>script attribute</code>":</p>
       <ol>
        <li data-md="">
-        <p>If the result of executing <a href="#match-element-to-source-list">§6.1.12.1 Does element match source list?</a> on <var>element</var>, this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-27">value</a>, and <var>type</var> is "<code>Does Not Match</code>", return "<code>Blocked</code>".</p>
+        <p>If <var>list</var> contains a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-4">source expression</a> which is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII
+  case-insensitive match</a> for the <a data-link-type="grammar" href="#grammardef-keyword-source" id="ref-for-grammardef-keyword-source-3">keyword-source</a> "<a data-link-type="grammar" href="#grammardef-unsafe-dynamic" id="ref-for-grammardef-unsafe-dynamic-4"><code>'unsafe-dynamic'</code></a>", return "<code>Blocked</code>".</p>
+        <p class="note" role="note">Note: "<a data-link-type="grammar" href="#grammardef-unsafe-dynamic" id="ref-for-grammardef-unsafe-dynamic-5"><code>'unsafe-dynamic'</code></a>" is explained in more detail
+  in <a href="#unsafe-dynamic-usage">§8.2 Usage of "'unsafe-dynamic'"</a>.</p>
+       <li data-md="">
+        <p>If the result of executing <a href="#match-element-to-source-list">§6.1.12.1 Does element match source list?</a> on <var>element</var>, this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-29">value</a>, and <var>type</var> is "<code>Does Not Match</code>", return "<code>Blocked</code>".</p>
       </ol>
      <li data-md="">
       <p>Return "<code>Allowed</code>".</p>
@@ -3361,10 +3398,10 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <ol>
        <li data-md="">
         <p>If the result of executing <a href="#match-nonce-to-source-list">§6.1.11.2 Does nonce match source list?</a> on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-nonce-metadata">cryptographic nonce metadata</a> and this
-  directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-28">value</a> is "<code>Matches</code>", return
+  directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-30">value</a> is "<code>Matches</code>", return
   "<code>Allowed</code>".</p>
        <li data-md="">
-        <p>If the result of executing <a href="#match-url-to-source-list">§6.1.11.3 Does url match source list?</a> on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url">url</a> and this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-29">value</a> is "<code>Does Not Match</code>",
+        <p>If the result of executing <a href="#match-url-to-source-list">§6.1.11.3 Does url match source list?</a> on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url">url</a> and this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-31">value</a> is "<code>Does Not Match</code>",
   return "<code>Blocked</code>".</p>
       </ol>
      <li data-md="">
@@ -3378,10 +3415,10 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <ol>
        <li data-md="">
         <p>If the result of executing <a href="#match-nonce-to-source-list">§6.1.11.2 Does nonce match source list?</a> on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-nonce-metadata">cryptographic nonce metadata</a> and this
-  directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-30">value</a> is "<code>Matches</code>", return
+  directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-32">value</a> is "<code>Matches</code>", return
   "<code>Allowed</code>".</p>
        <li data-md="">
-        <p>If the result of executing <a href="#match-url-to-source-list">§6.1.11.3 Does url match source list?</a> on <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a> and this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-31">value</a> is "<code>Does Not Match</code>",
+        <p>If the result of executing <a href="#match-url-to-source-list">§6.1.11.3 Does url match source list?</a> on <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a> and this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-33">value</a> is "<code>Does Not Match</code>",
   return "<code>Blocked</code>".</p>
       </ol>
      <li data-md="">
@@ -3394,7 +3431,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <p>If <var>type</var> is "<code>style</code>" or "<code>style attribute</code>":</p>
       <ol>
        <li data-md="">
-        <p>If the result of executing <a href="#match-element-to-source-list">§6.1.12.1 Does element match source list?</a> on <var>element</var>, this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-32">value</a>, and <var>type</var> is "<code>Does Not Match</code>", return "<code>Blocked</code>".</p>
+        <p>If the result of executing <a href="#match-element-to-source-list">§6.1.12.1 Does element match source list?</a> on <var>element</var>, this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-34">value</a>, and <var>type</var> is "<code>Does Not Match</code>", return "<code>Blocked</code>".</p>
       </ol>
      <li data-md="">
       <p>Return "<code>Allowed</code>".</p>
@@ -3461,7 +3498,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <p>Return "<code>Does Not Match</code>".</p>
     </ol>
     <h5 class="heading settled" data-algorithm="Does url match expression in origin with redirect count?" data-level="6.1.11.4" id="match-url-to-source-expression"><span class="secno">6.1.11.4. </span><span class="content"> Does <var>url</var> match <var>expression</var> in <var>origin</var> with <var>redirect count</var>? </span><a class="self-link" href="#match-url-to-source-expression"></a></h5>
-    <p>Given a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url">URL</a></code> (<var>url</var>), a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-3">source expression</a> (<var>expression</var>), an <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6454#section-3.2">origin</a> (<var>origin</var>), and a number (<var>redirect count</var>), this algorithm
+    <p>Given a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url">URL</a></code> (<var>url</var>), a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-5">source expression</a> (<var>expression</var>), an <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6454#section-3.2">origin</a> (<var>origin</var>), and a number (<var>redirect count</var>), this algorithm
   returns "<code>Matches</code>" if <var>url</var> matches <var>expression</var>, and "<code>Does Not Match</code>"
   otherwise.</p>
     <p class="note" role="note">Note: <var>origin</var> is the <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6454#section-3.2">origin</a> of the resource relative to which the <var>expression</var> should be resolved. "<code>'self'</code>", for instance, will have distinct
@@ -3704,7 +3741,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
         <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source-5"><code>nonce-source</code></a> or <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source-4"><code>hash-source</code></a> grammar, set <var>contains nonce or hash</var> to <code>true</code>.</p>
       </ol>
      <li data-md="">
-      <p>If <var>contains nonce or hash</var> is <code>false</code>, and <var>list</var> contains a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-4">source expression</a> which is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for the string "<code>unsafe-inline</code>", then return "<code>Matches</code>".</p>
+      <p>If <var>contains nonce or hash</var> is <code>false</code>, and <var>list</var> contains a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-6">source expression</a> which is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for the string "<code>unsafe-inline</code>", then return "<code>Matches</code>".</p>
      <li data-md="">
       <p>If <var>type</var> is not "<code>script attribute</code>" or "<code>style attribute</code>":</p>
       <ol>
@@ -3844,6 +3881,51 @@ Content-Security-Policy: connect-src http://example.com/;
   would only allow script from <code>http://example.com/</code>. Script will only load if
   it meets both policy’s criteria: in this case, the only origin that can match
   is <code>http://example.com</code>, as both policies allow it.</p>
+    <h3 class="heading settled" data-level="8.2" id="unsafe-dynamic-usage"><span class="secno">8.2. </span><span class="content"> Usage of "<code>'unsafe-dynamic'</code>" </span><a class="self-link" href="#unsafe-dynamic-usage"></a></h3>
+    <p>Whitelists are tough to get right, especially on sprawling origins like CDNs.
+  The <a href="https://github.com/cure53/XSSChallengeWiki/wiki/H5SC-Minichallenge-3:-%22Sh*t,-it%27s-CSP!%22#107-bytes">solutions
+  to Cure53’s H5SC Minichallenge 3: "Sh*t, it’s CSP!"</a> <a data-link-type="biblio" href="#biblio-h5sc3">[H5SC3]</a> are good
+  examples of the kinds of bypasses which whitelists can enable, and though CSP
+  is capable of mitigating these bypasses via extensive whitelists, those end
+  up being brittle, awkward, and difficult to implement and maintain.</p>
+    <p>The "<a data-link-type="grammar" href="#grammardef-unsafe-dynamic" id="ref-for-grammardef-unsafe-dynamic-6"><code>'unsafe-dynamic'</code></a>" source expression aims to make Content
+  Security Policy simpler to deploy for existing applications who have a high
+  degree of confidence in the scripts they load directly, but low confidence in
+  their ability to provide a reasonably secure whitelist.</p>
+    <p>If present in a <a data-link-type="dfn" href="#script-src" id="ref-for-script-src-6"><code>script-src</code></a> or <a data-link-type="dfn" href="#default-src" id="ref-for-default-src-5"><code>default-src</code></a> directive, it has
+  two main effects:</p>
+    <ol>
+     <li data-md="">
+      <p><a data-link-type="grammar" href="#grammardef-host-source" id="ref-for-grammardef-host-source-5">host-source</a> and <a data-link-type="grammar" href="#grammardef-scheme-source" id="ref-for-grammardef-scheme-source-4">scheme-source</a> expressions, as well as the "<a data-link-type="grammar" href="#grammardef-unsafe-inline" id="ref-for-grammardef-unsafe-inline-4"><code>'unsafe-inline'</code></a>" <a data-link-type="grammar" href="#grammardef-keyword-source" id="ref-for-grammardef-keyword-source-4">keyword-source</a> will be ignored when loading script.</p>
+     <li data-md="">
+      <p>Script requests which are triggered by non-<a data-link-type="dfn">parser-inserted</a> <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> elements are allowed.</p>
+    </ol>
+    <p>The first change allows you to deploy "<a data-link-type="grammar" href="#grammardef-unsafe-dynamic" id="ref-for-grammardef-unsafe-dynamic-7"><code>'unsafe-dynamic'</code></a> in a
+  backwards compatible way, without requiring user-agent sniffing: the policy <code>'unsafe-inline' https: 'nonce-abcdefg' 'unsafe-dynamic'</code> will act like <code>'unsafe-inline' https:</code> in browsers that support CSP1, <code>https: 'nonce-abcdefg'</code> in browsers that support CSP2, and <code>'nonce-abcdefg' 'unsafe-dynamic'</code> in browsers that support CSP3.</p>
+    <p>The second allows scripts which are given access to the page via nonces or
+  hashes to bring in their dependencies without adding them explicitly to the
+  page’s policy.</p>
+    <div class="example" id="example-4bdb4a8c">
+     <a class="self-link" href="#example-4bdb4a8c"></a> Suppose MegaCorp, Inc. deploys the following policy: 
+<pre><a data-link-type="dfn" href="#content-security-policy" id="ref-for-content-security-policy-7">Content-Security-Policy</a>: <a data-link-type="dfn" href="#script-src" id="ref-for-script-src-7">script-src</a> 'nonce-abcdefg' <a data-link-type="grammar" href="#grammardef-unsafe-dynamic" id="ref-for-grammardef-unsafe-dynamic-8">'unsafe-dynamic'</a>
+</pre>
+     <p>And serves the following HTML with that policy active:</p>
+<pre>...
+&lt;script src="https://cdn.example.com/script.js" nonce="abcdefg" >&lt;/script>
+...
+</pre>
+     <p>This will generate a request for <code>https://cdn.example.com/script.js</code>, which
+    will not be blocked because of the matching <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/#attr-script-nonce">nonce</a></code> attribute.</p>
+     <p>If <code>script.js</code> contains the following code:</p>
+<pre>var s = document.createElement('script');
+s.src = 'https://othercdn.not-example.net/dependency.js';
+document.head.appendChild('s');
+
+document.write('&lt;scr' + 'ipt src='/sadness.js'>&lt;/scr' + 'ipt>');
+</pre>
+     <p><code>dependency.js</code> will load, as the <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> element created by <code>createElement()</code> is not <a data-link-type="dfn">parser-inserted</a>.</p>
+     <p><code>sadness.js</code> will <em>not</em> load, however, as <code>document.write()</code> produces <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> elements which are <a data-link-type="dfn">parser-inserted</a>.</p>
+    </div>
    </section>
    <section>
     <h2 class="heading settled" data-level="9" id="implementation-considerations"><span class="secno">9. </span><span class="content">Implementation Considerations</span><a class="self-link" href="#implementation-considerations"></a></h2>
@@ -3879,7 +3961,14 @@ Content-Security-Policy: connect-src http://example.com/;
    </section>
    <section>
     <h2 class="heading settled" data-level="11" id="acknowledgements"><span class="secno">11. </span><span class="content">Acknowledgements</span><a class="self-link" href="#acknowledgements"></a></h2>
-    <p>Lots of people are awesome.</p>
+    <p>Lots of people are awesome. For instance:</p>
+    <ul>
+     <li data-md="">
+      <p>Mario and all of Cure53.</p>
+     <li data-md="">
+      <p>Artur Jank, Michele Spagnuolo, Lukas Weichselbaum, Jochen Eisinger, and the
+rest of Google’s CSP Cabal.</p>
+    </ul>
    </section>
   </main>
   <h2 class="no-ref no-num heading settled" id="conformance"><span class="content">Conformance</span><a class="self-link" href="#conformance"></a></h2>
@@ -3949,16 +4038,16 @@ Content-Security-Policy: connect-src http://example.com/;
      <li><a href="#dom-securitypolicyviolationeventinit-documenturi">dict-member for SecurityPolicyViolationEventInit</a><span>, in §5.1</span>
     </ul>
    <li>
-    effectiveDirective
-    <ul>
-     <li><a href="#dom-securitypolicyviolationevent-effectivedirective">attribute for SecurityPolicyViolationEvent</a><span>, in §5.1</span>
-     <li><a href="#dom-securitypolicyviolationeventinit-effectivedirective">dict-member for SecurityPolicyViolationEventInit</a><span>, in §5.1</span>
-    </ul>
-   <li>
     effective directive
     <ul>
      <li><a href="#violation-effective-directive">dfn for violation</a><span>, in §2.3</span>
      <li><a href="#request-effective-directive">dfn for request</a><span>, in §6.1.11.5</span>
+    </ul>
+   <li>
+    effectiveDirective
+    <ul>
+     <li><a href="#dom-securitypolicyviolationevent-effectivedirective">attribute for SecurityPolicyViolationEvent</a><span>, in §5.1</span>
+     <li><a href="#dom-securitypolicyviolationeventinit-effectivedirective">dict-member for SecurityPolicyViolationEventInit</a><span>, in §5.1</span>
     </ul>
    <li><a href="#embedding-document">embedding document</a><span>, in §4.2</span>
    <li><a href="#enforced">enforced</a><span>, in §4.2</span>
@@ -4028,14 +4117,14 @@ Content-Security-Policy: connect-src http://example.com/;
    <li><a href="#dom-securitypolicyviolationevent-securitypolicyviolationevent">SecurityPolicyViolationEvent(type, eventInitDict)</a><span>, in §5.1</span>
    <li><a href="#grammardef-self">'self'</a><span>, in §2.2.1</span>
    <li><a href="#serialized-csp">serialized CSP</a><span>, in §2.1</span>
-   <li><a href="#grammardef-serialized-directive">serialized-directive</a><span>, in §2.2</span>
    <li><a href="#serialized-directive">serialized directive</a><span>, in §2.2</span>
+   <li><a href="#grammardef-serialized-directive">serialized-directive</a><span>, in §2.2</span>
    <li><a href="#grammardef-serialized-policy">serialized-policy</a><span>, in §2.1</span>
    <li><a href="#serialized-source-list">serialized source list</a><span>, in §2.2.1</span>
    <li><a href="#grammardef-serialized-source-list">serialized-source-list</a><span>, in §2.2.1</span>
+   <li><a href="#grammardef-source-expression">source-expression</a><span>, in §2.2.1</span>
    <li><a href="#source-expression">source
   expression</a><span>, in §2.2.1</span>
-   <li><a href="#grammardef-source-expression">source-expression</a><span>, in §2.2.1</span>
    <li><a href="#violation-source-file">source file</a><span>, in §2.3</span>
    <li>
     sourceFile
@@ -4052,6 +4141,7 @@ Content-Security-Policy: connect-src http://example.com/;
      <li><a href="#dom-securitypolicyviolationeventinit-statuscode">dict-member for SecurityPolicyViolationEventInit</a><span>, in §5.1</span>
     </ul>
    <li><a href="#style-src">style-src</a><span>, in §6.1.10</span>
+   <li><a href="#grammardef-unsafe-dynamic">'unsafe-dynamic'</a><span>, in §2.2.1</span>
    <li><a href="#grammardef-unsafe-eval">'unsafe-eval'</a><span>, in §2.2.1</span>
    <li><a href="#grammardef-unsafe-inline">'unsafe-inline'</a><span>, in §2.2.1</span>
    <li><a href="#violation-url">url</a><span>, in §2.3</span>
@@ -4333,6 +4423,8 @@ Content-Security-Policy: connect-src http://example.com/;
    <dd>Mike West; Adam Barth; Daniel Veditz. <a href="http://www.w3.org/TR/CSP2/">Content Security Policy Level 2</a>. 21 July 2015. CR. URL: <a href="http://www.w3.org/TR/CSP2/">http://www.w3.org/TR/CSP2/</a>
    <dt id="biblio-eventsource">[EVENTSOURCE]
    <dd>Ian Hickson. <a href="http://www.w3.org/TR/eventsource/">Server-Sent Events</a>. 3 February 2015. REC. URL: <a href="http://www.w3.org/TR/eventsource/">http://www.w3.org/TR/eventsource/</a>
+   <dt id="biblio-h5sc3">[H5SC3]
+   <dd>Mario Heiderich. <a href="https://github.com/cure53/XSSChallengeWiki/wiki/H5SC-Minichallenge-3:-%22Sh*t,-it%27s-CSP!%22">H5SC Minichallenge 3: "Sh*t, it's CSP!"</a>. URL: <a href="https://github.com/cure53/XSSChallengeWiki/wiki/H5SC-Minichallenge-3:-%22Sh*t,-it%27s-CSP!%22">https://github.com/cure53/XSSChallengeWiki/wiki/H5SC-Minichallenge-3:-%22Sh*t,-it%27s-CSP!%22</a>
    <dt id="biblio-html-design">[HTML-DESIGN]
    <dd>Anne Van Kesteren; Maciej Stachowiak. <a href="http://www.w3.org/TR/html-design-principles/">HTML Design Principles</a>. URL: <a href="http://www.w3.org/TR/html-design-principles/">http://www.w3.org/TR/html-design-principles/</a>
    <dt id="biblio-mix">[MIX]
@@ -4387,7 +4479,6 @@ dictionary <a href="#dictdef-securitypolicyviolationeventinit">SecurityPolicyVio
   much of the risk by using the original URL of a blocked resource; there
   shouldn’t be anything in the report JSON that script can’t gather on its own
   by walking the DOM.<a href="#issue-ac8a0d14"> ↵ </a></div>
-   <div class="issue"> Should we add <a href="https://lists.w3.org/Archives/Public/public-webappsec/2016Feb/0048.html"><code>'unsafe-dynamic'</code></a>?<a href="#issue-cdec18fd"> ↵ </a></div>
    <div class="issue"> Should we allow hashes to whitelist inline event handlers? <a href="https://github.com/w3c/webappsec-csp/issues/13">&lt;https://github.com/w3c/webappsec-csp/issues/13></a><a href="#issue-c8939acb"> ↵ </a></div>
    <div class="issue"> Is this kind of thing specified anywhere? I didn’t see anything
   that looked useful in <a data-link-type="biblio" href="#biblio-ecma262">[ECMA262]</a>.<a href="#issue-c404edb5"> ↵ </a></div>
@@ -4414,6 +4505,8 @@ dictionary <a href="#dictdef-securitypolicyviolationeventinit">SecurityPolicyVio
   it to W3C’s version. <a href="https://github.com/w3c/html/issues/189">&lt;https://github.com/w3c/html/issues/189></a><a href="#issue-7105cfbe"> ↵ </a></div>
    <div class="issue"> TODO.<a href="#issue-95f2d23a"> ↵ </a></div>
    <div class="issue"> TODO.<a href="#issue-95f2d23a0"> ↵ </a></div>
+   <div class="issue"> We don’t currently have a mechanism for
+  determining whether or not a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> was triggered from a <a data-link-type="dfn">parser-inserted</a> element from within Fetch. Talk to Anne. <a href="https://github.com/w3c/webappsec-csp/issues/70">&lt;https://github.com/w3c/webappsec-csp/issues/70></a><a href="#issue-19689d44"> ↵ </a></div>
    <div class="issue"> Do something interesting to the execution context in order to lock down <code>eval()</code>, et al. I don’t think ECMA gives us any hooks here, so let’s work
   with them to put something reasonable together.<a href="#issue-2b1bf0aa"> ↵ </a></div>
    <div class="issue"> This needs to be better explained.<a href="#issue-ba1a0a35"> ↵ </a></div>

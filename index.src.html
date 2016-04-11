@@ -273,6 +273,12 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       "title": "Pixel Perfect Timing Attacks with HTML5",
       "authors": [ "Paul Stone" ],
       "publisher": "Context Information Security"
+  },
+  "H5SC3": {
+      "href": "https://github.com/cure53/XSSChallengeWiki/wiki/H5SC-Minichallenge-3:-%22Sh*t,-it%27s-CSP!%22",
+      "title": "H5SC Minichallenge 3: \"Sh*t, it's CSP!\"",
+      "authors": [ "Mario Heiderich" ],
+      "publisher": "Cure53"
   }
 }
 </pre>
@@ -391,6 +397,10 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   7.  The `report-uri` directive is deprecated in favor of the new `report-to`
       directive, which relies on [[OOB-REPORTING]] as infrastructure.
 
+  8.  The `'unsafe-dynamic'` source expression will now allow script which
+      executes on a page to load more script via non-<a>parser-inserted</a>
+      <{script}> elements. Details are in [[#unsafe-dynamic-usage]].
+
   <h3 id="open-questions">Open Questions</h3>
 
   ISSUE: Do we really want to remove `frame-src`? Though the threat model of
@@ -402,8 +412,6 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   much of the risk by using the original URL of a blocked resource; there
   shouldn't be anything in the report JSON that script can't gather on its own
   by walking the DOM.
-
-  ISSUE: Should we add <a href="https://lists.w3.org/Archives/Public/public-webappsec/2016Feb/0048.html">`'unsafe-dynamic'`</a>?
 
   ISSUE(w3c/webappsec-csp#13): Should we allow hashes to whitelist inline event handlers?
 </section>
@@ -607,7 +615,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
                   ; <a>path</a> is defined in section 3.3 of RFC 3986.
    
     ; Keywords:
-    <dfn>keyword-source</dfn> = "<dfn>'self'</dfn>" / "<dfn>'unsafe-inline'</dfn>" / "<dfn>'unsafe-eval'</dfn>" 
+    <dfn>keyword-source</dfn> = "<dfn>'self'</dfn>" / "<dfn>'unsafe-inline'</dfn>" / "<dfn>'unsafe-eval'</dfn>" / "<dfn>'unsafe-dynamic'</dfn>"
 
     ; Nonces: 'nonce-[nonce goes here]'
     <dfn>nonce-source</dfn>  = "'nonce-" <a>base64-value</a> "'"
@@ -2125,7 +2133,23 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
           directive's <a for="directive">value</a> is "`Matches`", return
           "`Allowed`".
 
-      2.  If the result of executing [[#match-url-to-source-list]] on
+      2.  If this directive's <a for="directive">value</a> contains a <a>source
+          expression</a> that is an <a>ASCII case-insensitive match</a> for
+          the "<a grammar>`'unsafe-dynamic'`</a>" <a grammar>keyword-source</a>:
+
+          1.  If the |request| was triggered by a <a>parser-inserted</a>
+              <{script}> element, return "`Blocked`".
+
+              Otherwise, return "`Allowed`".
+
+              Note: "<a grammar>`'unsafe-dynamic'`</a>" is explained in more detail
+              in [[#unsafe-dynamic-usage]].
+
+              ISSUE(w3c/webappsec-csp#70): We don't currently have a mechanism for
+              determining whether or not a <a>request</a> was triggered from a
+              <a>parser-inserted</a> element from within Fetch. Talk to Anne.
+
+      3.  If the result of executing [[#match-url-to-source-list]] on
           |request|'s <a for="request">url</a> and this directive's
           <a for="directive">value</a> is "`Does Not Match`",
           return "`Blocked`".
@@ -2145,7 +2169,11 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
           directive's <a for="directive">value</a> is "`Matches`", return
           "`Allowed`".
 
-      2.  If the result of executing [[#match-url-to-source-list]] on
+      2.  <strong>Assert</strong>: This directive's <a for="directive">value</a>
+          does not contain "<a grammar>`'unsafe-dynamic'`</a>", or |request| was
+          not triggered by a <a>parser-inserted</a> <{script}> element.
+
+      3.  If the result of executing [[#match-url-to-source-list]] on
           |response|'s <a for="response">url</a> and this directive's
           <a for="directive">value</a> is "`Does Not Match`",
           return "`Blocked`".
@@ -2157,8 +2185,15 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   Given an {{Element}} (|element|) and a string (|type|):
 
   1.  If |type| is "`script`" or "`script attribute`":
- 
-      1.  If the result of executing [[#match-element-to-source-list]] on
+
+      1.  If |list| contains a <a>source expression</a> which is an <a>ASCII
+          case-insensitive match</a> for the <a grammar>keyword-source</a>
+          "<a grammar>`'unsafe-dynamic'`</a>", return "`Blocked`".
+
+          Note: "<a grammar>`'unsafe-dynamic'`</a>" is explained in more detail
+          in [[#unsafe-dynamic-usage]].
+
+      2.  If the result of executing [[#match-element-to-source-list]] on
           |element|, this directive's <a for="directive">value</a>, and
           |type| is "`Does Not Match`", return "`Blocked`".
 
@@ -2754,6 +2789,78 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   would only allow script from `http://example.com/`. Script will only load if
   it meets both policy’s criteria: in this case, the only origin that can match
   is `http://example.com`, as both policies allow it.
+
+  <h3 id="unsafe-dynamic-usage">
+    Usage of "`'unsafe-dynamic'`"
+  </h3>
+
+  Whitelists are tough to get right, especially on sprawling origins like CDNs.
+  The <a href="https://github.com/cure53/XSSChallengeWiki/wiki/H5SC-Minichallenge-3:-%22Sh*t,-it%27s-CSP!%22#107-bytes">solutions
+  to Cure53's H5SC Minichallenge 3: "Sh*t, it's CSP!"</a> [[H5SC3]] are good
+  examples of the kinds of bypasses which whitelists can enable, and though CSP
+  is capable of mitigating these bypasses via extensive whitelists, those end
+  up being brittle, awkward, and difficult to implement and maintain.
+
+  The "<a grammar>`'unsafe-dynamic'`</a>" source expression aims to make Content
+  Security Policy simpler to deploy for existing applications who have a high
+  degree of confidence in the scripts they load directly, but low confidence in
+  their ability to provide a reasonably secure whitelist.
+
+  If present in a <a>`script-src`</a> or <a>`default-src`</a> directive, it has
+  two main effects:
+
+  1.  <a grammar>host-source</a> and <a grammar>scheme-source</a>
+      expressions, as well as the "<a grammar>`'unsafe-inline'`</a>"
+      <a grammar>keyword-source</a> will be ignored when loading script.
+
+  2.  Script requests which are triggered by non-<a>parser-inserted</a>
+      <{script}> elements are allowed.
+
+  The first change allows you to deploy "<a grammar>`'unsafe-dynamic'`</a> in a
+  backwards compatible way, without requiring user-agent sniffing: the policy
+  `'unsafe-inline' https: 'nonce-abcdefg' 'unsafe-dynamic'` will act like
+  `'unsafe-inline' https:` in browsers that support CSP1, `https:
+  'nonce-abcdefg'` in browsers that support CSP2, and `'nonce-abcdefg'
+  'unsafe-dynamic'` in browsers that support CSP3.
+
+  The second allows scripts which are given access to the page via nonces or
+  hashes to bring in their dependencies without adding them explicitly to the
+  page's policy.
+
+  <div class="example">
+    Suppose MegaCorp, Inc. deploys the following policy:
+
+    <pre>
+      <a>Content-Security-Policy</a>: <a>script-src</a> 'nonce-abcdefg' <a grammar>'unsafe-dynamic'</a>
+    </pre>
+
+    And serves the following HTML with that policy active:
+
+    <pre>
+      ...
+      &lt;script src="https://cdn.example.com/script.js" nonce="abcdefg" &gt;&lt;/script&gt;
+      ...
+    </pre>
+
+    This will generate a request for `https://cdn.example.com/script.js`, which
+    will not be blocked because of the matching <{script/nonce}> attribute.
+
+    If `script.js` contains the following code:
+
+    <pre>
+      var s = document.createElement('script');
+      s.src = 'https://othercdn.not-example.net/dependency.js';
+      document.head.appendChild('s');
+
+      document.write('&lt;scr' + 'ipt src='/sadness.js'&gt;&lt;/scr' + 'ipt&gt;');
+    </pre>
+
+    `dependency.js` will load, as the <{script}> element created by
+    `createElement()` is not <a>parser-inserted</a>.
+
+    `sadness.js` will <em>not</em> load, however, as `document.write()` produces
+    <{script}> elements which are <a>parser-inserted</a>.
+  </div>
 </section>
 
 <section>
@@ -2807,5 +2914,10 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 <section>
   <h2 id="acknowledgements">Acknowledgements</h2>
 
-  Lots of people are awesome.
+  Lots of people are awesome. For instance:
+
+  * Mario and all of Cure53.
+
+  * Artur Jank, Michele Spagnuolo, Lukas Weichselbaum, Jochen Eisinger, and the
+    rest of Google's CSP Cabal.
 </section>
