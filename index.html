@@ -1353,7 +1353,7 @@ Possible extra rowspan handling
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="http://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1 class="p-name no-ref" id="title">Content Security Policy Level 3</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-04-11">11 April 2016</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-04-14">14 April 2016</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -3289,12 +3289,11 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
   the "<a data-link-type="grammar" href="#grammardef-unsafe-dynamic" id="ref-for-grammardef-unsafe-dynamic-1"><code>'unsafe-dynamic'</code></a>" <a data-link-type="grammar" href="#grammardef-keyword-source" id="ref-for-grammardef-keyword-source-2">keyword-source</a>:</p>
         <ol>
          <li data-md="">
-          <p>If the <var>request</var> was triggered by a <a data-link-type="dfn">parser-inserted</a> <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> element, return "<code>Blocked</code>".</p>
+          <p>If the <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-parser-metadata">parser metadata</a> is
+  "<code>parser-inserted</code>", return "<code>Blocked</code>".</p>
           <p>Otherwise, return "<code>Allowed</code>".</p>
           <p class="note" role="note">Note: "<a data-link-type="grammar" href="#grammardef-unsafe-dynamic" id="ref-for-grammardef-unsafe-dynamic-2"><code>'unsafe-dynamic'</code></a>" is explained in more detail
   in <a href="#unsafe-dynamic-usage">§8.2 Usage of "'unsafe-dynamic'"</a>.</p>
-          <p class="issue" id="issue-19689d44"><a class="self-link" href="#issue-19689d44"></a> We don’t currently have a mechanism for
-  determining whether or not a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> was triggered from a <a data-link-type="dfn">parser-inserted</a> element from within Fetch. Talk to Anne. <a href="https://github.com/w3c/webappsec-csp/issues/70">&lt;https://github.com/w3c/webappsec-csp/issues/70></a></p>
         </ol>
        <li data-md="">
         <p>If the result of executing <a href="#match-url-to-source-list">§6.1.11.3 Does url match source list?</a> on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url">url</a> and this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-25">value</a> is "<code>Does Not Match</code>",
@@ -3314,8 +3313,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
   directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-26">value</a> is "<code>Matches</code>", return
   "<code>Allowed</code>".</p>
        <li data-md="">
-        <p><strong>Assert</strong>: This directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-27">value</a> does not contain "<a data-link-type="grammar" href="#grammardef-unsafe-dynamic" id="ref-for-grammardef-unsafe-dynamic-3"><code>'unsafe-dynamic'</code></a>", or <var>request</var> was
-  not triggered by a <a data-link-type="dfn">parser-inserted</a> <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> element.</p>
+        <p><strong>Assert</strong>: This directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-27">value</a> does not contain "<a data-link-type="grammar" href="#grammardef-unsafe-dynamic" id="ref-for-grammardef-unsafe-dynamic-3"><code>'unsafe-dynamic'</code></a>", or <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-parser-metadata">parser metadata</a> is not "<code>parser-inserted</code>".</p>
        <li data-md="">
         <p>If the result of executing <a href="#match-url-to-source-list">§6.1.11.3 Does url match source list?</a> on <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a> and this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-28">value</a> is "<code>Does Not Match</code>",
   return "<code>Blocked</code>".</p>
@@ -4203,6 +4201,7 @@ rest of Google’s CSP Cabal.</p>
      <li><a href="https://fetch.spec.whatwg.org/#concept-network-error">network error</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-header-parse">parse a header value</a>
+     <li><a href="https://fetch.spec.whatwg.org/#concept-request-parser-metadata">parser metadata</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-redirect-mode">redirect mode</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request">request</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-response">response</a>
@@ -4505,8 +4504,6 @@ dictionary <a href="#dictdef-securitypolicyviolationeventinit">SecurityPolicyVio
   it to W3C’s version. <a href="https://github.com/w3c/html/issues/189">&lt;https://github.com/w3c/html/issues/189></a><a href="#issue-7105cfbe"> ↵ </a></div>
    <div class="issue"> TODO.<a href="#issue-95f2d23a"> ↵ </a></div>
    <div class="issue"> TODO.<a href="#issue-95f2d23a0"> ↵ </a></div>
-   <div class="issue"> We don’t currently have a mechanism for
-  determining whether or not a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> was triggered from a <a data-link-type="dfn">parser-inserted</a> element from within Fetch. Talk to Anne. <a href="https://github.com/w3c/webappsec-csp/issues/70">&lt;https://github.com/w3c/webappsec-csp/issues/70></a><a href="#issue-19689d44"> ↵ </a></div>
    <div class="issue"> Do something interesting to the execution context in order to lock down <code>eval()</code>, et al. I don’t think ECMA gives us any hooks here, so let’s work
   with them to put something reasonable together.<a href="#issue-2b1bf0aa"> ↵ </a></div>
    <div class="issue"> This needs to be better explained.<a href="#issue-ba1a0a35"> ↵ </a></div>

@@ -79,6 +79,7 @@ spec: HTML5; urlPrefix: http://www.w3.org/TR/html5/
       text: pragma directives
       text: set the frozen base url
     urlPrefix: scripting-1.html
+      text: parser inserted
       text: prepare a script
       text: the script block's source; url: the-script-block's-source
   type: element
@@ -148,6 +149,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
       text: initiator; url: concept-request-initiator
       text: method; url:concept-request-method
       text: origin; url:concept-request-origin
+      text: parser metadata; url: concept-request-parser-metadata
       text: redirect mode; url:concept-request-redirect-mode
       text: target browsing context; url: concept-request-target-browsing-context
       text: type; url: concept-request-type
@@ -2137,17 +2139,13 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
           expression</a> that is an <a>ASCII case-insensitive match</a> for
           the "<a grammar>`'unsafe-dynamic'`</a>" <a grammar>keyword-source</a>:
 
-          1.  If the |request| was triggered by a <a>parser-inserted</a>
-              <{script}> element, return "`Blocked`".
+          1.  If the |request|'s <a for="request">parser metadata</a> is
+              "`parser-inserted`", return "`Blocked`".
 
               Otherwise, return "`Allowed`".
 
               Note: "<a grammar>`'unsafe-dynamic'`</a>" is explained in more detail
               in [[#unsafe-dynamic-usage]].
-
-              ISSUE(w3c/webappsec-csp#70): We don't currently have a mechanism for
-              determining whether or not a <a>request</a> was triggered from a
-              <a>parser-inserted</a> element from within Fetch. Talk to Anne.
 
       3.  If the result of executing [[#match-url-to-source-list]] on
           |request|'s <a for="request">url</a> and this directive's
@@ -2170,8 +2168,8 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
           "`Allowed`".
 
       2.  <strong>Assert</strong>: This directive's <a for="directive">value</a>
-          does not contain "<a grammar>`'unsafe-dynamic'`</a>", or |request| was
-          not triggered by a <a>parser-inserted</a> <{script}> element.
+          does not contain "<a grammar>`'unsafe-dynamic'`</a>", or |request|'s
+          <a for="request">parser metadata</a> is not "`parser-inserted`".
 
       3.  If the result of executing [[#match-url-to-source-list]] on
           |response|'s <a for="response">url</a> and this directive's
