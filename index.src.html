@@ -163,6 +163,7 @@ spec: MIX; urlPrefix: http://www.w3.org/TR/mixed-content/
 spec: URL; urlPrefix: https://url.spec.whatwg.org/
   type: dfn
     text: local scheme
+    text: network scheme
     text: default port
     text: IPv6 address; url: concept-ipv6
     text: percent decode
@@ -379,11 +380,14 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   2.  The `frame-src` directive, which was deprecated in CSP Level
       2, has been removed.
 
-  3.  Insecure schemes in source expressions now match their secure variants.
-      That is, `http:` is equivalent to `http: https:`, and `http://example.com`
-      to `http://example.com https://example.com`.
+  3.  Insecure schemes in source expressions now match their secure variants,
+      and WebSocket schemes now match HTTP schemes. That is, `http:` or `ws:`
+      is equivalent to `http: https:`, and `wss:` is equivalent to `https:`.
+      Similarly, `http://example.com` or `ws://example.com` is equivalent to
+      `http://example.com https://example.com`, and `wss://example.com` is
+      equivalent to `https://example.com`.
 
-      Likewise, `'self'` now matches `https` and `wss` variants of the page's
+      Likewise, `'self'` now matches `https:` and `wss:` variants of the page's
       origin, even on pages whose scheme is `http`.
 
   4.  Violation reports generated from inline script or style will now report
@@ -407,6 +411,10 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   9.  The `'unsafe-hash-attributes'` source expression will now allow event
       handlers and style attributes to match hash source expressions. Details
       in [[#unsafe-hash-attributes-usage]].
+
+  10. The <a>source expression</a> matching has been changed to require explicit whitelisting
+      of any non-<a>network scheme</a>, rather than <a>local scheme</a>, as described
+      in [[#match-url-to-source-expression]].
 
   <h3 id="open-questions">Open Questions</h3>
 
@@ -2396,8 +2404,12 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   |expression| should be resolved. "`'self'`", for instance, will have distinct
   meaning depending on that bit of context.
 
-  1.  If |expression| is the string "*", and |url|'s {{URL/scheme}} is not a
-      <a>local scheme</a>, return "`Matches`".
+  1.  If |expression| is the string "*", and |url|'s {{URL/scheme}} is a
+      <a>network scheme</a>, return "`Matches`". 
+
+      Note: This logic means that in order to allow resource from non-<a>network scheme</a>,
+      it has to be explicitly whitelisted: `default-src * data: custom-scheme-1: custom-scheme-2:`.
+      In other words, there is no semantic representation of most permissive |expression|.
 
   2.  If |expression| matches the <a grammar>`scheme-source`</a> or
       <a grammar>`host-source`</a> grammar:
@@ -2413,7 +2425,11 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
               
           2.  |expression|'s <a grammar>`scheme-part`</a> is an <a>ASCII
               case-insensitive match</a> for "`ws`" and |url|'s {{URL/scheme}}
-              is "`wss`"
+              is "`wss`", "`http`" or "`https`"
+
+          3.  |expression|'s <a grammar>`scheme-part`</a> is an <a>ASCII
+              case-insensitive match</a> for "`wss`" and |url|'s {{URL/scheme}}
+              is "`https`"
 
       2.  If |expression| matches the <a grammar>`scheme-source`</a> grammar,
           return "`Matches`".
@@ -2421,8 +2437,9 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       Note: This logic effectively means that `script-src http:` is
       equivalent to `script-src http: https:`, and
       `script-src http://example.com/` is equivalent to `script-src
-      http://example.com https://example.com`. In short, we always allow a
-      secure upgrade from an explicitly insecure expression.
+      http://example.com https://example.com`. As well as WebSocket 
+      schemes are equivalent to corresponding HTTP schemes. In short,
+      we always allow a secure upgrade from an explicitly insecure expression.
 
   3.  If |expression| matches the <a grammar>`host-source`</a> grammar:
   
