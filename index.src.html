@@ -2378,23 +2378,25 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   algorithm returns "`Matches`" if the URL matches one or more source
   expressions in |source list|, or "`Does Not Match`" otherwise:
 
-  1.  If |source list| is `null`, return "`Does Not Match`".
+  1.  If |source list| is an |null|, return "`Matches`".
 
-  2.  If |source list| contains a single item which is an <a>ASCII
+  2.  If |source list| is an empty list, return "`Does Not Match`".
+
+  3.  If |source list| contains a single item which is an <a>ASCII
       case-insensitive match</a> for the string "`'none'`", return "`Does Not
       Match`".
 
-      Note: Above two conditions imply that empty |source list| is the most
+      Note: Above conditions imply that empty |source list| is the most
       restrictive semantic representation of a <a>fetch directive</a>, and is
-      equivalent to a |source list| that consists of "`'none'`" string. It is 
-      |not| equivalent to missing directive (or it's fallback).
+      equivalent to a |source list| that consists of "`'none'`" string. 
+      It is |not| equivalent to |source list| being |null| (missing directive or it's fallback).
 
-  3.  For each |expression| in |source list|:
+  4.  For each |expression| in |source list|:
 
       1.  If [[#match-url-to-source-expression]] returns "`Matches`" when
           executed upon |url| and |expression|, return "`Matches`".
 
-  4.  Return "`Does Not Match`".
+  5.  Return "`Does Not Match`".
 
   <h5 id="match-url-to-source-expression" algorithm>
     Does |url| match |expression| in |origin| with |redirect count|?
