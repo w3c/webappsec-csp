@@ -157,6 +157,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
       text: type; url: concept-request-type
       text: url; url: concept-request-url
       text: window; url:concept-request-window
+      text: integrity metadata; url: concept-request-integrity-metadata
   type: interface
     text: Request
 spec: MIX; urlPrefix: http://www.w3.org/TR/mixed-content/
@@ -416,6 +417,11 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   10. The <a>source expression</a> matching has been changed to require explicit whitelisting
       of any non-<a>network scheme</a>, rather than <a>local scheme</a>, as described
       in [[#match-url-to-source-expression]].
+
+  11. Hash-based source expressions may now whitelist external scripts if the
+      <{script}> element that triggers the request specifies a set of integrity
+      metadata which is whitelisted by the current policy. Details in
+      [[#external-hash]].
 
   <h3 id="open-questions">Open Questions</h3>
 
@@ -2152,7 +2158,39 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
           directive's <a for="directive">value</a> is "`Matches`", return
           "`Allowed`".
 
-      2.  If this directive's <a for="directive">value</a> contains a <a>source
+      2.  If this directive's <a for="directive">value</a> contains one or more
+          <a>source expressions</a> that match the <a grammar>hash-source</a>
+          grammar, and |request|'s <a for="request">integrity metadata</a> is
+          not the empty string, then:
+
+          1.  Let |integrity sources| be the result of executing the
+              [[SRI#parse-metadata]] algorithm on |request|'s
+              <a for="request">integrity metadata</a>. [[!SRI]]
+
+          2.  Assert: |integrity sources| is not "`no metadata`".
+
+          3.  Let |bypass due to integrity match| be `true`.
+
+          3.  For each |source| in |integrity sources|:
+
+              1.  If this directive's <a for="directive">value</a> does not
+                  contain a <a>source expression</a> whose
+                  <a grammar>hash-algorithm</a> is a <a>case-sensitive</a> match
+                  for |source|'s `hash-algo` component, and whose
+                  <a grammar>base64-value</a> is a <a>case-sensitive</a> match
+                  for |source|'s `base64-value`, then set |bypass due to
+                  integrity match| to `false`.
+
+          4.  If |bypass due to integrity match| is `true`, return
+              "`Allowed`".
+
+          Note: Here, we verify only that the |request| contains a set of
+          <a for="request">integrity metadata</a> which is a subset of the
+          <a grammar>hash-source</a> <a>source expressions</a> whitelisted by
+          this directive. We rely on the browser's enforcement of Subresource
+          Integrity [[!SRI]] to block non-matching resources upon response.
+
+      3.  If this directive's <a for="directive">value</a> contains a <a>source
           expression</a> that is an <a>ASCII case-insensitive match</a> for
           the "<a grammar>`'unsafe-dynamic'`</a>" <a grammar>keyword-source</a>:
 
@@ -2164,7 +2202,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
               Note: "<a grammar>`'unsafe-dynamic'`</a>" is explained in more detail
               in [[#unsafe-dynamic-usage]].
 
-      3.  If the result of executing [[#match-url-to-source-list]] on
+      4.  If the result of executing [[#match-url-to-source-list]] on
           |request|'s <a for="request">url</a> and this directive's
           <a for="directive">value</a> is "`Does Not Match`",
           return "`Blocked`".
@@ -2863,7 +2901,11 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   1.  <a grammar>host-source</a> and <a grammar>scheme-source</a>
       expressions, as well as the "<a grammar>`'unsafe-inline'`</a>"
-      <a grammar>keyword-source</a> will be ignored when loading script.
+      and "<a grammar>`'self'`</a> <a grammar>keyword-source</a>s will be
+      ignored when loading script.
+
+      <a grammar>hash-source</a> and <a grammar>nonce-source</a> expressions
+      will be honored.
 
   2.  Script requests which are triggered by non-<a>parser-inserted</a>
       <{script}> elements are allowed.
@@ -2918,6 +2960,8 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     Usage of "`'unsafe-hash-attributes'`"
   </h3>
 
+  <em>This section is not normative.</em>
+
   Legacy websites and websites with legacy dependencies might find it difficult
   to entirely externalize event handlers. These sites could enable such handlers
   by whitelisting `'unsafe-inline'`, but that's a big hammer with a lot of
@@ -2940,6 +2984,51 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
     <pre>
       <a>Content-Security-Policy</a>: <a grammar>'unsafe-hash-attributes'</a> 'sha256-jzgBGA4UWFFmpOBq0JpdsySukE1FrEN5bUpoK8Z29fY='
+    </pre>
+  </div>
+
+  <h3 id="external-hash">
+    Whitelisting external JavaScript with hashes
+  </h3>
+
+  <em>This section is not normative.</em>
+
+  In [[CSP2]], hash <a>source expressions</a> could only whitelist inlined
+  script, but now that Subresource Integrity is widely deployed, we can expand
+  the scope to enable externalized JavaScript as well.
+
+  
+  If multiple sets of integrity metadata are specified for a <{script}>, the
+  request will match a policy's <a grammar>hash-source</a>s if and only if
+  <em>each</em> item in a <{script}>'s integrity metadata matches the policy.
+
+  <div class="example">
+    MegaCorp, Inc. wishes to whitelist two specific scripts on a page in a way
+    that ensures that the content matches their expectations. They do so by
+    setting the following policy:
+
+    <pre>
+      Content-Security-Policy: script-src 'sha256-abc123' 'sha512-321cba'
+    </pre>
+
+    In the presence of that policy, the following <{script}> elements would be
+    whitelisted because they contain only integrity metadata that matches the
+    policy:
+
+    <pre>
+      &lt;script integrity="sha256-abc123" ...&gt;&lt;/script&gt;
+      &lt;script integrity="sha512-321cba" ...&gt;&lt;/script&gt;
+      &lt;script integrity="sha256-abc123 sha512-321cba" ...&gt;&lt;/script&gt;
+    </pre>
+
+    While the following <{script}> elements would not be whitelisted because they
+    contain metadata that does not match the policy (even though other metadata
+    does match):
+
+    <pre>
+      &lt;script integrity="<b>sha384-xyz789</b>" ...&gt;&lt;/script&gt;
+      &lt;script integrity="<b>sha384-xyz789</b> sha512-321cba" ...&gt;&lt;/script&gt;
+      &lt;script integrity="sha256-abc123 <b>sha384-xyz789</b> sha512-321cba" ...&gt;&lt;/script&gt;
     </pre>
   </div>
 </section>

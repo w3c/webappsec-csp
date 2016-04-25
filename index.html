@@ -1359,7 +1359,7 @@ Possible extra rowspan handling
      <dt>This version:
      <dd><a class="u-url" href="https://w3c.github.io/webappsec-csp/">https://w3c.github.io/webappsec-csp/</a>
      <dt>Latest version:
-     <dd><a href="https://www.w3.org/TR/CSP3/">https://www.w3.org/TR/CSP3/</a>
+     <dd><a href="http://www.w3.org/TR/CSP3/">http://www.w3.org/TR/CSP3/</a>
      <dt>Previous Versions:
      <dd><a href="http://www.w3.org/TR/2016/WD-CSP3-20160126/" rel="previous">http://www.w3.org/TR/2016/WD-CSP3-20160126/</a>
      <dt>Version History:
@@ -1571,6 +1571,7 @@ of security-relevant policy decisions.</p>
       <li><a href="#multiple-policies"><span class="secno">8.1</span> <span class="content"> The effect of multiple policies </span></a>
       <li><a href="#unsafe-dynamic-usage"><span class="secno">8.2</span> <span class="content"> Usage of "<code>'unsafe-dynamic'</code>" </span></a>
       <li><a href="#unsafe-hash-attributes-usage"><span class="secno">8.3</span> <span class="content"> Usage of "<code>'unsafe-hash-attributes'</code>" </span></a>
+      <li><a href="#external-hash"><span class="secno">8.4</span> <span class="content"> Whitelisting external JavaScript with hashes </span></a>
      </ol>
     <li>
      <a href="#implementation-considerations"><span class="secno">9</span> <span class="content">Implementation Considerations</span></a>
@@ -1701,6 +1702,9 @@ of security-relevant policy decisions.</p>
       <p>The <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-1">source expression</a> matching has been changed to require explicit whitelisting
   of any non-<a data-link-type="dfn" href="https://url.spec.whatwg.org/#network-scheme">network scheme</a>, rather than <a data-link-type="dfn" href="https://url.spec.whatwg.org/#local-scheme">local scheme</a>, as described
   in <a href="#match-url-to-source-expression">§6.1.11.4 Does url match expression in origin with redirect count?</a>.</p>
+     <li data-md="">
+      <p>Hash-based source expressions may now whitelist external scripts if the <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> element that triggers the request specifies a set of integrity
+  metadata which is whitelisted by the current policy. Details in <a href="#external-hash">§8.4 Whitelisting external JavaScript with hashes</a>.</p>
     </ol>
     <h3 class="heading settled" data-level="1.4" id="open-questions"><span class="secno">1.4. </span><span class="content">Open Questions</span><a class="self-link" href="#open-questions"></a></h3>
     <p class="issue" id="issue-091030d4"><a class="self-link" href="#issue-091030d4"></a> Do we really want to remove <code>frame-src</code>? Though the threat model of
@@ -1834,7 +1838,7 @@ of security-relevant policy decisions.</p>
     Get the effective directive for request </a></span></span></dfn> / <dfn class="dfn-paneled" data-dfn-for="directive" data-dfn-type="dfn" data-lt="value" data-noexport="" id="directive-value">value<span class="dfn-panel" data-deco=""><b><a href="#directive-value">#directive-value</a></b><b>Referenced in:</b><span><a href="#ref-for-directive-value-1">2.1.1. 
     Parse a serialized CSP as disposition </a></span><span><a href="#ref-for-directive-value-2">2.2. Directives</a> <a href="#ref-for-directive-value-3">(2)</a></span><span><a href="#ref-for-directive-value-4">2.2.1. Source Lists</a></span><span><a href="#ref-for-directive-value-5">4.3.1. 
     EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm) </a> <a href="#ref-for-directive-value-6">(2)</a></span><span><a href="#ref-for-directive-value-7">5.3. 
-    Report a violation </a> <a href="#ref-for-directive-value-8">(2)</a></span><span><a href="#ref-for-directive-value-9">6.1.2.1. Algorithms</a> <a href="#ref-for-directive-value-10">(2)</a></span><span><a href="#ref-for-directive-value-11">6.1.3.1. Algorithms</a> <a href="#ref-for-directive-value-12">(2)</a></span><span><a href="#ref-for-directive-value-13">6.1.4.1. Algorithms</a> <a href="#ref-for-directive-value-14">(2)</a></span><span><a href="#ref-for-directive-value-15">6.1.5.1. Algorithms</a> <a href="#ref-for-directive-value-16">(2)</a></span><span><a href="#ref-for-directive-value-17">6.1.6.1. Algorithms</a> <a href="#ref-for-directive-value-18">(2)</a></span><span><a href="#ref-for-directive-value-19">6.1.7.1. Algorithms</a> <a href="#ref-for-directive-value-20">(2)</a></span><span><a href="#ref-for-directive-value-21">6.1.8.1. Algorithms</a> <a href="#ref-for-directive-value-22">(2)</a></span><span><a href="#ref-for-directive-value-23">6.1.9.1. Algorithms</a> <a href="#ref-for-directive-value-24">(2)</a> <a href="#ref-for-directive-value-25">(3)</a> <a href="#ref-for-directive-value-26">(4)</a> <a href="#ref-for-directive-value-27">(5)</a> <a href="#ref-for-directive-value-28">(6)</a> <a href="#ref-for-directive-value-29">(7)</a> <a href="#ref-for-directive-value-30">(8)</a></span><span><a href="#ref-for-directive-value-31">6.1.10.1. Algorithms</a> <a href="#ref-for-directive-value-32">(2)</a> <a href="#ref-for-directive-value-33">(3)</a> <a href="#ref-for-directive-value-34">(4)</a> <a href="#ref-for-directive-value-35">(5)</a></span></span></dfn> pair. The <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name-3">name</a> is a
+    Report a violation </a> <a href="#ref-for-directive-value-8">(2)</a></span><span><a href="#ref-for-directive-value-9">6.1.2.1. Algorithms</a> <a href="#ref-for-directive-value-10">(2)</a></span><span><a href="#ref-for-directive-value-11">6.1.3.1. Algorithms</a> <a href="#ref-for-directive-value-12">(2)</a></span><span><a href="#ref-for-directive-value-13">6.1.4.1. Algorithms</a> <a href="#ref-for-directive-value-14">(2)</a></span><span><a href="#ref-for-directive-value-15">6.1.5.1. Algorithms</a> <a href="#ref-for-directive-value-16">(2)</a></span><span><a href="#ref-for-directive-value-17">6.1.6.1. Algorithms</a> <a href="#ref-for-directive-value-18">(2)</a></span><span><a href="#ref-for-directive-value-19">6.1.7.1. Algorithms</a> <a href="#ref-for-directive-value-20">(2)</a></span><span><a href="#ref-for-directive-value-21">6.1.8.1. Algorithms</a> <a href="#ref-for-directive-value-22">(2)</a></span><span><a href="#ref-for-directive-value-23">6.1.9.1. Algorithms</a> <a href="#ref-for-directive-value-24">(2)</a> <a href="#ref-for-directive-value-25">(3)</a> <a href="#ref-for-directive-value-26">(4)</a> <a href="#ref-for-directive-value-27">(5)</a> <a href="#ref-for-directive-value-28">(6)</a> <a href="#ref-for-directive-value-29">(7)</a> <a href="#ref-for-directive-value-30">(8)</a> <a href="#ref-for-directive-value-31">(9)</a> <a href="#ref-for-directive-value-32">(10)</a></span><span><a href="#ref-for-directive-value-33">6.1.10.1. Algorithms</a> <a href="#ref-for-directive-value-34">(2)</a> <a href="#ref-for-directive-value-35">(3)</a> <a href="#ref-for-directive-value-36">(4)</a> <a href="#ref-for-directive-value-37">(5)</a></span></span></dfn> pair. The <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name-3">name</a> is a
   non-empty string, and the <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-2">value</a> is a set of non-empty strings. The <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-3">value</a> set MAY be empty.</p>
     <p>A <dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="serialized directive" data-noexport="" id="serialized-directive">serialized directive<span class="dfn-panel" data-deco=""><b><a href="#serialized-directive">#serialized-directive</a></b><b>Referenced in:</b><span><a href="#ref-for-serialized-directive-1">2.1. Policies</a></span></span></dfn> is an ASCII string, consisting of one or more
   whitespace-delimited tokens, and adhering to the following ABNF <a data-link-type="biblio" href="#biblio-rfc5234">[RFC5234]</a>:</p>
@@ -1891,9 +1895,10 @@ of security-relevant policy decisions.</p>
   or executed. These tokens represent one of the following types of <dfn class="dfn-paneled" data-dfn-type="dfn" data-lt="source
   expression" data-noexport="" id="source-expression">source
   expression<span class="dfn-panel" data-deco=""><b><a href="#source-expression">#source-expression</a></b><b>Referenced in:</b><span><a href="#ref-for-source-expression-1">1.3. Changes from Level 2</a></span><span><a href="#ref-for-source-expression-2">2.2.1. Source Lists</a></span><span><a href="#ref-for-source-expression-3">4.3.1. 
-    EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm) </a></span><span><a href="#ref-for-source-expression-4">6.1.9.1. Algorithms</a> <a href="#ref-for-source-expression-5">(2)</a> <a href="#ref-for-source-expression-6">(3)</a> <a href="#ref-for-source-expression-7">(4)</a></span><span><a href="#ref-for-source-expression-8">6.1.11.4. 
-    Does url match expression in origin with redirect count? </a></span><span><a href="#ref-for-source-expression-9">6.1.12.1. 
-    Does element match source list for type and source? </a></span></span></dfn>:</p>
+    EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm) </a></span><span><a href="#ref-for-source-expression-4">6.1.9.1. Algorithms</a> <a href="#ref-for-source-expression-5">(2)</a> <a href="#ref-for-source-expression-6">(3)</a> <a href="#ref-for-source-expression-7">(4)</a> <a href="#ref-for-source-expression-8">(5)</a> <a href="#ref-for-source-expression-9">(6)</a> <a href="#ref-for-source-expression-10">(7)</a></span><span><a href="#ref-for-source-expression-11">6.1.11.4. 
+    Does url match expression in origin with redirect count? </a></span><span><a href="#ref-for-source-expression-12">6.1.12.1. 
+    Does element match source list for type and source? </a></span><span><a href="#ref-for-source-expression-13">8.4. 
+    Whitelisting external JavaScript with hashes </a></span></span></dfn>:</p>
     <ol>
      <li data-md="">
       <p>Keywords such as <a data-link-type="grammar" href="#grammardef-none" id="ref-for-grammardef-none-1"><code>'none'</code></a> and <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-1"><code>'self'</code></a> (which match nothing and the current
@@ -1956,7 +1961,9 @@ of security-relevant policy decisions.</p>
     Does element match source list for type and source?
   </a></span><span><a href="#ref-for-grammardef-keyword-source-7">8.2. 
     Usage of "'unsafe-dynamic'"
-  </a></span></span></dfn> = "<dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" data-lt="&apos;self&apos;" id="grammardef-self">'self'<span class="dfn-panel" data-deco=""><b><a href="#grammardef-self">#grammardef-self</a></b><b>Referenced in:</b><span><a href="#ref-for-grammardef-self-1">2.2.1. Source Lists</a></span><span><a href="#ref-for-grammardef-self-2">6.1.3. default-src</a> <a href="#ref-for-grammardef-self-3">(2)</a> <a href="#ref-for-grammardef-self-4">(3)</a> <a href="#ref-for-grammardef-self-5">(4)</a> <a href="#ref-for-grammardef-self-6">(5)</a> <a href="#ref-for-grammardef-self-7">(6)</a> <a href="#ref-for-grammardef-self-8">(7)</a> <a href="#ref-for-grammardef-self-9">(8)</a> <a href="#ref-for-grammardef-self-10">(9)</a> <a href="#ref-for-grammardef-self-11">(10)</a> <a href="#ref-for-grammardef-self-12">(11)</a> <a href="#ref-for-grammardef-self-13">(12)</a> <a href="#ref-for-grammardef-self-14">(13)</a> <a href="#ref-for-grammardef-self-15">(14)</a> <a href="#ref-for-grammardef-self-16">(15)</a> <a href="#ref-for-grammardef-self-17">(16)</a> <a href="#ref-for-grammardef-self-18">(17)</a> <a href="#ref-for-grammardef-self-19">(18)</a> <a href="#ref-for-grammardef-self-20">(19)</a></span></span></dfn>" / "<dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" data-lt="&apos;unsafe-inline&apos;" id="grammardef-unsafe-inline">'unsafe-inline'<span class="dfn-panel" data-deco=""><b><a href="#grammardef-unsafe-inline">#grammardef-unsafe-inline</a></b><b>Referenced in:</b><span><a href="#ref-for-grammardef-unsafe-inline-1">6. 
+  </a></span></span></dfn> = "<dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" data-lt="&apos;self&apos;" id="grammardef-self">'self'<span class="dfn-panel" data-deco=""><b><a href="#grammardef-self">#grammardef-self</a></b><b>Referenced in:</b><span><a href="#ref-for-grammardef-self-1">2.2.1. Source Lists</a></span><span><a href="#ref-for-grammardef-self-2">6.1.3. default-src</a> <a href="#ref-for-grammardef-self-3">(2)</a> <a href="#ref-for-grammardef-self-4">(3)</a> <a href="#ref-for-grammardef-self-5">(4)</a> <a href="#ref-for-grammardef-self-6">(5)</a> <a href="#ref-for-grammardef-self-7">(6)</a> <a href="#ref-for-grammardef-self-8">(7)</a> <a href="#ref-for-grammardef-self-9">(8)</a> <a href="#ref-for-grammardef-self-10">(9)</a> <a href="#ref-for-grammardef-self-11">(10)</a> <a href="#ref-for-grammardef-self-12">(11)</a> <a href="#ref-for-grammardef-self-13">(12)</a> <a href="#ref-for-grammardef-self-14">(13)</a> <a href="#ref-for-grammardef-self-15">(14)</a> <a href="#ref-for-grammardef-self-16">(15)</a> <a href="#ref-for-grammardef-self-17">(16)</a> <a href="#ref-for-grammardef-self-18">(17)</a> <a href="#ref-for-grammardef-self-19">(18)</a> <a href="#ref-for-grammardef-self-20">(19)</a></span><span><a href="#ref-for-grammardef-self-21">8.2. 
+    Usage of "'unsafe-dynamic'"
+  </a></span></span></dfn>" / "<dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" data-lt="&apos;unsafe-inline&apos;" id="grammardef-unsafe-inline">'unsafe-inline'<span class="dfn-panel" data-deco=""><b><a href="#grammardef-unsafe-inline">#grammardef-unsafe-inline</a></b><b>Referenced in:</b><span><a href="#ref-for-grammardef-unsafe-inline-1">6. 
     Content Security Policy Directives
   </a></span><span><a href="#ref-for-grammardef-unsafe-inline-2">7.1. Nonce Reuse</a> <a href="#ref-for-grammardef-unsafe-inline-3">(2)</a></span><span><a href="#ref-for-grammardef-unsafe-inline-4">8.2. 
     Usage of "'unsafe-dynamic'"
@@ -1975,20 +1982,26 @@ of security-relevant policy decisions.</p>
     Does nonce match source list?
   </a></span><span><a href="#ref-for-grammardef-nonce-source-5">6.1.12.1. 
     Does element match source list for type and source?
-  </a> <a href="#ref-for-grammardef-nonce-source-6">(2)</a></span><span><a href="#ref-for-grammardef-nonce-source-7">7.1. Nonce Reuse</a></span></span></dfn>  = "'nonce-" <a data-link-type="grammar" href="#grammardef-base64-value" id="ref-for-grammardef-base64-value-1">base64-value</a> "'"
-<dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" data-lt="base64-value" id="grammardef-base64-value">base64-value<span class="dfn-panel" data-deco=""><b><a href="#grammardef-base64-value">#grammardef-base64-value</a></b><b>Referenced in:</b><span><a href="#ref-for-grammardef-base64-value-1">2.2.1. Source Lists</a> <a href="#ref-for-grammardef-base64-value-2">(2)</a></span><span><a href="#ref-for-grammardef-base64-value-3">6.1.11.2. 
+  </a> <a href="#ref-for-grammardef-nonce-source-6">(2)</a></span><span><a href="#ref-for-grammardef-nonce-source-7">7.1. Nonce Reuse</a></span><span><a href="#ref-for-grammardef-nonce-source-8">8.2. 
+    Usage of "'unsafe-dynamic'"
+  </a></span></span></dfn>  = "'nonce-" <a data-link-type="grammar" href="#grammardef-base64-value" id="ref-for-grammardef-base64-value-1">base64-value</a> "'"
+<dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" data-lt="base64-value" id="grammardef-base64-value">base64-value<span class="dfn-panel" data-deco=""><b><a href="#grammardef-base64-value">#grammardef-base64-value</a></b><b>Referenced in:</b><span><a href="#ref-for-grammardef-base64-value-1">2.2.1. Source Lists</a> <a href="#ref-for-grammardef-base64-value-2">(2)</a></span><span><a href="#ref-for-grammardef-base64-value-3">6.1.9.1. Algorithms</a></span><span><a href="#ref-for-grammardef-base64-value-4">6.1.11.2. 
     Does nonce match source list?
-  </a></span><span><a href="#ref-for-grammardef-base64-value-4">6.1.12.1. 
+  </a></span><span><a href="#ref-for-grammardef-base64-value-5">6.1.12.1. 
     Does element match source list for type and source?
-  </a> <a href="#ref-for-grammardef-base64-value-5">(2)</a></span></span></dfn>  = 1*( <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc5234#appendix-B.1">ALPHA</a> / <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc5234#appendix-B.1">DIGIT</a> / "+" / "/" / "-" / "_" )*2( "=" ) 
+  </a> <a href="#ref-for-grammardef-base64-value-6">(2)</a></span></span></dfn>  = 1*( <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc5234#appendix-B.1">ALPHA</a> / <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc5234#appendix-B.1">DIGIT</a> / "+" / "/" / "-" / "_" )*2( "=" ) 
 
 ; Digests: 'sha256-[digest goes here]'
-<dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" data-lt="hash-source" id="grammardef-hash-source">hash-source<span class="dfn-panel" data-deco=""><b><a href="#grammardef-hash-source">#grammardef-hash-source</a></b><b>Referenced in:</b><span><a href="#ref-for-grammardef-hash-source-1">2.2.1. Source Lists</a></span><span><a href="#ref-for-grammardef-hash-source-2">6.1.9. script-src</a></span><span><a href="#ref-for-grammardef-hash-source-3">6.1.10. style-src</a></span><span><a href="#ref-for-grammardef-hash-source-4">6.1.12.1. 
+<dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" data-lt="hash-source" id="grammardef-hash-source">hash-source<span class="dfn-panel" data-deco=""><b><a href="#grammardef-hash-source">#grammardef-hash-source</a></b><b>Referenced in:</b><span><a href="#ref-for-grammardef-hash-source-1">2.2.1. Source Lists</a></span><span><a href="#ref-for-grammardef-hash-source-2">6.1.9. script-src</a></span><span><a href="#ref-for-grammardef-hash-source-3">6.1.9.1. Algorithms</a> <a href="#ref-for-grammardef-hash-source-4">(2)</a></span><span><a href="#ref-for-grammardef-hash-source-5">6.1.10. style-src</a></span><span><a href="#ref-for-grammardef-hash-source-6">6.1.12.1. 
     Does element match source list for type and source?
-  </a> <a href="#ref-for-grammardef-hash-source-5">(2)</a></span></span></dfn>    = "'" <a data-link-type="grammar" href="#grammardef-hash-algorithm" id="ref-for-grammardef-hash-algorithm-1">hash-algorithm</a> "-" <a data-link-type="grammar" href="#grammardef-base64-value" id="ref-for-grammardef-base64-value-2">base64-value</a> "'"
-<dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" data-lt="hash-algorithm" id="grammardef-hash-algorithm">hash-algorithm<span class="dfn-panel" data-deco=""><b><a href="#grammardef-hash-algorithm">#grammardef-hash-algorithm</a></b><b>Referenced in:</b><span><a href="#ref-for-grammardef-hash-algorithm-1">2.2.1. Source Lists</a></span><span><a href="#ref-for-grammardef-hash-algorithm-2">6.1.12.1. 
+  </a> <a href="#ref-for-grammardef-hash-source-7">(2)</a></span><span><a href="#ref-for-grammardef-hash-source-8">8.2. 
+    Usage of "'unsafe-dynamic'"
+  </a></span><span><a href="#ref-for-grammardef-hash-source-9">8.4. 
+    Whitelisting external JavaScript with hashes
+  </a></span></span></dfn>    = "'" <a data-link-type="grammar" href="#grammardef-hash-algorithm" id="ref-for-grammardef-hash-algorithm-1">hash-algorithm</a> "-" <a data-link-type="grammar" href="#grammardef-base64-value" id="ref-for-grammardef-base64-value-2">base64-value</a> "'"
+<dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" data-lt="hash-algorithm" id="grammardef-hash-algorithm">hash-algorithm<span class="dfn-panel" data-deco=""><b><a href="#grammardef-hash-algorithm">#grammardef-hash-algorithm</a></b><b>Referenced in:</b><span><a href="#ref-for-grammardef-hash-algorithm-1">2.2.1. Source Lists</a></span><span><a href="#ref-for-grammardef-hash-algorithm-2">6.1.9.1. Algorithms</a></span><span><a href="#ref-for-grammardef-hash-algorithm-3">6.1.12.1. 
     Does element match source list for type and source?
-  </a> <a href="#ref-for-grammardef-hash-algorithm-3">(2)</a> <a href="#ref-for-grammardef-hash-algorithm-4">(3)</a></span></span></dfn> = "sha256" / "sha384" / "sha512"
+  </a> <a href="#ref-for-grammardef-hash-algorithm-4">(2)</a> <a href="#ref-for-grammardef-hash-algorithm-5">(3)</a></span></span></dfn> = "sha256" / "sha384" / "sha512"
 </pre>
     <p>The <a data-link-type="grammar" href="#grammardef-host-char" id="ref-for-grammardef-host-char-3">host-char</a> production intentionally contains only ASCII
   characters; internationalized domain names cannot be entered directly as part
@@ -3307,7 +3320,34 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
   directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-23">value</a> is "<code>Matches</code>", return
   "<code>Allowed</code>".</p>
        <li data-md="">
-        <p>If this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-24">value</a> contains a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-4">source
+        <p>If this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-24">value</a> contains one or more <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-4">source expressions</a> that match the <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source-3">hash-source</a> grammar, and <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-integrity-metadata">integrity metadata</a> is
+  not the empty string, then:</p>
+        <ol>
+         <li data-md="">
+          <p>Let <var>integrity sources</var> be the result of executing the <a href="https://w3c.github.io/webappsec-subresource-integrity/#parse-metadata">Subresource Integrity §parse-metadata</a> algorithm on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-integrity-metadata">integrity metadata</a>. <a data-link-type="biblio" href="#biblio-sri">[SRI]</a></p>
+         <li data-md="">
+          <p>Assert: <var>integrity sources</var> is not "<code>no metadata</code>".</p>
+         <li data-md="">
+          <p>Let <var>bypass due to integrity match</var> be <code>true</code>.</p>
+         <li data-md="">
+          <p>For each <var>source</var> in <var>integrity sources</var>:</p>
+          <ol>
+           <li data-md="">
+            <p>If this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-25">value</a> does not
+  contain a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-5">source expression</a> whose <a data-link-type="grammar" href="#grammardef-hash-algorithm" id="ref-for-grammardef-hash-algorithm-2">hash-algorithm</a> is a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#case-sensitive">case-sensitive</a> match
+  for <var>source</var>’s <code>hash-algo</code> component, and whose <a data-link-type="grammar" href="#grammardef-base64-value" id="ref-for-grammardef-base64-value-3">base64-value</a> is a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#case-sensitive">case-sensitive</a> match
+  for <var>source</var>’s <code>base64-value</code>, then set <var>bypass due to
+  integrity match</var> to <code>false</code>.</p>
+          </ol>
+         <li data-md="">
+          <p>If <var>bypass due to integrity match</var> is <code>true</code>, return
+  "<code>Allowed</code>".</p>
+        </ol>
+        <p class="note" role="note">Note: Here, we verify only that the <var>request</var> contains a set of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-integrity-metadata">integrity metadata</a> which is a subset of the <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source-4">hash-source</a> <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-6">source expressions</a> whitelisted by
+  this directive. We rely on the browser’s enforcement of Subresource
+  Integrity <a data-link-type="biblio" href="#biblio-sri">[SRI]</a> to block non-matching resources upon response.</p>
+       <li data-md="">
+        <p>If this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-26">value</a> contains a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-7">source
   expression</a> that is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for
   the "<a data-link-type="grammar" href="#grammardef-unsafe-dynamic" id="ref-for-grammardef-unsafe-dynamic-1"><code>'unsafe-dynamic'</code></a>" <a data-link-type="grammar" href="#grammardef-keyword-source" id="ref-for-grammardef-keyword-source-2">keyword-source</a>:</p>
         <ol>
@@ -3319,7 +3359,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
   in <a href="#unsafe-dynamic-usage">§8.2 Usage of "'unsafe-dynamic'"</a>.</p>
         </ol>
        <li data-md="">
-        <p>If the result of executing <a href="#match-url-to-source-list">§6.1.11.3 Does url match source list?</a> on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url">url</a> and this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-25">value</a> is "<code>Does Not Match</code>",
+        <p>If the result of executing <a href="#match-url-to-source-list">§6.1.11.3 Does url match source list?</a> on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url">url</a> and this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-27">value</a> is "<code>Does Not Match</code>",
   return "<code>Blocked</code>".</p>
       </ol>
      <li data-md="">
@@ -3333,12 +3373,12 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <ol>
        <li data-md="">
         <p>If the result of executing <a href="#match-nonce-to-source-list">§6.1.11.2 Does nonce match source list?</a> on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-nonce-metadata">cryptographic nonce metadata</a> and this
-  directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-26">value</a> is "<code>Matches</code>", return
+  directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-28">value</a> is "<code>Matches</code>", return
   "<code>Allowed</code>".</p>
        <li data-md="">
-        <p><strong>Assert</strong>: This directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-27">value</a> does not contain "<a data-link-type="grammar" href="#grammardef-unsafe-dynamic" id="ref-for-grammardef-unsafe-dynamic-3"><code>'unsafe-dynamic'</code></a>", or <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-parser-metadata">parser metadata</a> is not "<code>parser-inserted</code>".</p>
+        <p><strong>Assert</strong>: This directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-29">value</a> does not contain "<a data-link-type="grammar" href="#grammardef-unsafe-dynamic" id="ref-for-grammardef-unsafe-dynamic-3"><code>'unsafe-dynamic'</code></a>", or <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-parser-metadata">parser metadata</a> is not "<code>parser-inserted</code>".</p>
        <li data-md="">
-        <p>If the result of executing <a href="#match-url-to-source-list">§6.1.11.3 Does url match source list?</a> on <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a> and this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-28">value</a> is "<code>Does Not Match</code>",
+        <p>If the result of executing <a href="#match-url-to-source-list">§6.1.11.3 Does url match source list?</a> on <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a> and this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-30">value</a> is "<code>Does Not Match</code>",
   return "<code>Blocked</code>".</p>
       </ol>
      <li data-md="">
@@ -3351,22 +3391,22 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <p>If <var>type</var> is "<code>script attribute</code>":</p>
       <ol>
        <li data-md="">
-        <p>If <var>list</var> contains a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-5">source expression</a> which is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII
-  case-insensitive match</a> for the <a data-link-type="grammar" href="#grammardef-keyword-source" id="ref-for-grammardef-keyword-source-3">keyword-source</a> "<a data-link-type="grammar" href="#grammardef-unsafe-dynamic" id="ref-for-grammardef-unsafe-dynamic-4"><code>'unsafe-dynamic'</code></a>", and does not contain a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-6">source expression</a> which is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive
+        <p>If <var>list</var> contains a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-8">source expression</a> which is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII
+  case-insensitive match</a> for the <a data-link-type="grammar" href="#grammardef-keyword-source" id="ref-for-grammardef-keyword-source-3">keyword-source</a> "<a data-link-type="grammar" href="#grammardef-unsafe-dynamic" id="ref-for-grammardef-unsafe-dynamic-4"><code>'unsafe-dynamic'</code></a>", and does not contain a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-9">source expression</a> which is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive
   match</a> for the <a data-link-type="grammar" href="#grammardef-keyword-source" id="ref-for-grammardef-keyword-source-4">keyword-source</a> "<a data-link-type="grammar" href="#grammardef-unsafe-hash-attributes" id="ref-for-grammardef-unsafe-hash-attributes-1"><code>'unsafe-hash-attributes'</code></a>", return "<code>Blocked</code>".</p>
        <li data-md="">
-        <p>If the result of executing <a href="#match-element-to-source-list">§6.1.12.1 Does element match source list for type and source?</a> on <var>element</var>, this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-29">value</a>, and <var>type</var> is "<code>Does Not Match</code>", return "<code>Blocked</code>".</p>
+        <p>If the result of executing <a href="#match-element-to-source-list">§6.1.12.1 Does element match source list for type and source?</a> on <var>element</var>, this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-31">value</a>, and <var>type</var> is "<code>Does Not Match</code>", return "<code>Blocked</code>".</p>
       </ol>
      <li data-md="">
       <p>If <var>type</var> is "<code>script</code>":</p>
       <ol>
        <li data-md="">
-        <p>If <var>list</var> contains a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-7">source expression</a> which is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII
+        <p>If <var>list</var> contains a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-10">source expression</a> which is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII
   case-insensitive match</a> for the <a data-link-type="grammar" href="#grammardef-keyword-source" id="ref-for-grammardef-keyword-source-5">keyword-source</a> "<a data-link-type="grammar" href="#grammardef-unsafe-dynamic" id="ref-for-grammardef-unsafe-dynamic-5"><code>'unsafe-dynamic'</code></a>", return "<code>Blocked</code>".</p>
         <p class="note" role="note">Note: "<a data-link-type="grammar" href="#grammardef-unsafe-dynamic" id="ref-for-grammardef-unsafe-dynamic-6"><code>'unsafe-dynamic'</code></a>" is explained in more detail
   in <a href="#unsafe-dynamic-usage">§8.2 Usage of "'unsafe-dynamic'"</a>.</p>
        <li data-md="">
-        <p>If the result of executing <a href="#match-element-to-source-list">§6.1.12.1 Does element match source list for type and source?</a> on <var>element</var>, this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-30">value</a>, and <var>type</var> is "<code>Does Not Match</code>", return "<code>Blocked</code>".</p>
+        <p>If the result of executing <a href="#match-element-to-source-list">§6.1.12.1 Does element match source list for type and source?</a> on <var>element</var>, this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-32">value</a>, and <var>type</var> is "<code>Does Not Match</code>", return "<code>Blocked</code>".</p>
       </ol>
      <li data-md="">
       <p>Return "<code>Allowed</code>".</p>
@@ -3399,7 +3439,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <p>Inline <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-style-element">style</a></code> blocks MUST pass through <a href="#should-block-inline">§4.2.3 Should element’s inline type behavior be blocked by Content Security Policy?</a>. The
   styles will be blocked unless every policy allows inline style, either
   implicitly by not specifying a <code>script-src</code> (or <code>default-src</code>) directive,
-  or explicitly, by whitelisting "<code>unsafe-inline</code>", a <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source-3">nonce-source</a> or a <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source-3">hash-source</a> that matches
+  or explicitly, by whitelisting "<code>unsafe-inline</code>", a <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source-3">nonce-source</a> or a <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source-5">hash-source</a> that matches
   the inline block.</p>
      <li data-md="">
       <p>The following CSS algorithms are gated on the <code>unsafe-eval</code> source
@@ -3426,10 +3466,10 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <ol>
        <li data-md="">
         <p>If the result of executing <a href="#match-nonce-to-source-list">§6.1.11.2 Does nonce match source list?</a> on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-nonce-metadata">cryptographic nonce metadata</a> and this
-  directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-31">value</a> is "<code>Matches</code>", return
+  directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-33">value</a> is "<code>Matches</code>", return
   "<code>Allowed</code>".</p>
        <li data-md="">
-        <p>If the result of executing <a href="#match-url-to-source-list">§6.1.11.3 Does url match source list?</a> on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url">url</a> and this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-32">value</a> is "<code>Does Not Match</code>",
+        <p>If the result of executing <a href="#match-url-to-source-list">§6.1.11.3 Does url match source list?</a> on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url">url</a> and this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-34">value</a> is "<code>Does Not Match</code>",
   return "<code>Blocked</code>".</p>
       </ol>
      <li data-md="">
@@ -3443,10 +3483,10 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <ol>
        <li data-md="">
         <p>If the result of executing <a href="#match-nonce-to-source-list">§6.1.11.2 Does nonce match source list?</a> on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-nonce-metadata">cryptographic nonce metadata</a> and this
-  directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-33">value</a> is "<code>Matches</code>", return
+  directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-35">value</a> is "<code>Matches</code>", return
   "<code>Allowed</code>".</p>
        <li data-md="">
-        <p>If the result of executing <a href="#match-url-to-source-list">§6.1.11.3 Does url match source list?</a> on <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a> and this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-34">value</a> is "<code>Does Not Match</code>",
+        <p>If the result of executing <a href="#match-url-to-source-list">§6.1.11.3 Does url match source list?</a> on <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a> and this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-36">value</a> is "<code>Does Not Match</code>",
   return "<code>Blocked</code>".</p>
       </ol>
      <li data-md="">
@@ -3459,7 +3499,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <p>If <var>type</var> is "<code>style</code>" or "<code>style attribute</code>":</p>
       <ol>
        <li data-md="">
-        <p>If the result of executing <a href="#match-element-to-source-list">§6.1.12.1 Does element match source list for type and source?</a> on <var>element</var>, this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-35">value</a>, <var>type</var>,
+        <p>If the result of executing <a href="#match-element-to-source-list">§6.1.12.1 Does element match source list for type and source?</a> on <var>element</var>, this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-37">value</a>, <var>type</var>,
   and <var>source</var>, is "<code>Does Not Match</code>", return "<code>Blocked</code>".</p>
       </ol>
      <li data-md="">
@@ -3501,7 +3541,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <ol>
        <li data-md="">
         <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source-4"><code>nonce-source</code></a> grammar,
-  and <var>nonce</var> is a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#case-sensitive">case-sensitive</a> match for <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-base64-value" id="ref-for-grammardef-base64-value-3"><code>base64-value</code></a> part, return "<code>Matches</code>".</p>
+  and <var>nonce</var> is a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#case-sensitive">case-sensitive</a> match for <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-base64-value" id="ref-for-grammardef-base64-value-4"><code>base64-value</code></a> part, return "<code>Matches</code>".</p>
       </ol>
      <li data-md="">
       <p>Return "<code>Does Not Match</code>".</p>
@@ -3527,7 +3567,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <p>Return "<code>Does Not Match</code>".</p>
     </ol>
     <h5 class="heading settled" data-algorithm="Does url match expression in origin with redirect count?" data-level="6.1.11.4" id="match-url-to-source-expression"><span class="secno">6.1.11.4. </span><span class="content"> Does <var>url</var> match <var>expression</var> in <var>origin</var> with <var>redirect count</var>? </span><a class="self-link" href="#match-url-to-source-expression"></a></h5>
-    <p>Given a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url">URL</a></code> (<var>url</var>), a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-8">source expression</a> (<var>expression</var>), an <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6454#section-3.2">origin</a> (<var>origin</var>), and a number (<var>redirect count</var>), this algorithm
+    <p>Given a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url">URL</a></code> (<var>url</var>), a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-11">source expression</a> (<var>expression</var>), an <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6454#section-3.2">origin</a> (<var>origin</var>), and a number (<var>redirect count</var>), this algorithm
   returns "<code>Matches</code>" if <var>url</var> matches <var>expression</var>, and "<code>Does Not Match</code>"
   otherwise.</p>
     <p class="note" role="note">Note: <var>origin</var> is the <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc6454#section-3.2">origin</a> of the resource relative to which the <var>expression</var> should be resolved. "<code>'self'</code>", for instance, will have distinct
@@ -3784,13 +3824,13 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <p>For each <var>expression</var> in <var>list</var>:</p>
       <ol>
        <li data-md="">
-        <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source-5"><code>nonce-source</code></a> or <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source-4"><code>hash-source</code></a> grammar, set <var>contains nonce or hash</var> to <code>true</code>.</p>
+        <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source-5"><code>nonce-source</code></a> or <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source-6"><code>hash-source</code></a> grammar, set <var>contains nonce or hash</var> to <code>true</code>.</p>
        <li data-md="">
         <p>If <var>expression</var> is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for the <a data-link-type="grammar" href="#grammardef-keyword-source" id="ref-for-grammardef-keyword-source-6"><code>keyword-source</code></a> "<a data-link-type="grammar" href="#grammardef-unsafe-hash-attributes" id="ref-for-grammardef-unsafe-hash-attributes-2"><code>'unsafe-hash-attributes'</code></a>", set <var>hashes match
   attributes</var> to <code>true</code>.</p>
       </ol>
      <li data-md="">
-      <p>If <var>contains nonce or hash</var> is <code>false</code>, and <var>list</var> contains a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-9">source expression</a> which is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for the string "<code>unsafe-inline</code>", then return "<code>Matches</code>".</p>
+      <p>If <var>contains nonce or hash</var> is <code>false</code>, and <var>list</var> contains a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-12">source expression</a> which is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for the string "<code>unsafe-inline</code>", then return "<code>Matches</code>".</p>
      <li data-md="">
       <p>If <var>type</var> is "<code>script</code>" or "<code>style</code>":</p>
       <ol>
@@ -3799,7 +3839,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
         <ol>
          <li data-md="">
           <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source-6"><code>nonce-source</code></a> grammar,
-  and <var>element</var> has a <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/#attr-script-nonce">nonce</a></code> attribute whose value is a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#case-sensitive">case-sensitive</a> match for <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-base64-value" id="ref-for-grammardef-base64-value-4"><code>base64-value</code></a> part, return "<code>Matches</code>".</p>
+  and <var>element</var> has a <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/#attr-script-nonce">nonce</a></code> attribute whose value is a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#case-sensitive">case-sensitive</a> match for <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-base64-value" id="ref-for-grammardef-base64-value-5"><code>base64-value</code></a> part, return "<code>Matches</code>".</p>
         </ol>
       </ol>
       <p class="note" role="note">Note: Nonces only apply to inline <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> and inline <code><a data-link-type="element" href="http://www.w3.org/TR/html5/document-metadata.html#the-style-element">style</a></code>, not to
@@ -3811,16 +3851,16 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
         <p>For each <var>expression</var> in <var>list</var>:</p>
         <ol>
          <li data-md="">
-          <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source-5"><code>hash-source</code></a> grammar:</p>
+          <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source-7"><code>hash-source</code></a> grammar:</p>
           <ol>
            <li data-md="">
             <p>Let <var>algorithm</var> be <code>null</code>.</p>
            <li data-md="">
-            <p>If <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-hash-algorithm" id="ref-for-grammardef-hash-algorithm-2"><code>hash-algorithm</code></a> part is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for "sha256", set <var>algorithm</var> to <a data-link-type="dfn" href="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf#">SHA-256</a>.</p>
+            <p>If <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-hash-algorithm" id="ref-for-grammardef-hash-algorithm-3"><code>hash-algorithm</code></a> part is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for "sha256", set <var>algorithm</var> to <a data-link-type="dfn" href="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf#">SHA-256</a>.</p>
            <li data-md="">
-            <p>If <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-hash-algorithm" id="ref-for-grammardef-hash-algorithm-3"><code>hash-algorithm</code></a> part is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for "sha384", set <var>algorithm</var> to <a data-link-type="dfn" href="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf#">SHA-384</a>.</p>
+            <p>If <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-hash-algorithm" id="ref-for-grammardef-hash-algorithm-4"><code>hash-algorithm</code></a> part is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for "sha384", set <var>algorithm</var> to <a data-link-type="dfn" href="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf#">SHA-384</a>.</p>
            <li data-md="">
-            <p>If <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-hash-algorithm" id="ref-for-grammardef-hash-algorithm-4"><code>hash-algorithm</code></a> part is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for "sha512", set <var>algorithm</var> to <a data-link-type="dfn" href="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf#">SHA-512</a>.</p>
+            <p>If <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-hash-algorithm" id="ref-for-grammardef-hash-algorithm-5"><code>hash-algorithm</code></a> part is an <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for "sha512", set <var>algorithm</var> to <a data-link-type="dfn" href="http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf#">SHA-512</a>.</p>
            <li data-md="">
             <p>If <var>algorithm</var> is not <code>null</code>:</p>
             <ol>
@@ -3828,7 +3868,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
               <p>Let <var>actual</var> be the result of <a data-link-type="dfn" href="https://tools.ietf.org/html/rfc4648#section-4">base64 encoding</a> the
   result of applying <var>algorithm</var> to <var>source</var>.</p>
              <li data-md="">
-              <p>If <var>actual</var> is a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#case-sensitive">case-sensitive</a> match for <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-base64-value" id="ref-for-grammardef-base64-value-5"><code>base64-value</code></a> part, return
+              <p>If <var>actual</var> is a <a data-link-type="dfn" href="http://www.w3.org/TR/html5/infrastructure.html#case-sensitive">case-sensitive</a> match for <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-base64-value" id="ref-for-grammardef-base64-value-6"><code>base64-value</code></a> part, return
   "<code>Matches</code>".</p>
             </ol>
           </ol>
@@ -3952,7 +3992,11 @@ Content-Security-Policy: connect-src http://example.com/;
   two main effects:</p>
     <ol>
      <li data-md="">
-      <p><a data-link-type="grammar" href="#grammardef-host-source" id="ref-for-grammardef-host-source-5">host-source</a> and <a data-link-type="grammar" href="#grammardef-scheme-source" id="ref-for-grammardef-scheme-source-4">scheme-source</a> expressions, as well as the "<a data-link-type="grammar" href="#grammardef-unsafe-inline" id="ref-for-grammardef-unsafe-inline-4"><code>'unsafe-inline'</code></a>" <a data-link-type="grammar" href="#grammardef-keyword-source" id="ref-for-grammardef-keyword-source-7">keyword-source</a> will be ignored when loading script.</p>
+      <p><a data-link-type="grammar" href="#grammardef-host-source" id="ref-for-grammardef-host-source-5">host-source</a> and <a data-link-type="grammar" href="#grammardef-scheme-source" id="ref-for-grammardef-scheme-source-4">scheme-source</a> expressions, as well as the "<a data-link-type="grammar" href="#grammardef-unsafe-inline" id="ref-for-grammardef-unsafe-inline-4"><code>'unsafe-inline'</code></a>"
+  and "<a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-21"><code>'self'</code></a> <a data-link-type="grammar" href="#grammardef-keyword-source" id="ref-for-grammardef-keyword-source-7">keyword-source</a>s will be
+  ignored when loading script.</p>
+      <p><a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source-8">hash-source</a> and <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source-8">nonce-source</a> expressions
+  will be honored.</p>
      <li data-md="">
       <p>Script requests which are triggered by non-<a data-link-type="dfn" href="http://www.w3.org/TR/html5/scripting-1.html#parser-inserted">parser-inserted</a> <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> elements are allowed.</p>
     </ol>
@@ -3983,6 +4027,7 @@ document.write('&lt;scr' + 'ipt src='/sadness.js'>&lt;/scr' + 'ipt>');
      <p><code>sadness.js</code> will <em>not</em> load, however, as <code>document.write()</code> produces <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> elements which are <a data-link-type="dfn" href="http://www.w3.org/TR/html5/scripting-1.html#parser-inserted">parser-inserted</a>.</p>
     </div>
     <h3 class="heading settled" data-level="8.3" id="unsafe-hash-attributes-usage"><span class="secno">8.3. </span><span class="content"> Usage of "<code>'unsafe-hash-attributes'</code>" </span><a class="self-link" href="#unsafe-hash-attributes-usage"></a></h3>
+    <p><em>This section is not normative.</em></p>
     <p>Legacy websites and websites with legacy dependencies might find it difficult
   to entirely externalize event handlers. These sites could enable such handlers
   by whitelisting <code>'unsafe-inline'</code>, but that’s a big hammer with a lot of
@@ -3998,6 +4043,34 @@ document.write('&lt;scr' + 'ipt src='/sadness.js'>&lt;/scr' + 'ipt>');
      <p>Rather than whitelisting "<code>'unsafe-inline'</code>", they decide to use
     "<code>'unsafe-hash-attributes'</code>" along with a hash source expression, as follows:</p>
 <pre><a data-link-type="dfn" href="#header-content-security-policy" id="ref-for-header-content-security-policy-8">Content-Security-Policy</a>: <a data-link-type="grammar" href="#grammardef-unsafe-hash-attributes" id="ref-for-grammardef-unsafe-hash-attributes-5">'unsafe-hash-attributes'</a> 'sha256-jzgBGA4UWFFmpOBq0JpdsySukE1FrEN5bUpoK8Z29fY='
+</pre>
+    </div>
+    <h3 class="heading settled" data-level="8.4" id="external-hash"><span class="secno">8.4. </span><span class="content"> Whitelisting external JavaScript with hashes </span><a class="self-link" href="#external-hash"></a></h3>
+    <p><em>This section is not normative.</em></p>
+    <p>In <a data-link-type="biblio" href="#biblio-csp2">[CSP2]</a>, hash <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-13">source expressions</a> could only whitelist inlined
+  script, but now that Subresource Integrity is widely deployed, we can expand
+  the scope to enable externalized JavaScript as well.</p>
+    <p>If multiple sets of integrity metadata are specified for a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code>, the
+  request will match a policy’s <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source-9">hash-source</a>s if and only if <em>each</em> item in a <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code>'s integrity metadata matches the policy.</p>
+    <div class="example" id="example-8e55aae2">
+     <a class="self-link" href="#example-8e55aae2"></a> MegaCorp, Inc. wishes to whitelist two specific scripts on a page in a way
+    that ensures that the content matches their expectations. They do so by
+    setting the following policy: 
+<pre>Content-Security-Policy: script-src 'sha256-abc123' 'sha512-321cba'
+</pre>
+     <p>In the presence of that policy, the following <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> elements would be
+    whitelisted because they contain only integrity metadata that matches the
+    policy:</p>
+<pre>&lt;script integrity="sha256-abc123" ...>&lt;/script>
+&lt;script integrity="sha512-321cba" ...>&lt;/script>
+&lt;script integrity="sha256-abc123 sha512-321cba" ...>&lt;/script>
+</pre>
+     <p>While the following <code><a data-link-type="element" href="http://www.w3.org/TR/html5/scripting-1.html#the-script-element">script</a></code> elements would not be whitelisted because they
+    contain metadata that does not match the policy (even though other metadata
+    does match):</p>
+<pre>&lt;script integrity="<b>sha384-xyz789</b>" ...>&lt;/script>
+&lt;script integrity="<b>sha384-xyz789</b> sha512-321cba" ...>&lt;/script>
+&lt;script integrity="sha256-abc123 <b>sha384-xyz789</b> sha512-321cba" ...>&lt;/script>
 </pre>
     </div>
    </section>
@@ -4274,6 +4347,7 @@ rest of Google’s CSP Cabal.</p>
      <li><a href="https://fetch.spec.whatwg.org/#http-fetch">http fetch</a>
      <li><a href="https://fetch.spec.whatwg.org/#http-network-fetch">http-network fetch</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-initiator">initiator</a>
+     <li><a href="https://fetch.spec.whatwg.org/#concept-request-integrity-metadata">integrity metadata</a>
      <li><a href="https://fetch.spec.whatwg.org/#main-fetch">main fetch</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-method">method</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-network-error">network error</a>
@@ -4484,6 +4558,8 @@ rest of Google’s CSP Cabal.</p>
    <dd>Alex Russell; Jungkee Song; Jake Archibald. <a href="https://slightlyoff.github.io/ServiceWorker/spec/service_worker/">Service Workers</a>. 25 June 2015. WD. URL: <a href="https://slightlyoff.github.io/ServiceWorker/spec/service_worker/">https://slightlyoff.github.io/ServiceWorker/spec/service_worker/</a>
    <dt id="biblio-sha2">[SHA2]
    <dd><a href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf">FIPS PUB 180-4, Secure Hash Standard</a>. URL: <a href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf">http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf</a>
+   <dt id="biblio-sri">[SRI]
+   <dd>Devdatta Akhawe; et al. <a href="http://www.w3.org/TR/SRI/">Subresource Integrity</a>. 12 November 2015. CR. URL: <a href="http://www.w3.org/TR/SRI/">http://www.w3.org/TR/SRI/</a>
    <dt id="biblio-whatwg-dom">[WHATWG-DOM]
    <dd>Anne van Kesteren. <a href="https://dom.spec.whatwg.org/">DOM Standard</a>. Living Standard. URL: <a href="https://dom.spec.whatwg.org/">https://dom.spec.whatwg.org/</a>
    <dt id="biblio-whatwg-url">[WHATWG-URL]
