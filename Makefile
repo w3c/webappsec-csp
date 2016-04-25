@@ -13,6 +13,9 @@ index.html: index.src.html
 FPWD:
 	bikeshed -f spec --md-status=FPWD --md-date=2015-01-19 ./index.src.html ./published/FPWD-2015-01.html
 
+WD:
+	bikeshed -f spec --md-status=WD ./index.src.html ./WD.html
+
 api/index.html: api/index.src.html
 	bikeshed -f spec ./api/index.src.html
 
