@@ -2183,7 +2183,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
           directive's <a for="directive">value</a> is "`Matches`", return
           "`Allowed`".
 
-      2.  <strong>Assert</strong>: This directive's <a for="directive">value</a>
+      2.  <assert>Assert</assert>: This directive's <a for="directive">value</a>
           does not contain "<a grammar>`'unsafe-dynamic'`</a>", or |request|'s
           <a for="request">parser metadata</a> is not "`parser-inserted`".
 
@@ -2359,16 +2359,18 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   "`Matches`" if the nonce matches one or more source expressions in the list,
   and "`Does Not Match`" otherwise:
 
-  1.  If |source list| is `null`, or |nonce| is the empty string, return
+  1.  <assert>Assert</assert>: |source list| is not |null|.
+
+  2.  If |nonce| is the empty string, return
       "`Does Not Match`".
 
-  2.  For each |expression| in |source list|:
+  3.  For each |expression| in |source list|:
 
       1.  If |expression| matches the <a grammar>`nonce-source`</a> grammar,
           and |nonce| is a <a>case-sensitive</a> match for |expression|'s
           <a grammar>`base64-value`</a> part, return "`Matches`".
 
-  3.  Return "`Does Not Match`".
+  4.  Return "`Does Not Match`".
 
   <h5 id="match-url-to-source-list" algorithm>
     Does |url| match |source list|?
@@ -2378,7 +2380,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   algorithm returns "`Matches`" if the URL matches one or more source
   expressions in |source list|, or "`Does Not Match`" otherwise:
 
-  1.  If |source list| is an |null|, return "`Matches`".
+  1.  <assert>Assert</assert>: |source list| is not |null|.
 
   2.  If |source list| is an empty list, return "`Does Not Match`".
 
@@ -2386,10 +2388,9 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       case-insensitive match</a> for the string "`'none'`", return "`Does Not
       Match`".
 
-      Note: Above conditions imply that empty |source list| is the most
-      restrictive semantic representation of a <a>fetch directive</a>, and is
-      equivalent to a |source list| that consists of "`'none'`" string. 
-      It is |not| equivalent to |source list| being |null| (missing directive or it's fallback).
+      Note: An empty source list (that is, a directive without a value: `script-src`,
+      as opposed to `script-src host1`) is equivalent to a source list containing `'none'`,
+      and will not match any URL.
 
   4.  For each |expression| in |source list|:
 
@@ -2631,7 +2632,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   (|type|), and a string (|source|), this algorithm returns "`Matches`" or
   "`Does Not Match`".
 
-  1.  ASSERT: |source| contains the value of a <{script}> element's
+  1.  <assert>Assert</assert>: |source| contains the value of a <{script}> element's
       {{HTMLScriptElement/text}} IDL attribute, the value of a <{style}>
       element's {{Node/textContent}} IDL attribute, or the value of one of a
       <{script}> element's <a>event handler IDL attribute</a>.
