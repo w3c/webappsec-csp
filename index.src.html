@@ -380,7 +380,8 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       Service Workers in particular).
 
   2.  The `frame-src` directive, which was deprecated in CSP Level
-      2, has been removed.
+      2, has been undeprecated, and a `worker-src` directive added. Both defer
+      to `child-src` if not present (which defers to `default-src` in turn).
 
   3.  Insecure schemes in source expressions now match their secure variants,
       and WebSocket schemes now match HTTP schemes. That is, `http:` or `ws:`
@@ -424,11 +425,6 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       [[#external-hash]].
 
   <h3 id="open-questions">Open Questions</h3>
-
-  ISSUE: Do we really want to remove `frame-src`? Though the threat model of
-  workers and frames is similar, they have distinct capabilities. Perhaps
-  it makes sense for folks to allow workers while disallowing frames, or
-  vice-versa?
 
   ISSUE: Do we still need to strip values when reporting? I think we've removed
   much of the risk by using the original URL of a blocked resource; there
@@ -1774,7 +1770,15 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   3.  If |policy| contains a <a>directive</a> whose <a for="directive">name</a>
       is |name|, return "`Allowed`".
 
-  4.  Otherwise, return the result of executing the
+  4.  If |name| is "`frame-src`" or "`worker-src`", and |policy| contains a
+      <a>directive</a> whose <a for="directive">name</a> is "`child-src`",
+      return "`Allowed`".
+
+      Note: It would be lovely to remove this special case. Perhaps "effective
+      directive" could return "`child-src`" and that could delegate out in the
+      same way this algorithm does?
+
+  5.  Otherwise, return the result of executing the
       <a for="directive">pre-request check</a> for the <a>directive</a> whose
       <a for="directive">name</a> is |name| on |request| and |policy|, using
       this directive's <a for="directive">value</a> for the comparison.
@@ -1792,7 +1796,15 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   3.  If |policy| contains a <a>directive</a> whose <a for="directive">name</a>
       is |name|, return "`Allowed`".
 
-  4.  Otherwise, return the result of executing the
+  4.  If |name| is "`frame-src`" or "`worker-src`", and |policy| contains a
+      <a>directive</a> whose <a for="directive">name</a> is "`child-src`",
+      return "`Allowed`".
+
+      Note: It would be lovely to remove this special case. Perhaps "effective
+      directive" could return "`child-src`" and that could delegate out in the
+      same way this algorithm does?
+
+  5.  Otherwise, return the result of executing the
       <a for="directive">pre-request check</a> for the <a>directive</a> whose
       <a for="directive">name</a> is |name| on |request| and |policy|, using
       this directive's <a for="directive">value</a> for the comparison.
@@ -1851,6 +1863,66 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   <a>policy</a> (|policy|):
 
   1.  If |request|'s <a for="request">type</a> is "`font`":
+
+      1.  If the result of executing [[#match-url-to-source-list]] on
+          |response|'s <a for="response">url</a> and this directive's
+          <a for="directive">value</a> is "`Does Not Match`",
+          return "`Blocked`".
+
+  2.  Return "`Allowed`".
+
+  <h4 id="directive-frame-src">`frame-src`</h4>
+
+  The <dfn>frame-src</dfn> directive restricts the URLs which may be loaded into
+  <a>nested browsing contexts</a>. The syntax for the directive's name and value
+  is described by the following ABNF:
+
+  <pre>
+    directive-name  = "frame-src"
+    directive-value = <a grammar>serialized-source-list</a>
+  </pre>
+
+  <div class="example">
+    Given a page with the following Content Security Policy:
+
+    <pre>
+      Content-Security-Policy: <a>frame-src</a> https://example.com/
+    </pre>
+
+    Fetches for the following code will return a network errors, as the URL
+    provided do not match `frame-src`'s <a>source list</a>:
+
+    <pre>
+      &lt;iframe src="https://not-example.com/"&gt;
+      &lt;/iframe&gt;
+    </pre>
+  </div>
+
+  <h5 id="frame-src-algorithms">Algorithms</h5>
+
+  This directive's <a for="directive">pre-request check</a> is as follows:
+
+  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
+
+  1.  If |request|'s <a for="request">type</a> is "`document`" and
+      <a for="request">target browsing context</a> is a <a>nested browsing
+      context</a>:
+
+      1.  If the result of executing [[#match-url-to-source-list]] on
+          |request|'s <a for="request">url</a> and this directive's
+          <a for="directive">value</a> is "`Does Not Match`",
+          return "`Blocked`".
+
+  2.  Return "`Allowed`".
+
+  This directive's <a for="directive">post-request check</a> is as follows:
+
+  Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
+  <a>policy</a> (|policy|):
+
+  1.  If |request|'s <a for="request">type</a> is "`document`" and
+      <a for="request">target browsing context</a> is a <a>nested browsing
+      context</a>:
 
       1.  If the result of executing [[#match-url-to-source-list]] on
           |response|'s <a for="response">url</a> and this directive's
@@ -2368,6 +2440,67 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   interesting CSSOM algorithms. I don't think CSSOM gives us any hooks here, so
   let's work with them to put something reasonable together.
 
+  <h4 id="directive-worker-src">`worker-src`</h4>
+
+  The <dfn>worker-src</dfn> directive restricts the URLs which may be loaded as
+  a {{Worker}}, {{SharedWorker}}, or {{ServiceWorker}}. The syntax for the
+  directive's name and value is described by the following ABNF:
+
+  <pre>
+    directive-name  = "worker-src"
+    directive-value = <a grammar>serialized-source-list</a>
+  </pre>
+
+  <div class="example">
+    Given a page with the following Content Security Policy:
+
+    <pre>
+      Content-Security-Policy: <a>worker-src</a> https://example.com/
+    </pre>
+
+    Fetches for the following code will return a network errors, as the URL
+    provided do not match `worker-src`'s <a>source list</a>:
+
+    <pre>
+      &lt;script&gt;
+        var blockedWorker = new Worker("data:application/javascript,...");
+        blockedWorker = new SharedWorker("https://not-example.com/");
+        navigator.serviceWorker.register('https://not-example.com/sw.js');
+      &lt;/script&gt;
+    </pre>
+  </div>
+
+  <h5 id="worker-src-algorithms">Algorithms</h5>
+
+  This directive's <a for="directive">pre-request check</a> is as follows:
+
+  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
+
+  1.  If |request|'s <a for="request">destination</a> is one of
+      "`serviceworker`", "`sharedworker`", or "`worker`":
+
+      1.  If the result of executing [[#match-url-to-source-list]] on
+          |request|'s <a for="request">url</a> and this directive's
+          <a for="directive">value</a> is "`Does Not Match`",
+          return "`Blocked`".
+
+  2.  Return "`Allowed`".
+
+  This directive's <a for="directive">post-request check</a> is as follows:
+
+  Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
+  <a>policy</a> (|policy|):
+
+  1.  If |request|'s <a for="request">destination</a> is one of
+      "`serviceworker`", "`sharedworker`", or "`worker`":
+
+      1.  If the result of executing [[#match-url-to-source-list]] on
+          |response|'s <a for="response">url</a> and this directive's
+          <a for="directive">value</a> is "`Does Not Match`",
+          return "`Blocked`".
+
+  2.  Return "`Allowed`".
+
   <h4 id="fetch-directive-matching-url">URL Matching Algorithms</h4>
 
   <h5 id="does-request-violate-policy" algorithm>
@@ -2616,7 +2749,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
         5.  If the |request|'s <a for="request">destination</a> is
             "`document`" <em>and</em> the |request|'s
             <a for="request">target browsing context</a> is a <a>nested browsing
-            context</a>, return `child-src`.
+            context</a>, return `frame-src`.
 
       : "`audio`"
       : "`track`"
@@ -2649,7 +2782,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
             : "`sharedworker`"
             : "`worker`"
             ::
-              1.  Return `child-src`.
+              1.  Return `worker-src`.
 
   2.  Return `null`.
 
