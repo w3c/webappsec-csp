@@ -69,6 +69,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     text: CSP list; for: document; url: concept-document-csp-list
     text: sandboxed scripts browsing context flag
     text: sandboxed origin browsing context flag
+    text: splitting tokens on spaces; url: split-a-string-on-spaces
+    text: ASCII case-insensitive match; url: ascii-case-insensitive
   type: element
     text: frame
 spec: URL; urlPrefix: https://url.spec.whatwg.org/
@@ -247,6 +249,44 @@ spec:dom-ls; type:interface; text:Document
 
   ISSUE: Define the hooks into HTML's plugin loading algorithms.
 
+  <h4 id="directive-require-sri-for">`require-sri-for`</h4>
+
+  The <dfn>require-sri-for</dfn> directive specifies a policy for blocking requests for resources due to lack of integrity metadata defined by [[SRI]].
+  The syntax for the directive's name and value is described by the following ABNF:
+
+  <pre dfn-type="grammar" link-type="grammar">
+    directive-name  = "require-sri-for"
+    directive-value = <a grammar>token</a> *( <a>RWS</a> <a>token</a> )
+  </pre>
+
+  The directive recognizes a number of potential token values:
+
+    * `script` requires SRI for scripts
+    * `style` requires SRI for style sheets
+
+  <h5 id="require-sri-for-parsing">Parsing</h5>
+
+  To parse the |token| list, the user agent MUST use an algorithm equivalent to the following:
+
+  1. Let the set of |resource types subject to SRI| that require SRI be |null|.
+
+  2. For each token returned by <a>splitting tokens on spaces</a>,
+  if token matches the grammar for `require-sri-for`,
+  add the token to the set of |resource types subject to SRI|. Otherwise, ignore the token.
+
+  3. Return the set of |resource types subject to SRI|.
+
+  <h5 id="require-sri-for-algorithms">Algorithms</h5>
+
+  This directive’s <a for="directive">pre-request check</a> is as follows:
+
+  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
+
+    1. If |request|'s type is a <a>ASCII case-insensitive match</a> for at least one token in |resource types subject to SRI|, and |request|'s integrity metadata is the empty string, return "Blocked":
+
+    2. Return "Allowed".
+
+
   <h4 id="directive-sandbox">`sandbox`</h4>
 
   The <dfn>sandbox</dfn> directive specifies an HTML sandbox policy which the
@@ -407,14 +447,14 @@ spec:dom-ls; type:interface; text:Document
 
   :   <a>`base-uri`</a>
   ::  This document (see [[#directive-base-uri]])
-  :   <a>`block-non-sri-resources`</a>
-  ::  This document (see [[#block-non-sri-resources]])
   :   <a>`form-action`</a>
   ::  This document (see [[#directive-form-action]])
   :   <a>`frame-ancestors`</a>
   ::  This document (see [[#directive-frame-ancestors]])
   :   <a>`plugin-types`</a>
   ::  This document (see [[#directive-plugin-types]])
+  :   <a>`require-sri-for`</a>
+  ::  This document (see [[#directive-require-sri-for]])
   :   <a>`sandbox`</a>
   ::  This document (see [[#directive-sandbox]])
 </section>
