@@ -55,6 +55,8 @@ spec: HTML5; urlPrefix: https://www.w3.org/TR/html5/
       text: nested through; url: browsing-context-nested-through
       text: forced sandboxing flag set
       text: parse a sandboxing directive
+      text: sandboxed scripts browsing context flag
+      text: sandboxed origin browsing context flag
     urlPrefix: dom.html
       text: CSP list; for: document; url: concept-document-csp-list
     urlPrefix: webappapis.html
@@ -222,13 +224,13 @@ spec: RFC7231; urlPrefix: https://tools.ietf.org/html/rfc7231
       text: resource representation
       text: representation
 
-spec: OOB-REPORTING; urlPrefix: https://mikewest.github.io/error-reporting/
+spec: REPORTING; urlPrefix: https://w3c.github.io/reporting/
   type: dfn
     text: group
     text: queue report; url: queue-report
 
 spec: HTML; urlPrefix: https://html.spec.whatwg.org/
-  type: dfn  
+  type: dfn
     text: run a worker
     text: initialising a new Document object
     text: update a style block
@@ -247,12 +249,6 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 </pre>
 <pre class="biblio">
 {
-  "CSP-DOCUMENT": {
-    "authors": [ "Mike West" ],
-    "href": "https://w3c.github.io/webappsec-csp/document/",
-    "title": "Content Security Policy: Document Features",
-    "publisher": "W3C"
-  },
   "HTML-DESIGN": {
     "authors": [ "Anne Van Kesteren", "Maciej Stachowiak" ],
     "href": "https://www.w3.org/TR/html-design-principles/",
@@ -397,29 +393,24 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       "`inline`" as the blocked resource. Likewise, blocked `eval()` execution
       will report "`eval`" as the blocked resource.
 
-  5.  Directives with effects on a {{Document}} or {{Worker}} itself (as opposed
-      to the resources such a context can load) have moved out into a separate
-      [[CSP-DOCUMENT]] module. This includes `base-uri`, `form-action`,
-      `frame-ancestors`, `plugin-types`, `sandbox`.
+  5.  The `manifest-src` directive has been added.
 
-  6.  The `manifest-src` directive has been added.
-
-  7.  The `report-uri` directive is deprecated in favor of the new `report-to`
+  6.  The `report-uri` directive is deprecated in favor of the new `report-to`
       directive, which relies on [[OOB-REPORTING]] as infrastructure.
 
-  8.  The `'unsafe-dynamic'` source expression will now allow script which
+  7.  The `'unsafe-dynamic'` source expression will now allow script which
       executes on a page to load more script via non-<a>parser-inserted</a>
       <{script}> elements. Details are in [[#unsafe-dynamic-usage]].
 
-  9.  The `'unsafe-hashed-attributes'` source expression will now allow event
+  8.  The `'unsafe-hashed-attributes'` source expression will now allow event
       handlers and style attributes to match hash source expressions. Details
       in [[#unsafe-hashed-attributes-usage]].
 
-  10. The <a>source expression</a> matching has been changed to require explicit whitelisting
+  9.  The <a>source expression</a> matching has been changed to require explicit whitelisting
       of any non-<a>network scheme</a>, rather than <a>local scheme</a>, as described
       in [[#match-url-to-source-expression]].
 
-  11. Hash-based source expressions may now whitelist external scripts if the
+  10. Hash-based source expressions may now whitelist external scripts if the
       <{script}> element that triggers the request specifies a set of integrity
       metadata which is whitelisted by the current policy. Details in
       [[#external-hash]].
@@ -1079,7 +1070,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   <h3 id="html-integration">
     Integration with HTML
   </h3>
-  
+
   1.  The {{Document}} and {{WorkerGlobalScope}} objects have a
       <dfn for="global object" id="global-object-csp-list">CSP list</dfn>,
       which holds all the <a>policy</a> objects which are active for a given
@@ -1136,7 +1127,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   7.  HTML populates each <a>request</a>'s <a for="request">cryptographic nonce
       metadata</a> and <a>parser metadata</a> with relevant data from the
       elements responsible for resource loading.
-      
+
       ISSUE(w3c/html#183): This processing was added to WHATWG's HTML in
       <a href="https://github.com/whatwg/html/commit/5479e07a6f6e01062b85b5fe6799752b0370336c">whatwg/html@5479e07</a>.
       It has not yet been added to W3C's HTML.
@@ -1149,6 +1140,13 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
       ISSUE(whatwg/html#968): Stylesheet loading is not yet integrated with
       Fetch in WHATWG's HTML.
+
+  8.  [[#allow-base-for-document]] is called during <{base}>'s <a>set the frozen
+      base URL</a> algorithm to ensure that the <{base/href}> attribute's value
+      is valid.
+
+      ISSUE: Correct the reference in WHATWG's document. File a bug against
+      W3C's document.
 
   <h4 id="initialize-document-csp" algorithm>
     Initialize a `Document`'s `CSP list`
@@ -1511,10 +1509,12 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   <h2 id="csp-directives">
     Content Security Policy Directives
   </h2>
-  
+
   This specification defines a number of types of <a>directives</a> which allow
   developers to control certain aspects of their sites' behavior. This document
-  defines directives which govern resource fetching (in [[#directives-fetch]])
+  defines directives which govern resource fetching (in [[#directives-fetch]]),
+  directives which govern the state of a document (in [[#directives-document]]),
+  directives which govern aspects of navigation (in [[#directives-navigation]]),
   and directives which govern reporting (in [[#directives-reporting]]). These
   form the core of Content Security Policy; other directives are defined in a
   modular fashion in ancillary documents (see [[#directives-elsewhere]] for
@@ -1535,7 +1535,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   <h3 id="directives-fetch">
     Fetch Directives
   </h3>
-  
+
   <dfn>Fetch directives</dfn> control the locations from which certain resource
   types may be loaded. For instance, <a>script-src</a> allows developers to
   whitelist trusted sources of script to execute on a page, while
@@ -1556,7 +1556,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   This directive controls <a>requests</a> which will populate a frame or a
   worker. More formally, <a>requests</a> falling into one of the
   following categories:
-  
+
   *  <a for="request">destination</a> is "`document`", and whose
      <a for="request">target browsing context</a> is a <a>nested browsing
      context</a> (e.g. requests which will populate an <{iframe}> or <{frame}>
@@ -2886,6 +2886,196 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   8.  Return "`Does Not Match`".
 
+  <h3 id="directives-document">
+    Document Directives
+  </h3>
+
+  The following directives govern the properties of a document or worker
+  environment to which a policy applies.
+
+  <h4 id="directive-base-uri">`base-uri`</h4>
+
+  The <dfn>base-uri</dfn> directive restricts the {{URL}}s which can be used in
+  a {{Document}}'s <{base}> element. The syntax for the directive's name and
+  value is described by the following ABNF:
+
+  <pre>
+    directive-name  = "base-uri"
+    directive-value = <a grammar>serialized-source-list</a>
+  </pre>
+
+  The following algorithm is called during HTML's <a>set the frozen base url</a>
+  algorithm in order to monitor and enforce this directive:
+
+  <h5 id="allow-base-for-document" algorithm>
+    Is |base| allowed for |document|?
+  </h5>
+
+  Given a {{URL}} (|base|), and a {{Document}} (|document|), this algorithm
+  returns "`Allowed`" if |base| may be used as the value of a <{base}>
+  element's <{base/href}> attribute, and "`Blocked`" otherwise:
+
+  1.  For each |policy| in |document|'s <a>global object</a>'s
+      <a for="global object">csp list</a>:
+
+      1.  Let |source list| be `null`.
+
+      2.  If a <a>directive</a> whose <a for="directive">name</a> is
+          "`base-uri`" is present in |policy|'s <a for="policy">directive
+          set</a>, set |source list| to that <a>directive</a>'s
+          <a for="directive">value</a>.
+
+      3.  If |source list| is `null`, skip to the next |policy|.
+
+      4.  If the result of executing [[#match-url-to-source-list]]
+          on |base| and |source list| is "`Does Not Match`":
+
+          1.  Let |violation| be the result of executing
+              [[#create-violation-for-global]] on |document|'s <a>global
+              object</a>, |policy|, and "<a>`base-uri`</a>".
+
+          2.  Set |violation|'s <a for="violation">resource</a> to "`inline`".
+
+          3.  Execute [[#report-violation]] on |violation|.
+
+          4.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
+              return "`Blocked`".
+
+  2.  Return "`Allowed`".
+
+  <h4 id="directive-plugin-types">`plugin-types`</h4>
+
+  <dfn>plugin-types</dfn>
+
+  ISSUE: Define the hooks into HTML's plugin loading algorithms.
+
+  <h4 id="directive-sandbox">`sandbox`</h4>
+
+  The <dfn>sandbox</dfn> directive specifies an HTML sandbox policy which the
+  user agent will apply to a resource, just as though it had been included in
+  an <{iframe}> with a <{iframe/sandbox}> property.
+
+  The directive's syntax is described by the following ABNF grammar, with
+  the additional requirement that each token value MUST be one of the
+  keywords defined by HTML specification as allowed values for the <{iframe}>
+  <{iframe/sandbox}> attribute [[!HTML]].
+
+  <pre dfn-type="grammar" link-type="grammar">
+    directive-name  = "sandbox"
+    directive-value = "" / <a>token</a> *( <a>RWS</a> <a>token</a> )
+  </pre>
+
+  This directive has no reporting requirements; it will be ignored entirely when
+  delivered in a <a>`Content-Security-Policy-Report-Only`</a> header, or within
+  a <{meta}> element.
+
+  <h5 id="sandbox-algorithms">Algorithms</h5>
+
+  This directive's <a for="directive">response check</a> algorithm is as
+  follows:
+
+  Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
+  <a>policy</a> (|policy|):
+
+  1.  If |request|'s <a for="request">destination</a> is one of
+      "`serviceworker`", "`sharedworker`", or "`worker`":
+
+      1.  If the result of the <a>Parse a sandboxing directive</a> algorithm
+          using this directive's <a for="directive">value</a> as the input
+          contains either the <a>sandboxed scripts browsing context flag</a> or
+          the <a>sandboxed origin browsing context flag</a> flags, return
+          "`Blocked`".
+
+          Note: This will need to change if we allow Workers to be sandboxed into
+          unique origins, which seems like a pretty reasonable thing to do.
+
+  2.  Return "`Allowed`".
+
+  This directive's <a for="directive">initialization</a> algorithm is
+  responsible for adjusting a {{Document}}'s <a>forced sandboxing flag set</a>
+  according to the <a>`sandbox`</a> values present in its policies, as
+  follows:
+
+  Given a {{Document}} or <a>global object</a> (|context|), a <a>response</a>
+  (|response|), and a <a>policy</a> (|policy|):
+
+  1.  If |policy|'s <a for="policy">disposition</a> is not "`Enforce`", or
+      |context| is not a {{Document}}, then abort this algorithm.
+
+      Note: This will need to change if we allow Workers to be sandboxed,
+      which seems like a pretty reasonable thing to do.
+
+  2.  <a>Parse a sandboxing directive</a> using this directive's
+      <a for="directive">value</a> as the input, and |context|'s <a>forced
+      sandboxing flag set</a> as the output.
+
+  <h3 id="directives-navigation">
+    Navigation Directives
+  </h3>
+
+  <h4 id="directive-form-action">`form-action`</h4>
+
+  The <dfn>form-action</dfn> directive restricts the {{URL}}s which can be used
+  as the target of a form submissions.
+
+  ISSUE: Define the hooks into HTML's navigation and form submission algorithms.
+
+  <h4 id="directive-frame-ancestors">`frame-ancestors`</h4>
+
+  The <dfn>frame-ancestors</dfn> directive restricts the {{URL}}s which can
+  embed the resource using <{frame}>, <{iframe}>, <{object}>, <{embed}>, or
+  <{applet}> element. Resources can use this directive to avoid many UI
+  Redressing [[UISECURITY]] attacks, by avoiding the risk of being embedded into
+  potentially hostile contexts.
+
+  The directive's syntax is described by the following ABNF grammar:
+
+  <pre dfn-type="grammar" link-type="grammar">
+    directive-name  = "frame-ancestors"
+    directive-value = <a>ancestor-source-list</a>
+
+    <dfn>ancestor-source-list</dfn> = ( <a>ancestor-source</a> *( <a>RWS</a> <a>ancestor-source</a>) ) / "<a>'none'</a>"
+    <dfn>ancestor-source</dfn>      = <a>scheme-source</a> / <a>host-source</a> / "<a>'self'</a>"
+  </pre>
+
+  The `frame-ancestors` directive MUST be ignored when contained in a policy
+  declared via a <{meta}> element.
+
+  Note: The `frame-ancestors` directive's syntax is similar to a <a>source
+  list</a>, but `frame-ancestors` will not fall back to the `default-src`
+  directive's value if one is specified. That is, a policy that declares
+  `default-src 'none'` will still allow the resource to be embedded by anyone.
+
+  <h5 id="frame-ancestors-algorithms">Algorithms</h5>
+
+  This directive's <a for="directive">response check</a> is as follows:
+
+  Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
+  <a>policy</a> (|policy|):
+
+  1.  If |request|'s <a for="request">destination</a> is "`document`"
+      <em>and</em> the |request|'s <a for="request">target browsing
+      context</a> is a <a>nested browsing context</a>:
+
+      1.  For each |ancestor| of the |request|'s
+          <a for="request">target browsing context</a>'s <a>ancestor
+          browsing context</a>s:
+
+          1.  Let |origin-as-url| be the result of executing the <a>URL
+              parser</a> on the <a>unicode serialization</a> of |ancestor|'s
+              <a>active document</a>'s origin.
+
+          2.  If <a href="../#match-url-to-source-list>">Match URL to source
+              list</a> returns `Does Not Match` when executed upon
+              |origin-as-url| and this directive's <a for="directive">value</a>,
+              return "`Blocked`".
+
+              ISSUE: Do we need syntax to allow matching a unique origin?
+
+  2.  Return "`Allowed`".
+
+  ISSUE: Rewrite this in terms of HTML's navigation algorithm.
+
   <h3 id="directives-reporting">
     Reporting Directives
   </h3>
@@ -2945,12 +3135,10 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   * [[MIX]] defines `block-all-mixed-content`
   * [[UPGRADE-INSECURE-REQUESTS]] defines `upgrade-insecure-requests`
-  * [[CSP-DOCUMENT]] defines `base-uri`, `form-action`, `frame-ancestors`,
-    `plugin-types`, and `sandbox`.
 
   Extensions to CSP MUST register themselves via the process outlined in
-  <a href="https://tools.ietf.org/html/draft-west-webappsec-csp-reg">draft-west-webappsec-csp-reg</a>.
-  In particular, note the criteria discussed in Section 3.2 of that document.
+  [[!RFC7762]]. In particular, note the criteria discussed in Section 4.2 of
+  that document.
 
   New directives SHOULD use the <a for="directive">pre-request check</a>,
   <a for="directive">post-request check</a>, <a for="directive">response
@@ -3187,7 +3375,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   of user-agent features like addons, extensions, or bookmarklets. These kinds
   of features generally advance the user's priority over page authors, as
   espoused in [[HTML-DESIGN]].
-  
+
   Moreover, applying CSP to these kinds of features produces a substantial
   amount of noise in violation reports, significantly reducing their value to
   developers.
@@ -3201,12 +3389,56 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 <section>
   <h2 id="iana-considerations">IANA Considerations</h2>
 
-  The permanent message header field registry should be updated
-  with the following registration: [[!RFC3864]]
-
-  <h3 id="iana-csp">
-    Content-Security-Policy
+  <h3 id="iana-registry">
+    Directive Registry
   </h3>
+
+  The Content Security Policy Directive registry should be updated with the
+  following directives and references [[!RFC7762]]:
+
+  :   <a>`base-uri`</a>
+  ::  This document (see [[#directive-base-uri]])
+  :   <a>`child-src`</a>
+  ::  This document (see [[#directive-child-src]])
+  :   <a>`connect-src`</a>
+  ::  This document (see [[#directive-connect-src]])
+  :   <a>`default-src`</a>
+  ::  This document (see [[#directive-default-src]])
+  :   <a>`font-src`</a>
+  ::  This document (see [[#directive-font-src]])
+  :   <a>`form-action`</a>
+  ::  This document (see [[#directive-form-action]])
+  :   <a>`frame-ancestors`</a>
+  ::  This document (see [[#directive-frame-ancestors]])
+  :   <a>`frame-src`</a>
+  ::  This document (see [[#directive-frame-src]])
+  :   <a>`img-src`</a>
+  ::  This document (see [[#directive-img-src]])
+  :   <a>`manifest-src`</a>
+  ::  This document (see [[#directive-manifest-src]])
+  :   <a>`media-src`</a>
+  ::  This document (see [[#directive-media-src]])
+  :   <a>`object-src`</a>
+  ::  This document (see [[#directive-object-src]])
+  :   <a>`plugin-types`</a>
+  ::  This document (see [[#directive-plugin-types]])
+  :   <a>`sandbox`</a>
+  ::  This document (see [[#directive-sandbox]])
+  :   <a>`script-src`</a>
+  ::  This document (see [[#directive-script-src]])
+  :   <a>`style-src`</a>
+  ::  This document (see [[#directive-style-src]])
+  :   <a>`worker-src`</a>
+  ::  This document (see [[#directive-worker-src]])
+
+  <h3 id="iana-headers">
+    Headers
+  </h3>
+
+  The permanent message header field registry should be updated
+  with the following registrations: [[!RFC3864]]
+
+  <h4 id="iana-csp">Content-Security-Policy</h4>
 
   <dl>
     <dt>Header field name</dt>
@@ -3223,6 +3455,25 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
     <dt>Specification document</dt>
     <dd>This specification (See [[#csp-header]])</dd>
+  </dl>
+
+  <h4 id="iana-cspro">Content-Security-Policy-Report-Only</h4>
+
+  <dl>
+    <dt>Header field name</dt>
+    <dd>Content-Security-Policy-Report-Only</dd>
+
+    <dt>Applicable protocol</dt>
+    <dd>http</dd>
+
+    <dt>Status</dt>
+    <dd>standard</dd>
+
+    <dt>Author/Change controller</dt>
+    <dd>W3C</dd>
+
+    <dt>Specification document</dt>
+    <dd>This specification (See [[#cspro-header]])</dd>
   </dl>
 </section>
 
