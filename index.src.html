@@ -18,9 +18,6 @@ Boilerplate: omit conformance, omit feedback-header
 !Participate: <a href="https://github.com/w3c/webappsec-csp/issues/new">File an issue</a> (<a href="https://github.com/w3c/webappsec-csp/issues">open issues</a>)
 Markup Shorthands: css off, markdown on
 </pre>
-<pre class="link-defaults">
-spec:dom-ls; type:interface; text:Event
-</pre>
 <pre class="anchors">
 spec: RFC6454; urlPrefix: https://tools.ietf.org/html/rfc6454
   type: dfn
@@ -57,6 +54,7 @@ spec: HTML5; urlPrefix: https://www.w3.org/TR/html5/
       text: parse a sandboxing directive
       text: sandboxed scripts browsing context flag
       text: sandboxed origin browsing context flag
+      text: unicode serialization; url: unicode-serialization-of-an-origin
     urlPrefix: dom.html
       text: CSP list; for: document; url: concept-document-csp-list
     urlPrefix: webappapis.html
@@ -133,9 +131,8 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
     text: request; url: concept-request
     text: response; url: concept-response
     text: header; url: concept-header
-    text: header list; url: concept-header-list
     text: network error; url: concept-network-error
-    for: header    
+    for: header
       text: name; url: concept-header-name
     for: response
       text: CSP list; url: concept-response-csp-list
@@ -429,7 +426,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   <h3 id="framework-policy">Policies</h3>
 
-  A <dfn local-lt="policies" export>policy</dfn> defines a set of allowed and
+  A <dfn export>policy</dfn> defines a set of allowed and
   restricted behaviors, and may be applied to a {{Window}} or
   {{WorkerGlobalScope}} as described in [[#initialize-global-object-csp]].
   
@@ -501,7 +498,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   Given a string (|list|) and a <a for="policy">disposition</a> (|disposition|)
   which contains a comma-delimited series of <a>serialized CSP</a> strings, the
-  following algorithm will return a list of <a>policies</a>:
+  following algorithm will return a list of <a>policy</a> objects:
 
   1.  Let |policies| be an empty list.
 
@@ -520,7 +517,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   <h3 id="framework-directives">Directives</h3>
 
-  <a>Policies</a> contain a set of <dfn export>directives</dfn>, each of which controls
+  Each <a>policy</a> contain a set of <dfn export>directives</dfn>, each of which controls
   a specific behavior. The directives defined in this document are described in
   detail in [[#csp-directives]].
 
@@ -651,7 +648,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   <h3 id="framework-violation">Violations</h3>
 
   A <dfn export>violation</dfn> represents an action or resource which goes against the
-  <a>policies</a> associated with a <a>global object</a>.
+  set of <a>policy</a> objects associated with a <a>global object</a>.
 
   Each <a>violation</a> has a
   <dfn for="violation" id="violation-global-object" export>global object</dfn>, which
@@ -1113,7 +1110,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       <a href="https://github.com/whatwg/html/commit/920c9183a7990968ecac1aeedae22391f3438791">whatwg/html@920c918</a>.
       It has been partially added to W3C's HTML.
 
-  5.  <a>Policies</a> are <a>enforced</a> during processing of the <{meta}>
+  5.  <a>Policy</a> is <a>enforced</a> during processing of the <{meta}>
       element's <{meta/http-equiv}>.
 
       ISSUE(w3c/html#184): This processing was added to WHATWG's HTML in
@@ -1463,7 +1460,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
           :   <a for="request">credentials mode</a>
           ::  "`same-origin`"
           :   <a for="request">header list</a>
-          ::  A <a for=''>header list</a> containing a single header whose name is
+          ::  A header list containing a single header whose name is
               "`Content-Type`", and value is "`application/csp-report`"
           :   <a for="request">body</a>
           ::  The result of executing [[#deprecated-serialize-violation]] on
@@ -2531,7 +2528,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   "`Matches`" if the nonce matches one or more source expressions in the list,
   and "`Does Not Match`" otherwise:
 
-  1.  Assert: |source list| is not |null|.
+  1.  Assert: |source list| is not `null`.
 
   2.  If |nonce| is the empty string, return "`Does Not Match`".
 
@@ -2551,7 +2548,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   algorithm returns "`Matches`" if the URL matches one or more source
   expressions in |source list|, or "`Does Not Match`" otherwise:
 
-  1.  Assert: |source list| is not |null|.
+  1.  Assert: |source list| is not `null`.
 
   2.  If |source list| is an empty list, return "`Does Not Match`".
 
@@ -2834,7 +2831,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       <a>source expression</a> which is an <a>ASCII case-insensitive match</a>
       for the string "'unsafe-inline'", then return "`Matches`".
 
-      Note: This logic means that if |source list| contains both "'unsafe-inline'"
+      Note: This logic means that if |list| contains both "'unsafe-inline'"
       and either <a grammar>`nonce-source`</a> or <a grammar>`hash-source`</a>,
       "'unsafe-inline'" will have no effect.
 
