@@ -62,6 +62,7 @@ spec: HTML5; urlPrefix: https://www.w3.org/TR/html5/
     urlPrefix: webappapis.html
       text: environment settings object; url: settings-object
       text: global object
+      text: global object; for: settings object; url: concept-settings-object-global
       text: incumbent settings object
       text: relevant settings object; url: relevant-settings-object-for-a-global-object
       text: responsible browsing context
@@ -148,7 +149,6 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
       text: cryptographic nonce metadata; url: concept-request-nonce-metadata
       text: current url; url: concept-request-current-url
       text: destination;  url: concept-request-destination
-      text: global object; url: concept-request-global-object
       text: header list; url: concept-request-header-list
       text: initiator; url: concept-request-initiator
       text: method; url:concept-request-method
@@ -683,7 +683,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   <dfn for="violation" id="violation-effective-directive">effective directive</dfn>
   which is a non-empty string representing the <a>directive</a> whose
   enforcement caused the violation.
-  
+
   Each <a>violation</a> has a
   <dfn for="violation" id="violation-source-file">source file</dfn>, which is
   either `null` or a {{URL}}.
@@ -699,7 +699,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   <h4 id="create-violation-for-global" algorithm>
     Create a violation object for |global|, |policy|, and |directive|
   </h4>
-  
+
   Given a <a>global object</a> (|global|), a <a>policy</a> (|policy|), and a
   string (|directive|), the following algorithm creates a new <a>violation</a>
   object, and populates it with an initial set of data:
@@ -724,7 +724,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   4.  Set |violation|'s <a for="violation">status</a> to the HTTP status code
       for the resource associated with |violation|'s <a for="violation">global
       object</a>.
-  
+
       ISSUE: How, exactly, do we get the status code? We don't actually store it
       anywhere.
 
@@ -732,7 +732,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   <h4 id="create-violation-for-request" algorithm>
     Create a violation object for |request|, |policy|, and |directive|
-  </h4> 
+  </h4>
 
   Given a <a>request</a> (|request|), a <a>policy</a> (|policy|), and a string
   (|directive|), the following algorithm creates a new <a>violation</a> object,
@@ -740,7 +740,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   1.  Let |violation| be the result of executing
       [[#create-violation-for-global]] on |request|'s
-      <a for="request">client</a>'s <a for="request">global object</a>,
+      <a for="request">client</a>'s <a for="settings object">global object</a>,
       |policy|, and |directive|.
 
   2.  Set |violation|'s <a for="violation">resource</a> to |request|'s
@@ -964,11 +964,11 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   on <a for="request">client</a>'s "report only" policies.
 
   1.  Let |CSP list| be |request|'s
-      <a for="request">client</a>'s <a>global object</a>'s
+      <a for="request">client</a>'s <a for="settings object">global object</a>'s
       <a for="global object">CSP list</a>.
 
   2.  For each |policy| in |CSP list|:
-    
+
       1.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
           then skip to the next |policy|.
 
@@ -989,7 +989,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   <a for="request">client</a>'s Content Security Policy.
 
   1.  Let |CSP list| be |request|'s
-      <a for="request">client</a>'s <a>global object</a>'s
+      <a for="request">client</a>'s <a for="settings object">global object</a>'s
       <a for="global object">CSP list</a>.
 
   2.  Let |result| be "`Allowed`".
@@ -1023,7 +1023,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   <a for="request">client</a>'s Content Security Policy.
 
   1.  Let |CSP list| be |request|'s
-      <a for="request">client</a>'s <a>global object</a>'s
+      <a for="request">client</a>'s <a for="settings object">global object</a>'s
       <a for="global object">CSP list</a>.
 
   2.  Let |result| be "`Allowed`".
@@ -1080,7 +1080,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       ISSUE(w3c/html#187): This concept has been added to WHATWG's HTML, but is
       missing from W3C's version.
 
-  2.  A <a>policy</a> is <dfn>enforced</dfn> or <dfn>monitored</dfn> for an
+  2.  A <a>policy</a> is <dfn>enforced</dfn> or <dfn>monitored</dfn> for a
       <a>global object</a> by inserting it into the <a>global object</a>'s
       <a for="global object">CSP list</a>.
 
