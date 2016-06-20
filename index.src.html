@@ -395,9 +395,9 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   6.  The `report-uri` directive is deprecated in favor of the new `report-to`
       directive, which relies on [[OOB-REPORTING]] as infrastructure.
 
-  7.  The `'unsafe-dynamic'` source expression will now allow script which
+  7.  The `'strict-dynamic'` source expression will now allow script which
       executes on a page to load more script via non-<a>parser-inserted</a>
-      <{script}> elements. Details are in [[#unsafe-dynamic-usage]].
+      <{script}> elements. Details are in [[#strict-dynamic-usage]].
 
   8.  The `'unsafe-hashed-attributes'` source expression will now allow event
       handlers and style attributes to match hash source expressions. Details
@@ -619,7 +619,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
                   ; <a>path</a> is defined in section 3.3 of RFC 3986.
    
     ; Keywords:
-    <dfn>keyword-source</dfn> = "<dfn>'self'</dfn>" / "<dfn>'unsafe-inline'</dfn>" / "<dfn>'unsafe-eval'</dfn>" / "<dfn>'unsafe-dynamic'</dfn>" / "<dfn>'unsafe-hashed-attributes'</dfn>"
+    <dfn>keyword-source</dfn> = "<dfn>'self'</dfn>" / "<dfn>'unsafe-inline'</dfn>" / "<dfn>'unsafe-eval'</dfn>" / "<dfn>'strict-dynamic'</dfn>" / "<dfn>'unsafe-hashed-attributes'</dfn>"
 
     ; Nonces: 'nonce-[nonce goes here]'
     <dfn>nonce-source</dfn>  = "'nonce-" <a>base64-value</a> "'"
@@ -2261,15 +2261,15 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
       3.  If this directive's <a for="directive">value</a> contains a <a>source
           expression</a> that is an <a>ASCII case-insensitive match</a> for
-          the "<a grammar>`'unsafe-dynamic'`</a>" <a grammar>keyword-source</a>:
+          the "<a grammar>`'strict-dynamic'`</a>" <a grammar>keyword-source</a>:
 
           1.  If the |request|'s <a for="request">parser metadata</a> is
               "`parser-inserted`", return "`Blocked`".
 
               Otherwise, return "`Allowed`".
 
-              Note: "<a grammar>`'unsafe-dynamic'`</a>" is explained in more detail
-              in [[#unsafe-dynamic-usage]].
+              Note: "<a grammar>`'strict-dynamic'`</a>" is explained in more detail
+              in [[#strict-dynamic-usage]].
 
       4.  If the result of executing [[#match-url-to-source-list]] on
           |request|'s <a for="request">url</a> and this directive's
@@ -2292,7 +2292,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
           "`Allowed`".
 
       2.  Assert: This directive's <a for="directive">value</a>
-          does not contain "<a grammar>`'unsafe-dynamic'`</a>", or |request|'s
+          does not contain "<a grammar>`'strict-dynamic'`</a>", or |request|'s
           <a for="request">parser metadata</a> is not "`parser-inserted`".
 
       3.  If the result of executing [[#match-url-to-source-list]] on
@@ -2310,7 +2310,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       
       1.  If |list| contains a <a>source expression</a> which is an <a>ASCII
           case-insensitive match</a> for the <a grammar>keyword-source</a>
-          "<a grammar>`'unsafe-dynamic'`</a>", and does not contain a
+          "<a grammar>`'strict-dynamic'`</a>", and does not contain a
           <a>source expression</a> which is an <a>ASCII case-insensitive
           match</a> for the <a grammar>keyword-source</a>
           "<a grammar>`'unsafe-hashed-attributes'`</a>", return "`Blocked`".
@@ -2323,10 +2323,10 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
       1.  If |list| contains a <a>source expression</a> which is an <a>ASCII
           case-insensitive match</a> for the <a grammar>keyword-source</a>
-          "<a grammar>`'unsafe-dynamic'`</a>", return "`Blocked`".
+          "<a grammar>`'strict-dynamic'`</a>", return "`Blocked`".
 
-          Note: "<a grammar>`'unsafe-dynamic'`</a>" is explained in more detail
-          in [[#unsafe-dynamic-usage]].
+          Note: "<a grammar>`'strict-dynamic'`</a>" is explained in more detail
+          in [[#strict-dynamic-usage]].
 
       2.  If the result of executing [[#match-element-to-source-list]] on
           |element|, this directive's <a for="directive">value</a>, and
@@ -3210,8 +3210,8 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   it meets both policy’s criteria: in this case, the only origin that can match
   is `http://example.com`, as both policies allow it.
 
-  <h3 id="unsafe-dynamic-usage">
-    Usage of "`'unsafe-dynamic'`"
+  <h3 id="strict-dynamic-usage">
+    Usage of "`'strict-dynamic'`"
   </h3>
 
   Whitelists are tough to get right, especially on sprawling origins like CDNs.
@@ -3221,7 +3221,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   is capable of mitigating these bypasses via extensive whitelists, those end
   up being brittle, awkward, and difficult to implement and maintain.
 
-  The "<a grammar>`'unsafe-dynamic'`</a>" source expression aims to make Content
+  The "<a grammar>`'strict-dynamic'`</a>" source expression aims to make Content
   Security Policy simpler to deploy for existing applications who have a high
   degree of confidence in the scripts they load directly, but low confidence in
   their ability to provide a reasonably secure whitelist.
@@ -3240,12 +3240,12 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   2.  Script requests which are triggered by non-<a>parser-inserted</a>
       <{script}> elements are allowed.
 
-  The first change allows you to deploy "<a grammar>`'unsafe-dynamic'`</a> in a
+  The first change allows you to deploy "<a grammar>`'strict-dynamic'`</a> in a
   backwards compatible way, without requiring user-agent sniffing: the policy
-  `'unsafe-inline' https: 'nonce-abcdefg' 'unsafe-dynamic'` will act like
+  `'unsafe-inline' https: 'nonce-abcdefg' 'strict-dynamic'` will act like
   `'unsafe-inline' https:` in browsers that support CSP1, `https:
   'nonce-abcdefg'` in browsers that support CSP2, and `'nonce-abcdefg'
-  'unsafe-dynamic'` in browsers that support CSP3.
+  'strict-dynamic'` in browsers that support CSP3.
 
   The second allows scripts which are given access to the page via nonces or
   hashes to bring in their dependencies without adding them explicitly to the
@@ -3255,7 +3255,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
     Suppose MegaCorp, Inc. deploys the following policy:
 
     <pre>
-      <a>Content-Security-Policy</a>: <a>script-src</a> 'nonce-abcdefg' <a grammar>'unsafe-dynamic'</a>
+      <a>Content-Security-Policy</a>: <a>script-src</a> 'nonce-abcdefg' <a grammar>'strict-dynamic'</a>
     </pre>
 
     And serves the following HTML with that policy active:
