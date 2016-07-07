@@ -1239,7 +1239,7 @@ Possible extra rowspan handling
                 content: "Invalid Example" counter(example);
             }
 
-            figure {
+            figcaption {
                 counter-increment: figure;
             }
             figcaption:not(.no-marker)::before {
@@ -1406,7 +1406,7 @@ pre.idl.highlight { color: #708090; }
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="http://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1>Content Security Policy Level 3</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-06-21">21 June 2016</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-07-07">7 July 2016</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1769,10 +1769,8 @@ of security-relevant policy decisions.</p>
   2, has been undeprecated, and a <code>worker-src</code> directive added. Both defer
   to <code>child-src</code> if not present (which defers to <code>default-src</code> in turn).</p>
      <li data-md="">
-      <p>Insecure schemes in source expressions now match their secure variants,
-  and WebSocket schemes now match HTTP schemes. That is, <code>http:</code> or <code>ws:</code> is equivalent to <code>http: https:</code>, and <code>wss:</code> is equivalent to <code>https:</code>.
-  Similarly, <code>http://example.com</code> or <code>ws://example.com</code> is equivalent to <code>http://example.com https://example.com</code>, and <code>wss://example.com</code> is
-  equivalent to <code>https://example.com</code>.</p>
+      <p>The URL matching algorithm now treats insecure schemes and ports as
+  matching their secure variants. That is, the source expression <code>http://example.com:80</code> will match both <code>http://example.com:80</code> and <code>https://example.com:443</code>.</p>
       <p>Likewise, <code>'self'</code> now matches <code>https:</code> and <code>wss:</code> variants of the page’s
   origin, even on pages whose scheme is <code>http</code>.</p>
      <li data-md="">
@@ -1912,7 +1910,7 @@ of security-relevant policy decisions.</p>
   type string, and a soure string as arguments, and is executed during <a href="#should-block-inline">§4.2.3 Should element’s inline type behavior be blocked by Content Security Policy?</a>. This algorithm returns "<code>Allowed</code>" unless
   otherwise specified.</p>
      <li data-md="">
-      <p>An <dfn class="dfn-paneled" data-dfn-for="directive" data-dfn-type="dfn" data-export="" id="directive-initialization">initialization</dfn>, which takes a <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/html5/dom.html#document">Document</a></code> or <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>, a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a>, and a <a data-link-type="dfn" href="#policy" id="ref-for-policy-9">policy</a> as
+      <p>An <dfn class="dfn-paneled" data-dfn-for="directive" data-dfn-type="dfn" data-export="" id="directive-initialization">initialization</dfn>, which takes a <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/html5/dom.html#document">Document</a></code> or <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#concept-settings-object-global">global object</a>, a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a>, and a <a data-link-type="dfn" href="#policy" id="ref-for-policy-9">policy</a> as
   arguments. This algorithm is executed during <a href="#initialize-document-csp">§4.2.1 Initialize a Document's CSP list</a>,
   and has no effect unless otherwise specified.</p>
     </ol>
@@ -1983,9 +1981,9 @@ of security-relevant policy decisions.</p>
     <p>A <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url">URL</a></code> <dfn data-dfn-type="dfn" data-export="" id="matches-a-source-list">matches a source list<a class="self-link" href="#matches-a-source-list"></a></dfn> if the algorithm in <a href="#match-url-to-source-list">§6.1.13.3 Does url match source list?</a> returns <code>Matches</code>.</p>
     <h3 class="heading settled" data-level="2.3" id="framework-violation"><span class="secno">2.3. </span><span class="content">Violations</span><a class="self-link" href="#framework-violation"></a></h3>
     <p>A <dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="violation">violation</dfn> represents an action or resource which goes against the
-  set of <a data-link-type="dfn" href="#policy" id="ref-for-policy-10">policy</a> objects associated with a <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>.</p>
+  set of <a data-link-type="dfn" href="#policy" id="ref-for-policy-10">policy</a> objects associated with a <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#concept-settings-object-global">global object</a>.</p>
     <p>Each <a data-link-type="dfn" href="#violation" id="ref-for-violation-1">violation</a> has a <dfn class="dfn-paneled" data-dfn-for="violation" data-dfn-type="dfn" data-export="" id="violation-global-object">global object</dfn>, which
-  is the <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#global-object">global object</a> whose <a data-link-type="dfn" href="#policy" id="ref-for-policy-11">policy</a> has been violated.</p>
+  is the <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#concept-settings-object-global">global object</a> whose <a data-link-type="dfn" href="#policy" id="ref-for-policy-11">policy</a> has been violated.</p>
     <p>Each <a data-link-type="dfn" href="#violation" id="ref-for-violation-2">violation</a> has a <dfn class="dfn-paneled" data-dfn-for="violation" data-dfn-type="dfn" data-export="" id="violation-url">url</dfn> which is its <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-1">global object</a>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url">URL</a></code>.</p>
     <p>Each <a data-link-type="dfn" href="#violation" id="ref-for-violation-3">violation</a> has a <dfn class="dfn-paneled" data-dfn-for="violation" data-dfn-type="dfn" data-export="" id="violation-status">status</dfn> which is a
   non-negative integer representing the HTTP status code of the resource for
@@ -2005,7 +2003,7 @@ of security-relevant policy decisions.</p>
     <p>Each <a data-link-type="dfn" href="#violation" id="ref-for-violation-10">violation</a> has a <dfn class="dfn-paneled" data-dfn-for="violation" data-dfn-type="dfn" data-export="" id="violation-column-number">column number</dfn>, which
   is a non-negative integer.</p>
     <h4 class="heading settled" data-algorithm="Create a violation object for global, policy, and directive" data-level="2.3.1" id="create-violation-for-global"><span class="secno">2.3.1. </span><span class="content"> Create a violation object for <var>global</var>, <var>policy</var>, and <var>directive</var> </span><a class="self-link" href="#create-violation-for-global"></a></h4>
-    <p>Given a <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#global-object">global object</a> (<var>global</var>), a <a data-link-type="dfn" href="#policy" id="ref-for-policy-13">policy</a> (<var>policy</var>), and a
+    <p>Given a <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#concept-settings-object-global">global object</a> (<var>global</var>), a <a data-link-type="dfn" href="#policy" id="ref-for-policy-13">policy</a> (<var>policy</var>), and a
   string (<var>directive</var>), the following algorithm creates a new <a data-link-type="dfn" href="#violation" id="ref-for-violation-11">violation</a> object, and populates it with an initial set of data:</p>
     <ol>
      <li data-md="">
@@ -2139,9 +2137,9 @@ of security-relevant policy decisions.</p>
     Security Policy?</a> is called as part of step #13 of its <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#main-fetch">Main
   Fetch</a> algorithm.</p>
     </ol>
-    <p>A <a data-link-type="dfn" href="#policy" id="ref-for-policy-17">policy</a> is generally enforced upon a <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>, but the
+    <p>A <a data-link-type="dfn" href="#policy" id="ref-for-policy-17">policy</a> is generally enforced upon a <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#concept-settings-object-global">global object</a>, but the
   user agent needs to <a data-link-type="dfn" href="#parse-serialized-policy" id="ref-for-parse-serialized-policy-4">parse</a> any policy
-  delivered via an HTTP response header field before any <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#global-object">global object</a> is created in order to handle directives that require knowledge of a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a>’s details. To that end:</p>
+  delivered via an HTTP response header field before any <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#concept-settings-object-global">global object</a> is created in order to handle directives that require knowledge of a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a>’s details. To that end:</p>
     <ol>
      <li data-md="">
       <p>A <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> has an associated <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">CSP list</a> which
@@ -2279,12 +2277,12 @@ of security-relevant policy decisions.</p>
       <p class="issue" id="issue-3ca5b0d6"><a class="self-link" href="#issue-3ca5b0d6"></a> This concept has been added to WHATWG’s HTML, but is
   missing from W3C’s version. <a href="https://github.com/w3c/html/issues/187">&lt;https://github.com/w3c/html/issues/187></a></p>
      <li data-md="">
-      <p>A <a data-link-type="dfn" href="#policy" id="ref-for-policy-19">policy</a> is <dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="enforced">enforced</dfn> or <dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="monitored">monitored</dfn> for a <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#global-object">global object</a> by inserting it into the <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list-4">CSP list</a>.</p>
+      <p>A <a data-link-type="dfn" href="#policy" id="ref-for-policy-19">policy</a> is <dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="enforced">enforced</dfn> or <dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="monitored">monitored</dfn> for a <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#concept-settings-object-global">global object</a> by inserting it into the <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#concept-settings-object-global">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list-4">CSP list</a>.</p>
      <li data-md="">
       <p><a href="#initialize-global-object-csp">§4.2.2 Initialize a global object’s CSP list</a> is called during the <a data-link-type="dfn" href="https://html.spec.whatwg.org/#initialising-a-new-document-object">initialising a
   new <code>Document</code> object</a> and <a data-link-type="dfn" href="https://html.spec.whatwg.org/#run-a-worker">run a worker</a> algorithms in order to
   bind a set of <a data-link-type="dfn" href="#policy" id="ref-for-policy-20">policy</a> objects associated with a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> to a
-  newly created <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>.</p>
+  newly created <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#concept-settings-object-global">global object</a>.</p>
       <p class="issue" id="issue-1ffaf849"><a class="self-link" href="#issue-1ffaf849"></a> This landed in WHATWG’s HTML, but is missing from
   W3C’s version. <a href="https://github.com/w3c/html/issues/188">&lt;https://github.com/w3c/html/issues/188></a></p>
      <li data-md="">
@@ -2368,7 +2366,7 @@ of security-relevant policy decisions.</p>
       </ol>
     </ol>
     <h4 class="heading settled" data-algorithm="Initialize a global object’s CSP list" data-level="4.2.2" id="initialize-global-object-csp"><span class="secno">4.2.2. </span><span class="content"> Initialize a global object’s <code>CSP list</code> </span><a class="self-link" href="#initialize-global-object-csp"></a></h4>
-    <p>Given a <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#global-object">global object</a> (<var>global</var>), and a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), the user agent performs the following steps in order
+    <p>Given a <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#concept-settings-object-global">global object</a> (<var>global</var>), and a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), the user agent performs the following steps in order
   to initialize <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list-5">CSP list</a>:</p>
     <ol>
      <li data-md="">
@@ -2382,7 +2380,7 @@ of security-relevant policy decisions.</p>
         <p>For each <var>document</var> in <var>documents</var>:</p>
         <ol>
          <li data-md="">
-          <p>For each <var>policy</var> in <var>document</var>’s <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#global-object">global
+          <p>For each <var>policy</var> in <var>document</var>’s <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#concept-settings-object-global">global
   object</a>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list-6">CSP list</a>:</p>
           <ol>
            <li data-md="">
@@ -2404,7 +2402,7 @@ of security-relevant policy decisions.</p>
      <li data-md="">
       <p>Let <var>result</var> be "<code>Allowed</code>".</p>
      <li data-md="">
-      <p>For each <var>policy</var> in <var>element</var>’s <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/html5/dom.html#document">Document</a></code>'s <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list-9">CSP list</a>:</p>
+      <p>For each <var>policy</var> in <var>element</var>’s <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/html5/dom.html#document">Document</a></code>'s <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#concept-settings-object-global">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list-9">CSP list</a>:</p>
       <ol>
        <li data-md="">
         <p>For each <var>directive</var> in <var>policy</var>:</p>
@@ -2468,31 +2466,31 @@ of security-relevant policy decisions.</p>
   report</dfn> may be generated and sent out to a reporting endpoint associated
   with the <a data-link-type="dfn" href="#policy" id="ref-for-policy-24">policy</a>.</p>
     <h3 class="heading settled" data-level="5.1" id="violation-events"><span class="secno">5.1. </span><span class="content"> Violation DOM Events </span><a class="self-link" href="#violation-events"></a></h3>
-<pre class="idl highlight def">[<a class="nv idl-code" data-link-type="constructor" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-securitypolicyviolationevent">Constructor</a>(<span class="kt">DOMString</span> <a class="nv idl-code" data-link-type="argument" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-type">type</a>, <span class="kt">optional</span> <a class="n" data-link-type="idl-name" href="https://w3c.github.io/webappsec-csp/#dictdef-securitypolicyviolationeventinit">SecurityPolicyViolationEventInit</a> <a class="nv idl-code" data-link-type="argument" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-eventinitdict">eventInitDict</a>)]
+<pre class="idl highlight def">[<dfn class="nv idl-code" data-dfn-for="SecurityPolicyViolationEvent" data-dfn-type="constructor" data-export="" data-lt="SecurityPolicyViolationEvent(type, eventInitDict)|SecurityPolicyViolationEvent(type)" id="dom-securitypolicyviolationevent-securitypolicyviolationevent">Constructor<a class="self-link" href="#dom-securitypolicyviolationevent-securitypolicyviolationevent"></a></dfn>(<span class="kt">DOMString</span> <dfn class="nv idl-code" data-dfn-for="SecurityPolicyViolationEvent/SecurityPolicyViolationEvent(type, eventInitDict)" data-dfn-type="argument" data-export="" id="dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-type">type<a class="self-link" href="#dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-type"></a></dfn>, <span class="kt">optional</span> <a class="n" data-link-type="idl-name" href="#dictdef-securitypolicyviolationeventinit" id="ref-for-dictdef-securitypolicyviolationeventinit-1">SecurityPolicyViolationEventInit</a> <dfn class="nv idl-code" data-dfn-for="SecurityPolicyViolationEvent/SecurityPolicyViolationEvent(type, eventInitDict)" data-dfn-type="argument" data-export="" id="dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-eventinitdict">eventInitDict<a class="self-link" href="#dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-eventinitdict"></a></dfn>)]
 <span class="kt">interface</span> <dfn class="nv dfn-paneled idl-code" data-dfn-type="interface" data-export="" id="securitypolicyviolationevent">SecurityPolicyViolationEvent</dfn> : <a class="n" data-link-type="idl-name" href="https://dom.spec.whatwg.org/#event">Event</a> {
-    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="attribute" data-readonly="" data-type="DOMString" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-documenturi">documentURI</a>;
-    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="attribute" data-readonly="" data-type="DOMString" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-referrer">referrer</a>;
-    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="attribute" data-readonly="" data-type="DOMString" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-blockeduri">blockedURI</a>;
-    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="attribute" data-readonly="" data-type="DOMString" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-violateddirective">violatedDirective</a>;
-    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="attribute" data-readonly="" data-type="DOMString" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-effectivedirective">effectiveDirective</a>;
-    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="attribute" data-readonly="" data-type="DOMString" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-originalpolicy">originalPolicy</a>;
-    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="attribute" data-readonly="" data-type="DOMString" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-sourcefile">sourceFile</a>;
-    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">unsigned</span> <span class="kt">short</span> <a class="nv idl-code" data-link-type="attribute" data-readonly="" data-type="unsigned short" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-statuscode">statusCode</a>;
-    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">long</span>           <a class="nv idl-code" data-link-type="attribute" data-readonly="" data-type="long" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-linenumber">lineNumber</a>;
-    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">long</span>           <a class="nv idl-code" data-link-type="attribute" data-readonly="" data-type="long" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-columnnumber">columnNumber</a>;
+    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <dfn class="nv dfn-paneled idl-code" data-dfn-for="SecurityPolicyViolationEvent" data-dfn-type="attribute" data-export="" data-readonly="" data-type="DOMString" id="dom-securitypolicyviolationevent-documenturi">documentURI</dfn>;
+    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <dfn class="nv dfn-paneled idl-code" data-dfn-for="SecurityPolicyViolationEvent" data-dfn-type="attribute" data-export="" data-readonly="" data-type="DOMString" id="dom-securitypolicyviolationevent-referrer">referrer</dfn>;
+    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <dfn class="nv dfn-paneled idl-code" data-dfn-for="SecurityPolicyViolationEvent" data-dfn-type="attribute" data-export="" data-readonly="" data-type="DOMString" id="dom-securitypolicyviolationevent-blockeduri">blockedURI</dfn>;
+    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <dfn class="nv dfn-paneled idl-code" data-dfn-for="SecurityPolicyViolationEvent" data-dfn-type="attribute" data-export="" data-readonly="" data-type="DOMString" id="dom-securitypolicyviolationevent-violateddirective">violatedDirective</dfn>;
+    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <dfn class="nv dfn-paneled idl-code" data-dfn-for="SecurityPolicyViolationEvent" data-dfn-type="attribute" data-export="" data-readonly="" data-type="DOMString" id="dom-securitypolicyviolationevent-effectivedirective">effectiveDirective</dfn>;
+    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <dfn class="nv dfn-paneled idl-code" data-dfn-for="SecurityPolicyViolationEvent" data-dfn-type="attribute" data-export="" data-readonly="" data-type="DOMString" id="dom-securitypolicyviolationevent-originalpolicy">originalPolicy</dfn>;
+    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <dfn class="nv dfn-paneled idl-code" data-dfn-for="SecurityPolicyViolationEvent" data-dfn-type="attribute" data-export="" data-readonly="" data-type="DOMString" id="dom-securitypolicyviolationevent-sourcefile">sourceFile</dfn>;
+    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">unsigned</span> <span class="kt">short</span> <dfn class="nv dfn-paneled idl-code" data-dfn-for="SecurityPolicyViolationEvent" data-dfn-type="attribute" data-export="" data-readonly="" data-type="unsigned short" id="dom-securitypolicyviolationevent-statuscode">statusCode</dfn>;
+    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">long</span>           <dfn class="nv dfn-paneled idl-code" data-dfn-for="SecurityPolicyViolationEvent" data-dfn-type="attribute" data-export="" data-readonly="" data-type="long" id="dom-securitypolicyviolationevent-linenumber">lineNumber</dfn>;
+    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">long</span>           <dfn class="nv dfn-paneled idl-code" data-dfn-for="SecurityPolicyViolationEvent" data-dfn-type="attribute" data-export="" data-readonly="" data-type="long" id="dom-securitypolicyviolationevent-columnnumber">columnNumber</dfn>;
 };
 
-<span class="kt">dictionary</span> <a class="nv idl-code" data-link-type="dictionary" href="https://w3c.github.io/webappsec-csp/#dictdef-securitypolicyviolationeventinit">SecurityPolicyViolationEventInit</a> : <a class="n" data-link-type="idl-name" href="https://dom.spec.whatwg.org/#dictdef-eventinit">EventInit</a> {
-    <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="dict-member" data-type="DOMString      " href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationeventinit-documenturi">documentURI</a>;
-    <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="dict-member" data-type="DOMString      " href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationeventinit-referrer">referrer</a>;
-    <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="dict-member" data-type="DOMString      " href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationeventinit-blockeduri">blockedURI</a>;
-    <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="dict-member" data-type="DOMString      " href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationeventinit-violateddirective">violatedDirective</a>;
-    <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="dict-member" data-type="DOMString      " href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationeventinit-effectivedirective">effectiveDirective</a>;
-    <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="dict-member" data-type="DOMString      " href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationeventinit-originalpolicy">originalPolicy</a>;
-    <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="dict-member" data-type="DOMString      " href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationeventinit-sourcefile">sourceFile</a>;
-    <span class="kt">unsigned</span> <span class="kt">short</span> <a class="nv idl-code" data-link-type="dict-member" data-type="unsigned short " href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationeventinit-statuscode">statusCode</a>;
-    <span class="kt">long</span>           <a class="nv idl-code" data-link-type="dict-member" data-type="long           " href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationeventinit-linenumber">lineNumber</a>;
-    <span class="kt">long</span>           <a class="nv idl-code" data-link-type="dict-member" data-type="long           " href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationeventinit-columnnumber">columnNumber</a>;
+<span class="kt">dictionary</span> <dfn class="nv dfn-paneled idl-code" data-dfn-type="dictionary" data-export="" id="dictdef-securitypolicyviolationeventinit">SecurityPolicyViolationEventInit</dfn> : <a class="n" data-link-type="idl-name" href="https://dom.spec.whatwg.org/#dictdef-eventinit">EventInit</a> {
+    <span class="kt">DOMString</span>      <dfn class="nv idl-code" data-dfn-for="SecurityPolicyViolationEventInit" data-dfn-type="dict-member" data-export="" data-type="DOMString      " id="dom-securitypolicyviolationeventinit-documenturi">documentURI<a class="self-link" href="#dom-securitypolicyviolationeventinit-documenturi"></a></dfn>;
+    <span class="kt">DOMString</span>      <dfn class="nv idl-code" data-dfn-for="SecurityPolicyViolationEventInit" data-dfn-type="dict-member" data-export="" data-type="DOMString      " id="dom-securitypolicyviolationeventinit-referrer">referrer<a class="self-link" href="#dom-securitypolicyviolationeventinit-referrer"></a></dfn>;
+    <span class="kt">DOMString</span>      <dfn class="nv idl-code" data-dfn-for="SecurityPolicyViolationEventInit" data-dfn-type="dict-member" data-export="" data-type="DOMString      " id="dom-securitypolicyviolationeventinit-blockeduri">blockedURI<a class="self-link" href="#dom-securitypolicyviolationeventinit-blockeduri"></a></dfn>;
+    <span class="kt">DOMString</span>      <dfn class="nv idl-code" data-dfn-for="SecurityPolicyViolationEventInit" data-dfn-type="dict-member" data-export="" data-type="DOMString      " id="dom-securitypolicyviolationeventinit-violateddirective">violatedDirective<a class="self-link" href="#dom-securitypolicyviolationeventinit-violateddirective"></a></dfn>;
+    <span class="kt">DOMString</span>      <dfn class="nv idl-code" data-dfn-for="SecurityPolicyViolationEventInit" data-dfn-type="dict-member" data-export="" data-type="DOMString      " id="dom-securitypolicyviolationeventinit-effectivedirective">effectiveDirective<a class="self-link" href="#dom-securitypolicyviolationeventinit-effectivedirective"></a></dfn>;
+    <span class="kt">DOMString</span>      <dfn class="nv idl-code" data-dfn-for="SecurityPolicyViolationEventInit" data-dfn-type="dict-member" data-export="" data-type="DOMString      " id="dom-securitypolicyviolationeventinit-originalpolicy">originalPolicy<a class="self-link" href="#dom-securitypolicyviolationeventinit-originalpolicy"></a></dfn>;
+    <span class="kt">DOMString</span>      <dfn class="nv idl-code" data-dfn-for="SecurityPolicyViolationEventInit" data-dfn-type="dict-member" data-export="" data-type="DOMString      " id="dom-securitypolicyviolationeventinit-sourcefile">sourceFile<a class="self-link" href="#dom-securitypolicyviolationeventinit-sourcefile"></a></dfn>;
+    <span class="kt">unsigned</span> <span class="kt">short</span> <dfn class="nv idl-code" data-dfn-for="SecurityPolicyViolationEventInit" data-dfn-type="dict-member" data-export="" data-type="unsigned short " id="dom-securitypolicyviolationeventinit-statuscode">statusCode<a class="self-link" href="#dom-securitypolicyviolationeventinit-statuscode"></a></dfn>;
+    <span class="kt">long</span>           <dfn class="nv idl-code" data-dfn-for="SecurityPolicyViolationEventInit" data-dfn-type="dict-member" data-export="" data-type="long           " id="dom-securitypolicyviolationeventinit-linenumber">lineNumber<a class="self-link" href="#dom-securitypolicyviolationeventinit-linenumber"></a></dfn>;
+    <span class="kt">long</span>           <dfn class="nv idl-code" data-dfn-for="SecurityPolicyViolationEventInit" data-dfn-type="dict-member" data-export="" data-type="long           " id="dom-securitypolicyviolationeventinit-columnnumber">columnNumber<a class="self-link" href="#dom-securitypolicyviolationeventinit-columnnumber"></a></dfn>;
 };
 </pre>
     <h3 class="heading settled" data-level="5.2" id="deprecated-serialize-violation"><span class="secno">5.2. </span><span class="content"> Obtain the deprecated serialization of <var>violation</var> </span><a class="self-link" href="#deprecated-serialize-violation"></a></h3>
@@ -2558,47 +2556,47 @@ of security-relevant policy decisions.</p>
   attributes initialized as follows:</p>
       <dl>
        <dt data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-documenturi">documentURI</a></code></p>
+        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-documenturi" id="ref-for-dom-securitypolicyviolationevent-documenturi-1">documentURI</a></code></p>
        <dd data-md="">
         <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-url" id="ref-for-violation-url-2">url</a></p>
        <dt data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-referrer">referrer</a></code></p>
+        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-referrer" id="ref-for-dom-securitypolicyviolationevent-referrer-1">referrer</a></code></p>
        <dd data-md="">
         <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-referrer" id="ref-for-violation-referrer-3">referrer</a></p>
        <dt data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-blockeduri">blockedURI</a></code></p>
+        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-blockeduri" id="ref-for-dom-securitypolicyviolationevent-blockeduri-1">blockedURI</a></code></p>
        <dd data-md="">
         <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-resource" id="ref-for-violation-resource-5">resource</a></p>
        <dt data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-effectivedirective">effectiveDirective</a></code></p>
+        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-effectivedirective" id="ref-for-dom-securitypolicyviolationevent-effectivedirective-1">effectiveDirective</a></code></p>
        <dd data-md="">
         <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-effective-directive" id="ref-for-violation-effective-directive-4">effective directive</a></p>
        <dt data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-violateddirective">violatedDirective</a></code></p>
+        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-violateddirective" id="ref-for-dom-securitypolicyviolationevent-violateddirective-1">violatedDirective</a></code></p>
        <dd data-md="">
         <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-effective-directive" id="ref-for-violation-effective-directive-5">effective directive</a></p>
        <dt data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-originalpolicy">originalPolicy</a></code></p>
+        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-originalpolicy" id="ref-for-dom-securitypolicyviolationevent-originalpolicy-1">originalPolicy</a></code></p>
        <dd data-md="">
         <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-policy" id="ref-for-violation-policy-4">policy</a></p>
        <dt data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-sourcefile">sourceFile</a></code></p>
+        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-sourcefile" id="ref-for-dom-securitypolicyviolationevent-sourcefile-1">sourceFile</a></code></p>
        <dd data-md="">
         <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-source-file" id="ref-for-violation-source-file-4">source file</a></p>
        <dt data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-statuscode">statusCode</a></code></p>
+        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-statuscode" id="ref-for-dom-securitypolicyviolationevent-statuscode-1">statusCode</a></code></p>
        <dd data-md="">
         <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-status" id="ref-for-violation-status-3">status</a></p>
        <dt data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-linenumber">lineNumber</a></code></p>
+        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-linenumber" id="ref-for-dom-securitypolicyviolationevent-linenumber-1">lineNumber</a></code></p>
        <dd data-md="">
         <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-line-number" id="ref-for-violation-line-number-3">line number</a></p>
        <dt data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-columnnumber">columnNumber</a></code></p>
+        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-columnnumber" id="ref-for-dom-securitypolicyviolationevent-columnnumber-1">columnNumber</a></code></p>
        <dd data-md="">
         <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-column-number" id="ref-for-violation-column-number-3">column number</a></p>
       </dl>
-      <p class="note" role="note">Note: Both <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-effectivedirective">effectiveDirective</a></code> and <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-violateddirective">violatedDirective</a></code> are the same value.
+      <p class="note" role="note">Note: Both <code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-effectivedirective" id="ref-for-dom-securitypolicyviolationevent-effectivedirective-2">effectiveDirective</a></code> and <code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-violateddirective" id="ref-for-dom-securitypolicyviolationevent-violateddirective-2">violatedDirective</a></code> are the same value.
   This is intentional to maintain backwards compatibility.</p>
      <li data-md="">
       <p>If <var>violation</var>’s <a data-link-type="dfn" href="#violation-policy" id="ref-for-violation-policy-5">policy</a>’s <a data-link-type="dfn" href="#policy-directive-set" id="ref-for-policy-directive-set-6">directive
@@ -3651,11 +3649,15 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
        <li data-md="">
         <p>If <var>expression</var> does not contain a <a data-link-type="grammar" href="#grammardef-port-part" id="ref-for-grammardef-port-part-2"><code>port-part</code></a>, and <var>url</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-port">port</a></code> is not the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#default-port">default port</a> for <var>url</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code>, return "<code>Does Not Match</code>".</p>
        <li data-md="">
-        <p>If <var>expression</var> does contain a <a data-link-type="grammar" href="#grammardef-port-part" id="ref-for-grammardef-port-part-3"><code>port-part</code></a>:</p>
+        <p>If <var>expression</var> does contain a <a data-link-type="grammar" href="#grammardef-port-part" id="ref-for-grammardef-port-part-3"><code>port-part</code></a>, return
+  "<code>Does Not Match</code>" unless one of the following conditions is met:</p>
         <ol>
          <li data-md="">
-          <p>If <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-port-part" id="ref-for-grammardef-port-part-4"><code>port-part</code></a> is not "<code>*</code>", and
-  is not the same number as <var>url</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-port">port</a></code>, return "<code>Does Not Match</code>".</p>
+          <p><var>expression</var>’s <a data-link-type="grammar" href="#grammardef-port-part" id="ref-for-grammardef-port-part-4"><code>port-part</code></a> is "<code>*</code>".</p>
+         <li data-md="">
+          <p><var>expression</var>’s <a data-link-type="grammar" href="#grammardef-port-part" id="ref-for-grammardef-port-part-5"><code>port-part</code></a> is the same number as <var>url</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-port">port</a></code>.</p>
+         <li data-md="">
+          <p><var>expression</var>’s <a data-link-type="grammar" href="#grammardef-port-part" id="ref-for-grammardef-port-part-6"><code>port-part</code></a> is <code>80</code>, and <var>url</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-port">port</a></code> is <code>443</code>.</p>
         </ol>
        <li data-md="">
         <p>If <var>expression</var> contains a non-empty <a data-link-type="grammar" href="#grammardef-path-part" id="ref-for-grammardef-path-part-2"><code>path-part</code></a>, and <var>redirect count</var> is 0, then:</p>
@@ -3906,7 +3908,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
   returns "<code>Allowed</code>" if <var>base</var> may be used as the value of a <code><a data-link-type="element" href="https://www.w3.org/TR/html5/document-metadata.html#the-base-element">base</a></code> element’s <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/multipage/semantics.html#attr-base-href">href</a></code> attribute, and "<code>Blocked</code>" otherwise:</p>
     <ol>
      <li data-md="">
-      <p>For each <var>policy</var> in <var>document</var>’s <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list-12">csp list</a>:</p>
+      <p>For each <var>policy</var> in <var>document</var>’s <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#concept-settings-object-global">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list-12">csp list</a>:</p>
       <ol>
        <li data-md="">
         <p>Let <var>source list</var> be <code>null</code>.</p>
@@ -3920,7 +3922,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
         <p>If the result of executing <a href="#match-url-to-source-list">§6.1.13.3 Does url match source list?</a> on <var>base</var> and <var>source list</var> is "<code>Does Not Match</code>":</p>
         <ol>
          <li data-md="">
-          <p>Let <var>violation</var> be the result of executing <a href="#create-violation-for-global">§2.3.1 Create a violation object for global, policy, and directive</a> on <var>document</var>’s <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#global-object">global
+          <p>Let <var>violation</var> be the result of executing <a href="#create-violation-for-global">§2.3.1 Create a violation object for global, policy, and directive</a> on <var>document</var>’s <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#concept-settings-object-global">global
   object</a>, <var>policy</var>, and "<a data-link-type="dfn" href="#base-uri" id="ref-for-base-uri-1"><code>base-uri</code></a>".</p>
          <li data-md="">
           <p>Set <var>violation</var>’s <a data-link-type="dfn" href="#violation-resource" id="ref-for-violation-resource-6">resource</a> to "<code>inline</code>".</p>
@@ -3974,7 +3976,7 @@ directive-value = "" / <a data-link-type="grammar" href="https://tools.ietf.org/
     <p>This directive’s <a data-link-type="dfn" href="#directive-initialization" id="ref-for-directive-initialization-3">initialization</a> algorithm is
   responsible for adjusting a <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/html5/dom.html#document">Document</a></code>'s <a data-link-type="dfn" href="https://www.w3.org/TR/html5/browsers.html#forced-sandboxing-flag-set">forced sandboxing flag set</a> according to the <a data-link-type="dfn" href="#sandbox" id="ref-for-sandbox-1"><code>sandbox</code></a> values present in its policies, as
   follows:</p>
-    <p>Given a <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/html5/dom.html#document">Document</a></code> or <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#global-object">global object</a> (<var>context</var>), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), and a <a data-link-type="dfn" href="#policy" id="ref-for-policy-49">policy</a> (<var>policy</var>):</p>
+    <p>Given a <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/html5/dom.html#document">Document</a></code> or <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#concept-settings-object-global">global object</a> (<var>context</var>), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), and a <a data-link-type="dfn" href="#policy" id="ref-for-policy-49">policy</a> (<var>policy</var>):</p>
     <ol>
      <li data-md="">
       <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition-10">disposition</a> is not "<code>Enforce</code>", or <var>context</var> is not a <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/html5/dom.html#document">Document</a></code>, then abort this algorithm.</p>
@@ -4069,6 +4071,8 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
       <p><a data-link-type="biblio" href="#biblio-mix">[MIX]</a> defines <code>block-all-mixed-content</code></p>
      <li data-md="">
       <p><a data-link-type="biblio" href="#biblio-upgrade-insecure-requests">[UPGRADE-INSECURE-REQUESTS]</a> defines <code>upgrade-insecure-requests</code></p>
+     <li data-md="">
+      <p><a data-link-type="biblio" href="#biblio-sri">[SRI]</a> defines <code>require-sri-for</code></p>
     </ul>
     <p>Extensions to CSP MUST register themselves via the process outlined in <a data-link-type="biblio" href="#biblio-rfc7762">[RFC7762]</a>. In particular, note the criteria discussed in Section 4.2 of
   that document.</p>
@@ -4397,8 +4401,20 @@ rest of Google’s CSP Cabal.</p>
    <li><a href="#grammardef-ancestor-source-list">ancestor-source-list</a><span>, in §6.3.2</span>
    <li><a href="#grammardef-base64-value">base64-value</a><span>, in §2.2.1</span>
    <li><a href="#base-uri">base-uri</a><span>, in §6.2.1</span>
+   <li>
+    blockedURI
+    <ul>
+     <li><a href="#dom-securitypolicyviolationevent-blockeduri">attribute for SecurityPolicyViolationEvent</a><span>, in §5.1</span>
+     <li><a href="#dom-securitypolicyviolationeventinit-blockeduri">dict-member for SecurityPolicyViolationEventInit</a><span>, in §5.1</span>
+    </ul>
    <li><a href="#child-src">child-src</a><span>, in §6.1.1</span>
    <li><a href="#violation-column-number">column number</a><span>, in §2.3</span>
+   <li>
+    columnNumber
+    <ul>
+     <li><a href="#dom-securitypolicyviolationevent-columnnumber">attribute for SecurityPolicyViolationEvent</a><span>, in §5.1</span>
+     <li><a href="#dom-securitypolicyviolationeventinit-columnnumber">dict-member for SecurityPolicyViolationEventInit</a><span>, in §5.1</span>
+    </ul>
    <li><a href="#connect-src">connect-src</a><span>, in §6.1.2</span>
    <li><a href="#header-content-security-policy">Content-Security-Policy</a><span>, in §3.1</span>
    <li><a href="#content-security-policy">Content Security Policy</a><span>, in §1</span>
@@ -4411,10 +4427,22 @@ rest of Google’s CSP Cabal.</p>
    <li><a href="#grammardef-directive-value">directive-value</a><span>, in §2.2</span>
    <li><a href="#policy-disposition">disposition</a><span>, in §2.1</span>
    <li>
+    documentURI
+    <ul>
+     <li><a href="#dom-securitypolicyviolationevent-documenturi">attribute for SecurityPolicyViolationEvent</a><span>, in §5.1</span>
+     <li><a href="#dom-securitypolicyviolationeventinit-documenturi">dict-member for SecurityPolicyViolationEventInit</a><span>, in §5.1</span>
+    </ul>
+   <li>
     effective directive
     <ul>
      <li><a href="#violation-effective-directive">dfn for violation</a><span>, in §2.3</span>
      <li><a href="#request-effective-directive">dfn for request</a><span>, in §6.1.13.5</span>
+    </ul>
+   <li>
+    effectiveDirective
+    <ul>
+     <li><a href="#dom-securitypolicyviolationevent-effectivedirective">attribute for SecurityPolicyViolationEvent</a><span>, in §5.1</span>
+     <li><a href="#dom-securitypolicyviolationeventinit-effectivedirective">dict-member for SecurityPolicyViolationEventInit</a><span>, in §5.1</span>
     </ul>
    <li><a href="#embedding-document">embedding document</a><span>, in §4.2</span>
    <li><a href="#enforced">enforced</a><span>, in §4.2</span>
@@ -4435,6 +4463,12 @@ rest of Google’s CSP Cabal.</p>
    <li><a href="#directive-inline-check">inline check</a><span>, in §2.2</span>
    <li><a href="#grammardef-keyword-source">keyword-source</a><span>, in §2.2.1</span>
    <li><a href="#violation-line-number">line number</a><span>, in §2.3</span>
+   <li>
+    lineNumber
+    <ul>
+     <li><a href="#dom-securitypolicyviolationevent-linenumber">attribute for SecurityPolicyViolationEvent</a><span>, in §5.1</span>
+     <li><a href="#dom-securitypolicyviolationeventinit-linenumber">dict-member for SecurityPolicyViolationEventInit</a><span>, in §5.1</span>
+    </ul>
    <li><a href="#manifest-src">manifest-src</a><span>, in §6.1.7</span>
    <li><a href="#matches-a-source-list">matches a source list</a><span>, in §2.2.1</span>
    <li><a href="#media-src">media-src</a><span>, in §6.1.8</span>
@@ -4443,6 +4477,12 @@ rest of Google’s CSP Cabal.</p>
    <li><a href="#grammardef-nonce-source">nonce-source</a><span>, in §2.2.1</span>
    <li><a href="#grammardef-none">'none'</a><span>, in §2.2.1</span>
    <li><a href="#object-src">object-src</a><span>, in §6.1.9</span>
+   <li>
+    originalPolicy
+    <ul>
+     <li><a href="#dom-securitypolicyviolationevent-originalpolicy">attribute for SecurityPolicyViolationEvent</a><span>, in §5.1</span>
+     <li><a href="#dom-securitypolicyviolationeventinit-originalpolicy">dict-member for SecurityPolicyViolationEventInit</a><span>, in §5.1</span>
+    </ul>
    <li><a href="#parse-serialized-policy">parse a serialized CSP</a><span>, in §2.1</span>
    <li><a href="#grammardef-path-part">path-part</a><span>, in §2.2.1</span>
    <li><a href="#plugin-types">plugin-types</a><span>, in §6.2.2</span>
@@ -4455,7 +4495,13 @@ rest of Google’s CSP Cabal.</p>
    <li><a href="#grammardef-port-part">port-part</a><span>, in §2.2.1</span>
    <li><a href="#directive-post-request-check">post-request check</a><span>, in §2.2</span>
    <li><a href="#directive-pre-request-check">pre-request check</a><span>, in §2.2</span>
-   <li><a href="#violation-referrer">referrer</a><span>, in §2.3</span>
+   <li>
+    referrer
+    <ul>
+     <li><a href="#violation-referrer">dfn for violation</a><span>, in §2.3</span>
+     <li><a href="#dom-securitypolicyviolationevent-referrer">attribute for SecurityPolicyViolationEvent</a><span>, in §5.1</span>
+     <li><a href="#dom-securitypolicyviolationeventinit-referrer">dict-member for SecurityPolicyViolationEventInit</a><span>, in §5.1</span>
+    </ul>
    <li><a href="#report-to">report-to</a><span>, in §6.4.2</span>
    <li><a href="#report-uri">report-uri</a><span>, in §6.4.1</span>
    <li><a href="#violation-resource">resource</a><span>, in §2.3</span>
@@ -4465,18 +4511,33 @@ rest of Google’s CSP Cabal.</p>
    <li><a href="#grammardef-scheme-source">scheme-source</a><span>, in §2.2.1</span>
    <li><a href="#script-src">script-src</a><span>, in §6.1.10</span>
    <li><a href="#securitypolicyviolationevent">SecurityPolicyViolationEvent</a><span>, in §5.1</span>
+   <li><a href="#dictdef-securitypolicyviolationeventinit">SecurityPolicyViolationEventInit</a><span>, in §5.1</span>
+   <li><a href="#dom-securitypolicyviolationevent-securitypolicyviolationevent">SecurityPolicyViolationEvent(type)</a><span>, in §5.1</span>
+   <li><a href="#dom-securitypolicyviolationevent-securitypolicyviolationevent">SecurityPolicyViolationEvent(type, eventInitDict)</a><span>, in §5.1</span>
    <li><a href="#grammardef-self">'self'</a><span>, in §2.2.1</span>
    <li><a href="#serialized-csp">serialized CSP</a><span>, in §2.1</span>
-   <li><a href="#grammardef-serialized-directive">serialized-directive</a><span>, in §2.2</span>
    <li><a href="#serialized-directive">serialized directive</a><span>, in §2.2</span>
+   <li><a href="#grammardef-serialized-directive">serialized-directive</a><span>, in §2.2</span>
    <li><a href="#grammardef-serialized-policy">serialized-policy</a><span>, in §2.1</span>
    <li><a href="#serialized-source-list">serialized source list</a><span>, in §2.2.1</span>
    <li><a href="#grammardef-serialized-source-list">serialized-source-list</a><span>, in §2.2.1</span>
-   <li><a href="#source-expression">source expression</a><span>, in §2.2.1</span>
    <li><a href="#grammardef-source-expression">source-expression</a><span>, in §2.2.1</span>
+   <li><a href="#source-expression">source expression</a><span>, in §2.2.1</span>
    <li><a href="#violation-source-file">source file</a><span>, in §2.3</span>
+   <li>
+    sourceFile
+    <ul>
+     <li><a href="#dom-securitypolicyviolationevent-sourcefile">attribute for SecurityPolicyViolationEvent</a><span>, in §5.1</span>
+     <li><a href="#dom-securitypolicyviolationeventinit-sourcefile">dict-member for SecurityPolicyViolationEventInit</a><span>, in §5.1</span>
+    </ul>
    <li><a href="#source-lists">source lists</a><span>, in §2.2.1</span>
    <li><a href="#violation-status">status</a><span>, in §2.3</span>
+   <li>
+    statusCode
+    <ul>
+     <li><a href="#dom-securitypolicyviolationevent-statuscode">attribute for SecurityPolicyViolationEvent</a><span>, in §5.1</span>
+     <li><a href="#dom-securitypolicyviolationeventinit-statuscode">dict-member for SecurityPolicyViolationEventInit</a><span>, in §5.1</span>
+    </ul>
    <li><a href="#grammardef-strict-dynamic">'strict-dynamic'</a><span>, in §2.2.1</span>
    <li><a href="#style-src">style-src</a><span>, in §6.1.11</span>
    <li><a href="#grammardef-unsafe-eval">'unsafe-eval'</a><span>, in §2.2.1</span>
@@ -4484,6 +4545,12 @@ rest of Google’s CSP Cabal.</p>
    <li><a href="#grammardef-unsafe-inline">'unsafe-inline'</a><span>, in §2.2.1</span>
    <li><a href="#violation-url">url</a><span>, in §2.3</span>
    <li><a href="#directive-value">value</a><span>, in §2.2</span>
+   <li>
+    violatedDirective
+    <ul>
+     <li><a href="#dom-securitypolicyviolationevent-violateddirective">attribute for SecurityPolicyViolationEvent</a><span>, in §5.1</span>
+     <li><a href="#dom-securitypolicyviolationeventinit-violateddirective">dict-member for SecurityPolicyViolationEventInit</a><span>, in §5.1</span>
+    </ul>
    <li><a href="#violation">violation</a><span>, in §2.3</span>
    <li><a href="#violation-report">violation report</a><span>, in §5</span>
    <li><a href="#worker-src">worker-src</a><span>, in §6.1.12</span>
@@ -4579,7 +4646,7 @@ rest of Google’s CSP Cabal.</p>
      <li><a href="https://www.w3.org/TR/html5/infrastructure.html#concept-event-fire">fire</a>
      <li><a href="https://www.w3.org/TR/html5/browsers.html#forced-sandboxing-flag-set">forced sandboxing flag set</a>
      <li><a href="https://www.w3.org/TR/html5/obsolete.html#frame">frame</a>
-     <li><a href="https://www.w3.org/TR/html5/webappapis.html#global-object">global object</a>
+     <li><a href="https://www.w3.org/TR/html5/webappapis.html#concept-settings-object-global">global object</a>
      <li><a href="https://www.w3.org/TR/html5/document-metadata.html#attr-meta-http-equiv">http-equiv</a>
      <li><a href="https://www.w3.org/TR/html5/embedded-content-0.html#the-iframe-element">iframe</a>
      <li><a href="https://www.w3.org/TR/html5/webappapis.html#incumbent-settings-object">incumbent settings object</a>
@@ -4686,24 +4753,6 @@ rest of Google’s CSP Cabal.</p>
      <li><a href="https://www.w3.org/TR/workers/#worker">Worker</a>
     </ul>
    <li>
-    <a data-link-type="biblio">[CSP1]</a> defines the following terms:
-    <ul>
-     <li><a href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-securitypolicyviolationevent">SecurityPolicyViolationEvent(type, eventInitDict)</a>
-     <li><a href="https://w3c.github.io/webappsec-csp/#dictdef-securitypolicyviolationeventinit">SecurityPolicyViolationEventInit</a>
-     <li><a href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-blockeduri">blockedURI</a>
-     <li><a href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-columnnumber">columnNumber</a>
-     <li><a href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-documenturi">documentURI</a>
-     <li><a href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-effectivedirective">effectiveDirective</a>
-     <li><a href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-eventinitdict">eventInitDict</a>
-     <li><a href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-linenumber">lineNumber</a>
-     <li><a href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-originalpolicy">originalPolicy</a>
-     <li><a href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-referrer">referrer</a>
-     <li><a href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-sourcefile">sourceFile</a>
-     <li><a href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-statuscode">statusCode</a>
-     <li><a href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-type">type</a>
-     <li><a href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-violateddirective">violatedDirective</a>
-    </ul>
-   <li>
     <a data-link-type="biblio">[css-cascade-4]</a> defines the following terms:
     <ul>
      <li><a href="https://drafts.csswg.org/css-cascade-4/#at-ruledef-import">@import</a>
@@ -4731,8 +4780,6 @@ rest of Google’s CSP Cabal.</p>
   <h2 class="no-num no-ref heading settled" id="references"><span class="content">References</span><a class="self-link" href="#references"></a></h2>
   <h3 class="no-num no-ref heading settled" id="normative"><span class="content">Normative References</span><a class="self-link" href="#normative"></a></h3>
   <dl>
-   <dt id="biblio-csp1">[CSP1]
-   <dd>Brandon Sterne; Adam Barth. <a href="http://dvcs.w3.org/hg/content-security-policy/raw-file/tip/csp-1.0-specification.html">Content Security Policy 1.0</a>. 19 February 2015. NOTE. URL: <a href="http://dvcs.w3.org/hg/content-security-policy/raw-file/tip/csp-1.0-specification.html">http://dvcs.w3.org/hg/content-security-policy/raw-file/tip/csp-1.0-specification.html</a>
    <dt id="biblio-css-cascade-4">[CSS-CASCADE-4]
    <dd>Elika Etemad; Tab Atkins Jr.. <a href="http://dev.w3.org/csswg/css-cascade/">CSS Cascading and Inheritance Level 4</a>. 14 January 2016. CR. URL: <a href="http://dev.w3.org/csswg/css-cascade/">http://dev.w3.org/csswg/css-cascade/</a>
    <dt id="biblio-cssom">[CSSOM]
@@ -4744,7 +4791,7 @@ rest of Google’s CSP Cabal.</p>
    <dt id="biblio-html">[HTML]
    <dd>Ian Hickson. <a href="https://html.spec.whatwg.org/multipage/">HTML Standard</a>. Living Standard. URL: <a href="https://html.spec.whatwg.org/multipage/">https://html.spec.whatwg.org/multipage/</a>
    <dt id="biblio-html5">[HTML5]
-   <dd>Ian Hickson; et al. <a href="http://www.w3.org/html/wg/drafts/html/master/">HTML5</a>. 28 October 2014. REC. URL: <a href="http://www.w3.org/html/wg/drafts/html/master/">http://www.w3.org/html/wg/drafts/html/master/</a>
+   <dd>Ian Hickson; et al. <a href="https://www.w3.org/html/wg/drafts/html/master/">HTML5</a>. 28 October 2014. REC. URL: <a href="https://www.w3.org/html/wg/drafts/html/master/">https://www.w3.org/html/wg/drafts/html/master/</a>
    <dt id="biblio-oob-reporting">[OOB-REPORTING]
    <dd>Ilya Gregorik; Mike West. <a href="https://mikewest.github.io/error-reporting/">Out-of-band Reporting</a>. URL: <a href="https://mikewest.github.io/error-reporting/">https://mikewest.github.io/error-reporting/</a>
    <dt id="biblio-rfc2119">[RFC2119]
@@ -4785,7 +4832,7 @@ rest of Google’s CSP Cabal.</p>
   <h3 class="no-num no-ref heading settled" id="informative"><span class="content">Informative References</span><a class="self-link" href="#informative"></a></h3>
   <dl>
    <dt id="biblio-appmanifest">[APPMANIFEST]
-   <dd>Marcos Caceres; et al. <a href="https://w3c.github.io/manifest/">Web App Manifest</a>. 26 April 2016. WD. URL: <a href="https://w3c.github.io/manifest/">https://w3c.github.io/manifest/</a>
+   <dd>Marcos Caceres; et al. <a href="https://w3c.github.io/manifest/">Web App Manifest</a>. 9 June 2016. WD. URL: <a href="https://w3c.github.io/manifest/">https://w3c.github.io/manifest/</a>
    <dt id="biblio-beacon">[BEACON]
    <dd>Ilya Grigorik; et al. <a href="https://w3c.github.io/beacon/">Beacon</a>. 25 February 2016. WD. URL: <a href="https://w3c.github.io/beacon/">https://w3c.github.io/beacon/</a>
    <dt id="biblio-csp2">[CSP2]
@@ -4801,42 +4848,42 @@ rest of Google’s CSP Cabal.</p>
    <dt id="biblio-timing">[TIMING]
    <dd>Paul Stone. <a href="http://www.contextis.com/documents/2/Browser_Timing_Attacks.pdf">Pixel Perfect Timing Attacks with HTML5</a>. URL: <a href="http://www.contextis.com/documents/2/Browser_Timing_Attacks.pdf">http://www.contextis.com/documents/2/Browser_Timing_Attacks.pdf</a>
    <dt id="biblio-uisecurity">[UISECURITY]
-   <dd>Giorgio Maone; et al. <a href="http://dvcs.w3.org/hg/user-interface-safety/raw-file/tip/user-interface-safety.html">User Interface Security Directives for Content Security Policy</a>. 18 March 2014. LCWD. URL: <a href="http://dvcs.w3.org/hg/user-interface-safety/raw-file/tip/user-interface-safety.html">http://dvcs.w3.org/hg/user-interface-safety/raw-file/tip/user-interface-safety.html</a>
+   <dd>Brad Hill. <a href="https://w3c.github.io/webappsec-uisecurity/index.html">User Interface Security and the Visibility API</a>. 7 June 2016. WD. URL: <a href="https://w3c.github.io/webappsec-uisecurity/index.html">https://w3c.github.io/webappsec-uisecurity/index.html</a>
    <dt id="biblio-upgrade-insecure-requests">[UPGRADE-INSECURE-REQUESTS]
    <dd>Mike West. <a href="https://w3c.github.io/webappsec-upgrade-insecure-requests/">Upgrade Insecure Requests</a>. 8 October 2015. CR. URL: <a href="https://w3c.github.io/webappsec-upgrade-insecure-requests/">https://w3c.github.io/webappsec-upgrade-insecure-requests/</a>
    <dt id="biblio-websockets">[WEBSOCKETS]
-   <dd>Ian Hickson. <a href="http://www.w3.org/TR/websockets/">The WebSocket API</a>. 20 September 2012. CR. URL: <a href="http://www.w3.org/TR/websockets/">http://www.w3.org/TR/websockets/</a>
+   <dd>Ian Hickson. <a href="https://www.w3.org/TR/websockets/">The WebSocket API</a>. 20 September 2012. CR. URL: <a href="https://www.w3.org/TR/websockets/">https://www.w3.org/TR/websockets/</a>
    <dt id="biblio-xhr">[XHR]
    <dd>Anne van Kesteren. <a href="https://xhr.spec.whatwg.org/">XMLHttpRequest Standard</a>. Living Standard. URL: <a href="https://xhr.spec.whatwg.org/">https://xhr.spec.whatwg.org/</a>
    <dt id="biblio-xslt">[XSLT]
-   <dd>James Clark. <a href="http://www.w3.org/TR/xslt">XSL Transformations (XSLT) Version 1.0</a>. 16 November 1999. REC. URL: <a href="http://www.w3.org/TR/xslt">http://www.w3.org/TR/xslt</a>
+   <dd>James Clark. <a href="https://www.w3.org/TR/xslt">XSL Transformations (XSLT) Version 1.0</a>. 16 November 1999. REC. URL: <a href="https://www.w3.org/TR/xslt">https://www.w3.org/TR/xslt</a>
   </dl>
   <h2 class="no-num no-ref heading settled" id="idl-index"><span class="content">IDL Index</span><a class="self-link" href="#idl-index"></a></h2>
-<pre class="idl def">[<a class="nv idl-code" data-link-type="constructor" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-securitypolicyviolationevent">Constructor</a>(<span class="kt">DOMString</span> <a class="nv idl-code" data-link-type="argument" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-type">type</a>, <span class="kt">optional</span> <a class="n" data-link-type="idl-name" href="https://w3c.github.io/webappsec-csp/#dictdef-securitypolicyviolationeventinit">SecurityPolicyViolationEventInit</a> <a class="nv idl-code" data-link-type="argument" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-eventinitdict">eventInitDict</a>)]
+<pre class="idl def">[<a class="nv" href="#dom-securitypolicyviolationevent-securitypolicyviolationevent">Constructor</a>(<span class="kt">DOMString</span> <a class="nv" href="#dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-type">type</a>, <span class="kt">optional</span> <a class="n" data-link-type="idl-name" href="#dictdef-securitypolicyviolationeventinit">SecurityPolicyViolationEventInit</a> <a class="nv" href="#dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-eventinitdict">eventInitDict</a>)]
 <span class="kt">interface</span> <a class="nv" href="#securitypolicyviolationevent">SecurityPolicyViolationEvent</a> : <a class="n" data-link-type="idl-name" href="https://dom.spec.whatwg.org/#event">Event</a> {
-    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="attribute" data-readonly="" data-type="DOMString" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-documenturi">documentURI</a>;
-    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="attribute" data-readonly="" data-type="DOMString" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-referrer">referrer</a>;
-    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="attribute" data-readonly="" data-type="DOMString" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-blockeduri">blockedURI</a>;
-    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="attribute" data-readonly="" data-type="DOMString" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-violateddirective">violatedDirective</a>;
-    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="attribute" data-readonly="" data-type="DOMString" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-effectivedirective">effectiveDirective</a>;
-    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="attribute" data-readonly="" data-type="DOMString" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-originalpolicy">originalPolicy</a>;
-    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="attribute" data-readonly="" data-type="DOMString" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-sourcefile">sourceFile</a>;
-    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">unsigned</span> <span class="kt">short</span> <a class="nv idl-code" data-link-type="attribute" data-readonly="" data-type="unsigned short" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-statuscode">statusCode</a>;
-    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">long</span>           <a class="nv idl-code" data-link-type="attribute" data-readonly="" data-type="long" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-linenumber">lineNumber</a>;
-    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">long</span>           <a class="nv idl-code" data-link-type="attribute" data-readonly="" data-type="long" href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationevent-columnnumber">columnNumber</a>;
+    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <a class="nv" data-readonly="" data-type="DOMString" href="#dom-securitypolicyviolationevent-documenturi">documentURI</a>;
+    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <a class="nv" data-readonly="" data-type="DOMString" href="#dom-securitypolicyviolationevent-referrer">referrer</a>;
+    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <a class="nv" data-readonly="" data-type="DOMString" href="#dom-securitypolicyviolationevent-blockeduri">blockedURI</a>;
+    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <a class="nv" data-readonly="" data-type="DOMString" href="#dom-securitypolicyviolationevent-violateddirective">violatedDirective</a>;
+    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <a class="nv" data-readonly="" data-type="DOMString" href="#dom-securitypolicyviolationevent-effectivedirective">effectiveDirective</a>;
+    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <a class="nv" data-readonly="" data-type="DOMString" href="#dom-securitypolicyviolationevent-originalpolicy">originalPolicy</a>;
+    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">DOMString</span>      <a class="nv" data-readonly="" data-type="DOMString" href="#dom-securitypolicyviolationevent-sourcefile">sourceFile</a>;
+    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">unsigned</span> <span class="kt">short</span> <a class="nv" data-readonly="" data-type="unsigned short" href="#dom-securitypolicyviolationevent-statuscode">statusCode</a>;
+    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">long</span>           <a class="nv" data-readonly="" data-type="long" href="#dom-securitypolicyviolationevent-linenumber">lineNumber</a>;
+    <span class="kt">readonly</span>    <span class="kt">attribute</span> <span class="kt">long</span>           <a class="nv" data-readonly="" data-type="long" href="#dom-securitypolicyviolationevent-columnnumber">columnNumber</a>;
 };
 
-<span class="kt">dictionary</span> <a class="nv idl-code" data-link-type="dictionary" href="https://w3c.github.io/webappsec-csp/#dictdef-securitypolicyviolationeventinit">SecurityPolicyViolationEventInit</a> : <a class="n" data-link-type="idl-name" href="https://dom.spec.whatwg.org/#dictdef-eventinit">EventInit</a> {
-    <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="dict-member" data-type="DOMString      " href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationeventinit-documenturi">documentURI</a>;
-    <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="dict-member" data-type="DOMString      " href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationeventinit-referrer">referrer</a>;
-    <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="dict-member" data-type="DOMString      " href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationeventinit-blockeduri">blockedURI</a>;
-    <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="dict-member" data-type="DOMString      " href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationeventinit-violateddirective">violatedDirective</a>;
-    <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="dict-member" data-type="DOMString      " href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationeventinit-effectivedirective">effectiveDirective</a>;
-    <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="dict-member" data-type="DOMString      " href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationeventinit-originalpolicy">originalPolicy</a>;
-    <span class="kt">DOMString</span>      <a class="nv idl-code" data-link-type="dict-member" data-type="DOMString      " href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationeventinit-sourcefile">sourceFile</a>;
-    <span class="kt">unsigned</span> <span class="kt">short</span> <a class="nv idl-code" data-link-type="dict-member" data-type="unsigned short " href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationeventinit-statuscode">statusCode</a>;
-    <span class="kt">long</span>           <a class="nv idl-code" data-link-type="dict-member" data-type="long           " href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationeventinit-linenumber">lineNumber</a>;
-    <span class="kt">long</span>           <a class="nv idl-code" data-link-type="dict-member" data-type="long           " href="https://w3c.github.io/webappsec-csp/#dom-securitypolicyviolationeventinit-columnnumber">columnNumber</a>;
+<span class="kt">dictionary</span> <a class="nv" href="#dictdef-securitypolicyviolationeventinit">SecurityPolicyViolationEventInit</a> : <a class="n" data-link-type="idl-name" href="https://dom.spec.whatwg.org/#dictdef-eventinit">EventInit</a> {
+    <span class="kt">DOMString</span>      <a class="nv" data-type="DOMString      " href="#dom-securitypolicyviolationeventinit-documenturi">documentURI</a>;
+    <span class="kt">DOMString</span>      <a class="nv" data-type="DOMString      " href="#dom-securitypolicyviolationeventinit-referrer">referrer</a>;
+    <span class="kt">DOMString</span>      <a class="nv" data-type="DOMString      " href="#dom-securitypolicyviolationeventinit-blockeduri">blockedURI</a>;
+    <span class="kt">DOMString</span>      <a class="nv" data-type="DOMString      " href="#dom-securitypolicyviolationeventinit-violateddirective">violatedDirective</a>;
+    <span class="kt">DOMString</span>      <a class="nv" data-type="DOMString      " href="#dom-securitypolicyviolationeventinit-effectivedirective">effectiveDirective</a>;
+    <span class="kt">DOMString</span>      <a class="nv" data-type="DOMString      " href="#dom-securitypolicyviolationeventinit-originalpolicy">originalPolicy</a>;
+    <span class="kt">DOMString</span>      <a class="nv" data-type="DOMString      " href="#dom-securitypolicyviolationeventinit-sourcefile">sourceFile</a>;
+    <span class="kt">unsigned</span> <span class="kt">short</span> <a class="nv" data-type="unsigned short " href="#dom-securitypolicyviolationeventinit-statuscode">statusCode</a>;
+    <span class="kt">long</span>           <a class="nv" data-type="long           " href="#dom-securitypolicyviolationeventinit-linenumber">lineNumber</a>;
+    <span class="kt">long</span>           <a class="nv" data-type="long           " href="#dom-securitypolicyviolationeventinit-columnnumber">columnNumber</a>;
 };
 
 </pre>
@@ -5288,7 +5335,7 @@ rest of Google’s CSP Cabal.</p>
    <ul>
     <li><a href="#ref-for-grammardef-port-part-1">2.2.1. Source Lists</a>
     <li><a href="#ref-for-grammardef-port-part-2">6.1.13.4. 
-    Does url match expression in origin with redirect count? </a> <a href="#ref-for-grammardef-port-part-3">(2)</a> <a href="#ref-for-grammardef-port-part-4">(3)</a>
+    Does url match expression in origin with redirect count? </a> <a href="#ref-for-grammardef-port-part-3">(2)</a> <a href="#ref-for-grammardef-port-part-4">(3)</a> <a href="#ref-for-grammardef-port-part-5">(4)</a> <a href="#ref-for-grammardef-port-part-6">(5)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="grammardef-path-part">
@@ -5616,6 +5663,83 @@ rest of Google’s CSP Cabal.</p>
    <ul>
     <li><a href="#ref-for-securitypolicyviolationevent-1">5.3. 
     Report a violation </a> <a href="#ref-for-securitypolicyviolationevent-2">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="dom-securitypolicyviolationevent-documenturi">
+   <b><a href="#dom-securitypolicyviolationevent-documenturi">#dom-securitypolicyviolationevent-documenturi</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-dom-securitypolicyviolationevent-documenturi-1">5.3. 
+    Report a violation </a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="dom-securitypolicyviolationevent-referrer">
+   <b><a href="#dom-securitypolicyviolationevent-referrer">#dom-securitypolicyviolationevent-referrer</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-dom-securitypolicyviolationevent-referrer-1">5.3. 
+    Report a violation </a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="dom-securitypolicyviolationevent-blockeduri">
+   <b><a href="#dom-securitypolicyviolationevent-blockeduri">#dom-securitypolicyviolationevent-blockeduri</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-dom-securitypolicyviolationevent-blockeduri-1">5.3. 
+    Report a violation </a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="dom-securitypolicyviolationevent-violateddirective">
+   <b><a href="#dom-securitypolicyviolationevent-violateddirective">#dom-securitypolicyviolationevent-violateddirective</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-dom-securitypolicyviolationevent-violateddirective-1">5.3. 
+    Report a violation </a> <a href="#ref-for-dom-securitypolicyviolationevent-violateddirective-2">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="dom-securitypolicyviolationevent-effectivedirective">
+   <b><a href="#dom-securitypolicyviolationevent-effectivedirective">#dom-securitypolicyviolationevent-effectivedirective</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-dom-securitypolicyviolationevent-effectivedirective-1">5.3. 
+    Report a violation </a> <a href="#ref-for-dom-securitypolicyviolationevent-effectivedirective-2">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="dom-securitypolicyviolationevent-originalpolicy">
+   <b><a href="#dom-securitypolicyviolationevent-originalpolicy">#dom-securitypolicyviolationevent-originalpolicy</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-dom-securitypolicyviolationevent-originalpolicy-1">5.3. 
+    Report a violation </a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="dom-securitypolicyviolationevent-sourcefile">
+   <b><a href="#dom-securitypolicyviolationevent-sourcefile">#dom-securitypolicyviolationevent-sourcefile</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-dom-securitypolicyviolationevent-sourcefile-1">5.3. 
+    Report a violation </a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="dom-securitypolicyviolationevent-statuscode">
+   <b><a href="#dom-securitypolicyviolationevent-statuscode">#dom-securitypolicyviolationevent-statuscode</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-dom-securitypolicyviolationevent-statuscode-1">5.3. 
+    Report a violation </a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="dom-securitypolicyviolationevent-linenumber">
+   <b><a href="#dom-securitypolicyviolationevent-linenumber">#dom-securitypolicyviolationevent-linenumber</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-dom-securitypolicyviolationevent-linenumber-1">5.3. 
+    Report a violation </a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="dom-securitypolicyviolationevent-columnnumber">
+   <b><a href="#dom-securitypolicyviolationevent-columnnumber">#dom-securitypolicyviolationevent-columnnumber</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-dom-securitypolicyviolationevent-columnnumber-1">5.3. 
+    Report a violation </a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="dictdef-securitypolicyviolationeventinit">
+   <b><a href="#dictdef-securitypolicyviolationeventinit">#dictdef-securitypolicyviolationeventinit</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-dictdef-securitypolicyviolationeventinit-1">5.1. 
+    Violation DOM Events </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="fetch-directives">

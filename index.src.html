@@ -376,12 +376,10 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       2, has been undeprecated, and a `worker-src` directive added. Both defer
       to `child-src` if not present (which defers to `default-src` in turn).
 
-  3.  Insecure schemes in source expressions now match their secure variants,
-      and WebSocket schemes now match HTTP schemes. That is, `http:` or `ws:`
-      is equivalent to `http: https:`, and `wss:` is equivalent to `https:`.
-      Similarly, `http://example.com` or `ws://example.com` is equivalent to
-      `http://example.com https://example.com`, and `wss://example.com` is
-      equivalent to `https://example.com`.
+  3.  The URL matching algorithm now treats insecure schemes and ports as
+      matching their secure variants. That is, the source expression
+      `http://example.com:80` will match both `http://example.com:80` and
+      `https://example.com:443`.
 
       Likewise, `'self'` now matches `https:` and `wss:` variants of the page's
       origin, even on pages whose scheme is `http`.
@@ -2668,11 +2666,16 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
           |url|'s {{URL/port}} is not the <a>default port</a> for |url|'s
           {{URL/scheme}}, return "`Does Not Match`".
 
-      7.  If |expression| does contain a <a grammar>`port-part`</a>:
+      7.  If |expression| does contain a <a grammar>`port-part`</a>, return
+          "`Does Not Match`" unless one of the following conditions is met:
 
-          1.  If |expression|'s <a grammar>`port-part`</a> is not "`*`", and
-              is not the same number as |url|'s {{URL/port}}, return "`Does Not
-              Match`".
+          1.  |expression|'s <a grammar>`port-part`</a> is "`*`".
+
+          2.  |expression|'s <a grammar>`port-part`</a> is the same number as
+              |url|'s {{URL/port}}.
+
+          3.  |expression|'s <a grammar>`port-part`</a> is `80`, and |url|'s
+              {{URL/port}} is `443`.
 
       8.  If |expression| contains a non-empty <a grammar>`path-part`</a>, and
           |redirect count| is 0, then:
