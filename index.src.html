@@ -47,6 +47,7 @@ spec: HTML5; urlPrefix: https://www.w3.org/TR/html5/
       text: browsing context
       text: create a document object
       text: creator document
+      text: disown its opener
       text: opener browsing context
       text: nested browsing context
       text: nested through; url: browsing-context-nested-through
@@ -409,6 +410,9 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       <{script}> element that triggers the request specifies a set of integrity
       metadata which is whitelisted by the current policy. Details in
       [[#external-hash]].
+
+  11. The <a>`disown-opener`</a> directive ensures that a resource can't be opened
+      in such a way as to give another browsing context control over its contents.
 
   <h3 id="open-questions">Open Questions</h3>
 
@@ -3011,6 +3015,40 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       <a for="directive">value</a> as the input, and |context|'s <a>forced
       sandboxing flag set</a> as the output.
 
+  <h4 id="directive-disown-opener">`disown-opener`</h4>
+
+  The <dfn export>`disown-opener`</dfn> directive ensures that a resource
+  will <a>disown its opener</a> when navigated to. The directive's syntax is
+  described by the following ABNF grammar:
+
+  <pre dfn-type="grammar" link-type="grammar">
+    directive-name  = "disown-opener"
+    directive-value = ""
+  </pre>
+
+  This directive has no reporting requirements; it will be ignored entirely when
+  delivered in a <a>`Content-Security-Policy-Report-Only`</a> header, or within
+  a <{meta}> element.
+
+  ISSUE: Not sure this is the right model. We need to ensure that we take care
+  of <a href="https://github.com/w3c/webappsec/issues/139">the inverse</a> as
+  well, and there might be a cleverer syntax that could encompass both a
+  document's opener, and a document's openees. `disown-openee` is weird.
+  Maybe `disown 'opener' 'openee'`? Do we need origin restrictions on either/both?
+
+  <h5 id="disown-opener-algorithms">Algorithms</h5>
+
+  This directive's <a for="directive">initialization</a> algorithm is as
+  follows:
+
+  Given a {{Document}} or <a>global object</a> (|context|), a <a>response</a>
+  (|response|), and a <a>policy</a> (|policy|):
+
+  1.  If |context|'s <a>responsible browsing context</a> has an <a>opener browsing
+      context</a>, <a>disown its opener</a>.
+
+  ISSUE: What should this do in an <{iframe}>? Anything?
+
   <h3 id="directives-navigation">
     Navigation Directives
   </h3>
@@ -3406,6 +3444,8 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
   ::  This document (see [[#directive-connect-src]])
   :   <a>`default-src`</a>
   ::  This document (see [[#directive-default-src]])
+  :   <a>`disown-opener`</a>
+  ::  This document (see [[#directive-disown-opener]])
   :   <a>`font-src`</a>
   ::  This document (see [[#directive-font-src]])
   :   <a>`form-action`</a>
