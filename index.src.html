@@ -191,6 +191,10 @@ spec: CSSOM; urlPrefix: https://www.w3.org/TR/cssom/
     text: parse a css declaration block
     text: parse a css rule
     text: parse a group of selectors
+spec: RFC2045; urlPrefix: https://tools.ietf.org/html/rfc2045
+  type: grammar
+    text: type; url: section-5.1
+    text: subtype; url: section-5.1
 spec: RFC3986; urlPrefix: https://tools.ietf.org/html/rfc3986
   type: grammar
     text: path; url: section-3.3
@@ -2935,7 +2939,63 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   <h4 id="directive-plugin-types">`plugin-types`</h4>
 
-  <dfn export>plugin-types</dfn>
+  The <dfn export>plugin-types</dfn> directive restricts the set of plugins that
+  can be embedded into a document by limiting the types of resources which can
+  be loaded. The directive's syntax is described by the following ABNF grammar:
+
+  <pre dfn-type="grammar" link-type="grammar">
+    directive-name  = "plugin-types"
+    directive-value = <a>media-type-list</a>
+
+    <dfn>media-type-list</dfn> = <a>media-type</a> *( <a>RWS</a> <a>media-type</a> )
+    <dfn>media-type</dfn> = <a>type</a> "/" <a>subtype</a>
+    ; <a>type</a> and <a>subtype</a> are defined in RFC 2045
+  </pre>
+
+  If a `plugin-types` directive is present, instantiation of an <{embed}> or
+  <{object}> element will fail if any of the following conditions hold:
+
+  1.  The element does not explicitly declare a <a>MIME type</a> via a
+      <{embed/type}> attribute.
+
+  2.  The declared type does not match one of the items in the directive's
+      value.
+
+  3.  The fetched resource does not match the declared type.
+
+  <div class="example">
+    Given a page with the following Content Security Policy:
+
+    <pre>
+      Content-Security-Policy: <a>plugin-types</a> application/pdf
+    </pre>
+
+    Fetches for the following code will all return network errors:
+
+    <pre>
+      &lt;!-- No 'type' declaration --&gt;
+      &lt;object data="https://example.com/flash"&gt;&lt;/object&gt;
+
+      &lt;!-- Non-matching 'type' declaration --&gt;
+      &lt;object data="https://example.com/flash" type="application/x-shockwave-flash"&gt;&lt;/object&gt;
+
+      &lt;!-- Non-matching resource --&gt;
+      &lt;object data="https://example.com/flash" type="application/pdf"&gt;&lt;/object&gt;
+    </pre>
+
+    If the page allowed Flash content by sending the following header:
+
+    <pre>
+      Content-Security-Policy: <a>plugin-types</a> application/x-shockwave-flash
+    </pre>
+
+    Then the second item above would load successfully:
+
+    <pre>
+      &lt;!-- Matching 'type' declaration and resource --&gt;
+      &lt;object data="https://example.com/flash" type="application/x-shockwave-flash"&gt;&lt;/object&gt;
+    </pre>
+  </div>
 
   ISSUE: Define the hooks into HTML's plugin loading algorithms.
 
