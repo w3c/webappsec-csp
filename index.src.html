@@ -1547,13 +1547,38 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a>request</a> (|request|):
+  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
 
-  ISSUE: TODO.
+  1.  Let |name| be the result of executing
+      [[#effective-directive-for-a-request]] on |request|.
+
+  2.  If |name| is not `frame-src` or `worker-src`, return "`Allowed`".
+
+  3.  If |policy| contains a directive whose <a for="directive">name</a>
+      is |name|, return "`Allowed`"
+
+  4.  Return the result of executing the <a for="directive">pre-request
+      check</a> for the <a>directive</a> whose <a for="directive">name</a>
+      is |name| on |request| and |policy|, using this directive's
+      <a for="directive">value</a> for the comparison.
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  ISSUE: TODO.
+  Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
+  <a>policy</a> (|policy|):
+
+  1.  Let |name| be the result of executing
+      [[#effective-directive-for-a-request]] on |request|.
+
+  2.  If |name| is not `frame-src` or `worker-src`, return "`Allowed`".
+
+  3.  If |policy| contains a directive whose <a for="directive">name</a>
+      is |name|, return "`Allowed`"
+
+  4.  Return the result of executing the <a for="directive">post-request
+      check</a> for the <a>directive</a> whose <a for="directive">name</a>
+      is |name| on |request| and |policy|, using this directive's
+      <a for="directive">value</a> for the comparison.
 
   <h4 id="directive-connect-src">`connect-src`</h4>
 
@@ -1765,7 +1790,7 @@ spec: SHA2; urlPrefix: http://csrc.nist.gov/publications/fips/fips180-4/fips-180
       same way this algorithm does?
 
   5.  Otherwise, return the result of executing the
-      <a for="directive">pre-request check</a> for the <a>directive</a> whose
+      <a for="directive">post-request check</a> for the <a>directive</a> whose
       <a for="directive">name</a> is |name| on |request| and |policy|, using
       this directive's <a for="directive">value</a> for the comparison.
 
