@@ -1171,13 +1171,8 @@ Possible extra rowspan handling
   }
 
   a[href^="http:"]:after {
-    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAByUDbMAAAC3klEQVQ4T63UT0iTcRzH8fczZXPTnFOXYuDC7FKBUJijlsSY1iqbzTnJykNIZSehg4jiw4MgCCPwUBSBB8mBM5kz+4MNg/RQSUSEp+jQQckc4yn/5ES3mOKqzVWHfrcfz/N98Xm+3y+PwH88wn+0SIpJkmQFbgAlQC4QAN6Fw+GbkiQ93i7EtpgkSeeysrKGzGazkJeXh1KpZHV1lbm5OcbHxyOyLNeIouiNB5Nhr+12e2lGRgZ9fX2xmoaGBhYWFvB6vVOiKB7+V2y5vr5e7Xa7UalUhpaWln3Atf7+fltZWRlut/u7KIqaSCRSCTQBdwVBeJosWcTpdOLxeGhrazu96h97tHLvNln3B5kJBOjt7aWjo6M6srIyLF9yktbYhPqE1ZoUq6urY2BgIFrk++KosoUmRlGVWsh98JBBn49am42Ao4rQlB+V6TQ7h0ZH4rEUl8v1QqFQHNnqh8FgoNpqZab2LCuv/KSVWSi4P8jsxdrYfdfgCAq1OiGZxuVyLdXU1PzWW41GQ25mJh8dVSy99JOihvXvkG60sGcTqhYEwRefLLO7u/urxWJJWCOtVoshJ4epAzmsL4dJ0SgofR8gVafbgKIF8Zi2q6tLNpvNv2E6nY7iwkLeOGwEJ8dITU9lbWmN7KMVHBoaQZGWtm0ybWdnp1xeXh7DsrOz2VdczKTDxvzEGHpTBcZ+Dy8vOJmffLZxN22CCT3TiqIom0ymGFZSUsL7K5eZ8Y+Sf6wC85CPD58+sXf3bsbtZ/k88YxdljOYvQ8Tpqltb2+XjUZjDNPr9eQHg0zfvUWl28Pb6WkWFxeZnZ2lzm5n7Hwt+69ep/Ck9VRCz1pbW+XKyuhi/zzRTy0oKNgAgsEg0ekODw/T2NjoKCoqagDuCILwJGGazc3Nz5VK5cG//ZpCodDbnp6e48C3rXfjMQ2gB3YAij+AYWABmAeWk2EpgApI3WZtfrUjwBoQAta3HvwA9PEAlB8kUSsAAAAASUVORK5CYII=);
-    background-size: cover;
-    content: "";
-    display: inline-block;
-    height: 1em;
-    width: 1em;
-    vertical-align: -0.1em;
+    color: red;
+    content: "🔓";
   }
 </style>
 <style>/* style-md-lists */
@@ -1642,7 +1637,13 @@ of security-relevant policy decisions.</p>
          <ol class="toc">
           <li><a href="#allow-base-for-document"><span class="secno">6.2.1.1</span> <span class="content"> Is <var>base</var> allowed for <var>document</var>? </span></a>
          </ol>
-        <li><a href="#directive-plugin-types"><span class="secno">6.2.2</span> <span class="content"><code>plugin-types</code></span></a>
+        <li>
+         <a href="#directive-plugin-types"><span class="secno">6.2.2</span> <span class="content"><code>plugin-types</code></span></a>
+         <ol class="toc">
+          <li><a href="#plugin-types-response-check"><span class="secno">6.2.2.1</span> <span class="content"> <code>plugin-types</code> Response Check </span></a>
+          <li><a href="#should-plugin-element-be-blocked-a-priori-by-content-security-policy"><span class="secno">6.2.2.2</span> <span class="content"> Should <var>plugin element</var> be blocked <i lang="la">a priori</i> by Content
+    Security Policy?: </span></a>
+         </ol>
         <li>
          <a href="#directive-sandbox"><span class="secno">6.2.3</span> <span class="content"><code>sandbox</code></span></a>
          <ol class="toc">
@@ -2327,6 +2328,12 @@ of security-relevant policy decisions.</p>
       <p><a href="#allow-base-for-document">§6.2.1.1 Is base allowed for document?</a> is called during <code><a data-link-type="element" href="https://www.w3.org/TR/html5/document-metadata.html#the-base-element">base</a></code>'s <a data-link-type="dfn" href="https://www.w3.org/TR/html5/document-metadata.html#set-the-frozen-base-url">set the frozen
   base URL</a> algorithm to ensure that the <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/multipage/semantics.html#attr-base-href">href</a></code> attribute’s value
   is valid.</p>
+     <li data-md="">
+      <p><a href="#should-plugin-element-be-blocked-a-priori-by-content-security-policy" id="ref-for-should-plugin-element-be-blocked-a-priori-by-content-security-policy-1">§6.2.2.2 Should plugin element be blocked a priori by Content
+    Security Policy?:</a> is called during the processing of <code><a data-link-type="element" href="https://www.w3.org/TR/html5/embedded-content-0.html#the-object-element">object</a></code>, <code><a data-link-type="element" href="https://www.w3.org/TR/html5/embedded-content-0.html#the-embed-element">embed</a></code>, and <code><a data-link-type="element" href="https://www.w3.org/TR/html5/obsolete.html#the-applet-element">applet</a></code> elements to determine whether they may trigger a fetch.</p>
+      <p class="note" role="note">Note: Fetched plugin resources are handled in <a href="#should-block-response">§4.1.4 Should response to request be blocked by Content
+    Security Policy?</a>.</p>
+      <p class="issue" id="issue-a1ac0d32"><a class="self-link" href="#issue-a1ac0d32"></a> Upstream this to WHATWG and W3C.</p>
     </ol>
     <h4 class="heading settled algorithm" data-algorithm="Initialize a Document&apos;s CSP list" data-level="4.2.1" id="initialize-document-csp"><span class="secno">4.2.1. </span><span class="content"> Initialize a <code>Document</code>'s <code>CSP list</code> </span><a class="self-link" href="#initialize-document-csp"></a></h4>
     <p>Given a <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/html5/dom.html#document">Document</a></code> (<var>document</var>), and a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), the
@@ -3975,7 +3982,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-media-type-list"
     <p>If a <code>plugin-types</code> directive is present, instantiation of an <code><a data-link-type="element" href="https://www.w3.org/TR/html5/embedded-content-0.html#the-embed-element">embed</a></code> or <code><a data-link-type="element" href="https://www.w3.org/TR/html5/embedded-content-0.html#the-object-element">object</a></code> element will fail if any of the following conditions hold:</p>
     <ol>
      <li data-md="">
-      <p>The element does not explicitly declare a <a data-link-type="dfn">MIME type</a> via a <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/multipage/embedded-content.html#attr-embed-type">type</a></code> attribute.</p>
+      <p>The element does not explicitly declare a <a data-link-type="dfn" href="https://www.w3.org/TR/html5/infrastructure.html#valid-mime-type">valid MIME type</a> via a <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/multipage/embedded-content.html#attr-embed-type">type</a></code> attribute.</p>
      <li data-md="">
       <p>The declared type does not match one of the items in the directive’s
   value.</p>
@@ -4004,7 +4011,56 @@ directive-value = <a data-link-type="grammar" href="#grammardef-media-type-list"
 &lt;object data="https://example.com/flash" type="application/x-shockwave-flash">&lt;/object>
 </pre>
     </div>
-    <p class="issue" id="issue-4d81caf0"><a class="self-link" href="#issue-4d81caf0"></a> Define the hooks into HTML’s plugin loading algorithms.</p>
+    <h5 class="heading settled algorithm" data-algorithm="plugin-types Response Check" data-dfn-type="dfn" data-level="6.2.2.1" data-lt="plugin-types Response Check" data-noexport="" id="plugin-types-response-check"><span class="secno">6.2.2.1. </span><span class="content"> <code>plugin-types</code> Response Check </span><a class="self-link" href="#plugin-types-response-check"></a></h5>
+    <p>This directive’s <a data-link-type="dfn" href="#directive-response-check" id="ref-for-directive-response-check-2">response check</a> algorithm is as
+  follows:</p>
+    <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), and a <a data-link-type="dfn" href="#policy" id="ref-for-policy-50">policy</a> (<var>policy</var>):</p>
+    <ol>
+     <li data-md="">
+      <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-destination">destination</a> is either "<code>object</code>"
+  or "<code>embed</code>":</p>
+      <ol>
+       <li data-md="">
+        <p>Let <var>type</var> be the result of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-header-extract-mime-type">extracting a MIME type</a> from <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a>.</p>
+       <li data-md="">
+        <p>If <var>type</var> is not an <a data-link-type="dfn" href="https://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for any item
+  in this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-45">value</a>, return "<code>Blocked</code>".</p>
+      </ol>
+     <li data-md="">
+      <p>Return "<code>Allowed</code>".</p>
+    </ol>
+    <h5 class="heading settled dfn-paneled algorithm" data-algorithm="Should plugin element be blocked a priori by Content
+    Security Policy?:" data-dfn-type="dfn" data-level="6.2.2.2" data-lt="Should plugin element be blocked a priori by Content Security Policy?:" data-noexport="" id="should-plugin-element-be-blocked-a-priori-by-content-security-policy"><span class="secno">6.2.2.2. </span><span class="content"> Should <var>plugin element</var> be blocked <i lang="la">a priori</i> by Content
+    Security Policy?: </span></h5>
+    <p>Given an <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/dom/#interface-element">Element</a></code> (<var>plugin element</var>), this algorithm returns "<code>Blocked</code>"
+  or "<code>Allowed</code>" based on the element’s <code>type</code> attribute and the policy applied to
+  its document:</p>
+    <ol class="algorithm">
+     <li data-md="">
+      <p>For each <var>policy</var> in <var>plugin element</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document">node document</a>’s <a data-link-type="dfn" href="https://www.w3.org/TR/html5/dom.html#concept-document-csp-list">CSP list</a>:</p>
+      <ol>
+       <li data-md="">
+        <p>If <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives-27">directive</a> (<var>directive</var>) whose name is <code>plugin-types</code>:</p>
+        <ol>
+         <li data-md="">
+          <p>Let <var>type</var> be "<code>application/x-java-applet</code>" if <var>plugin element</var> is an <code><a data-link-type="element" href="https://www.w3.org/TR/html5/obsolete.html#the-applet-element">applet</a></code> element, or <var>plugin element</var>’s <code>type</code> attribute’s
+  value if present, or "<code>null</code>" otherwise.</p>
+         <li data-md="">
+          <p>Return "<code>Blocked</code>" if any of the following are true:</p>
+          <ol>
+           <li data-md="">
+            <p><var>type</var> is <code>null</code>.</p>
+           <li data-md="">
+            <p><var>type</var> is not a <a data-link-type="dfn" href="https://www.w3.org/TR/html5/infrastructure.html#valid-mime-type">valid MIME type</a>.</p>
+           <li data-md="">
+            <p><var>type</var> is not an <a data-link-type="dfn" href="https://www.w3.org/TR/html5/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive match</a> for any
+  item in <var>directive</var>’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-46">value</a>.</p>
+          </ol>
+        </ol>
+      </ol>
+     <li data-md="">
+      <p>Return "<code>Allowed</code>".</p>
+    </ol>
     <h4 class="heading settled" data-level="6.2.3" id="directive-sandbox"><span class="secno">6.2.3. </span><span class="content"><code>sandbox</code></span><a class="self-link" href="#directive-sandbox"></a></h4>
     <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="sandbox">sandbox</dfn> directive specifies an HTML sandbox policy which the
   user agent will apply to a resource, just as though it had been included in
@@ -4019,9 +4075,9 @@ directive-value = "" / <a data-link-type="grammar" href="https://tools.ietf.org/
   delivered in a <a data-link-type="dfn" href="#header-content-security-policy-report-only" id="ref-for-header-content-security-policy-report-only-4"><code>Content-Security-Policy-Report-Only</code></a> header, or within
   a <code><a data-link-type="element" href="https://www.w3.org/TR/html5/document-metadata.html#the-meta-element">meta</a></code> element.</p>
     <h5 class="heading settled" data-level="6.2.3.1" id="sandbox-algorithms"><span class="secno">6.2.3.1. </span><span class="content">Algorithms</span><a class="self-link" href="#sandbox-algorithms"></a></h5>
-    <p>This directive’s <a data-link-type="dfn" href="#directive-response-check" id="ref-for-directive-response-check-2">response check</a> algorithm is as
+    <p>This directive’s <a data-link-type="dfn" href="#directive-response-check" id="ref-for-directive-response-check-3">response check</a> algorithm is as
   follows:</p>
-    <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), and a <a data-link-type="dfn" href="#policy" id="ref-for-policy-50">policy</a> (<var>policy</var>):</p>
+    <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), and a <a data-link-type="dfn" href="#policy" id="ref-for-policy-51">policy</a> (<var>policy</var>):</p>
     <ol>
      <li data-md="">
       <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-destination">destination</a> is one of
@@ -4029,7 +4085,7 @@ directive-value = "" / <a data-link-type="grammar" href="https://tools.ietf.org/
       <ol>
        <li data-md="">
         <p>If the result of the <a data-link-type="dfn" href="https://www.w3.org/TR/html5/browsers.html#parse-a-sandboxing-directive">Parse a sandboxing directive</a> algorithm
-  using this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-45">value</a> as the input
+  using this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-47">value</a> as the input
   contains either the <a data-link-type="dfn" href="https://www.w3.org/TR/html5/browsers.html#sandboxed-scripts-browsing-context-flag">sandboxed scripts browsing context flag</a> or
   the <a data-link-type="dfn" href="https://www.w3.org/TR/html5/browsers.html#sandboxed-origin-browsing-context-flag">sandboxed origin browsing context flag</a> flags, return
   "<code>Blocked</code>".</p>
@@ -4042,14 +4098,14 @@ directive-value = "" / <a data-link-type="grammar" href="https://tools.ietf.org/
     <p>This directive’s <a data-link-type="dfn" href="#directive-initialization" id="ref-for-directive-initialization-3">initialization</a> algorithm is
   responsible for adjusting a <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/html5/dom.html#document">Document</a></code>'s <a data-link-type="dfn" href="https://www.w3.org/TR/html5/browsers.html#forced-sandboxing-flag-set">forced sandboxing flag set</a> according to the <a data-link-type="dfn" href="#sandbox" id="ref-for-sandbox-1"><code>sandbox</code></a> values present in its policies, as
   follows:</p>
-    <p>Given a <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/html5/dom.html#document">Document</a></code> or <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#concept-settings-object-global">global object</a> (<var>context</var>), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), and a <a data-link-type="dfn" href="#policy" id="ref-for-policy-51">policy</a> (<var>policy</var>):</p>
+    <p>Given a <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/html5/dom.html#document">Document</a></code> or <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#concept-settings-object-global">global object</a> (<var>context</var>), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), and a <a data-link-type="dfn" href="#policy" id="ref-for-policy-52">policy</a> (<var>policy</var>):</p>
     <ol>
      <li data-md="">
       <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition-10">disposition</a> is not "<code>Enforce</code>", or <var>context</var> is not a <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/html5/dom.html#document">Document</a></code>, then abort this algorithm.</p>
       <p class="note" role="note">Note: This will need to change if we allow Workers to be sandboxed,
   which seems like a pretty reasonable thing to do.</p>
      <li data-md="">
-      <p><a data-link-type="dfn" href="https://www.w3.org/TR/html5/browsers.html#parse-a-sandboxing-directive">Parse a sandboxing directive</a> using this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-46">value</a> as the input, and <var>context</var>’s <a data-link-type="dfn" href="https://www.w3.org/TR/html5/browsers.html#forced-sandboxing-flag-set">forced
+      <p><a data-link-type="dfn" href="https://www.w3.org/TR/html5/browsers.html#parse-a-sandboxing-directive">Parse a sandboxing directive</a> using this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-48">value</a> as the input, and <var>context</var>’s <a data-link-type="dfn" href="https://www.w3.org/TR/html5/browsers.html#forced-sandboxing-flag-set">forced
   sandboxing flag set</a> as the output.</p>
     </ol>
     <h4 class="heading settled" data-level="6.2.4" id="directive-disown-opener"><span class="secno">6.2.4. </span><span class="content"><code>disown-opener</code></span><a class="self-link" href="#directive-disown-opener"></a></h4>
@@ -4070,7 +4126,7 @@ directive-value = ""
     <h5 class="heading settled" data-level="6.2.4.1" id="disown-opener-algorithms"><span class="secno">6.2.4.1. </span><span class="content">Algorithms</span><a class="self-link" href="#disown-opener-algorithms"></a></h5>
     <p>This directive’s <a data-link-type="dfn" href="#directive-initialization" id="ref-for-directive-initialization-4">initialization</a> algorithm is as
   follows:</p>
-    <p>Given a <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/html5/dom.html#document">Document</a></code> or <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#concept-settings-object-global">global object</a> (<var>context</var>), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), and a <a data-link-type="dfn" href="#policy" id="ref-for-policy-52">policy</a> (<var>policy</var>):</p>
+    <p>Given a <code class="idl"><a data-link-type="idl" href="https://www.w3.org/TR/html5/dom.html#document">Document</a></code> or <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#concept-settings-object-global">global object</a> (<var>context</var>), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), and a <a data-link-type="dfn" href="#policy" id="ref-for-policy-53">policy</a> (<var>policy</var>):</p>
     <ol>
      <li data-md="">
       <p>If <var>context</var>’s <a data-link-type="dfn" href="https://www.w3.org/TR/html5/webappapis.html#responsible-browsing-context">responsible browsing context</a> has an <a data-link-type="dfn" href="https://www.w3.org/TR/html5/browsers.html#opener-browsing-context">opener browsing
@@ -4099,8 +4155,8 @@ directive-value = <a data-link-type="grammar" href="#grammardef-ancestor-source-
     <p class="note" role="note">Note: The <code>frame-ancestors</code> directive’s syntax is similar to a <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists-14">source
   list</a>, but <code>frame-ancestors</code> will not fall back to the <code>default-src</code> directive’s value if one is specified. That is, a policy that declares <code>default-src 'none'</code> will still allow the resource to be embedded by anyone.</p>
     <h5 class="heading settled" data-level="6.3.2.1" id="frame-ancestors-algorithms"><span class="secno">6.3.2.1. </span><span class="content">Algorithms</span><a class="self-link" href="#frame-ancestors-algorithms"></a></h5>
-    <p>This directive’s <a data-link-type="dfn" href="#directive-response-check" id="ref-for-directive-response-check-3">response check</a> is as follows:</p>
-    <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), and a <a data-link-type="dfn" href="#policy" id="ref-for-policy-53">policy</a> (<var>policy</var>):</p>
+    <p>This directive’s <a data-link-type="dfn" href="#directive-response-check" id="ref-for-directive-response-check-4">response check</a> is as follows:</p>
+    <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), and a <a data-link-type="dfn" href="#policy" id="ref-for-policy-54">policy</a> (<var>policy</var>):</p>
     <ol>
      <li data-md="">
       <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-destination">destination</a> is "<code>document</code>" <em>and</em> the <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-target-browsing-context">target browsing
@@ -4115,7 +4171,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-ancestor-source-
   parser</a> on the <a data-link-type="dfn" href="https://www.w3.org/TR/html5/browsers.html#unicode-serialization-of-an-origin">unicode serialization</a> of <var>ancestor</var>’s <a data-link-type="dfn" href="https://www.w3.org/TR/html5/browsers.html#active-document">active document</a>’s origin.</p>
          <li data-md="">
           <p>If <a href="#match-url-to-source-list">§6.1.13.3 Does url match source list?</a> returns <code>Does Not Match</code> when
-  executed upon <var>origin-as-url</var> and this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-47">value</a>, return "<code>Blocked</code>".</p>
+  executed upon <var>origin-as-url</var> and this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-49">value</a>, return "<code>Blocked</code>".</p>
           <p class="issue" id="issue-feda0121"><a class="self-link" href="#issue-feda0121"></a> Do we need syntax to allow matching a unique origin?</p>
         </ol>
       </ol>
@@ -4167,7 +4223,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
     </ul>
     <p>Extensions to CSP MUST register themselves via the process outlined in <a data-link-type="biblio" href="#biblio-rfc7762">[RFC7762]</a>. In particular, note the criteria discussed in Section 4.2 of
   that document.</p>
-    <p>New directives SHOULD use the <a data-link-type="dfn" href="#directive-pre-request-check" id="ref-for-directive-pre-request-check-16">pre-request check</a>, <a data-link-type="dfn" href="#directive-post-request-check" id="ref-for-directive-post-request-check-16">post-request check</a>, <a data-link-type="dfn" href="#directive-response-check" id="ref-for-directive-response-check-4">response
+    <p>New directives SHOULD use the <a data-link-type="dfn" href="#directive-pre-request-check" id="ref-for-directive-pre-request-check-16">pre-request check</a>, <a data-link-type="dfn" href="#directive-post-request-check" id="ref-for-directive-post-request-check-16">post-request check</a>, <a data-link-type="dfn" href="#directive-response-check" id="ref-for-directive-response-check-5">response
   check</a>, and <a data-link-type="dfn" href="#directive-initialization" id="ref-for-directive-initialization-5">initialization</a> hooks in order to
   integrate themselves into Fetch and HTML.</p>
    </section>
@@ -4177,7 +4233,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
     <p>Nonces override the other restrictions present in the directive in which
   they’re delivered. It is critical, then, that they remain unguessable, as
   bypassing a resource’s policy is otherwise trivial.</p>
-    <p>If a server delivers a <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source-8">nonce-source</a> expression as part of a <a data-link-type="dfn" href="#policy" id="ref-for-policy-54">policy</a>, the server MUST generate a unique value each time it
+    <p>If a server delivers a <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source-8">nonce-source</a> expression as part of a <a data-link-type="dfn" href="#policy" id="ref-for-policy-55">policy</a>, the server MUST generate a unique value each time it
   transmits a policy. The generated value SHOULD be at least 128 bits long
   (before encoding), and SHOULD be generated via a cryptographically secure
   random number generator in order to ensure that the value is difficult for
@@ -4317,7 +4373,7 @@ document.write('&lt;scr' + 'ipt src='/sadness.js'>&lt;/scr' + 'ipt>');
    <section>
     <h2 class="heading settled" data-level="9" id="implementation-considerations"><span class="secno">9. </span><span class="content">Implementation Considerations</span><a class="self-link" href="#implementation-considerations"></a></h2>
     <h3 class="heading settled" data-level="9.1" id="extensions"><span class="secno">9.1. </span><span class="content">Vendor-specific Extensions and Addons</span><a class="self-link" href="#extensions"></a></h3>
-    <p><a data-link-type="dfn" href="#policy" id="ref-for-policy-55">Policy</a> enforced on a resource SHOULD NOT interfere with the operation
+    <p><a data-link-type="dfn" href="#policy" id="ref-for-policy-56">Policy</a> enforced on a resource SHOULD NOT interfere with the operation
   of user-agent features like addons, extensions, or bookmarklets. These kinds
   of features generally advance the user’s priority over page authors, as
   espoused in <a data-link-type="biblio" href="#biblio-html-design">[HTML-DESIGN]</a>.</p>
@@ -4548,6 +4604,7 @@ rest of Google’s CSP Cabal.</p>
    <li><a href="#parse-serialized-policy">parse a serialized CSP</a><span>, in §2.1</span>
    <li><a href="#grammardef-path-part">path-part</a><span>, in §2.2.1</span>
    <li><a href="#plugin-types">plugin-types</a><span>, in §6.2.2</span>
+   <li><a href="#plugin-types-response-check">plugin-types Response Check</a><span>, in §6.2.2</span>
    <li>
     policy
     <ul>
@@ -4574,6 +4631,7 @@ rest of Google’s CSP Cabal.</p>
    <li><a href="#grammardef-serialized-policy">serialized-policy</a><span>, in §2.1</span>
    <li><a href="#serialized-source-list">serialized source list</a><span>, in §2.2.1</span>
    <li><a href="#grammardef-serialized-source-list">serialized-source-list</a><span>, in §2.2.1</span>
+   <li><a href="#should-plugin-element-be-blocked-a-priori-by-content-security-policy">Should plugin element be blocked a priori by Content Security Policy?:</a><span>, in §6.2.2.1</span>
    <li><a href="#grammardef-source-expression">source-expression</a><span>, in §2.2.1</span>
    <li><a href="#source-expression">source expression</a><span>, in §2.2.1</span>
    <li><a href="#violation-source-file">source file</a><span>, in §2.3</span>
@@ -4626,6 +4684,7 @@ rest of Google’s CSP Cabal.</p>
      <li><a href="https://fetch.spec.whatwg.org/#concept-response-csp-list">csp list</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-current-url">current url</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-destination">destination</a>
+     <li><a href="https://fetch.spec.whatwg.org/#concept-header-extract-mime-type">extracting a mime type</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-fetch">fetch</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a>
      <li><a href="https://fetch.spec.whatwg.org/#http-fetch">http fetch</a>
@@ -4710,6 +4769,7 @@ rest of Google’s CSP Cabal.</p>
      <li><a href="https://www.w3.org/TR/html5/document-metadata.html#the-style-element">style</a>
      <li><a href="https://www.w3.org/TR/html5/infrastructure.html#concept-event-trusted">trusted</a>
      <li><a href="https://www.w3.org/TR/html5/browsers.html#unicode-serialization-of-an-origin">unicode serialization</a>
+     <li><a href="https://www.w3.org/TR/html5/infrastructure.html#valid-mime-type">valid mime type</a>
     </ul>
    <li>
     <a data-link-type="biblio">[REPORTING]</a> defines the following terms:
@@ -4824,6 +4884,7 @@ rest of Google’s CSP Cabal.</p>
      <li><a href="https://dom.spec.whatwg.org/#event">Event</a>
      <li><a href="https://dom.spec.whatwg.org/#dictdef-eventinit">EventInit</a>
      <li><a href="https://dom.spec.whatwg.org/#ascii-case-insensitive">ascii case-insensitive</a>
+     <li><a href="https://dom.spec.whatwg.org/#concept-node-document">node document</a>
     </ul>
    <li>
     <a data-link-type="biblio">[HTML]</a> defines the following terms:
@@ -4964,11 +5025,11 @@ rest of Google’s CSP Cabal.</p>
   Fetch in W3C’s HTML. <a href="https://github.com/whatwg/html/issues/198">&lt;https://github.com/whatwg/html/issues/198></a><a href="#issue-aa77c60b"> ↵ </a></div>
    <div class="issue"> Stylesheet loading is not yet integrated with
   Fetch in WHATWG’s HTML. <a href="https://github.com/whatwg/html/issues/968">&lt;https://github.com/whatwg/html/issues/968></a><a href="#issue-25da4fba"> ↵ </a></div>
+   <div class="issue"> Upstream this to WHATWG and W3C.<a href="#issue-a1ac0d32"> ↵ </a></div>
    <div class="issue"> This needs to be better explained.<a href="#issue-ba1a0a35"> ↵ </a></div>
    <div class="issue"> Do something interesting to the execution context in order to lock down
   interesting CSSOM algorithms. I don’t think CSSOM gives us any hooks here, so
   let’s work with them to put something reasonable together.<a href="#issue-eba1ebc1"> ↵ </a></div>
-   <div class="issue"> Define the hooks into HTML’s plugin loading algorithms.<a href="#issue-4d81caf0"> ↵ </a></div>
    <div class="issue"> Not sure this is the right model. We need to ensure that we take care
   of <a href="https://github.com/w3c/webappsec/issues/139">the inverse</a> as
   well, and there might be a cleverer syntax that could encompass both a
@@ -5016,11 +5077,13 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-policy-47">6.1.12.1. Algorithms</a> <a href="#ref-for-policy-48">(2)</a>
     <li><a href="#ref-for-policy-49">6.1.13.1. 
     Does request violate policy? </a>
-    <li><a href="#ref-for-policy-50">6.2.3.1. Algorithms</a> <a href="#ref-for-policy-51">(2)</a>
-    <li><a href="#ref-for-policy-52">6.2.4.1. Algorithms</a>
-    <li><a href="#ref-for-policy-53">6.3.2.1. Algorithms</a>
-    <li><a href="#ref-for-policy-54">7.1. Nonce Reuse</a>
-    <li><a href="#ref-for-policy-55">9.1. Vendor-specific Extensions and Addons</a>
+    <li><a href="#ref-for-policy-50">6.2.2.1. 
+    plugin-types Response Check </a>
+    <li><a href="#ref-for-policy-51">6.2.3.1. Algorithms</a> <a href="#ref-for-policy-52">(2)</a>
+    <li><a href="#ref-for-policy-53">6.2.4.1. Algorithms</a>
+    <li><a href="#ref-for-policy-54">6.3.2.1. Algorithms</a>
+    <li><a href="#ref-for-policy-55">7.1. Nonce Reuse</a>
+    <li><a href="#ref-for-policy-56">9.1. Vendor-specific Extensions and Addons</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="policy-directive-set">
@@ -5122,6 +5185,9 @@ rest of Google’s CSP Cabal.</p>
     Does request violate policy? </a>
     <li><a href="#ref-for-directives-25">6.2.1.1. 
     Is base allowed for document? </a> <a href="#ref-for-directives-26">(2)</a>
+    <li><a href="#ref-for-directives-27">6.2.2.2. 
+    Should plugin element be blocked a priori by Content
+    Security Policy?: </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="directive-name">
@@ -5165,8 +5231,13 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-directive-value-42">6.1.12.1. Algorithms</a> <a href="#ref-for-directive-value-43">(2)</a>
     <li><a href="#ref-for-directive-value-44">6.2.1.1. 
     Is base allowed for document? </a>
-    <li><a href="#ref-for-directive-value-45">6.2.3.1. Algorithms</a> <a href="#ref-for-directive-value-46">(2)</a>
-    <li><a href="#ref-for-directive-value-47">6.3.2.1. Algorithms</a>
+    <li><a href="#ref-for-directive-value-45">6.2.2.1. 
+    plugin-types Response Check </a>
+    <li><a href="#ref-for-directive-value-46">6.2.2.2. 
+    Should plugin element be blocked a priori by Content
+    Security Policy?: </a>
+    <li><a href="#ref-for-directive-value-47">6.2.3.1. Algorithms</a> <a href="#ref-for-directive-value-48">(2)</a>
+    <li><a href="#ref-for-directive-value-49">6.3.2.1. Algorithms</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="serialized-directive">
@@ -5242,9 +5313,11 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-directive-response-check-1">4.1.4. 
     Should response to request be blocked by Content
     Security Policy? </a>
-    <li><a href="#ref-for-directive-response-check-2">6.2.3.1. Algorithms</a>
-    <li><a href="#ref-for-directive-response-check-3">6.3.2.1. Algorithms</a>
-    <li><a href="#ref-for-directive-response-check-4">6.5. 
+    <li><a href="#ref-for-directive-response-check-2">6.2.2.1. 
+    plugin-types Response Check </a>
+    <li><a href="#ref-for-directive-response-check-3">6.2.3.1. Algorithms</a>
+    <li><a href="#ref-for-directive-response-check-4">6.3.2.1. Algorithms</a>
+    <li><a href="#ref-for-directive-response-check-5">6.5. 
     Directives Defined in Other Documents </a>
    </ul>
   </aside>
@@ -5871,6 +5944,13 @@ rest of Google’s CSP Cabal.</p>
    <b><a href="#grammardef-media-type">#grammardef-media-type</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-grammardef-media-type-1">6.2.2. plugin-types</a> <a href="#ref-for-grammardef-media-type-2">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="should-plugin-element-be-blocked-a-priori-by-content-security-policy">
+   <b><a href="#should-plugin-element-be-blocked-a-priori-by-content-security-policy">#should-plugin-element-be-blocked-a-priori-by-content-security-policy</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-should-plugin-element-be-blocked-a-priori-by-content-security-policy-1">4.2. 
+    Integration with HTML </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="sandbox">
