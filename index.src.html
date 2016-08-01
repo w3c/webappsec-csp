@@ -68,6 +68,7 @@ spec: HTML5; urlPrefix: https://www.w3.org/TR/html5/
       text: queue a task
       text: event handler IDL attributes
     urlPrefix: infrastructure.html
+      text: valid MIME type
       text: fire; url: concept-event-fire
       text: trusted; url: concept-event-trusted
       text: case-sensitive; url: case-sensitive
@@ -132,6 +133,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
     text: request; url: concept-request
     text: response; url: concept-response
     text: header; url: concept-header
+    text: extracting a MIME type; url: concept-header-extract-mime-type
     text: network error; url: concept-network-error
     for: header
       text: name; url: concept-header-name
@@ -1117,6 +1119,14 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   8.  [[#allow-base-for-document]] is called during <{base}>'s <a>set the frozen
       base URL</a> algorithm to ensure that the <{base/href}> attribute's value
       is valid.
+
+  9.  [[#should-plugin-element-be-blocked-a-priori-by-content-security-policy]]
+      is called during the processing of <{object}>, <{embed}>, and <{applet}>
+      elements to determine whether they may trigger a fetch.
+
+      Note: Fetched plugin resources are handled in [[#should-block-response]].
+
+      ISSUE: Upstream this to WHATWG and W3C.
 
   <h4 id="initialize-document-csp" algorithm>
     Initialize a `Document`'s `CSP list`
@@ -2960,7 +2970,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   If a `plugin-types` directive is present, instantiation of an <{embed}> or
   <{object}> element will fail if any of the following conditions hold:
 
-  1.  The element does not explicitly declare a <a>MIME type</a> via a
+  1.  The element does not explicitly declare a <a>valid MIME type</a> via a
       <{embed/type}> attribute.
 
   2.  The declared type does not match one of the items in the directive's
@@ -3002,7 +3012,58 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     </pre>
   </div>
 
-  ISSUE: Define the hooks into HTML's plugin loading algorithms.
+  <h5 algorithm dfn>
+    `plugin-types` Response Check
+  </h5>
+
+  This directive's <a for="directive">response check</a> algorithm is as
+  follows:
+
+  Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
+  <a>policy</a> (|policy|):
+
+  1.  If |request|'s <a for="request">destination</a> is either "`object`"
+      or "`embed`":
+
+      1.  Let |type| be the result of <a>extracting a MIME type</a> from
+          |response|'s <a for="response">header list</a>.
+
+      2.  If |type| is not an <a>ASCII case-insensitive match</a> for any item
+          in this directive's <a for="directive">value</a>, return "`Blocked`".
+
+  2.  Return "`Allowed`".
+
+  <h5 algorithm dfn>
+    Should |plugin element| be blocked <i lang="la">a priori</i> by Content
+    Security Policy?:
+  </h5>
+
+  Given an {{Element}} (|plugin element|), this algorithm returns "`Blocked`"
+  or "`Allowed`" based on the element's `type` attribute and the policy applied to
+  its document:
+
+  <ol class="algorithm">
+    1.  For each |policy| in |plugin element|'s <a>node document</a>'s
+        <a for="document">CSP list</a>:
+
+        1.  If |policy| contains a <a>directive</a> (|directive|) whose name is
+            `plugin-types`:
+           
+            1.  Let |type| be "`application/x-java-applet`" if |plugin element|
+                is an <{applet}> element, or |plugin element|'s `type` attribute's
+                value if present, or "`null`" otherwise.
+               
+            2.  Return "`Blocked`" if any of the following are true:
+
+                1.  |type| is `null`.
+
+                2.  |type| is not a <a>valid MIME type</a>.
+
+                3.  |type| is not an <a>ASCII case-insensitive match</a> for any
+                    item in |directive|'s <a for="directive">value</a>.
+
+    2.  Return "`Allowed`".
+  </ol>
 
   <h4 id="directive-sandbox">`sandbox`</h4>
 
