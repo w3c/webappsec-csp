@@ -237,19 +237,25 @@ spec: REPORTING; urlPrefix: https://w3c.github.io/reporting/
     text: group
     text: queue report; url: queue-report
 
-spec: HTML; urlPrefix: https://html.spec.whatwg.org/
+spec: HTML; urlPrefix: https://html.spec.whatwg.org/multipage/
   type: dfn
-    text: run a worker
-    text: initialising a new Document object
-    text: update a style block
-    text: the worker's documents
-    text: Content-Security-Policy http-equiv processing instructions; url: attr-meta-http-equiv-content-security-policy
-    text: realm's global object; url: concept-realm-global-object
-    text: process a navigate response
-    text: process a navigate fetch
+    urlPrefix: workers.html
+      text: run a worker
+      text: the worker's documents
+    urlPrefix: browsers.html
+      text: initialising a new Document object; url: initialise-the-document-object
+      text: process a navigate response
+      text: process a navigate fetch
+    urlPrefix: semantics.html
+      text: update a style block
+      text: Content-Security-Policy http-equiv processing instructions; url: attr-meta-http-equiv-content-security-policy
+    urlPrefix: webappapis.html
+      text: realm's global object; url: concept-realm-global-object
   type: element-attr
-    text: ping; for: a
-    text: nonce; for: script; url: attr-script-nonce
+    urlPrefix: semantics.html
+      text: ping; for: a
+    urlPrefix: scripting.html
+      text: nonce; for: script; url: attr-script-nonce
 
 spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   type: dfn
@@ -291,6 +297,12 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       "title": "H5SC Minichallenge 3: \"Sh*t, it's CSP!\"",
       "authors": [ "Mario Heiderich" ],
       "publisher": "Cure53"
+  },
+  "CSS-ABUSE": {
+      "href": "https://scarybeastsecurity.blogspot.com/2009/12/generic-cross-browser-cross-domain.html",
+      "title": "Generic cross-browser cross-domain theft",
+      "authors": [ "Chris Evans" ],
+      "date": "28 December 2009"
   }
 }
 </pre>
@@ -3599,7 +3611,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
 <!-- Big text: Security -->
 <section>
-  <h2 id="security-considerations">Security Considerations</h2>
+  <h2 id="security-considerations">Security and Privacy Considerations</h2>
 
   <h3 id="security-nonces">Nonce Reuse</h3>
 
@@ -3622,6 +3634,32 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   layering a content security policy on top of old code. When considering
   <a grammar>'unsafe-inline'</a>, authors are encouraged to consider nonces
   (or hashes) instead.
+  
+  <h3 id="security-css-parsing">CSS Parsing</h3>
+
+  The <a>style-src</a> directive restricts the locations from which the
+  protected resource can load styles. However, if the user agent uses a lax CSS
+  parsing algorithm, an attacker might be able to trick the user agent into
+  accepting malicious "stylesheets" hosted by an otherwise trustworthy origin.
+
+  These attacks are similar to the CSS cross-origin data leakage attack
+  described by Chris Evans in 2009 [[CSS-ABUSE]]. User agents SHOULD defend
+  against both attacks using the same mechanism: stricter CSS parsing rules for
+  style sheets with improper MIME types.
+
+  <h3 id="security-violation-reports">Violation Reports</h3>
+
+  The violation reporting mechanism in this document has been designed to
+  mitigate the risk that a malicious web site could use violation reports to
+  probe the behavior of other servers. For example, consider a malicious web
+  site that whitelists `https://example.com` as a source of images. If the
+  malicious site attempts to load `https://example.com/login` as an image, and
+  the `example.com` server redirects to an identity provider (e.g.
+  `identityprovider.example.net`), CSP will block the request. If violation
+  reports contained the full blocked URL, the violation report might contain
+  sensitive information contained in the redirected URL, such as session
+  identifiers or purported identities. For this reason, the user agent includes
+  only the URL of the original request, not the redirect target.
 </section>
 
 <!-- Big text: Authoring -->
