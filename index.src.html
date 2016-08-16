@@ -157,7 +157,8 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
       text: method; url:concept-request-method
       text: origin; url:concept-request-origin
       text: parser metadata; url: concept-request-parser-metadata
-      text: redirect mode; url:concept-request-redirect-mode
+      text: redirect mode; url: concept-request-redirect-mode
+      text: redirect count; url: concept-request-redirect-count
       text: target browsing context; url: concept-request-target-browsing-context
       text: type; url: concept-request-type
       text: url; url: concept-request-url
@@ -662,9 +663,6 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   expression (see [[#match-url-to-source-list]] for details). The security
   properties of IP addresses are suspect, and authors ought to prefer hostnames
   whenever possible.
-
-  A {{URL}} <dfn export>matches a source list</dfn> if the algorithm in
-  [[#match-url-to-source-list]] returns `Matches`.
 
   <h3 id="framework-violation">Violations</h3>
 
@@ -1771,10 +1769,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       <a for="request">type</a> is "" and <a for="request">destination</a> is
       "`subresource`":
 
-      1.  If the result of executing [[#match-url-to-source-list]] on
-          |request|'s <a for="request">url</a> and this directive's
-          <a for="directive">value</a> is "`Does Not Match`",
-          return "`Blocked`".
+      1.  If the result of executing [[#match-request-to-source-list]] on
+          |request| and this directive's <a for="directive">value</a> is
+          "`Does Not Match`", return "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -1787,10 +1784,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       <a for="request">type</a> is "" and <a for="request">destination</a> is
       "`subresource`":
 
-      1.  If the result of executing [[#match-url-to-source-list]] on
-          |response|'s <a for="response">url</a> and this directive's
-          <a for="directive">value</a> is "`Does Not Match`",
-          return "`Blocked`".
+      1.  If the result of executing [[#match-response-to-source-list]] on
+          |response|, |request|, and this directive's
+          <a for="directive">value</a> is "`Does Not Match`", return
+          "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -1961,10 +1958,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   1.  If |request|'s <a for="request">type</a> is "`font`":
 
-      1.  If the result of executing [[#match-url-to-source-list]] on
-          |request|'s <a for="request">url</a> and this directive's
-          <a for="directive">value</a> is "`Does Not Match`",
-          return "`Blocked`".
+      1.  If the result of executing [[#match-request-to-source-list]] on
+          |request| and this directive's <a for="directive">value</a> is
+          "`Does Not Match`", return "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -1975,10 +1971,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   1.  If |request|'s <a for="request">type</a> is "`font`":
 
-      1.  If the result of executing [[#match-url-to-source-list]] on
-          |response|'s <a for="response">url</a> and this directive's
-          <a for="directive">value</a> is "`Does Not Match`",
-          return "`Blocked`".
+      1.  If the result of executing [[#match-response-to-source-list]] on
+          |response|, |request|, and this directive's
+          <a for="directive">value</a> is "`Does Not Match`", return
+          "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -2019,10 +2015,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       <a for="request">target browsing context</a> is a <a>nested browsing
       context</a>:
 
-      1.  If the result of executing [[#match-url-to-source-list]] on
-          |request|'s <a for="request">url</a> and this directive's
-          <a for="directive">value</a> is "`Does Not Match`",
-          return "`Blocked`".
+      1.  If the result of executing [[#match-request-to-source-list]] on
+          |request| and this directive's <a for="directive">value</a> is
+          "`Does Not Match`", return "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -2035,10 +2030,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       <a for="request">target browsing context</a> is a <a>nested browsing
       context</a>:
 
-      1.  If the result of executing [[#match-url-to-source-list]] on
-          |response|'s <a for="response">url</a> and this directive's
-          <a for="directive">value</a> is "`Does Not Match`",
-          return "`Blocked`".
+      1.  If the result of executing [[#match-response-to-source-list]] on
+          |response|, |request|, and this directive's
+          <a for="directive">value</a> is "`Does Not Match`", return
+          "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -2080,10 +2075,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   1.  If |request|'s <a for="request">type</a> is "`image`":
 
-      1.  If the result of executing [[#match-url-to-source-list]] on
-          |request|'s <a for="request">url</a> and this directive's
-          <a for="directive">value</a> is "`Does Not Match`",
-          return "`Blocked`".
+      1.  If the result of executing [[#match-request-to-source-list]] on
+          |request| and this directive's <a for="directive">value</a> is
+          "`Does Not Match`", return "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -2094,10 +2088,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   1.  If |request|'s <a for="request">type</a> is "`image`":
 
-      1.  If the result of executing [[#match-url-to-source-list]] on
-          |response|'s <a for="response">url</a> and this directive's
-          <a for="directive">value</a> is "`Does Not Match`",
-          return "`Blocked`".
+      1.  If the result of executing [[#match-response-to-source-list]] on
+          |response|, |request|, and this directive's
+          <a for="directive">value</a> is "`Does Not Match`", return
+          "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -2136,10 +2130,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   1.  If |request|'s <a for="request">type</a> is "", and its
       <a for="request">initiator</a> is "`manifest`":
 
-      1.  If the result of executing [[#match-url-to-source-list]] on
-          |request|'s <a for="request">url</a> and this directive's
-          <a for="directive">value</a> is "`Does Not Match`",
-          return "`Blocked`".
+      1.  If the result of executing [[#match-request-to-source-list]] on
+          |request| and this directive's <a for="directive">value</a> is
+          "`Does Not Match`", return "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -2151,10 +2144,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   1.  If |request|'s <a for="request">type</a> is "", and its
       <a for="request">initiator</a> is "`manifest`":
 
-      1.  If the result of executing [[#match-url-to-source-list]] on
-          |response|'s <a for="response">url</a> and this directive's
-          <a for="directive">value</a> is "`Does Not Match`",
-          return "`Blocked`".
+      1.  If the result of executing [[#match-response-to-source-list]] on
+          |response|, |request|, and this directive's
+          <a for="directive">value</a> is "`Does Not Match`", return
+          "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -2196,10 +2189,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   1.  If |request|'s <a for="request">type</a> is one of "`audio`", "`video`",
       or "`track`":
 
-      1.  If the result of executing [[#match-url-to-source-list]] on
-          |request|'s <a for="request">url</a> and this directive's
-          <a for="directive">value</a> is "`Does Not Match`",
-          return "`Blocked`".
+      1.  If the result of executing [[#match-request-to-source-list]] on
+          |request| and this directive's <a for="directive">value</a> is
+          "`Does Not Match`", return "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -2211,10 +2203,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   1.  If |request|'s <a for="request">type</a> is one of "`audio`", "`video`",
       or "`track`":
 
-      1.  If the result of executing [[#match-url-to-source-list]] on
-          |response|'s <a for="response">url</a> and this directive's
-          <a for="directive">value</a> is "`Does Not Match`",
-          return "`Blocked`".
+      1.  If the result of executing [[#match-response-to-source-list]] on
+          |response|, |request|, and this directive's
+          <a for="directive">value</a> is "`Does Not Match`", return
+          "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -2268,10 +2260,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   1.  If |request|'s <a for="request">type</a> is "", and its
       <a for="request">destination</a> is "`unknown`":
 
-      1.  If the result of executing [[#match-url-to-source-list]] on
-          |request|'s <a for="request">url</a> and this directive's
-          <a for="directive">value</a> is "`Does Not Match`",
-          return "`Blocked`".
+      1.  If the result of executing [[#match-request-to-source-list]] on
+          |request| and this directive's <a for="directive">value</a> is
+          "`Does Not Match`", return "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -2283,10 +2274,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   1.  If |request|'s <a for="request">type</a> is "", and its
       <a for="request">destination</a> is "`unknown`":
 
-      1.  If the result of executing [[#match-url-to-source-list]] on
-          |response|'s <a for="response">url</a> and this directive's
-          <a for="directive">value</a> is "`Does Not Match`",
-          return "`Blocked`".
+      1.  If the result of executing [[#match-response-to-source-list]] on
+          |response|, |request|, and this directive's
+          <a for="directive">value</a> is "`Does Not Match`", return
+          "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -2385,10 +2376,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
               Note: "<a grammar>`'strict-dynamic'`</a>" is explained in more detail
               in [[#strict-dynamic-usage]].
 
-      4.  If the result of executing [[#match-url-to-source-list]] on
-          |request|'s <a for="request">url</a> and this directive's
-          <a for="directive">value</a> is "`Does Not Match`",
-          return "`Blocked`".
+      4.  If the result of executing [[#match-request-to-source-list]] on
+          |request| and this directive's <a for="directive">value</a> is
+          "`Does Not Match`", return "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -2409,10 +2399,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           does not contain "<a grammar>`'strict-dynamic'`</a>", or |request|'s
           <a for="request">parser metadata</a> is not "`parser-inserted`".
 
-      3.  If the result of executing [[#match-url-to-source-list]] on
-          |response|'s <a for="response">url</a> and this directive's
-          <a for="directive">value</a> is "`Does Not Match`",
-          return "`Blocked`".
+      3.  If the result of executing [[#match-response-to-source-list]] on
+          |response|, |request|, and this directive's
+          <a for="directive">value</a> is "`Does Not Match`", return
+          "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -2507,10 +2497,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           directive's <a for="directive">value</a> is "`Matches`", return
           "`Allowed`".
 
-      2.  If the result of executing [[#match-url-to-source-list]] on
-          |request|'s <a for="request">url</a> and this directive's
-          <a for="directive">value</a> is "`Does Not Match`",
-          return "`Blocked`".
+      2.  If the result of executing [[#match-request-to-source-list]] on
+          |request| and this directive's <a for="directive">value</a> is
+          "`Does Not Match`", return "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -2526,10 +2515,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           directive's <a for="directive">value</a> is "`Matches`", return
           "`Allowed`".
 
-      2.  If the result of executing [[#match-url-to-source-list]] on
-          |response|'s <a for="response">url</a> and this directive's
-          <a for="directive">value</a> is "`Does Not Match`",
-          return "`Blocked`".
+      2.  If the result of executing [[#match-response-to-source-list]] on
+          |response|, |request|, and this directive's
+          <a for="directive">value</a> is "`Does Not Match`", return
+          "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -2590,10 +2579,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   1.  If |request|'s <a for="request">destination</a> is one of
       "`serviceworker`", "`sharedworker`", or "`worker`":
 
-      1.  If the result of executing [[#match-url-to-source-list]] on
-          |request|'s <a for="request">url</a> and this directive's
-          <a for="directive">value</a> is "`Does Not Match`",
-          return "`Blocked`".
+      4.  If the result of executing [[#match-request-to-source-list]] on
+          |request| and this directive's <a for="directive">value</a> is
+          "`Does Not Match`", return "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -2605,10 +2593,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   1.  If |request|'s <a for="request">destination</a> is one of
       "`serviceworker`", "`sharedworker`", or "`worker`":
 
-      1.  If the result of executing [[#match-url-to-source-list]] on
-          |response|'s <a for="response">url</a> and this directive's
-          <a for="directive">value</a> is "`Does Not Match`",
-          return "`Blocked`".
+      1.  If the result of executing [[#match-response-to-source-list]] on
+          |response|, |request|, and this directive's
+          <a for="directive">value</a> is "`Does Not Match`", return
+          "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -2654,11 +2642,38 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   4.  Return "`Does Not Match`".
 
-  <h5 id="match-url-to-source-list" algorithm>
-    Does |url| match |source list|?
+  <h5 id="match-request-to-source-list" algorithm>
+    Does |request| match |source list|?
   </h5>
 
-  Given a {{URL}} (|url|), and a <a>source list</a> (|source list|), this
+  Given a <a>request</a> (|request|), and a <a>source list</a> (|source list|),
+  this algorithm returns the result of executing [[#match-url-to-source-list]]
+  on |request|'s <a for="request">url</a>, |source list|, |request|'s
+  <a for="request">origin</a>, and |request|'s <a for="request">redirect
+  count</a>.
+
+  Note: This is generally used in <a>directives</a>' <a>pre-request check</a>
+  algorithms to verify that a given <a>request</a> is reasonable.
+
+  <h5 id="match-response-to-source-list" algorithm>
+    Does |response| to |request| match |source list|?
+  </h5>
+
+  Given a <a>request</a> (|request|), and a <a>source list</a> (|source list|),
+  this algorithm returns the result of executing [[#match-url-to-source-list]]
+  on |response|'s <a for="response">url</a>, |source list|, |request|'s
+  <a for="request">origin</a>, and |request|'s <a for="request">redirect
+  count</a>.
+
+  Note: This is generally used in <a>directives</a>' <a>post-request check</a>
+  algorithms to verify that a given <a>response</a> is reasonable.
+
+  <h5 id="match-url-to-source-list" algorithm>
+    Does |url| match |source list| in |origin| with |redirect count|?
+  </h5>
+
+  Given a {{URL}} (|url|), a <a>source list</a> (|source list|), an
+  <a>origin</a> (|origin|), and a number (|redirect count|), this
   algorithm returns "`Matches`" if the URL matches one or more source
   expressions in |source list|, or "`Does Not Match`" otherwise:
 
@@ -2677,7 +2692,8 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   4.  For each |expression| in |source list|:
 
       1.  If [[#match-url-to-source-expression]] returns "`Matches`" when
-          executed upon |url| and |expression|, return "`Matches`".
+          executed upon |url|, |expression|, |origin|, and |redirect count|, return
+          "`Matches`".
 
   5.  Return "`Does Not Match`".
 
@@ -3044,7 +3060,8 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       3.  If |source list| is `null`, skip to the next |policy|.
 
       4.  If the result of executing [[#match-url-to-source-list]]
-          on |base| and |source list| is "`Does Not Match`":
+          on |base|, |source list|, |document|'s  <a>relevant settings
+          object</a>'s origin, and `0` is "`Does Not Match`":
 
           1.  Let |violation| be the result of executing
               [[#create-violation-for-global]] on |document|'s <a>global
@@ -3298,10 +3315,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
     2.  If |type| is "`form-submission`":
 
-        1.  If the result of executing [[#match-url-to-source-list]] on
-            |request|'s <a for="request">url</a> and this directive's
-            <a for="directive">value</a> is "`Does Not Match`", return
-            "`Blocked`".
+        1.  If the result of executing [[#match-request-to-source-list]] on
+            |request| and this directive's <a for="directive">value</a> is
+            "`Does Not Match`", return "`Blocked`".
 
     3.  Return "`Allowed`".
   </ol>
@@ -3358,11 +3374,13 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
         2.  Let |origin| be the result of executing the <a>URL parser</a> on the
             <a>unicode serialization</a> of |parent|'s <a>active document</a>'s
-            <a>origin</a>.
+            <a for="">origin</a>.
 
         3.  If [[#match-url-to-source-list]] returns `Does Not Match` when
-            executed upon |origin| and this directive's
-            <a for="directive">value</a>, return "`Blocked`".
+            executed upon |origin|, this directive's
+            <a for="directive">value</a>, |navigation response|'s
+            <a for="response">url</a>'s {{URL/origin}}, and `0`, return
+            "`Blocked`".
 
     5.  Return "`Allowed`".
   </ol>
