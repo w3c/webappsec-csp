@@ -1667,7 +1667,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     </pre>
   </div>
 
-  <h5 id="child-src-algorithms">Algorithms</h5>
+  <h5 algorithm id="child-src-pre-request">
+    `child-src` Pre-request check
+  </h5>
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
@@ -1686,6 +1688,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       is |name| on |request| and |policy|, using this directive's
       <a for="directive">value</a> for the comparison.
 
+  <h5 algorithm id="child-src-post-request">
+    `child-src` Post-request check
+  </h5>
+
   This directive's <a for="directive">post-request check</a> is as follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
@@ -1701,7 +1707,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   4.  Return the result of executing the <a for="directive">post-request
       check</a> for the <a>directive</a> whose <a for="directive">name</a>
-      is |name| on |request| and |policy|, using this directive's
+      is |name| on |request|, |response|, and |policy|, using this directive's
       <a for="directive">value</a> for the comparison.
 
   <h4 id="directive-connect-src">`connect-src`</h4>
@@ -1759,13 +1765,18 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     </pre>
   </div>
 
-  <h5 id="connect-src-algorithms">Algorithms</h5>
+
+  <h5 algorithm id="connect-src-pre-request">
+    `connect-src` Pre-request check
+  </h5>
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
   Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
 
-  1.  If |request|'s <a for="request">initiator</a> is "`fetch`", or its
+  1.  Assert: |policy| is unused.
+
+  2.  If |request|'s <a for="request">initiator</a> is "`fetch`", or its
       <a for="request">type</a> is "" and <a for="request">destination</a> is
       "`subresource`":
 
@@ -1773,14 +1784,20 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           |request| and this directive's <a for="directive">value</a> is
           "`Does Not Match`", return "`Blocked`".
 
-  2.  Return "`Allowed`".
+  3.  Return "`Allowed`".
+
+  <h5 algorithm id="connect-src-post-request">
+    `connect-src` Post-request check
+  </h5>
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
   <a>policy</a> (|policy|):
 
-  1.  If |request|'s <a for="request">initiator</a> is "`fetch`", or its
+  1.  Assert: |policy| is unused.
+
+  2.  If |request|'s <a for="request">initiator</a> is "`fetch`", or its
       <a for="request">type</a> is "" and <a for="request">destination</a> is
       "`subresource`":
 
@@ -1789,7 +1806,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           <a for="directive">value</a> is "`Does Not Match`", return
           "`Blocked`".
 
-  2.  Return "`Allowed`".
+  3.  Return "`Allowed`".
 
   <h4 id="directive-default-src">`default-src`</h4>
 
@@ -1864,7 +1881,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     particular page the policy will apply to.
   </div>
 
-  <h5 id="default-src-algorithms">Algorithms</h5>
+  <h5 algorithm id="default-src-pre-request">
+    `default-src` Pre-request check
+  </h5>
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
@@ -1891,6 +1910,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       <a for="directive">name</a> is |name| on |request| and |policy|, using
       this directive's <a for="directive">value</a> for the comparison.
 
+  <h5 algorithm id="default-src-post-request">
+    `default-src` Post-request check
+  </h5>
+
   This directive's <a for="directive">post-request check</a> is as follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
@@ -1914,8 +1937,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   5.  Otherwise, return the result of executing the
       <a for="directive">post-request check</a> for the <a>directive</a> whose
-      <a for="directive">name</a> is |name| on |request| and |policy|, using
-      this directive's <a for="directive">value</a> for the comparison.
+      <a for="directive">name</a> is |name| on |request|, |response|, and
+      |policy|, using this directive's <a for="directive">value</a> for the
+      comparison.
 
   <h4 id="directive-font-src">`font-src`</h4>
 
@@ -1950,33 +1974,43 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     </pre>
   </div>
 
-  <h5 id="font-src-algorithms">Algorithms</h5>
+  <h5 algorithm id="font-src-pre-request">
+    `font-src` Pre-request check
+  </h5>
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
   Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
 
-  1.  If |request|'s <a for="request">type</a> is "`font`":
+  1.  Assert: |policy| is unused.
+
+  2.  If |request|'s <a for="request">type</a> is "`font`":
 
       1.  If the result of executing [[#match-request-to-source-list]] on
           |request| and this directive's <a for="directive">value</a> is
           "`Does Not Match`", return "`Blocked`".
 
-  2.  Return "`Allowed`".
+  3.  Return "`Allowed`".
+
+  <h5 algorithm id="font-src-post-request">
+    `font-src` Post-request check
+  </h5>
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
   <a>policy</a> (|policy|):
 
-  1.  If |request|'s <a for="request">type</a> is "`font`":
+  1.  Assert: |policy| is unused.
+
+  2.  If |request|'s <a for="request">type</a> is "`font`":
 
       1.  If the result of executing [[#match-response-to-source-list]] on
           |response|, |request|, and this directive's
           <a for="directive">value</a> is "`Does Not Match`", return
           "`Blocked`".
 
-  2.  Return "`Allowed`".
+  3.  Return "`Allowed`".
 
   <h4 id="directive-frame-src">`frame-src`</h4>
 
@@ -2005,13 +2039,17 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     </pre>
   </div>
 
-  <h5 id="frame-src-algorithms">Algorithms</h5>
+  <h5 algorithm id="frame-src-pre-request">
+    `frame-src` Pre-request check
+  </h5>
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
   Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
 
-  1.  If |request|'s <a for="request">type</a> is "`document`" and
+  1.  Assert: |policy| is unused.
+
+  2.  If |request|'s <a for="request">type</a> is "`document`" and
       <a for="request">target browsing context</a> is a <a>nested browsing
       context</a>:
 
@@ -2019,14 +2057,20 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           |request| and this directive's <a for="directive">value</a> is
           "`Does Not Match`", return "`Blocked`".
 
-  2.  Return "`Allowed`".
+  3.  Return "`Allowed`".
+
+  <h5 algorithm id="frame-src-post-request">
+    `frame-src` Post-request check
+  </h5>
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
   <a>policy</a> (|policy|):
 
-  1.  If |request|'s <a for="request">type</a> is "`document`" and
+  1.  Assert: |policy| is unused.
+
+  2.  If |request|'s <a for="request">type</a> is "`document`" and
       <a for="request">target browsing context</a> is a <a>nested browsing
       context</a>:
 
@@ -2035,7 +2079,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           <a for="directive">value</a> is "`Does Not Match`", return
           "`Blocked`".
 
-  2.  Return "`Allowed`".
+  3.  Return "`Allowed`".
 
   <h4 id="directive-img-src">`img-src`</h4>
 
@@ -2067,33 +2111,43 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     </pre>
   </div>
 
-  <h5 id="img-src-algorithms">Algorithms</h5>
+  <h5 algorithm id="img-src-pre-request">
+    `img-src` Pre-request check
+  </h5>
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
   Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
 
-  1.  If |request|'s <a for="request">type</a> is "`image`":
+  1.  Assert: |policy| is unused.
+
+  2.  If |request|'s <a for="request">type</a> is "`image`":
 
       1.  If the result of executing [[#match-request-to-source-list]] on
           |request| and this directive's <a for="directive">value</a> is
           "`Does Not Match`", return "`Blocked`".
 
-  2.  Return "`Allowed`".
+  3.  Return "`Allowed`".
+
+  <h5 algorithm id="img-src-post-request">
+    `img-src` Post-request check
+  </h5>
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
   <a>policy</a> (|policy|):
 
-  1.  If |request|'s <a for="request">type</a> is "`image`":
+  1.  Assert: |policy| is unused.
+
+  2.  If |request|'s <a for="request">type</a> is "`image`":
 
       1.  If the result of executing [[#match-response-to-source-list]] on
           |response|, |request|, and this directive's
           <a for="directive">value</a> is "`Does Not Match`", return
           "`Blocked`".
 
-  2.  Return "`Allowed`".
+  3.  Return "`Allowed`".
 
   <h4 id="directive-manifest-src">`manifest-src`</h4>
 
@@ -2121,27 +2175,37 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     </pre>
   </div>
 
-  <h5 id="manifest-src-algorithms">Algorithms</h5>
+  <h5 algorithm id="manifest-src-pre-request">
+    `manifest-src` Pre-request check
+  </h5>
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
   Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
 
-  1.  If |request|'s <a for="request">type</a> is "", and its
+  1.  Assert: |policy| is unused.
+
+  2.  If |request|'s <a for="request">type</a> is "", and its
       <a for="request">initiator</a> is "`manifest`":
 
       1.  If the result of executing [[#match-request-to-source-list]] on
           |request| and this directive's <a for="directive">value</a> is
           "`Does Not Match`", return "`Blocked`".
 
-  2.  Return "`Allowed`".
+  3.  Return "`Allowed`".
+
+  <h5 algorithm id="manifest-src-post-request">
+    `manifest-src` Post-request check
+  </h5>
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
   <a>policy</a> (|policy|):
 
-  1.  If |request|'s <a for="request">type</a> is "", and its
+  1.  Assert: |policy| is unused.
+
+  2.  If |request|'s <a for="request">type</a> is "", and its
       <a for="request">initiator</a> is "`manifest`":
 
       1.  If the result of executing [[#match-response-to-source-list]] on
@@ -2149,7 +2213,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           <a for="directive">value</a> is "`Does Not Match`", return
           "`Blocked`".
 
-  2.  Return "`Allowed`".
+  3.  Return "`Allowed`".
 
   <h4 id="directive-media-src">`media-src`</h4>
 
@@ -2180,27 +2244,37 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     </pre>
   </div>
 
-  <h5 id="media-src-algorithms">Algorithms</h5>
+  <h5 algorithm id="media-src-pre-request">
+    `media-src` Pre-request check
+  </h5>
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
   Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
 
-  1.  If |request|'s <a for="request">type</a> is one of "`audio`", "`video`",
+  1.  Assert: |policy| is unused.
+
+  2.  If |request|'s <a for="request">type</a> is one of "`audio`", "`video`",
       or "`track`":
 
       1.  If the result of executing [[#match-request-to-source-list]] on
           |request| and this directive's <a for="directive">value</a> is
           "`Does Not Match`", return "`Blocked`".
 
-  2.  Return "`Allowed`".
+  3.  Return "`Allowed`".
+
+  <h5 algorithm id="media-src-post-request">
+    `media-src` Post-request check
+  </h5>
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
   <a>policy</a> (|policy|):
 
-  1.  If |request|'s <a for="request">type</a> is one of "`audio`", "`video`",
+  1.  Assert: |policy| is unused.
+
+  2.  If |request|'s <a for="request">type</a> is one of "`audio`", "`video`",
       or "`track`":
 
       1.  If the result of executing [[#match-response-to-source-list]] on
@@ -2208,7 +2282,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           <a for="directive">value</a> is "`Does Not Match`", return
           "`Blocked`".
 
-  2.  Return "`Allowed`".
+  3.  Return "`Allowed`".
 
   <h4 id="directive-object-src">`object-src`</h4>
 
@@ -2251,27 +2325,37 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   another directive, such as an <{object}> element with a `text/html` MIME
   type.
 
-  <h5 id="object-src-algorithms">Algorithms</h5>
+  <h5 algorithm id="object-src-pre-request">
+    `object-src` Pre-request check
+  </h5>
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
   Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
 
-  1.  If |request|'s <a for="request">type</a> is "", and its
+  1.  Assert: |policy| is unused.
+
+  2.  If |request|'s <a for="request">type</a> is "", and its
       <a for="request">destination</a> is "`unknown`":
 
       1.  If the result of executing [[#match-request-to-source-list]] on
           |request| and this directive's <a for="directive">value</a> is
           "`Does Not Match`", return "`Blocked`".
 
-  2.  Return "`Allowed`".
+  3.  Return "`Allowed`".
+
+  <h5 algorithm id="object-src-post-request">
+    `object-src` Post-request check
+  </h5>
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
   <a>policy</a> (|policy|):
 
-  1.  If |request|'s <a for="request">type</a> is "", and its
+  1.  Assert: |policy| is unused.
+
+  2.  If |request|'s <a for="request">type</a> is "", and its
       <a for="request">destination</a> is "`unknown`":
 
       1.  If the result of executing [[#match-response-to-source-list]] on
@@ -2279,7 +2363,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           <a for="directive">value</a> is "`Does Not Match`", return
           "`Blocked`".
 
-  2.  Return "`Allowed`".
+  3.  Return "`Allowed`".
 
   <h4 id="directive-script-src">`script-src`</h4>
 
@@ -2318,13 +2402,17 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       Note: If a user agent implements non-standard sinks like `setImmediate()`
       or `execScript()`, they SHOULD also be gated on "`unsafe-eval`".
 
-  <h5 id="script-src-algorithms">Algorithms</h5>
+  <h5 algorithm id="script-src-pre-request">
+    `script-src` Pre-request check
+  </h5>
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
   Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
 
-  1.  If |request|'s <a for="request">type</a> is "`script`", and its
+  1.  Assert: |policy| is unused.
+
+  2.  If |request|'s <a for="request">type</a> is "`script`", and its
       <a for="request">destination</a> is "`subresource`":
 
       1.  If the result of executing [[#match-nonce-to-source-list]] on
@@ -2380,14 +2468,20 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           |request| and this directive's <a for="directive">value</a> is
           "`Does Not Match`", return "`Blocked`".
 
-  2.  Return "`Allowed`".
+  3.  Return "`Allowed`".
+
+  <h5 algorithm id="script-src-post-request">
+    `script-src` Post-request check
+  </h5>
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
   <a>policy</a> (|policy|):
 
-  1.  If |request|'s <a for="request">type</a> is "`script`", and its
+  1.  Assert: |policy| is unused.
+
+  2.  If |request|'s <a for="request">type</a> is "`script`", and its
       <a for="request">destination</a> is "`subresource`":
 
       1.  If the result of executing [[#match-nonce-to-source-list]] on
@@ -2404,7 +2498,11 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           <a for="directive">value</a> is "`Does Not Match`", return
           "`Blocked`".
 
-  2.  Return "`Allowed`".
+  3.  Return "`Allowed`".
+
+  <h5 algorithm id="script-src-inline">
+    `script-src` Inline Check
+  </h5>
 
   This directive's <a for="directive">inline check</a> algorithm is as follows:
 
@@ -2420,8 +2518,8 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           "<a grammar>`'unsafe-hashed-attributes'`</a>", return "`Blocked`".
 
       2.  If the result of executing [[#match-element-to-source-list]] on
-          |element|, this directive's <a for="directive">value</a>, and
-          |type| is "`Does Not Match`", return "`Blocked`".
+          |element|, this directive's <a for="directive">value</a>, |type|,
+          and |source|, is "`Does Not Match`", return "`Blocked`".
 
   2.  If |type| is "`script`":
 
@@ -2433,8 +2531,8 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           in [[#strict-dynamic-usage]].
 
       2.  If the result of executing [[#match-element-to-source-list]] on
-          |element|, this directive's <a for="directive">value</a>, and
-          |type| is "`Does Not Match`", return "`Blocked`".
+          |element|, this directive's <a for="directive">value</a>, |type|,
+          and |source|, is "`Does Not Match`", return "`Blocked`".
 
   3.  Return "`Allowed`".
 
@@ -2484,13 +2582,17 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
       ISSUE: This needs to be better explained.
 
-  <h5 id="style-src-algorithms">Algorithms</h5>
+  <h5 algorithm id="style-src-pre-request">
+    `style-src` Pre-request Check
+  </h5>
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
   Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
 
-  1.  If |request|'s <a for="request">type</a> is "`style`":
+  1.  Assert: |policy| is unused.
+
+  2.  If |request|'s <a for="request">type</a> is "`style`":
 
       1.  If the result of executing [[#match-nonce-to-source-list]] on
           |request|'s <a for="request">cryptographic nonce metadata</a> and this
@@ -2501,14 +2603,20 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           |request| and this directive's <a for="directive">value</a> is
           "`Does Not Match`", return "`Blocked`".
 
-  2.  Return "`Allowed`".
+  3.  Return "`Allowed`".
+
+  <h5 algorithm id="style-src-post-request">
+    `style-src` Post-request Check
+  </h5>
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
   <a>policy</a> (|policy|):
 
-  1.  If |request|'s <a for="request">type</a> is "`style`":
+  1.  Assert: |policy| is unused.
+
+  2.  If |request|'s <a for="request">type</a> is "`style`":
 
       1.  If the result of executing [[#match-nonce-to-source-list]] on
           |request|'s <a for="request">cryptographic nonce metadata</a> and this
@@ -2520,7 +2628,11 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           <a for="directive">value</a> is "`Does Not Match`", return
           "`Blocked`".
 
-  2.  Return "`Allowed`".
+  3.  Return "`Allowed`".
+
+  <h5 algorithm id="style-src-inline">
+    `style-src` Inline Check
+  </h5>
 
   This directive's <a for="directive">inline check</a> algorithm is as follows:
 
@@ -2570,27 +2682,37 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     </pre>
   </div>
 
-  <h5 id="worker-src-algorithms">Algorithms</h5>
+  <h5 algorithm id="worker-src-pre-request">
+    `worker-src` Pre-request Check
+  </h5>
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
   Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
 
-  1.  If |request|'s <a for="request">destination</a> is one of
+  1.  Assert: |policy| is unused.
+
+  2.  If |request|'s <a for="request">destination</a> is one of
       "`serviceworker`", "`sharedworker`", or "`worker`":
 
       4.  If the result of executing [[#match-request-to-source-list]] on
           |request| and this directive's <a for="directive">value</a> is
           "`Does Not Match`", return "`Blocked`".
 
-  2.  Return "`Allowed`".
+  3.  Return "`Allowed`".
+
+  <h5 algorithm id="worker-src-post-request">
+    `worker-src` Post-request Check
+  </h5>
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
   <a>policy</a> (|policy|):
 
-  1.  If |request|'s <a for="request">destination</a> is one of
+  1.  Assert: |policy| is unused.
+
+  2.  If |request|'s <a for="request">destination</a> is one of
       "`serviceworker`", "`sharedworker`", or "`worker`":
 
       1.  If the result of executing [[#match-response-to-source-list]] on
@@ -2598,7 +2720,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           <a for="directive">value</a> is "`Does Not Match`", return
           "`Blocked`".
 
-  2.  Return "`Allowed`".
+  3.  Return "`Allowed`".
 
   <h4 id="fetch-directive-matching-url">URL Matching Algorithms</h4>
 
@@ -3146,7 +3268,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
   <a>policy</a> (|policy|):
 
-  1.  If |request|'s <a for="request">destination</a> is either "`object`"
+  1.  Assert: |policy| is unused.
+
+  2.  If |request|'s <a for="request">destination</a> is either "`object`"
       or "`embed`":
 
       1.  Let |type| be the result of <a>extracting a MIME type</a> from
@@ -3155,7 +3279,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       2.  If |type| is not an <a>ASCII case-insensitive match</a> for any item
           in this directive's <a for="directive">value</a>, return "`Blocked`".
 
-  2.  Return "`Allowed`".
+  3.  Return "`Allowed`".
 
   <h5 algorithm dfn>
     Should |plugin element| be blocked <i lang="la">a priori</i> by Content
@@ -3209,7 +3333,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   delivered in a <a>`Content-Security-Policy-Report-Only`</a> header, or within
   a <{meta}> element.
 
-  <h5 id="sandbox-algorithms">Algorithms</h5>
+  <h5 algorithm id="sandbox-response">
+    `sandbox` Response Check
+  </h5>
 
   This directive's <a for="directive">response check</a> algorithm is as
   follows:
@@ -3217,7 +3343,12 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
   <a>policy</a> (|policy|):
 
-  1.  If |request|'s <a for="request">destination</a> is one of
+  1.  Assert: |response| is unused.
+
+  2.  If |policy|'s <a for="policy">disposition</a> is not "`Enforce`", then
+      return "`Allowed`".
+
+  3.  If |request|'s <a for="request">destination</a> is one of
       "`serviceworker`", "`sharedworker`", or "`worker`":
 
       1.  If the result of the <a>Parse a sandboxing directive</a> algorithm
@@ -3229,7 +3360,11 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           Note: This will need to change if we allow Workers to be sandboxed into
           unique origins, which seems like a pretty reasonable thing to do.
 
-  2.  Return "`Allowed`".
+  4.  Return "`Allowed`".
+
+  <h5 algorithm id="sandbox-init">
+    `sandbox` Initialization
+  </h5>
 
   This directive's <a for="directive">initialization</a> algorithm is
   responsible for adjusting a {{Document}}'s <a>forced sandboxing flag set</a>
@@ -3239,13 +3374,15 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   Given a {{Document}} or <a>global object</a> (|context|), a <a>response</a>
   (|response|), and a <a>policy</a> (|policy|):
 
-  1.  If |policy|'s <a for="policy">disposition</a> is not "`Enforce`", or
+  1.  Assert: |response| is unused.
+
+  2.  If |policy|'s <a for="policy">disposition</a> is not "`Enforce`", or
       |context| is not a {{Document}}, then abort this algorithm.
 
       Note: This will need to change if we allow Workers to be sandboxed,
       which seems like a pretty reasonable thing to do.
 
-  2.  <a>Parse a sandboxing directive</a> using this directive's
+  3.  <a>Parse a sandboxing directive</a> using this directive's
       <a for="directive">value</a> as the input, and |context|'s <a>forced
       sandboxing flag set</a> as the output.
 
@@ -3270,7 +3407,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   document's opener, and a document's openees. `disown-openee` is weird.
   Maybe `disown 'opener' 'openee'`? Do we need origin restrictions on either/both?
 
-  <h5 id="disown-opener-algorithms">Algorithms</h5>
+  <h5 algorithm id="disown-opener-init">
+    `disown-opener` Initialization
+  </h5>
 
   This directive's <a for="directive">initialization</a> algorithm is as
   follows:
@@ -3278,7 +3417,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   Given a {{Document}} or <a>global object</a> (|context|), a <a>response</a>
   (|response|), and a <a>policy</a> (|policy|):
 
-  1.  If |context|'s <a>responsible browsing context</a> has an <a>opener browsing
+  1.  Assert: |response| and |policy| are unused.
+
+  2.  If |context|'s <a>responsible browsing context</a> has an <a>opener browsing
       context</a>, <a>disown its opener</a>.
 
   ISSUE: What should this do in an <{iframe}>? Anything?
