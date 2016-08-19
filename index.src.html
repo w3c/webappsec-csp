@@ -421,8 +421,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       in [[#unsafe-hashed-attributes-usage]].
 
   9.  The <a>source expression</a> matching has been changed to require explicit whitelisting
-      of any non-<a>network scheme</a>, rather than <a>local scheme</a>, as described
-      in [[#match-url-to-source-expression]].
+      of any non-<a>network scheme</a>, rather than <a>local scheme</a>,
+      unless that non-<a>network scheme</a> is the same as the scheme of protected resource,
+      as described in [[#match-url-to-source-expression]]. 
 
   10. Hash-based source expressions may now whitelist external scripts if the
       <{script}> element that triggers the request specifies a set of integrity
@@ -3288,12 +3289,16 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   |expression| should be resolved. "`'self'`", for instance, will have distinct
   meaning depending on that bit of context.
 
-  1.  If |expression| is the string "*", and |url|'s {{URL/scheme}} is a
-      <a>network scheme</a>, return "`Matches`". 
+  1.  If |expression| is the string "*", return "`Matches`" if one or more of
+      the following conditions is met:
+      
+      1. |url|'s {{URL/scheme}} is a <a>network scheme</a>.
 
-      Note: This logic means that in order to allow resource from non-<a>network scheme</a>,
-      it has to be explicitly whitelisted: `default-src * data: custom-scheme-1: custom-scheme-2:`.
-      In other words, there is no semantic representation of most permissive |expression|.
+      2. |url|'s {{URL/scheme}} is the same as |origin|'s {{URL/scheme}}. 
+
+      Note: This logic means that in order to allow resource from a non-<a>network scheme</a>,
+      it has to be either explicitly whitelisted: `default-src * data: custom-scheme-1: custom-scheme-2:`,
+      or the protected resource must be loaded from the same scheme.
 
   2.  If |expression| matches the <a grammar>`scheme-source`</a> or
       <a grammar>`host-source`</a> grammar:
