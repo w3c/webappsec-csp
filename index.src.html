@@ -44,14 +44,10 @@ spec: ECMA262; urlPrefix: https://tc39.github.io/ecma262
     text: JSON.stringify(); url: sec-json.stringify
 spec: HTML52; urlPrefix: https://www.w3.org/TR/html52/
   type: dfn
-    urlPrefix: browsers.html
-      text: nested browsing context
-    urlPrefix: dom.html
-      text: CSP list; for: document; url: concept-document-csp-list
-    urlPrefix: webappapis.html
-      text: global object; for: settings object; url: concept-settings-object-global
     urlPrefix: scripting-1.html
       text: parser-inserted
+    urlPrefix: document-metadata.html
+      text: Content Security Policy state; url: statedef-http-equiv-content-security-policy-state
 spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   type: dfn
     text: fetch; url: concept-fetch
@@ -159,11 +155,6 @@ spec: REPORTING; urlPrefix: https://w3c.github.io/reporting/
   type: dfn
     text: group
     text: queue report; url: queue-report
-
-spec: HTML; urlPrefix: https://html.spec.whatwg.org/multipage/
-  type: dfn
-    urlPrefix: semantics.html
-      text: Content Security Policy state; url: attr-meta-http-equiv-content-security-policy
 
 spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   type: dfn
@@ -677,7 +668,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   1.  Let |violation| be the result of executing
       [[#create-violation-for-global]] on |request|'s
-      <a for="request">client</a>'s <a for="settings object">global object</a>,
+      <a for="request">client</a>'s <a for="environment settings object">global object</a>,
       |policy|, and |directive|.
 
   2.  Set |violation|'s <a for="violation">resource</a> to |request|'s
@@ -901,7 +892,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   on <a for="request">client</a>'s "report only" policies.
 
   1.  Let |CSP list| be |request|'s
-      <a for="request">client</a>'s <a for="settings object">global object</a>'s
+      <a for="request">client</a>'s <a for="environment settings object">global object</a>'s
       <a for="global object">CSP list</a>.
 
   2.  For each |policy| in |CSP list|:
@@ -926,7 +917,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   <a for="request">client</a>'s Content Security Policy.
 
   1.  Let |CSP list| be |request|'s
-      <a for="request">client</a>'s <a for="settings object">global object</a>'s
+      <a for="request">client</a>'s <a for="environment settings object">global object</a>'s
       <a for="global object">CSP list</a>.
 
   2.  Let |result| be "`Allowed`".
@@ -960,7 +951,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   <a for="request">client</a>'s Content Security Policy.
 
   1.  Let |CSP list| be |request|'s
-      <a for="request">client</a>'s <a for="settings object">global object</a>'s
+      <a for="request">client</a>'s <a for="environment settings object">global object</a>'s
       <a for="global object">CSP list</a>.
 
   2.  Let |result| be "`Allowed`".
@@ -1076,7 +1067,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   Given a {{Document}} (|document|), and a <a>response</a> (|response|), the
   user agent performs the following steps in order to initialize |document|'s
-  <a for="document">CSP list</a>:
+  <a for="Document">CSP list</a>:
 
   1.  If |response|'s <a for="response">url</a>'s {{URL/scheme}} is a
       <a>local scheme</a>:
@@ -1091,10 +1082,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
       4.  For each |doc| in |documents|:
 
-          1.  For each |policy| in |doc|'s <a for="document">CSP list</a>:
+          1.  For each |policy| in |doc|'s <a for="Document">CSP list</a>:
 
               1.  Insert an alias to |policy| in |document|'s
-                  <a for="document">CSP list</a>.
+                  <a for="Document">CSP list</a>.
 
       Note: <a>local scheme</a> includes `about:`, and this algorithm will
       therefore alias the <a>embedding document</a>'s policies for <a>an iframe
@@ -1105,9 +1096,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       controls (`blob:` resources, or `document.write()`).
 
   2.  For each |policy| in |response|'s <a for="response">CSP list</a>, insert
-      |policy| into |document|'s <a for="document">CSP list</a>.
+      |policy| into |document|'s <a for="Document">CSP list</a>.
 
-  3.  For each |policy| in |document|'s <a for="document">CSP list</a>:
+  3.  For each |policy| in |document|'s <a for="Document">CSP list</a>:
 
       1.  For each |directive| in |policy|:
 
@@ -1168,7 +1159,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
           2.  Otherwise, let |violation| be the result of executing
               [[#create-violation-for-global]] on the <a>current settings
-              object</a>'s <a for="settings object">global object</a>, |policy|,
+              object</a>'s <a for="environment settings object">global object</a>, |policy|,
               and "`style-src`" if |type| is "`style`" or "`style-attribute`",
               or "`script-src`" otherwise.
 
@@ -2496,7 +2487,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
       This would include, for example, all invocations of CSSOM's various
       <code>cssText</code> setters and <code>insertRule</code> methods
-      [[!CSSOM]] [[!HTML5]].
+      [[!CSSOM]] [[!HTML]].
 
       ISSUE: This needs to be better explained.
 
@@ -2792,15 +2783,15 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   <ol class="algorithm">
     1.  For each |policy| in |plugin element|'s <a>node document</a>'s
-        <a for="document">CSP list</a>:
+        <a for="Document">CSP list</a>:
 
         1.  If |policy| contains a <a>directive</a> (|directive|) whose name is
             `plugin-types`:
-           
+
             1.  Let |type| be "`application/x-java-applet`" if |plugin element|
                 is an <{applet}> element, or |plugin element|'s `type` attribute's
                 value if present, or "`null`" otherwise.
-               
+
             2.  Return "`Blocked`" if any of the following are true:
 
                 1.  |type| is `null`.
