@@ -2,26 +2,30 @@
 <pre class="metadata">
 Status: ED
 ED: https://w3c.github.io/webappsec-csp/embedded/
+TR: https://www.w3.org/TR/csp-embedded-enforcement/
+Previous Version: https://www.w3.org/TR/2015/WD-csp-embedded-enforcement-20151215/
 Shortname: csp-embedded-enforcement
-Group: webappsec
-Level: 1
+Level: None
 Editor: Mike West 56384, Google Inc., mkwst@google.com
+Group: webappsec
 Abstract:
   This document defines a mechanism by which a web page can embed a nested
   browsing context if and only if it agrees to enforce a particular set of
   restrictions upon itself.
-Version History: https://github.com/w3c/webappsec-csp/commits/master/embedded/index.src.html
-!Participate: <a href="https://github.com/w3c/webappsec-csp/issues/new">File an issue</a> (<a href="https://github.com/w3c/webappsec-csp/issues">open issues</a>)
 Indent: 2
-Markup Shorthands: css off, markdown on
+Version History: https://github.com/w3c/webappsec-csp/commits/master/embedded/index.src.html
 Boilerplate: omit conformance, omit feedback-header
+!Participate: <a href="https://github.com/w3c/webappsec-csp/issues/new">File an issue</a> (<a href="https://github.com/w3c/webappsec-csp/issues">open issues</a>)
+Markup Shorthands: css off, markdown on
 </pre>
 <pre class="anchors">
-spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp
+spec: CSP3; urlPrefix: https://w3c.github.io/webappsec-csp
   type: dfn
     text: content-security-policy; url: content-security-policy-header-field
     text: content security policy; url: security-policy
     text: parse a serialized policy; url: parse-serialized-policy 
+    text: serialized csp
+    text: frame-ancestors
     text: policy
     text: directive set; for: policy
     text: disposition; for: policy
@@ -32,20 +36,21 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp
     text: serialized-policy; url: grammardef-serialized-policy
 spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   type: dfn
+    text: append; for: header list; url: concept-header-list-append
     text: request; url: concept-request
+    for: request
+      text: header list; url: concept-request-header-list
     text: response; url: concept-response
-    text: CSP list; for: response; url: concept-response-policy-list
+    for: response
+      text: CSP list; url: concept-response-policy-list
+      text: url; url: concept-response-url
 spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   type: dfn
-    text: navigate
-    text: browsing context
-    text: nested browsing context
     text: browsing context container
 </pre>
 <pre class="link-defaults">
-spec:dom-ls; type:interface; text:Document
+spec:dom; type:interface; text:Document
 </pre>
-<pre boilerplate="copyright">&copy;2015 Google, Inc.</pre>
 <!--
 ████ ██    ██ ████████ ████████   ███████
  ██  ███   ██    ██    ██     ██ ██     ██
@@ -56,7 +61,8 @@ spec:dom-ls; type:interface; text:Document
 ████ ██    ██    ██    ██     ██  ███████
 -->
 <section>
-  <h2 id="intro">Introduction</h2>
+  Introduction {#intro}
+  ============
 
   <em>This section is not normative.</em>
 
@@ -87,9 +93,10 @@ spec:dom-ls; type:interface; text:Document
   requested, the user agent will render the embedded content. If no such policy
   is present, the response will be blocked.
 
-  <h3 id="examples">Examples</h3>
+  Examples {#examples}
+  --------
 
-  <div class="example">
+  <div class="example" id="example1">
     MegaCorp Inc. wishes to ensure that the advertisements that run on its
     various publications are locked down to include script from trusted origins
     that have been audited for safety. They can do so by including the
@@ -102,97 +109,128 @@ spec:dom-ls; type:interface; text:Document
     </pre>
 
     This will generate a request to `advertisements-r-us.example.com` that has
-    an <a>`Embedding-CSP`</a> header, as follows:
+    an <a http-header>`Embedding-CSP`</a> header, as follows:
 
     <pre>
       GET / HTTP/1.1
       Host: advertisements-r-us.example.com
       ...
-      <a>Embedding-CSP</a>: script-src https://trusted-cdn.example.com/
+      <a http-header>Embedding-CSP</a>: script-src https://trusted-cdn.example.com/
       ...
     </pre>
 
-    The advertisment will only load if it is delivered with a Content Security
-    Policy which exactly matches the <{iframe/csp}> attribute's value. One way
-    to do so is to send the requested policy:
-   
+    The advertisement server parses this request header, decides that it's
+    acceptable, and reflects it in the response:
+
     <pre>
       HTTP/1.1 200 OK
       ...
       <a>Content-Security-Policy</a>: script-src https://trusted-cdn.example.com/
     </pre>
 
-    The server might want to futher restrict the document, however. Perhaps it
-    wishes to ensure that plugins will not be loaded. It can do so by sending
-    another policy with additional restrictions:
-   
+    Since the policy asserted by the response matches the policy required by the
+    request, the frame loads successfully.
+  </div>
+
+  <div class="example" id="example2">
+    The advertising server in the above example wishes to ensure that no plugins
+    are loaded, regardless of what its embedder requires. It can do so by
+    sending a restrictive policy in addition to any policy required by an
+    embedder. That is, given a request that has an
+    <a http-header>`Embedding-CSP`</a> header:
+
+    <pre>
+      GET / HTTP/1.1
+      Host: advertisements-r-us.example.com
+      ...
+      <a http-header>Embedding-CSP</a>: script-src https://trusted-cdn.example.com/
+      ...
+    </pre>
+
+    The advertisement server parses this request header, decides that it's
+    acceptable, and reflects it in the response, along with a policy that
+    prevents plugin loading:
+
     <pre>
       HTTP/1.1 200 OK
       ...
       <a>Content-Security-Policy</a>: script-src https://trusted-cdn.example.com/,
                                object-src 'none'
     </pre>
-
+    
     The "`,`" in the <a>`Content-Security-Policy`</a> header's value splits the
-    string into two serialized policies, each of which is enforced.
+    string into two serialized policies, each of which is enforced. The user
+    agent verifies that one of the policies delivered with the response matches
+    the requirement, and since additional policies can only make the
+    <em>effective</em> policy for the page more restrictive, allows the frame
+    to load successfully.
   </div>
 </section>
 
 <section>
-  <h2 id="framework">Framework</h2>
+  Framework {#framework}
+  =========
 
-  <h3 id="monkey-patching-html">
-    Specifying a Policy Requirement
-  </h3>
+  Integration with HTML {#html-integration}
+  ---------------------
 
-  ISSUE: Monkey-patching HTML.
+  1.  <{iframe}> elements have a <dfn element-attr for="iframe">csp</dfn>
+      attribute which specifies the policy that an embedded document must agree
+      to enforce upon itself. Valid attribute values match the
+      <a grammar>serialized-policy</a> grammar from [[!CSP3]].
 
-  <a>Browsing contexts</a> have an <dfn export>`iframe` security policy</dfn>
-  attribute, which is `null` unless otherwise specified.
+      <pre class="idl">
+        partial interface HTMLIFrameElement {
+          attribute DOMString csp;
+        };
+      </pre>
 
-  <{iframe}> elements have a <dfn element-attr for="iframe">csp</dfn> attribute
-  which specifies the policy that an embedded document must agree to enforce
-  upon itself.
+      {{HTMLIFrameElement}}'s {{HTMLIFrameElement/csp}} IDL attribute
+      <a>reflects</a> the value of the element's <{iframe/csp}> content attribute.
 
-  <pre class="idl">
-    partial interface HTMLIFrameElement {
-      attribute DOMString csp;
-    };
-  </pre>
+      ISSUE: Upstream this to all the HTMLs.
 
-  {{HTMLIFrameElement}}'s {{HTMLIFrameElement/csp}} IDL attribute
-  <a>reflects</a> the value of the element's <{iframe/csp}> content attribute.
+  2.  A <a>browsing context</a> has a <dfn export>required CSP</dfn>, which is
+      either `null` or a <a>serialized CSP</a>. For a given <a>browsing
+      context</a> (|context|), the value is the result of executing
+      [[#required-csp-for-context]] on |context|.
 
-  When an <{iframe}> element with a <{iframe/csp}> attribute has its <a>nested
-  browsing context</a> created (before the intial `about:blank` {{Document}} is
-  created), and when an <{iframe}> element's <{iframe/csp}> attribute is set
-  or changed while it has a <a>nested browsing context</a>, the user agent
-  must set the <a>nested browsing context</a>'s <a>`iframe` security policy</a>
-  to the result of executing the <a>parse a serialized policy</a> algorithm on
-  the <{iframe/csp}> attribute's value. 
+      ISSUE: Does this need to be upstreamed? Probably not.
 
-  During the <a>navigate</a> algorithm, perform the following step after the
-  current step 19. At this point, the user agent has fetched a response which it
-  is about to begin parsing, and redirects have been processed:
+  3.  Add the following to the list of error conditions in step 1 of HTML's
+      <a>process a navigate response</a> algorithm:
 
-  <ol start="20">
-    <li>
-      If the algorithm in [[#may-load-response]] returns `Blocked` when executed
-      upon the resource and the <a>browsing context</a> being navigated, abort
-      these steps. The user agent MAY indicate to the user that navigation has
-      been aborted for security reasons.
-    </li>
-  </ol>
+      *   The [[#process-response]] algorithm returns "`Blocked`" when executed
+          upon `response` and `browsingContext`.
 
-  <h3 id="embedding-csp-http-header">
-    The `Embedding-CSP` HTTP Request Header
-  </h3>
+      ISSUE: Upstream this to WHATWG's HTML.
+
+      ISSUE(w3c/html#584): W3C's HTML is not based on Fetch, and does not have
+      a <a>process a navigate response</a> algorithm into which to hook.
+
+  4.  Add the following after step 5 of HTML's <a>process a navigate fetch</a>
+      algorithm:
+
+      6.  If `browsingContext`'s <a>required CSP</a> is not `null`,
+          <a for="header list">append</a> a header whose name is
+          "<a http-header>`Embedding-CSP`</a>" and whose value is
+          `browsingContext`'s <a>required CSP</a> to `request`'s
+          <a for="request">header list</a>.
+
+      ISSUE: Upstream this to WHATWG's HTML.
+
+      ISSUE(w3c/html#584): W3C's HTML is not based on Fetch, and does not have
+      a <a>process a navigate fetch</a> algorithm into which to hook.
+  
+  The `Embedding-CSP` HTTP Request Header {#embedding-csp-http-header}
+  ---------------------------------------
 
   In order to ensure that the embedded resource can decide whether or not it is
   willing to adhere to the embedder's requirements, the policy expressed in an
   <{iframe}>'s <{iframe/csp}> attribute is communicated along with some
-  <a>requests</a> via an "<dfn export>`Embedding-CSP`</dfn>" HTTP request
-  header. The header's value is represented by the following ABNF [[!RFC5234]]:
+  <a>requests</a> via an "<dfn export http-header>`Embedding-CSP`</dfn>" HTTP
+  request header. The header's value is represented by the following ABNF
+  [[!RFC5234]]:
 
   <pre>
     Embedding-CSP = <a grammar>serialized-policy</a>
@@ -201,49 +239,70 @@ spec:dom-ls; type:interface; text:Document
   A user agent MUST NOT send more than one HTTP response header field named
   "`Embedding-CSP`", and any such header MUST NOT contain more than one
   <a grammar>serialized-policy</a>.
-
-  ISSUE: Step ~15 of the <a>navigate</a> algorithm needs to be adjusted to add
-  an `Embedding-CSP` header to a navigational request iff the navigation targets
-  a nested browsing context, and if the <a>browsing context container</a> is an
-  <{iframe}> element with a <{iframe/csp}> attribute. This should be pretty
-  straightforward once the algorithm is rewritten in terms of Fetch, but is a
-  bit tricky today.
+  
+  Servers MUST process only the first policy in the first such header received.
 </section>
 
 <section>
   <h2 id="algorithms">Algorithms</h2>
 
-  <h3 id="may-load-response">
-    Is |response| blocked by |context|'s `iframe` security policy?
+  <h3 id="process-response" algorithm>
+    Is |response| blocked by |context|'s required CSP?
   </h3>
 
   Given a <a>response</a> (|response|) and a <a>browsing context</a>
-  (|context|), this algorithm returns `Allowed` or `Blocked` as
+  (|context|), this algorithm returns "`Allowed`" or "`Blocked`" as
   appropriate:
 
-  1.  Let |embedding policy| be the value of |context|'s <a>`iframe`
-      security policy</a>.
+  <ol class="algorithm">
+    1.  Return "`Allowed`" if either of the following is true:
+    
+        1.  |context| is not a <a>nested browsing context</a>.
 
-  2.  Let |policy list| be the value of |response|'s
-      <a for="response">CSP list</a>.
+        2.  |context|'s <a>required CSP</a> is `null`.
 
-  3.  If the [[#subsume-policy]] algorithm returns `Subsumed` when executed
-      upon |policy list| and |embedding policy|, return `Allowed`.
+    2.  Let |embedding policy| be the result of executing
+        [[csp3#parse-serialized-policy]] on |context|'s <a>required CSP</a> and
+        "`enforce`".
 
-  4.  Return `Blocked`.
+    3.  If |response|'s <a for="response">url</a>'s <a for="url">scheme</a> is
+        a <a>local scheme</a>, or if |response|'s <a for="response">url</a>'s
+        <a for="url">origin</a> is the same as the <a for="/">origin</a> of the
+        {{Document}} <a lt="nested through">through which</a> |context| is nested:
 
-  <h3 id="subsume-policy">
+        1.  Append |embedding policy| to |response|'s <a for="response">CSP
+            list</a>.
+
+        2.  Return "`Allowed`".
+
+        Note: The embedder has direct access to same-origin responses, so if it
+        wishes to enforce a policy on that same-origin response, we simply do so.
+        Likewise, <a>local scheme</a> responses already inherit their policy from
+        the embedder, so we allow the embedder to tighten that policy via this
+        embedding mechanism.
+
+    4.  Assert: |context| is a <a>nested browsing context</a>, and |response| is
+        a cross-origin, <a>network schemed</a> resource.
+
+    5.  If the [[#subsume-policy]] algorithm returns "`Subsumed`" when executed
+        upon |response|'s <a for="response">CSP list</a> and |embedding policy|,
+        return "`Allowed`".
+
+    6.  Return "`Blocked`".
+  </ol>
+
+  <h3 id="subsume-policy" algorithm>
     Is |policy list| subsumed under |subsuming policy|?
   </h3>
 
   Given a list of <a>policy</a> objects (|policy list|), this algorithm returns
-  `Subsumed` if that list enforces a <a>policy</a> which is an exact match for a
-  given <a>policy</a> object (|subsuming policy|). It returns `Not Subsumed`
+  "`Subsumed`" if that list enforces a <a>policy</a> which is an exact match for
+  a given <a>policy</a> object (|subsuming policy|). It returns "`Not Subsumed`"
   otherwise.
 
   Note: Ideally, we'll someday define a real subsumption algorithm
   which would verify that the policy `default-src 'none'; script-src
-  https://example.com` is subsumbed under `default-src *.example.com` (as
+  https://example.com` is subsumbed under `default-src example.com` (as
   there is no case in which the latter will block a request that the former
   would allow). That calculation turns out to be hard, so the current algorithm
   takes the significantly simpler approach of requiring an exact match.
@@ -251,48 +310,70 @@ spec:dom-ls; type:interface; text:Document
   Note: This is not an efficient algorithm. Implementers are encouraged to
   implement something a little smarter and faster, with the same behavior.
 
-  1.  If |subsuming policy| is `null`, return `Subsumed`.
+  <ol class="algorithm">
+    1.  If |subsuming policy| is `null`, return "`Subsumed`".
 
-  2.  For each |policy| in |policy list|:
+    2.  For each |policy| in |policy list|:
 
-      1.  If |policy|'s <a for="policy">disposition</a> is not
-          `Enforce`, set skip to the next |policy|.
+        1.  If |policy|'s <a for="policy">disposition</a> is not
+            "`enforce`", set skip to the next |policy|.
 
-      2.  If |policy|'s <a for="policy">directive set</a> is not the
-          same size as |subsuming policy|'s <a for="policy">directive
-          set</a>, skip to the next |policy|.
+        2.  If |policy|'s <a for="policy">directive set</a> is not the
+            same size as |subsuming policy|'s <a for="policy">directive
+            set</a>, skip to the next |policy|.
 
-      3.  For each |directive| in |policy|'s
-          <a for="policy">directive set</a>:
+        3.  For each |directive| in |policy|'s
+            <a for="policy">directive set</a>:
 
-          1.  Let |subsuming directive| be the <a>directive</a> in
-              |subsuming policy|'s <a for="policy">directive
-              set</a> whose <a for="directive">name</a> matches
-              |directive|'s <a for="directive">name</a>, or `null`
-              if no such <a>directive</a> is present.
+            1.  Let |subsuming directive| be the <a>directive</a> in
+                |subsuming policy|'s <a for="policy">directive
+                set</a> whose <a for="directive">name</a> matches
+                |directive|'s <a for="directive">name</a>, or `null`
+                if no such <a>directive</a> is present.
 
-          2.  If |subsuming directive| is `null`, skip to the next
-              |policy|.
+            2.  If |subsuming directive| is `null`, skip to the next
+                |policy|.
 
-          3.  If |subsuming directive|'s <a for="directive">value</a>
-              list is not the same size as |directive|'s
-              <a for="directive">value</a> list, skip to the next
-              |policy|.
+            3.  If |subsuming directive|'s <a for="directive">value</a>
+                list is not the same size as |directive|'s
+                <a for="directive">value</a> list, skip to the next
+                |policy|.
 
-          4.  For each |token| in |directive|'s
-              <a for="directive">value</a>:
+            4.  For each |token| in |directive|'s
+                <a for="directive">value</a>:
 
-              1.  If |token| is not present in |subsuming
-                  directive|'s <a for="directive">value</a>, skip to the
-                  next |policy|.
+                1.  If |token| is not present in |subsuming
+                    directive|'s <a for="directive">value</a>, skip to the
+                    next |policy|.
 
-      4.  Return `Subsumed`.
+        4.  Return "`Subsumed`".
 
-  3.  Return `Not Subsumed`.
+    3.  Return "`Not Subsumed`".
+  </ol>
+
+  <h3 id="required-csp-for-context" algorithm>
+    Obtain the required CSP for |context|.
+  </h3>
+
+  Given a <a>browsing context</a> (|context|), the following algorithm returns
+  its <a>required CSP</a>:
+
+  <ol class="algorithm">
+    1.  If |context| is a <a>nested browsing context</a>.
+
+        1.  If |context|'s <a>browsing context container</a> has an <{iframe/csp}>
+            content attribute, return its value.
+
+    2.  Return `null`.
+  </ol>
 </section>
 
 <section>
-  <h2 id="security-considerations">Security Considerations</h2>
+  Security and Privacy Considerations {#security-and-privacy-considerations}
+  =================================== 
+
+  Policy Enforcement {#policy-enforcement}
+  ------------------
 
   Embedded documents should be careful to evaluate the proposed Content Security
   Policy, and not simply to reflect whatever policy an embedder suggests. Doing
@@ -301,44 +382,46 @@ spec:dom-ls; type:interface; text:Document
 
   In particular, documents which do not expect to be embedded should continue to
   respond to any such request with a Content Security Policy containing an
-  appropriate `frame-ancestors` directive.
-</section>
+  appropriate <a>`frame-ancestors`</a> directive.
 
-<section>
-  <h2 id="privacy-considerations">Privacy Considerations</h2>
+  Policy Leakage {#policy-leakage}
+  --------------
+
+  The enforcement mechanism allows a malicious embedder to read a page's policy
+  cross-origin by brute-forcing its constraints. This could leak interesting
+  data about the page or the user loading the page if the policy contains secret
+  tokens or usernames.
+
+  Again, the best defense here is to control the contexts allowed to embed a
+  given resource via an appropriate <a>`frame-ancestors`</a> directive.
+
+  Data Exfiltration {#exfiltration}
+  -----------------
 
   This feature allows an embedder to send information to a third-party endpoint
-  via the <a>`Embedding-CSP`</a> HTTP header. This doesn't seem to expose any
-  information that couldn't be tunneled in the HTTP request itself (via GET
-  parameters, etc), and embedders remain in control over the endpoints to which
-  such requests may be made by enforcing a Content Security Policy with an
-  appropriate `child-src` directive.
+  via the <a http-header>`Embedding-CSP`</a> HTTP header. This doesn't seem to
+  expose any information that couldn't be tunneled in the HTTP request itself
+  (via GET parameters, etc), and embedders remain in control over the endpoints
+  to which such requests may be made by enforcing a Content Security Policy with
+  an appropriate `child-src` directive.
 </section>
 
 <section>
-  <h2 id="iana-considerations">IANA Considerations</h2>
+  IANA Considerations {#iana}
+  ===================
 
   The permanent message header field registry should be updated
-  with the following registration: [[!RFC3864]]
+  with the following registration for the
+  <a http-header>`Embedding-CSP`</a> header: [[!RFC3864]]
 
-  <h3 id="iana-csp">
-    Embedding-CSP
-  </h3>
-
-  <dl>
-    <dt>Header field name</dt>
-    <dd>Embedding-CSP</dd>
-
-    <dt>Applicable protocol</dt>
-    <dd>http</dd>
-
-    <dt>Status</dt>
-    <dd>standard</dd>
-
-    <dt>Author/Change controller</dt>
-    <dd>W3C</dd>
-
-    <dt>Specification document</dt>
-    <dd>This specification (See [[#embedding-csp-http-header]])</dd>
-  </dl>
+  :   Header field name
+  ::  Embedding-CSP
+  :   Applicable protocol
+  ::  http
+  :   Status
+  ::  standard
+  :   Author/Change controller
+  ::  W3C
+  :   Specification document
+  ::  This specification (See [[#embedding-csp-http-header]])
 </section>
