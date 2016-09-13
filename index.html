@@ -1187,6 +1187,23 @@ Possible extra rowspan handling
     color: red;
     content: "🔓";
   }
+
+  .wip {
+    margin: 1em auto;
+
+    background: #FCFAEE;
+    border: 0.5em;
+    border-left-style: solid;
+    border-color: #E0CB52;
+    padding: 0.5em;
+  }
+
+  .wip::before {
+    content: "Work In Progress: ";
+    display: block;
+    color: #827017;
+  }
+
 </style>
 <style>/* style-md-lists */
 
@@ -1861,17 +1878,23 @@ of security-relevant policy decisions.</p>
       <p>The <code>'strict-dynamic'</code> source expression will now allow script which
   executes on a page to load more script via non-<a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted">"parser-inserted"</a> <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code> elements. Details are in <a href="#strict-dynamic-usage">§8.2 Usage of "'strict-dynamic'"</a>.</p>
      <li data-md="">
-      <p>The <code>'unsafe-hashed-attributes'</code> source expression will now allow event
-  handlers and style attributes to match hash source expressions. Details
-  in <a href="#unsafe-hashed-attributes-usage">§8.3 Usage of "'unsafe-hashed-attributes'"</a>.</p>
+      <div class="wip">
+        The <code>'unsafe-hashed-attributes'</code> source expression will now allow event
+    handlers and style attributes to match hash source expressions. Details
+    in <a href="#unsafe-hashed-attributes-usage">§8.3 Usage of "'unsafe-hashed-attributes'"</a>. 
+       <p class="issue" id="issue-2f321613"><a class="self-link" href="#issue-2f321613"></a> <code>unsafe-hashed-attributes</code> is a work in progress. <a href="https://github.com/w3c/webappsec-csp/issues/13">&lt;https://github.com/w3c/webappsec-csp/issues/13></a></p>
+      </div>
      <li data-md="">
       <p>The <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-1">source expression</a> matching has been changed to require explicit whitelisting
   of any non-<a data-link-type="dfn" href="https://url.spec.whatwg.org/#network-scheme">network scheme</a>, rather than <a data-link-type="dfn" href="https://url.spec.whatwg.org/#local-scheme">local scheme</a>,
   unless that non-<a data-link-type="dfn" href="https://url.spec.whatwg.org/#network-scheme">network scheme</a> is the same as the scheme of protected resource,
   as described in <a href="#match-url-to-source-expression">§6.6.1.6 Does url match expression in origin with redirect count?</a>.</p>
      <li data-md="">
-      <p>Hash-based source expressions may now whitelist external scripts if the <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code> element that triggers the request specifies a set of integrity
-  metadata which is whitelisted by the current policy. Details in <a href="#external-hash">§8.4 Whitelisting external JavaScript with hashes</a>.</p>
+      <div class="wip">
+        Hash-based source expressions may now whitelist external scripts if the <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code> element that triggers the request specifies a set of integrity
+    metadata which is whitelisted by the current policy. Details in <a href="#external-hash">§8.4 Whitelisting external JavaScript with hashes</a>. 
+       <p class="issue" id="issue-d4c4d0f5"><a class="self-link" href="#issue-d4c4d0f5"></a> SRI integration is a work in progress. <a href="https://github.com/w3c/webappsec-csp/issues/78">&lt;https://github.com/w3c/webappsec-csp/issues/78></a></p>
+      </div>
      <li data-md="">
       <p>The <a data-link-type="dfn" href="#disown-opener" id="ref-for-disown-opener-1"><code>disown-opener</code></a> directive ensures that a resource can’t be opened
   in such a way as to give another browsing context control over its contents.</p>
@@ -4648,53 +4671,59 @@ document.write('&lt;scr' + 'ipt src='/sadness.js'>&lt;/scr' + 'ipt>');
      <p><code>dependency.js</code> will load, as the <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code> element created by <code>createElement()</code> is not <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted">"parser-inserted"</a>.</p>
      <p><code>sadness.js</code> will <em>not</em> load, however, as <code>document.write()</code> produces <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code> elements which are <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted">"parser-inserted"</a>.</p>
     </div>
-    <h3 class="heading settled" data-level="8.3" id="unsafe-hashed-attributes-usage"><span class="secno">8.3. </span><span class="content"> Usage of "<code>'unsafe-hashed-attributes'</code>" </span><a class="self-link" href="#unsafe-hashed-attributes-usage"></a></h3>
-    <p><em>This section is not normative.</em></p>
-    <p>Legacy websites and websites with legacy dependencies might find it difficult
-  to entirely externalize event handlers. These sites could enable such handlers
-  by whitelisting <code>'unsafe-inline'</code>, but that’s a big hammer with a lot of
-  associated risk (and cannot be used in conjunction with nonces or hashes).</p>
-    <p>The "<a data-link-type="grammar" href="#grammardef-unsafe-hashed-attributes" id="ref-for-grammardef-unsafe-hashed-attributes-4"><code>'unsafe-hashed-attributes'</code></a>" source expression aims to make
-  CSP deployment simpler and safer in these situations by allowing developers
-  to whitelist specific handlers via hashes.</p>
-    <div class="example" id="example-0db435fa">
-     <a class="self-link" href="#example-0db435fa"></a> MegaCorp, Inc. can’t quite get rid of the following HTML on anything
-    resembling a reasonable schedule: 
+    <section class="wip">
+     <h3 class="heading settled" data-level="8.3" id="unsafe-hashed-attributes-usage"><span class="secno">8.3. </span><span class="content"> Usage of "<code>'unsafe-hashed-attributes'</code>" </span><a class="self-link" href="#unsafe-hashed-attributes-usage"></a></h3>
+     <p><em>This section is not normative.</em></p>
+     <p class="issue" id="issue-0e25e974"><a class="self-link" href="#issue-0e25e974"></a> Work in progress. <a href="https://github.com/w3c/webappsec-csp/issues/13">&lt;https://github.com/w3c/webappsec-csp/issues/13></a></p>
+     <p>Legacy websites and websites with legacy dependencies might find it difficult
+    to entirely externalize event handlers. These sites could enable such handlers
+    by whitelisting <code>'unsafe-inline'</code>, but that’s a big hammer with a lot of
+    associated risk (and cannot be used in conjunction with nonces or hashes).</p>
+     <p>The "<a data-link-type="grammar" href="#grammardef-unsafe-hashed-attributes" id="ref-for-grammardef-unsafe-hashed-attributes-4"><code>'unsafe-hashed-attributes'</code></a>" source expression aims to make
+    CSP deployment simpler and safer in these situations by allowing developers
+    to whitelist specific handlers via hashes.</p>
+     <div class="example" id="example-ad917da8">
+      <a class="self-link" href="#example-ad917da8"></a> MegaCorp, Inc. can’t quite get rid of the following HTML on anything
+      resembling a reasonable schedule: 
 <pre>&lt;button id="action" onclick="doSubmit()">
 </pre>
-     <p>Rather than whitelisting "<code>'unsafe-inline'</code>", they decide to use
-    "<code>'unsafe-hashed-attributes'</code>" along with a hash source expression, as follows:</p>
+      <p>Rather than whitelisting "<code>'unsafe-inline'</code>", they decide to use
+      "<code>'unsafe-hashed-attributes'</code>" along with a hash source expression, as follows:</p>
 <pre><a data-link-type="dfn" href="#header-content-security-policy" id="ref-for-header-content-security-policy-8">Content-Security-Policy</a>:  <a data-link-type="dfn" href="#script-src" id="ref-for-script-src-8">script-src</a> <a data-link-type="grammar" href="#grammardef-unsafe-hashed-attributes" id="ref-for-grammardef-unsafe-hashed-attributes-5">'unsafe-hashed-attributes'</a> 'sha256-jzgBGA4UWFFmpOBq0JpdsySukE1FrEN5bUpoK8Z29fY='
 </pre>
-    </div>
-    <h3 class="heading settled" data-level="8.4" id="external-hash"><span class="secno">8.4. </span><span class="content"> Whitelisting external JavaScript with hashes </span><a class="self-link" href="#external-hash"></a></h3>
-    <p><em>This section is not normative.</em></p>
-    <p>In <a data-link-type="biblio" href="#biblio-csp2">[CSP2]</a>, hash <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-13">source expressions</a> could only whitelist inlined
-  script, but now that Subresource Integrity is widely deployed, we can expand
-  the scope to enable externalized JavaScript as well.</p>
-    <p>If multiple sets of integrity metadata are specified for a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code>, the
-  request will match a policy’s <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source-10">hash-source</a>s if and only if <em>each</em> item in a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code>'s integrity metadata matches the policy.</p>
-    <div class="example" id="example-8e55aae2">
-     <a class="self-link" href="#example-8e55aae2"></a> MegaCorp, Inc. wishes to whitelist two specific scripts on a page in a way
-    that ensures that the content matches their expectations. They do so by
-    setting the following policy: 
+     </div>
+    </section>
+    <section class="wip">
+     <h3 class="heading settled" data-level="8.4" id="external-hash"><span class="secno">8.4. </span><span class="content"> Whitelisting external JavaScript with hashes </span><a class="self-link" href="#external-hash"></a></h3>
+     <p><em>This section is not normative.</em></p>
+     <p class="issue" id="issue-0e25e9740"><a class="self-link" href="#issue-0e25e9740"></a> Work in progress. <a href="https://github.com/w3c/webappsec-csp/issues/78">&lt;https://github.com/w3c/webappsec-csp/issues/78></a></p>
+     <p>In <a data-link-type="biblio" href="#biblio-csp2">[CSP2]</a>, hash <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-13">source expressions</a> could only whitelist inlined
+    script, but now that Subresource Integrity is widely deployed, we can expand
+    the scope to enable externalized JavaScript as well.</p>
+     <p>If multiple sets of integrity metadata are specified for a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code>, the
+    request will match a policy’s <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source-10">hash-source</a>s if and only if <em>each</em> item in a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code>'s integrity metadata matches the policy.</p>
+     <div class="example" id="example-ba2c75cc">
+      <a class="self-link" href="#example-ba2c75cc"></a> MegaCorp, Inc. wishes to whitelist two specific scripts on a page in a way
+      that ensures that the content matches their expectations. They do so by
+      setting the following policy: 
 <pre>Content-Security-Policy: script-src 'sha256-abc123' 'sha512-321cba'
 </pre>
-     <p>In the presence of that policy, the following <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code> elements would be
-    whitelisted because they contain only integrity metadata that matches the
-    policy:</p>
+      <p>In the presence of that policy, the following <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code> elements would be
+      whitelisted because they contain only integrity metadata that matches the
+      policy:</p>
 <pre>&lt;script integrity="sha256-abc123" ...>&lt;/script>
 &lt;script integrity="sha512-321cba" ...>&lt;/script>
 &lt;script integrity="sha256-abc123 sha512-321cba" ...>&lt;/script>
 </pre>
-     <p>While the following <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code> elements would not be whitelisted because they
-    contain metadata that does not match the policy (even though other metadata
-    does match):</p>
+      <p>While the following <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code> elements would not be whitelisted because they
+      contain metadata that does not match the policy (even though other metadata
+      does match):</p>
 <pre>&lt;script integrity="<b>sha384-xyz789</b>" ...>&lt;/script>
 &lt;script integrity="<b>sha384-xyz789</b> sha512-321cba" ...>&lt;/script>
 &lt;script integrity="sha256-abc123 <b>sha384-xyz789</b> sha512-321cba" ...>&lt;/script>
 </pre>
-    </div>
+     </div>
+    </section>
    </section>
    <section>
     <h2 class="heading settled" data-level="9" id="implementation-considerations"><span class="secno">9. </span><span class="content">Implementation Considerations</span><a class="self-link" href="#implementation-considerations"></a></h2>
@@ -5374,6 +5403,8 @@ rest of Google’s CSP Cabal.</p>
 </pre>
   <h2 class="no-num no-ref heading settled" id="issues-index"><span class="content">Issues Index</span><a class="self-link" href="#issues-index"></a></h2>
   <div style="counter-reset:issue">
+   <div class="issue"> <code>unsafe-hashed-attributes</code> is a work in progress. <a href="https://github.com/w3c/webappsec-csp/issues/13">&lt;https://github.com/w3c/webappsec-csp/issues/13></a><a href="#issue-2f321613"> ↵ </a></div>
+   <div class="issue"> SRI integration is a work in progress. <a href="https://github.com/w3c/webappsec-csp/issues/78">&lt;https://github.com/w3c/webappsec-csp/issues/78></a><a href="#issue-d4c4d0f5"> ↵ </a></div>
    <div class="issue"> Is this kind of thing specified anywhere? I didn’t see anything
   that looked useful in <a data-link-type="biblio" href="#biblio-ecma262">[ECMA262]</a>.<a href="#issue-c404edb5"> ↵ </a></div>
    <div class="issue"> How, exactly, do we get the status code? We don’t actually store it
@@ -5404,6 +5435,8 @@ rest of Google’s CSP Cabal.</p>
   impact by doing this check only for <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code> elements when a nonce is
   present, but we should probably consider this algorithm as "at risk" until
   we know its impact. <a href="https://github.com/w3c/webappsec-csp/issues/98">&lt;https://github.com/w3c/webappsec-csp/issues/98></a><a href="#issue-c41e2850"> ↵ </a></div>
+   <div class="issue"> Work in progress. <a href="https://github.com/w3c/webappsec-csp/issues/13">&lt;https://github.com/w3c/webappsec-csp/issues/13></a><a href="#issue-0e25e974"> ↵ </a></div>
+   <div class="issue"> Work in progress. <a href="https://github.com/w3c/webappsec-csp/issues/78">&lt;https://github.com/w3c/webappsec-csp/issues/78></a><a href="#issue-0e25e9740"> ↵ </a></div>
   </div>
   <aside class="dfn-panel" data-for="policy">
    <b><a href="#policy">#policy</a></b><b>Referenced in:</b>
@@ -5921,7 +5954,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-source-expression-12">6.6.2.2. 
     Does element match source list for type and source? </a>
     <li><a href="#ref-for-source-expression-13">8.4. 
-    Whitelisting external JavaScript with hashes </a>
+      Whitelisting external JavaScript with hashes </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="grammardef-serialized-source-list">
@@ -6078,7 +6111,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-grammardef-unsafe-hashed-attributes-2">6.6.2.2. 
     Does element match source list for type and source? </a> <a href="#ref-for-grammardef-unsafe-hashed-attributes-3">(2)</a>
     <li><a href="#ref-for-grammardef-unsafe-hashed-attributes-4">8.3. 
-    Usage of "'unsafe-hashed-attributes'" </a> <a href="#ref-for-grammardef-unsafe-hashed-attributes-5">(2)</a>
+      Usage of "'unsafe-hashed-attributes'" </a> <a href="#ref-for-grammardef-unsafe-hashed-attributes-5">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="grammardef-nonce-source">
@@ -6123,7 +6156,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-grammardef-hash-source-9">8.2. 
     Usage of "'strict-dynamic'" </a>
     <li><a href="#ref-for-grammardef-hash-source-10">8.4. 
-    Whitelisting external JavaScript with hashes </a>
+      Whitelisting external JavaScript with hashes </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="grammardef-hash-algorithm">
@@ -6288,7 +6321,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-header-content-security-policy-7">8.2. 
     Usage of "'strict-dynamic'" </a>
     <li><a href="#ref-for-header-content-security-policy-8">8.3. 
-    Usage of "'unsafe-hashed-attributes'" </a>
+      Usage of "'unsafe-hashed-attributes'" </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="header-content-security-policy-report-only">
@@ -6553,7 +6586,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-script-src-6">8.2. 
     Usage of "'strict-dynamic'" </a> <a href="#ref-for-script-src-7">(2)</a>
     <li><a href="#ref-for-script-src-8">8.3. 
-    Usage of "'unsafe-hashed-attributes'" </a>
+      Usage of "'unsafe-hashed-attributes'" </a>
     <li><a href="#ref-for-script-src-9">10.1. 
     Directive Registry </a>
    </ul>

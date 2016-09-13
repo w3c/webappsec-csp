@@ -218,6 +218,23 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     color: red;
     content: "🔓";
   }
+
+  .wip {
+    margin: 1em auto;
+
+    background: #FCFAEE;
+    border: 0.5em;
+    border-left-style: solid;
+    border-color: #E0CB52;
+    padding: 0.5em;
+  }
+
+  .wip::before {
+    content: "Work In Progress: ";
+    display: block;
+    color: #827017;
+  }
+
 </style>
 <!--
 ████ ██    ██ ████████ ████████   ███████
@@ -327,19 +344,27 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       executes on a page to load more script via non-<a>"parser-inserted"</a>
       <{script}> elements. Details are in [[#strict-dynamic-usage]].
 
-  8.  The `'unsafe-hashed-attributes'` source expression will now allow event
-      handlers and style attributes to match hash source expressions. Details
-      in [[#unsafe-hashed-attributes-usage]].
+  8.  <div class="wip">
+        The `'unsafe-hashed-attributes'` source expression will now allow event
+        handlers and style attributes to match hash source expressions. Details
+        in [[#unsafe-hashed-attributes-usage]].
+
+        ISSUE(w3c/webappsec-csp#13): `unsafe-hashed-attributes` is a work in progress.
+      </div>
 
   9.  The <a>source expression</a> matching has been changed to require explicit whitelisting
       of any non-<a>network scheme</a>, rather than <a>local scheme</a>,
       unless that non-<a>network scheme</a> is the same as the scheme of protected resource,
       as described in [[#match-url-to-source-expression]].
 
-  10. Hash-based source expressions may now whitelist external scripts if the
-      <{script}> element that triggers the request specifies a set of integrity
-      metadata which is whitelisted by the current policy. Details in
-      [[#external-hash]].
+  10. <div class="wip">
+        Hash-based source expressions may now whitelist external scripts if the
+        <{script}> element that triggers the request specifies a set of integrity
+        metadata which is whitelisted by the current policy. Details in
+        [[#external-hash]].
+        
+        ISSUE(w3c/webappsec-csp#78): SRI integration is a work in progress.
+      </div>
 
   11. The <a>`disown-opener`</a> directive ensures that a resource can't be opened
       in such a way as to give another browsing context control over its contents.
@@ -3752,81 +3777,89 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     <{script}> elements which are <a>"parser-inserted"</a>.
   </div>
 
-  <h3 id="unsafe-hashed-attributes-usage">
-    Usage of "`'unsafe-hashed-attributes'`"
-  </h3>
+  <section class="wip">
+    <h3 id="unsafe-hashed-attributes-usage">
+      Usage of "`'unsafe-hashed-attributes'`"
+    </h3>
 
-  <em>This section is not normative.</em>
+    <em>This section is not normative.</em>
+    
+    ISSUE(w3c/webappsec-csp#13): Work in progress.
 
-  Legacy websites and websites with legacy dependencies might find it difficult
-  to entirely externalize event handlers. These sites could enable such handlers
-  by whitelisting `'unsafe-inline'`, but that's a big hammer with a lot of
-  associated risk (and cannot be used in conjunction with nonces or hashes).
+    Legacy websites and websites with legacy dependencies might find it difficult
+    to entirely externalize event handlers. These sites could enable such handlers
+    by whitelisting `'unsafe-inline'`, but that's a big hammer with a lot of
+    associated risk (and cannot be used in conjunction with nonces or hashes).
 
-  The "<a grammar>`'unsafe-hashed-attributes'`</a>" source expression aims to make
-  CSP deployment simpler and safer in these situations by allowing developers
-  to whitelist specific handlers via hashes.
+    The "<a grammar>`'unsafe-hashed-attributes'`</a>" source expression aims to make
+    CSP deployment simpler and safer in these situations by allowing developers
+    to whitelist specific handlers via hashes.
 
-  <div class="example">
-    MegaCorp, Inc. can't quite get rid of the following HTML on anything
-    resembling a reasonable schedule:
+    <div class="example">
+      MegaCorp, Inc. can't quite get rid of the following HTML on anything
+      resembling a reasonable schedule:
 
-    <pre>
-      &lt;button id="action" onclick="doSubmit()"&gt;
-    </pre>
+      <pre>
+        &lt;button id="action" onclick="doSubmit()"&gt;
+      </pre>
 
-    Rather than whitelisting "`'unsafe-inline'`", they decide to use
-    "`'unsafe-hashed-attributes'`" along with a hash source expression, as follows:
+      Rather than whitelisting "`'unsafe-inline'`", they decide to use
+      "`'unsafe-hashed-attributes'`" along with a hash source expression, as follows:
 
-    <pre>
-      <a>Content-Security-Policy</a>:  <a>script-src</a> <a grammar>'unsafe-hashed-attributes'</a> 'sha256-jzgBGA4UWFFmpOBq0JpdsySukE1FrEN5bUpoK8Z29fY='
-    </pre>
-  </div>
+      <pre>
+        <a>Content-Security-Policy</a>:  <a>script-src</a> <a grammar>'unsafe-hashed-attributes'</a> 'sha256-jzgBGA4UWFFmpOBq0JpdsySukE1FrEN5bUpoK8Z29fY='
+      </pre>
+    </div>
+  </section>
 
-  <h3 id="external-hash">
-    Whitelisting external JavaScript with hashes
-  </h3>
+  <section class="wip">
+    <h3 id="external-hash">
+      Whitelisting external JavaScript with hashes
+    </h3>
 
-  <em>This section is not normative.</em>
+    <em>This section is not normative.</em>
 
-  In [[CSP2]], hash <a>source expressions</a> could only whitelist inlined
-  script, but now that Subresource Integrity is widely deployed, we can expand
-  the scope to enable externalized JavaScript as well.
+    ISSUE(w3c/webappsec-csp#78): Work in progress.
+
+    In [[CSP2]], hash <a>source expressions</a> could only whitelist inlined
+    script, but now that Subresource Integrity is widely deployed, we can expand
+    the scope to enable externalized JavaScript as well.
 
 
-  If multiple sets of integrity metadata are specified for a <{script}>, the
-  request will match a policy's <a grammar>hash-source</a>s if and only if
-  <em>each</em> item in a <{script}>'s integrity metadata matches the policy.
+    If multiple sets of integrity metadata are specified for a <{script}>, the
+    request will match a policy's <a grammar>hash-source</a>s if and only if
+    <em>each</em> item in a <{script}>'s integrity metadata matches the policy.
 
-  <div class="example">
-    MegaCorp, Inc. wishes to whitelist two specific scripts on a page in a way
-    that ensures that the content matches their expectations. They do so by
-    setting the following policy:
+    <div class="example">
+      MegaCorp, Inc. wishes to whitelist two specific scripts on a page in a way
+      that ensures that the content matches their expectations. They do so by
+      setting the following policy:
 
-    <pre>
-      Content-Security-Policy: script-src 'sha256-abc123' 'sha512-321cba'
-    </pre>
+      <pre>
+        Content-Security-Policy: script-src 'sha256-abc123' 'sha512-321cba'
+      </pre>
 
-    In the presence of that policy, the following <{script}> elements would be
-    whitelisted because they contain only integrity metadata that matches the
-    policy:
+      In the presence of that policy, the following <{script}> elements would be
+      whitelisted because they contain only integrity metadata that matches the
+      policy:
 
-    <pre>
-      &lt;script integrity="sha256-abc123" ...&gt;&lt;/script&gt;
-      &lt;script integrity="sha512-321cba" ...&gt;&lt;/script&gt;
-      &lt;script integrity="sha256-abc123 sha512-321cba" ...&gt;&lt;/script&gt;
-    </pre>
+      <pre>
+        &lt;script integrity="sha256-abc123" ...&gt;&lt;/script&gt;
+        &lt;script integrity="sha512-321cba" ...&gt;&lt;/script&gt;
+        &lt;script integrity="sha256-abc123 sha512-321cba" ...&gt;&lt;/script&gt;
+      </pre>
 
-    While the following <{script}> elements would not be whitelisted because they
-    contain metadata that does not match the policy (even though other metadata
-    does match):
+      While the following <{script}> elements would not be whitelisted because they
+      contain metadata that does not match the policy (even though other metadata
+      does match):
 
-    <pre>
-      &lt;script integrity="<b>sha384-xyz789</b>" ...&gt;&lt;/script&gt;
-      &lt;script integrity="<b>sha384-xyz789</b> sha512-321cba" ...&gt;&lt;/script&gt;
-      &lt;script integrity="sha256-abc123 <b>sha384-xyz789</b> sha512-321cba" ...&gt;&lt;/script&gt;
-    </pre>
-  </div>
+      <pre>
+        &lt;script integrity="<b>sha384-xyz789</b>" ...&gt;&lt;/script&gt;
+        &lt;script integrity="<b>sha384-xyz789</b> sha512-321cba" ...&gt;&lt;/script&gt;
+        &lt;script integrity="sha256-abc123 <b>sha384-xyz789</b> sha512-321cba" ...&gt;&lt;/script&gt;
+      </pre>
+    </div>
+  </section>
 </section>
 
 <section>
