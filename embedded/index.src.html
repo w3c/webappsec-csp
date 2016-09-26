@@ -311,12 +311,6 @@ spec:dom; type:interface; text:Document
 
         2.  Return "`Allowed`".
 
-        Note: The embedder has direct access to same-origin responses, so if it
-        wishes to enforce a policy on that same-origin response, we simply do so.
-        Likewise, <a>local scheme</a> responses already inherit their policy from
-        the embedder, so we allow the embedder to tighten that policy via this
-        embedding mechanism.
-
     4.  Assert: |context| is a <a>nested browsing context</a>, and |response| is
         a cross-origin, <a>network schemed</a> resource.
 
@@ -335,11 +329,19 @@ spec:dom; type:interface; text:Document
   algorithm returns "`Allowed`" if the former allows the latter to enforce
   arbitrary policy, and "`Not Allowed`" otherwise:
 
+
   1.  If |response|'s <a for="response">url</a>'s <a for="url">scheme</a> is
       a <a>local scheme</a>, return "`Allowed`".
+
+      Note: The embedder has direct access to same-origin responses, so if it
+      wishes to enforce a policy on that same-origin response, we simply do so.
       
   2.  If |response|'s <a for="response">url</a>'s <a for="url">origin</a> is the
       same as |request|'s <a for="request">origin</a>, return "`Allowed`".
+
+      Note: Likewise, <a>local scheme</a> responses already inherit their policy
+      from the embedder, so we allow the embedder to tighten that policy via this
+      embedding mechanism.
 
   3.  If |response|'s <a>header list</a> has a header named
       <a http-header>`CSP-Allow-Origin`</a> (|header|):
