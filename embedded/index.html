@@ -1487,7 +1487,7 @@ restrictions upon itself.</p>
      <ol class="toc">
       <li><a href="#html-integration"><span class="secno">2.1</span> <span class="content">Integration with HTML</span></a>
       <li><a href="#embedding-csp-http-header"><span class="secno">2.2</span> <span class="content">The <code>Embedding-CSP</code> HTTP Request Header</span></a>
-      <li><a href="#csp-allow-origin-http-header"><span class="secno">2.3</span> <span class="content">The <code>CSP-Allow-Origin</code> HTTP Response Header</span></a>
+      <li><a href="#allow-csp-from-http-header"><span class="secno">2.3</span> <span class="content">The <code>Allow-CSP-From</code> HTTP Response Header</span></a>
      </ol>
     <li>
      <a href="#algorithms"><span class="secno">3</span> <span class="content">Algorithms</span></a>
@@ -1607,16 +1607,16 @@ Host: advertisements-r-us.example.com
     <div class="example" id="example3">
      <a class="self-link" href="#example3"></a> To ease the embedee-side implementation, Advertisements-R-Us decides it can
     trust policies sent by MegaCorp, Inc. to be applied safely to its
-    advertisements. It can express this assertion via the <a data-link-type="http-header" href="#http-headerdef-csp-allow-origin" id="ref-for-http-headerdef-csp-allow-origin-1"><code>CSP-Allow-Origin</code></a> response header. Given the scenario in
+    advertisements. It can express this assertion via the <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-1"><code>Allow-CSP-From</code></a> response header. Given the scenario in
     the above examples, the following response wold be loaded successfully: 
 <pre>HTTP/1.1 200 OK
 ...
-<a data-link-type="http-header" href="#http-headerdef-csp-allow-origin" id="ref-for-http-headerdef-csp-allow-origin-2">CSP-Allow-Origin</a>: https://example.com/
+<a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-2">Allow-CSP-From</a>: https://example.com/
 </pre>
      <p>As would the wide-open response:</p>
 <pre>HTTP/1.1 200 OK
 ...
-<a data-link-type="http-header" href="#http-headerdef-csp-allow-origin" id="ref-for-http-headerdef-csp-allow-origin-3">CSP-Allow-Origin</a>: *
+<a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-3">Allow-CSP-From</a>: *
 </pre>
     </div>
    </section>
@@ -1668,11 +1668,11 @@ Host: advertisements-r-us.example.com
     <p>A user agent MUST NOT send more than one HTTP response header field named
   "<code>Embedding-CSP</code>", and any such header MUST NOT contain more than one <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp#grammardef-serialized-policy">serialized-policy</a>.</p>
     <p>Servers MUST process only the first policy in the first such header received.</p>
-    <h3 class="heading settled" data-level="2.3" id="csp-allow-origin-http-header"><span class="secno">2.3. </span><span class="content">The <code>CSP-Allow-Origin</code> HTTP Response Header</span><a class="self-link" href="#csp-allow-origin-http-header"></a></h3>
+    <h3 class="heading settled" data-level="2.3" id="allow-csp-from-http-header"><span class="secno">2.3. </span><span class="content">The <code>Allow-CSP-From</code> HTTP Response Header</span><a class="self-link" href="#allow-csp-from-http-header"></a></h3>
     <p>An embedee can opt-into accepting a policy specified by an embedder by
-  responding with a "<dfn class="dfn-paneled" data-dfn-type="http-header" data-export="" id="http-headerdef-csp-allow-origin"><code>CSP-Allow-Origin</code></dfn>" HTTP
+  responding with a "<dfn class="dfn-paneled" data-dfn-type="http-header" data-export="" id="http-headerdef-allow-csp-from"><code>Allow-CSP-From</code></dfn>" HTTP
   response header. The header’s value is represented by the following ABNF <a data-link-type="biblio" href="#biblio-rfc5234">[RFC5234]</a>:</p>
-<pre>CSP-Allow-Origin = <a data-link-type="grammar" href="https://fetch.spec.whatwg.org/#http-origin">origin-or-null</a> / <a data-link-type="grammar" href="https://fetch.spec.whatwg.org/#http-new-header-syntax">wildcard</a>
+<pre>Allow-CSP-From = <a data-link-type="grammar" href="https://fetch.spec.whatwg.org/#http-origin">origin-or-null</a> / <a data-link-type="grammar" href="https://fetch.spec.whatwg.org/#http-new-header-syntax">wildcard</a>
 </pre>
    </section>
    <section>
@@ -1728,7 +1728,7 @@ Host: advertisements-r-us.example.com
   from the embedder, so we allow the embedder to tighten that policy via this
   embedding mechanism.</p>
      <li data-md="">
-      <p>If <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-header-list">header list</a> has a header named <a data-link-type="http-header" href="#http-headerdef-csp-allow-origin" id="ref-for-http-headerdef-csp-allow-origin-4"><code>CSP-Allow-Origin</code></a> (<var>header</var>):</p>
+      <p>If <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-header-list">header list</a> has a header named <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-4"><code>Allow-CSP-From</code></a> (<var>header</var>):</p>
       <ol>
        <li data-md="">
         <p>If <var>header</var>’s value is "<code>*</code>", return "<code>Allowed</code>".</p>
@@ -1854,6 +1854,30 @@ Host: advertisements-r-us.example.com
      <dd data-md="">
       <p>This specification (See <a href="#embedding-csp-http-header">§2.2 The Embedding-CSP HTTP Request Header</a>)</p>
     </dl>
+    <p>Likewise, the registry should be updated with the following registration
+  for the <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-5"><code>Allow-CSP-From</code></a> header: <a data-link-type="biblio" href="#biblio-rfc3864">[RFC3864]</a></p>
+    <dl>
+     <dt data-md="">
+      <p>Header field name</p>
+     <dd data-md="">
+      <p>Allow-CSP-From</p>
+     <dt data-md="">
+      <p>Applicable protocol</p>
+     <dd data-md="">
+      <p>http</p>
+     <dt data-md="">
+      <p>Status</p>
+     <dd data-md="">
+      <p>standard</p>
+     <dt data-md="">
+      <p>Author/Change controller</p>
+     <dd data-md="">
+      <p>W3C</p>
+     <dt data-md="">
+      <p>Specification document</p>
+     <dd data-md="">
+      <p>This specification (See <a href="#allow-csp-from-http-header">§2.3 The Allow-CSP-From HTTP Response Header</a>)</p>
+    </dl>
    </section>
   </main>
   <h2 class="no-ref no-num heading settled" id="conformance"><span class="content">Conformance</span><a class="self-link" href="#conformance"></a></h2>
@@ -1891,13 +1915,13 @@ Host: advertisements-r-us.example.com
   <h2 class="no-num no-ref heading settled" id="index"><span class="content">Index</span><a class="self-link" href="#index"></a></h2>
   <h3 class="no-num no-ref heading settled" id="index-defined-here"><span class="content">Terms defined by this specification</span><a class="self-link" href="#index-defined-here"></a></h3>
   <ul class="index">
+   <li><a href="#http-headerdef-allow-csp-from">Allow-CSP-From</a><span>, in §2.3</span>
    <li>
     csp
     <ul>
      <li><a href="#element-attrdef-iframe-csp">element-attr for iframe</a><span>, in §2.1</span>
      <li><a href="#dom-htmliframeelement-csp">attribute for HTMLIFrameElement</a><span>, in §2.1</span>
     </ul>
-   <li><a href="#http-headerdef-csp-allow-origin">CSP-Allow-Origin</a><span>, in §2.3</span>
    <li><a href="#http-headerdef-embedding-csp">Embedding-CSP</a><span>, in §2.2</span>
    <li><a href="#required-csp">required CSP</a><span>, in §2.1</span>
   </ul>
@@ -2035,12 +2059,13 @@ Host: advertisements-r-us.example.com
     <li><a href="#ref-for-http-headerdef-embedding-csp-7">5. IANA Considerations</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="http-headerdef-csp-allow-origin">
-   <b><a href="#http-headerdef-csp-allow-origin">#http-headerdef-csp-allow-origin</a></b><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="http-headerdef-allow-csp-from">
+   <b><a href="#http-headerdef-allow-csp-from">#http-headerdef-allow-csp-from</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-http-headerdef-csp-allow-origin-1">1.1. Examples</a> <a href="#ref-for-http-headerdef-csp-allow-origin-2">(2)</a> <a href="#ref-for-http-headerdef-csp-allow-origin-3">(3)</a>
-    <li><a href="#ref-for-http-headerdef-csp-allow-origin-4">3.2. 
+    <li><a href="#ref-for-http-headerdef-allow-csp-from-1">1.1. Examples</a> <a href="#ref-for-http-headerdef-allow-csp-from-2">(2)</a> <a href="#ref-for-http-headerdef-allow-csp-from-3">(3)</a>
+    <li><a href="#ref-for-http-headerdef-allow-csp-from-4">3.2. 
     Does response allow blanket enforcment of policy from request? </a>
+    <li><a href="#ref-for-http-headerdef-allow-csp-from-5">5. IANA Considerations</a>
    </ul>
   </aside>
 <script>/* script-dfn-panel */
