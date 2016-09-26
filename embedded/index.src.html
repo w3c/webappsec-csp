@@ -40,10 +40,14 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
     text: request; url: concept-request
     for: request
       text: header list; url: concept-request-header-list
+      text: origin; url: concept-request-origin
     text: response; url: concept-response
     for: response
       text: CSP list; url: concept-response-policy-list
       text: url; url: concept-response-url
+  type: grammar
+    text: origin-or-null; url: http-origin
+    text: wildcard; url: http-new-header-syntax
 spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   type: dfn
     text: browsing context container
@@ -165,6 +169,28 @@ spec:dom; type:interface; text:Document
     <em>effective</em> policy for the page more restrictive, allows the frame
     to load successfully.
   </div>
+
+  <div class="example" id="example3">
+    To ease the embedee-side implementation, Advertisements-R-Us decides it can
+    trust policies sent by MegaCorp, Inc. to be applied safely to its
+    advertisements. It can express this assertion via the
+    <a http-header>`CSP-Allow-Origin`</a> response header. Given the scenario in
+    the above examples, the following response wold be loaded successfully:
+
+    <pre>
+      HTTP/1.1 200 OK
+      ...
+      <a http-header>CSP-Allow-Origin</a>: https://example.com/
+    </pre>
+
+    As would the wide-open response:
+
+    <pre>
+      HTTP/1.1 200 OK
+      ...
+      <a http-header>CSP-Allow-Origin</a>: *
+    </pre>
+  </div>
 </section>
 
 <section>
@@ -201,7 +227,7 @@ spec:dom; type:interface; text:Document
       <a>process a navigate response</a> algorithm:
 
       *   The [[#process-response]] algorithm returns "`Blocked`" when executed
-          upon `response` and `browsingContext`.
+          upon `response`, `request`, and `browsingContext`.
 
       ISSUE: Upstream this to WHATWG's HTML.
 
@@ -241,18 +267,30 @@ spec:dom; type:interface; text:Document
   <a grammar>serialized-policy</a>.
   
   Servers MUST process only the first policy in the first such header received.
+
+  The `CSP-Allow-Origin` HTTP Response Header {#csp-allow-origin-http-header}
+  -------------------------------------------
+
+  An embedee can opt-into accepting a policy specified by an embedder by
+  responding with a "<dfn export http-header>`CSP-Allow-Origin`</dfn>" HTTP
+  response header. The header's value is represented by the following ABNF
+  [[!RFC5234]]:
+
+  <pre>
+    CSP-Allow-Origin = <a grammar>origin-or-null</a> / <a grammar>wildcard</a>
+  </pre>
 </section>
 
 <section>
   <h2 id="algorithms">Algorithms</h2>
 
   <h3 id="process-response" algorithm>
-    Is |response| blocked by |context|'s required CSP?
+    Is |response| to |request| blocked by |context|'s required CSP?
   </h3>
 
-  Given a <a>response</a> (|response|) and a <a>browsing context</a>
-  (|context|), this algorithm returns "`Allowed`" or "`Blocked`" as
-  appropriate:
+  Given a <a>response</a> (|response|), a <a>request</a> (|request|), and a
+  <a>browsing context</a> (|context|), this algorithm returns "`Allowed`" or
+  "`Blocked`" as appropriate:
 
   <ol class="algorithm">
     1.  Return "`Allowed`" if either of the following is true:
@@ -265,10 +303,8 @@ spec:dom; type:interface; text:Document
         [[csp3#parse-serialized-policy]] on |context|'s <a>required CSP</a> and
         "`enforce`".
 
-    3.  If |response|'s <a for="response">url</a>'s <a for="url">scheme</a> is
-        a <a>local scheme</a>, or if |response|'s <a for="response">url</a>'s
-        <a for="url">origin</a> is the same as the <a for="/">origin</a> of the
-        {{Document}} <a lt="nested through">through which</a> |context| is nested:
+    3.  If the [[#origin-allowed]] algorithm returns "`Allowed`" when executed upon
+        |response| and |request|:
 
         1.  Append |embedding policy| to |response|'s <a for="response">CSP
             list</a>.
@@ -290,6 +326,31 @@ spec:dom; type:interface; text:Document
 
     6.  Return "`Blocked`".
   </ol>
+
+  <h3 id="origin-allowed" algorithm>
+    Does |response| allow blanket enforcment of policy from |request|?
+  </h3>
+
+  Given a <a>response</a> (|response|), and a <a>request</a> (|request|), this
+  algorithm returns "`Allowed`" if the former allows the latter to enforce
+  arbitrary policy, and "`Not Allowed`" otherwise:
+
+  1.  If |response|'s <a for="response">url</a>'s <a for="url">scheme</a> is
+      a <a>local scheme</a>, return "`Allowed`".
+      
+  2.  If |response|'s <a for="response">url</a>'s <a for="url">origin</a> is the
+      same as |request|'s <a for="request">origin</a>, return "`Allowed`".
+
+  3.  If |response|'s <a>header list</a> has a header named
+      <a http-header>`CSP-Allow-Origin`</a> (|header|):
+
+      1.  If |header|'s value is "`*`", return "`Allowed`".
+
+      2.  If |request|'s <a for="request">origin</a>,
+          <a lt="ASCII serialization of an origin">serialized</a> and <a>UTF-8
+          encoded</a> is |header|'s value, return "`Allowed`".
+
+  4.  Return "`Not Allowed`".
 
   <h3 id="subsume-policy" algorithm>
     Is |policy list| subsumed under |subsuming policy|?

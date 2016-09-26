@@ -1421,7 +1421,7 @@ pre.idl.highlight { color: #708090; }
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1>Content Security Policy: Embedded Enforcement</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-09-09">9 September 2016</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-09-26">26 September 2016</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1487,13 +1487,15 @@ restrictions upon itself.</p>
      <ol class="toc">
       <li><a href="#html-integration"><span class="secno">2.1</span> <span class="content">Integration with HTML</span></a>
       <li><a href="#embedding-csp-http-header"><span class="secno">2.2</span> <span class="content">The <code>Embedding-CSP</code> HTTP Request Header</span></a>
+      <li><a href="#csp-allow-origin-http-header"><span class="secno">2.3</span> <span class="content">The <code>CSP-Allow-Origin</code> HTTP Response Header</span></a>
      </ol>
     <li>
      <a href="#algorithms"><span class="secno">3</span> <span class="content">Algorithms</span></a>
      <ol class="toc">
-      <li><a href="#process-response"><span class="secno">3.1</span> <span class="content"> Is <var>response</var> blocked by <var>context</var>’s required CSP? </span></a>
-      <li><a href="#subsume-policy"><span class="secno">3.2</span> <span class="content"> Is <var>policy list</var> subsumed under <var>subsuming policy</var>? </span></a>
-      <li><a href="#required-csp-for-context"><span class="secno">3.3</span> <span class="content"> Obtain the required CSP for <var>context</var>. </span></a>
+      <li><a href="#process-response"><span class="secno">3.1</span> <span class="content"> Is <var>response</var> to <var>request</var> blocked by <var>context</var>’s required CSP? </span></a>
+      <li><a href="#origin-allowed"><span class="secno">3.2</span> <span class="content"> Does <var>response</var> allow blanket enforcment of policy from <var>request</var>? </span></a>
+      <li><a href="#subsume-policy"><span class="secno">3.3</span> <span class="content"> Is <var>policy list</var> subsumed under <var>subsuming policy</var>? </span></a>
+      <li><a href="#required-csp-for-context"><span class="secno">3.4</span> <span class="content"> Obtain the required CSP for <var>context</var>. </span></a>
      </ol>
     <li>
      <a href="#security-and-privacy-considerations"><span class="secno">4</span> <span class="content">Security and Privacy Considerations</span></a>
@@ -1602,6 +1604,21 @@ Host: advertisements-r-us.example.com
     the requirement, and since additional policies can only make the <em>effective</em> policy for the page more restrictive, allows the frame
     to load successfully.</p>
     </div>
+    <div class="example" id="example3">
+     <a class="self-link" href="#example3"></a> To ease the embedee-side implementation, Advertisements-R-Us decides it can
+    trust policies sent by MegaCorp, Inc. to be applied safely to its
+    advertisements. It can express this assertion via the <a data-link-type="http-header" href="#http-headerdef-csp-allow-origin" id="ref-for-http-headerdef-csp-allow-origin-1"><code>CSP-Allow-Origin</code></a> response header. Given the scenario in
+    the above examples, the following response wold be loaded successfully: 
+<pre>HTTP/1.1 200 OK
+...
+<a data-link-type="http-header" href="#http-headerdef-csp-allow-origin" id="ref-for-http-headerdef-csp-allow-origin-2">CSP-Allow-Origin</a>: https://example.com/
+</pre>
+     <p>As would the wide-open response:</p>
+<pre>HTTP/1.1 200 OK
+...
+<a data-link-type="http-header" href="#http-headerdef-csp-allow-origin" id="ref-for-http-headerdef-csp-allow-origin-3">CSP-Allow-Origin</a>: *
+</pre>
+    </div>
    </section>
    <section>
     <h2 class="heading settled" data-level="2" id="framework"><span class="secno">2. </span><span class="content">Framework</span><a class="self-link" href="#framework"></a></h2>
@@ -1619,14 +1636,14 @@ Host: advertisements-r-us.example.com
      <li data-md="">
       <p>A <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a> has a <dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="required-csp">required CSP</dfn>, which is
   either <code>null</code> or a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#serialized-csp">serialized CSP</a>. For a given <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing
-  context</a> (<var>context</var>), the value is the result of executing <a href="#required-csp-for-context">§3.3 Obtain the required CSP for context.</a> on <var>context</var>.</p>
+  context</a> (<var>context</var>), the value is the result of executing <a href="#required-csp-for-context">§3.4 Obtain the required CSP for context.</a> on <var>context</var>.</p>
       <p class="issue" id="issue-98d5483e"><a class="self-link" href="#issue-98d5483e"></a> Does this need to be upstreamed? Probably not.</p>
      <li data-md="">
       <p>Add the following to the list of error conditions in step 1 of HTML’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-response">process a navigate response</a> algorithm:</p>
       <ul>
        <li data-md="">
-        <p>The <a href="#process-response">§3.1 Is response blocked by context’s required CSP?</a> algorithm returns "<code>Blocked</code>" when executed
-  upon <code>response</code> and <code>browsingContext</code>.</p>
+        <p>The <a href="#process-response">§3.1 Is response to request blocked by context’s required CSP?</a> algorithm returns "<code>Blocked</code>" when executed
+  upon <code>response</code>, <code>request</code>, and <code>browsingContext</code>.</p>
       </ul>
       <p class="issue" id="issue-fdc1da1f"><a class="self-link" href="#issue-fdc1da1f"></a> Upstream this to WHATWG’s HTML.</p>
       <p class="issue" id="issue-a3a64cc9"><a class="self-link" href="#issue-a3a64cc9"></a> W3C’s HTML is not based on Fetch, and does not have
@@ -1651,12 +1668,18 @@ Host: advertisements-r-us.example.com
     <p>A user agent MUST NOT send more than one HTTP response header field named
   "<code>Embedding-CSP</code>", and any such header MUST NOT contain more than one <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp#grammardef-serialized-policy">serialized-policy</a>.</p>
     <p>Servers MUST process only the first policy in the first such header received.</p>
+    <h3 class="heading settled" data-level="2.3" id="csp-allow-origin-http-header"><span class="secno">2.3. </span><span class="content">The <code>CSP-Allow-Origin</code> HTTP Response Header</span><a class="self-link" href="#csp-allow-origin-http-header"></a></h3>
+    <p>An embedee can opt-into accepting a policy specified by an embedder by
+  responding with a "<dfn class="dfn-paneled" data-dfn-type="http-header" data-export="" id="http-headerdef-csp-allow-origin"><code>CSP-Allow-Origin</code></dfn>" HTTP
+  response header. The header’s value is represented by the following ABNF <a data-link-type="biblio" href="#biblio-rfc5234">[RFC5234]</a>:</p>
+<pre>CSP-Allow-Origin = <a data-link-type="grammar" href="https://fetch.spec.whatwg.org/#http-origin">origin-or-null</a> / <a data-link-type="grammar" href="https://fetch.spec.whatwg.org/#http-new-header-syntax">wildcard</a>
+</pre>
    </section>
    <section>
     <h2 class="heading settled" data-level="3" id="algorithms"><span class="secno">3. </span><span class="content">Algorithms</span><a class="self-link" href="#algorithms"></a></h2>
-    <h3 class="heading settled algorithm" data-algorithm="Is response blocked by context’s required CSP?" data-level="3.1" id="process-response"><span class="secno">3.1. </span><span class="content"> Is <var>response</var> blocked by <var>context</var>’s required CSP? </span><a class="self-link" href="#process-response"></a></h3>
-    <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>) and a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a> (<var>context</var>), this algorithm returns "<code>Allowed</code>" or "<code>Blocked</code>" as
-  appropriate:</p>
+    <h3 class="heading settled algorithm" data-algorithm="Is response to request blocked by context’s required CSP?" data-level="3.1" id="process-response"><span class="secno">3.1. </span><span class="content"> Is <var>response</var> to <var>request</var> blocked by <var>context</var>’s required CSP? </span><a class="self-link" href="#process-response"></a></h3>
+    <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>), and a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a> (<var>context</var>), this algorithm returns "<code>Allowed</code>" or
+  "<code>Blocked</code>" as appropriate:</p>
     <ol class="algorithm">
      <li data-md="">
       <p>Return "<code>Allowed</code>" if either of the following is true:</p>
@@ -1670,8 +1693,7 @@ Host: advertisements-r-us.example.com
       <p>Let <var>embedding policy</var> be the result of executing <a href="https://w3c.github.io/webappsec-csp/#parse-serialized-policy">Content Security Policy Level 3 §parse-serialized-policy</a> on <var>context</var>’s <a data-link-type="dfn" href="#required-csp" id="ref-for-required-csp-4">required CSP</a> and
   "<code>enforce</code>".</p>
      <li data-md="">
-      <p>If <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a> is
-  a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#local-scheme">local scheme</a>, or if <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-origin">origin</a> is the same as the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a> of the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document">Document</a></code> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context-nested-through">through which</a> <var>context</var> is nested:</p>
+      <p>If the <a href="#origin-allowed">§3.2 Does response allow blanket enforcment of policy from request?</a> algorithm returns "<code>Allowed</code>" when executed upon <var>response</var> and <var>request</var>:</p>
       <ol>
        <li data-md="">
         <p>Append <var>embedding policy</var> to <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-policy-list">CSP
@@ -1688,13 +1710,36 @@ Host: advertisements-r-us.example.com
       <p class="assertion">Assert: <var>context</var> is a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context">nested browsing context</a>, and <var>response</var> is
   a cross-origin, <a data-link-type="dfn" href="https://url.spec.whatwg.org/#network-scheme">network schemed</a> resource.</p>
      <li data-md="">
-      <p>If the <a href="#subsume-policy">§3.2 Is policy list subsumed under subsuming policy?</a> algorithm returns "<code>Subsumed</code>" when executed
+      <p>If the <a href="#subsume-policy">§3.3 Is policy list subsumed under subsuming policy?</a> algorithm returns "<code>Subsumed</code>" when executed
   upon <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-policy-list">CSP list</a> and <var>embedding policy</var>,
   return "<code>Allowed</code>".</p>
      <li data-md="">
       <p>Return "<code>Blocked</code>".</p>
     </ol>
-    <h3 class="heading settled algorithm" data-algorithm="Is policy list subsumed under subsuming policy?" data-level="3.2" id="subsume-policy"><span class="secno">3.2. </span><span class="content"> Is <var>policy list</var> subsumed under <var>subsuming policy</var>? </span><a class="self-link" href="#subsume-policy"></a></h3>
+    <h3 class="heading settled algorithm" data-algorithm="Does response allow blanket enforcment of policy from request?" data-level="3.2" id="origin-allowed"><span class="secno">3.2. </span><span class="content"> Does <var>response</var> allow blanket enforcment of policy from <var>request</var>? </span><a class="self-link" href="#origin-allowed"></a></h3>
+    <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), and a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>), this
+  algorithm returns "<code>Allowed</code>" if the former allows the latter to enforce
+  arbitrary policy, and "<code>Not Allowed</code>" otherwise:</p>
+    <ol>
+     <li data-md="">
+      <p>If <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a> is
+  a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#local-scheme">local scheme</a>, return "<code>Allowed</code>".</p>
+     <li data-md="">
+      <p>If <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-origin">origin</a> is the
+  same as <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a>, return "<code>Allowed</code>".</p>
+     <li data-md="">
+      <p>If <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-header-list">header list</a> has a header named <a data-link-type="http-header" href="#http-headerdef-csp-allow-origin" id="ref-for-http-headerdef-csp-allow-origin-4"><code>CSP-Allow-Origin</code></a> (<var>header</var>):</p>
+      <ol>
+       <li data-md="">
+        <p>If <var>header</var>’s value is "<code>*</code>", return "<code>Allowed</code>".</p>
+       <li data-md="">
+        <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a>, <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#ascii-serialisation-of-an-origin">serialized</a> and <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#utf-8-encode">UTF-8
+  encoded</a> is <var>header</var>’s value, return "<code>Allowed</code>".</p>
+      </ol>
+     <li data-md="">
+      <p>Return "<code>Not Allowed</code>".</p>
+    </ol>
+    <h3 class="heading settled algorithm" data-algorithm="Is policy list subsumed under subsuming policy?" data-level="3.3" id="subsume-policy"><span class="secno">3.3. </span><span class="content"> Is <var>policy list</var> subsumed under <var>subsuming policy</var>? </span><a class="self-link" href="#subsume-policy"></a></h3>
     <p>Given a list of <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#policy">policy</a> objects (<var>policy list</var>), this algorithm returns
   "<code>Subsumed</code>" if that list enforces a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#policy">policy</a> which is an exact match for
   a given <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#policy">policy</a> object (<var>subsuming policy</var>). It returns "<code>Not Subsumed</code>"
@@ -1744,7 +1789,7 @@ Host: advertisements-r-us.example.com
      <li data-md="">
       <p>Return "<code>Not Subsumed</code>".</p>
     </ol>
-    <h3 class="heading settled algorithm" data-algorithm="Obtain the required CSP for context." data-level="3.3" id="required-csp-for-context"><span class="secno">3.3. </span><span class="content"> Obtain the required CSP for <var>context</var>. </span><a class="self-link" href="#required-csp-for-context"></a></h3>
+    <h3 class="heading settled algorithm" data-algorithm="Obtain the required CSP for context." data-level="3.4" id="required-csp-for-context"><span class="secno">3.4. </span><span class="content"> Obtain the required CSP for <var>context</var>. </span><a class="self-link" href="#required-csp-for-context"></a></h3>
     <p>Given a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a> (<var>context</var>), the following algorithm returns
   its <a data-link-type="dfn" href="#required-csp" id="ref-for-required-csp-5">required CSP</a>:</p>
     <ol class="algorithm">
@@ -1852,6 +1897,7 @@ Host: advertisements-r-us.example.com
      <li><a href="#element-attrdef-iframe-csp">element-attr for iframe</a><span>, in §2.1</span>
      <li><a href="#dom-htmliframeelement-csp">attribute for HTMLIFrameElement</a><span>, in §2.1</span>
     </ul>
+   <li><a href="#http-headerdef-csp-allow-origin">CSP-Allow-Origin</a><span>, in §2.3</span>
    <li><a href="#http-headerdef-embedding-csp">Embedding-CSP</a><span>, in §2.2</span>
    <li><a href="#required-csp">required CSP</a><span>, in §2.1</span>
   </ul>
@@ -1874,8 +1920,12 @@ Host: advertisements-r-us.example.com
    <li>
     <a data-link-type="biblio">[WHATWG-DOM]</a> defines the following terms:
     <ul>
-     <li><a href="https://dom.spec.whatwg.org/#document">Document</a>
      <li><a href="https://dom.spec.whatwg.org/#concept-reflect">reflect</a>
+    </ul>
+   <li>
+    <a data-link-type="biblio">[WHATWG-ENCODING]</a> defines the following terms:
+    <ul>
+     <li><a href="https://encoding.spec.whatwg.org/#utf-8-encode">utf-8 encode</a>
     </ul>
    <li>
     <a data-link-type="biblio">[FETCH]</a> defines the following terms:
@@ -1883,20 +1933,22 @@ Host: advertisements-r-us.example.com
      <li><a href="https://fetch.spec.whatwg.org/#concept-header-list-append">append</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-response-policy-list">csp list</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-header-list">header list</a>
+     <li><a href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a>
+     <li><a href="https://fetch.spec.whatwg.org/#http-origin">origin-or-null</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request">request</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-response">response</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-response-url">url</a>
+     <li><a href="https://fetch.spec.whatwg.org/#http-new-header-syntax">wildcard</a>
     </ul>
    <li>
     <a data-link-type="biblio">[HTML]</a> defines the following terms:
     <ul>
      <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#htmliframeelement">HTMLIFrameElement</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#ascii-serialisation-of-an-origin">ascii serialization of an origin</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a>
      <li><a href="https://html.spec.whatwg.org/#browsing-context-container">browsing context container</a>
      <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context">nested browsing context</a>
-     <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context-nested-through">nested through</a>
-     <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-fetch">process a navigate fetch</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-response">process a navigate response</a>
     </ul>
@@ -1926,6 +1978,8 @@ Host: advertisements-r-us.example.com
    <dd>D. Crocker, Ed.; P. Overell. <a href="https://tools.ietf.org/html/rfc5234">Augmented BNF for Syntax Specifications: ABNF</a>. January 2008. Internet Standard. URL: <a href="https://tools.ietf.org/html/rfc5234">https://tools.ietf.org/html/rfc5234</a>
    <dt id="biblio-whatwg-dom">[WHATWG-DOM]
    <dd>Anne van Kesteren. <a href="https://dom.spec.whatwg.org/">DOM Standard</a>. Living Standard. URL: <a href="https://dom.spec.whatwg.org/">https://dom.spec.whatwg.org/</a>
+   <dt id="biblio-whatwg-encoding">[WHATWG-ENCODING]
+   <dd>Anne van Kesteren. <a href="https://encoding.spec.whatwg.org/">Encoding Standard</a>. Living Standard. URL: <a href="https://encoding.spec.whatwg.org/">https://encoding.spec.whatwg.org/</a>
    <dt id="biblio-whatwg-url">[WHATWG-URL]
    <dd>Anne van Kesteren. <a href="https://url.spec.whatwg.org/">URL Standard</a>. Living Standard. URL: <a href="https://url.spec.whatwg.org/">https://url.spec.whatwg.org/</a>
   </dl>
@@ -1952,7 +2006,7 @@ Host: advertisements-r-us.example.com
     <li><a href="#ref-for-element-attrdef-iframe-csp-1">1.1. Examples</a> <a href="#ref-for-element-attrdef-iframe-csp-2">(2)</a>
     <li><a href="#ref-for-element-attrdef-iframe-csp-3">2.1. Integration with HTML</a>
     <li><a href="#ref-for-element-attrdef-iframe-csp-4">2.2. The Embedding-CSP HTTP Request Header</a>
-    <li><a href="#ref-for-element-attrdef-iframe-csp-5">3.3. 
+    <li><a href="#ref-for-element-attrdef-iframe-csp-5">3.4. 
     Obtain the required CSP for context. </a>
    </ul>
   </aside>
@@ -1967,8 +2021,8 @@ Host: advertisements-r-us.example.com
    <ul>
     <li><a href="#ref-for-required-csp-1">2.1. Integration with HTML</a> <a href="#ref-for-required-csp-2">(2)</a>
     <li><a href="#ref-for-required-csp-3">3.1. 
-    Is response blocked by context’s required CSP? </a> <a href="#ref-for-required-csp-4">(2)</a>
-    <li><a href="#ref-for-required-csp-5">3.3. 
+    Is response to request blocked by context’s required CSP? </a> <a href="#ref-for-required-csp-4">(2)</a>
+    <li><a href="#ref-for-required-csp-5">3.4. 
     Obtain the required CSP for context. </a>
    </ul>
   </aside>
@@ -1979,6 +2033,14 @@ Host: advertisements-r-us.example.com
     <li><a href="#ref-for-http-headerdef-embedding-csp-5">2.1. Integration with HTML</a>
     <li><a href="#ref-for-http-headerdef-embedding-csp-6">4.3. Data Exfiltration</a>
     <li><a href="#ref-for-http-headerdef-embedding-csp-7">5. IANA Considerations</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="http-headerdef-csp-allow-origin">
+   <b><a href="#http-headerdef-csp-allow-origin">#http-headerdef-csp-allow-origin</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-http-headerdef-csp-allow-origin-1">1.1. Examples</a> <a href="#ref-for-http-headerdef-csp-allow-origin-2">(2)</a> <a href="#ref-for-http-headerdef-csp-allow-origin-3">(3)</a>
+    <li><a href="#ref-for-http-headerdef-csp-allow-origin-4">3.2. 
+    Does response allow blanket enforcment of policy from request? </a>
    </ul>
   </aside>
 <script>/* script-dfn-panel */
