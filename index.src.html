@@ -1336,6 +1336,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   </h3>
 
   <pre class="idl">
+    enum SecurityPolicyViolationEventDisposition {
+      "enforce", "report"
+    };
+
     [Constructor(DOMString type, optional SecurityPolicyViolationEventInit eventInitDict)]
     interface SecurityPolicyViolationEvent : Event {
         readonly    attribute DOMString      documentURI;
@@ -1344,8 +1348,8 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
         readonly    attribute DOMString      violatedDirective;
         readonly    attribute DOMString      effectiveDirective;
         readonly    attribute DOMString      originalPolicy;
-        readonly    attribute DOMString      disposition;
         readonly    attribute DOMString      sourceFile;
+        readonly    attribute SecurityPolicyViolationEventDisposition      disposition;
         readonly    attribute unsigned short statusCode;
         readonly    attribute long           lineNumber;
         readonly    attribute long           columnNumber;
@@ -1358,8 +1362,8 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
         DOMString      violatedDirective;
         DOMString      effectiveDirective;
         DOMString      originalPolicy;
-        DOMString      disposition;
         DOMString      sourceFile;
+        SecurityPolicyViolationEventDisposition      disposition;
         unsigned short statusCode;
         long           lineNumber;
         long           columnNumber;
@@ -2873,7 +2877,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   1.  Assert: |response| is unused.
 
-  2.  If |policy|'s <a for="policy">disposition</a> is not "`Enforce`", then
+  2.  If |policy|'s <a for="policy">disposition</a> is not "`enforce`", then
       return "`Allowed`".
 
   3.  If |request|'s <a for="request">destination</a> is one of
@@ -2904,7 +2908,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   1.  Assert: |response| is unused.
 
-  2.  If |policy|'s <a for="policy">disposition</a> is not "`Enforce`", or
+  2.  If |policy|'s <a for="policy">disposition</a> is not "`enforce`", or
       |context| is not a {{Document}}, then abort this algorithm.
 
       Note: This will need to change if we allow Workers to be sandboxed,
