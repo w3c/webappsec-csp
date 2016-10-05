@@ -1451,7 +1451,7 @@ pre.idl.highlight { color: #708090; }
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1>Content Security Policy Level 3</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-09-13">13 September 2016</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-10-05">5 October 2016</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1708,6 +1708,11 @@ of security-relevant policy decisions.</p>
          <ol class="toc">
           <li><a href="#frame-ancestors-navigation-response"><span class="secno">6.3.2.1</span> <span class="content"> <code>frame-ancestors</code> Navigation Response Check </span></a>
          </ol>
+        <li>
+         <a href="#directive-navigation-to"><span class="secno">6.3.3</span> <span class="content"><code>navigation-to</code></span></a>
+         <ol class="toc">
+          <li><a href="#navigation-to-pre-navigate"><span class="secno">6.3.3.1</span> <span class="content"> <code>navigation-to</code> Pre-Navigation Check </span></a>
+         </ol>
        </ol>
       <li>
        <a href="#directives-reporting"><span class="secno">6.4</span> <span class="content"> Reporting Directives </span></a>
@@ -1898,6 +1903,9 @@ of security-relevant policy decisions.</p>
      <li data-md="">
       <p>The <a data-link-type="dfn" href="#disown-opener" id="ref-for-disown-opener-1"><code>disown-opener</code></a> directive ensures that a resource can’t be opened
   in such a way as to give another browsing context control over its contents.</p>
+     <li data-md="">
+      <p>The <a data-link-type="dfn" href="#navigation-to" id="ref-for-navigation-to-1"><code>navigation-to</code></a> directive gives a resource control over the endpoints
+  to which it can initiate navigation.</p>
     </ol>
    </section>
    <section>
@@ -2611,7 +2619,7 @@ of security-relevant policy decisions.</p>
   if not:</p>
     <ol>
      <li data-md="">
-      <p>Let <var>globals</var> be a list containing <var>callerRealm</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global">global object</a> and <var>calleeRealm</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global">global object</a>.</p>
+      <p>Let <var>globals</var> be a list containing <var>callerRealm</var>’s <a data-link-type="dfn">global object</a> and <var>calleeRealm</var>’s <a data-link-type="dfn">global object</a>.</p>
      <li data-md="">
       <p>For each <var>global</var> in <var>globals</var>:</p>
       <ol>
@@ -4058,6 +4066,30 @@ directive-value = <a data-link-type="grammar" href="#grammardef-ancestor-source-
      <li data-md="">
       <p>Return "<code>Allowed</code>".</p>
     </ol>
+    <h4 class="heading settled" data-level="6.3.3" id="directive-navigation-to"><span class="secno">6.3.3. </span><span class="content"><code>navigation-to</code></span><a class="self-link" href="#directive-navigation-to"></a></h4>
+    <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="navigation-to">navigation-to</dfn> directive restricts the <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url">URL</a></code>s to which
+  a document can navigate by any means (<code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-a-element">a</a></code>, <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/forms.html#the-form-element">form</a></code>, <code>window.location</code>, <code>window.open</code>, etc.). The directive’s syntax is described by the following ABNF grammar:</p>
+<pre class="abnf">directive-name  = "navigation-to"
+directive-value = <a data-link-type="grammar" href="#grammardef-serialized-source-list" id="ref-for-grammardef-serialized-source-list-15">serialized-source-list</a>
+</pre>
+    <p class="issue" id="issue-707b369d"><a class="self-link" href="#issue-707b369d"></a> Should we use <code>ancestor-source-list</code> (basically, origins as opposed to
+  paths?) It doesn’t appear that blocking navigation targets is any worse than
+  blocking any other request type with regard to leakage. Given the redirect
+  behavior, this devolves to an origin check in the presence of a malicious
+  party anyway...</p>
+    <h5 class="heading settled algorithm" data-algorithm="navigation-to Pre-Navigation Check" data-level="6.3.3.1" id="navigation-to-pre-navigate"><span class="secno">6.3.3.1. </span><span class="content"> <code>navigation-to</code> Pre-Navigation Check </span><a class="self-link" href="#navigation-to-pre-navigate"></a></h5>
+    <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>), a string (<var>type</var>, "<code>form-submission</code> or
+  "<code>other</code>") and two <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing contexts</a> (<var>source</var> and <var>target</var>), this
+  algorithm returns "<code>Blocked</code>" if the navigation violates the <code>navigation-to</code> directive’s constraints, and "<code>Allowed</code>" otherwise. This constitutes the <code>navigation-to</code>' directive’s <a data-link-type="dfn" href="#directive-pre-navigation-check" id="ref-for-directive-pre-navigation-check-3">pre-navigation check</a>:</p>
+    <ol class="algorithm">
+     <li data-md="">
+      <p class="assertion">Assert: <var>source</var> and <var>target</var> are unused in this algorithm, as <code>navigation-to</code> is concerned only with details of the outgoing request.</p>
+     <li data-md="">
+      <p>If the result of executing <a href="#match-request-to-source-list">§6.6.1.3 Does request match source list?</a> on <var>request</var> and this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-51">value</a> is
+  "<code>Does Not Match</code>", return "<code>Blocked</code>".</p>
+     <li data-md="">
+      <p>Return "<code>Allowed</code>".</p>
+    </ol>
     <h3 class="heading settled" data-level="6.4" id="directives-reporting"><span class="secno">6.4. </span><span class="content"> Reporting Directives </span><a class="self-link" href="#directives-reporting"></a></h3>
     <p>Various algorithms in this document hook into the reporting process by
   constructing a <a data-link-type="dfn" href="#violation" id="ref-for-violation-17">violation</a> object via <a href="#create-violation-for-request">§2.3.2 Create a violation object for request, policy, and directive</a> or <a href="#create-violation-for-global">§2.3.1 Create a violation object for global, policy, and directive</a>, and passing that object to <a href="#report-violation">§5.3 Report a violation</a> to deliver the report.</p>
@@ -4990,6 +5022,7 @@ rest of Google’s CSP Cabal.</p>
    <li><a href="#monitored">monitored</a><span>, in §4.2</span>
    <li><a href="#directive-name">name</a><span>, in §2.2</span>
    <li><a href="#directive-navigation-response-check">navigation response check</a><span>, in §2.2</span>
+   <li><a href="#navigation-to">navigation-to</a><span>, in §6.3.3</span>
    <li><a href="#grammardef-nonce-source">nonce-source</a><span>, in §2.2.1</span>
    <li><a href="#grammardef-none">'none'</a><span>, in §2.2.1</span>
    <li><a href="#object-src">object-src</a><span>, in §6.1.9</span>
@@ -5169,6 +5202,7 @@ rest of Google’s CSP Cabal.</p>
      <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-embed-element">embed</a>
      <li><a href="https://html.spec.whatwg.org/multipage/webappapis.html#event-handler-idl-attributes">event handler idl attribute</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#forced-sandboxing-flag-set">forced sandboxing flag set</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/forms.html#the-form-element">form</a>
      <li><a href="https://html.spec.whatwg.org/multipage/obsolete.html#frame">frame</a>
      <li><a href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object">global object</a>
      <li><a href="https://html.spec.whatwg.org/multipage/semantics.html#attr-base-href">href</a>
@@ -5207,7 +5241,6 @@ rest of Google’s CSP Cabal.</p>
      <li><a href="https://html.spec.whatwg.org/multipage/infrastructure.html#strip-leading-and-trailing-whitespace">strip leading and trailing whitespace</a>
      <li><a href="https://html.spec.whatwg.org/multipage/semantics.html#the-style-element">style</a>
      <li><a href="https://html.spec.whatwg.org/multipage/scripting.html#dom-script-text">text</a>
-     <li><a href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global">the realm's global object</a>
      <li><a href="https://html.spec.whatwg.org/multipage/workers.html#the-worker&apos;s-documents">the worker's documents</a>
      <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#attr-embed-type">type</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#unicode-serialisation-of-an-origin">unicode serialization of an origin</a>
@@ -5340,7 +5373,7 @@ rest of Google’s CSP Cabal.</p>
   <h3 class="no-num no-ref heading settled" id="informative"><span class="content">Informative References</span><a class="self-link" href="#informative"></a></h3>
   <dl>
    <dt id="biblio-appmanifest">[APPMANIFEST]
-   <dd>Marcos Caceres; et al. <a href="https://w3c.github.io/manifest/">Web App Manifest</a>. 1 September 2016. WD. URL: <a href="https://w3c.github.io/manifest/">https://w3c.github.io/manifest/</a>
+   <dd>Marcos Caceres; et al. <a href="https://w3c.github.io/manifest/">Web App Manifest</a>. 12 September 2016. WD. URL: <a href="https://w3c.github.io/manifest/">https://w3c.github.io/manifest/</a>
    <dt id="biblio-beacon">[BEACON]
    <dd>Ilya Grigorik; et al. <a href="https://w3c.github.io/beacon/">Beacon</a>. 30 August 2016. WD. URL: <a href="https://w3c.github.io/beacon/">https://w3c.github.io/beacon/</a>
    <dt id="biblio-csp2">[CSP2]
@@ -5427,6 +5460,11 @@ rest of Google’s CSP Cabal.</p>
   document’s opener, and a document’s openees. <code>disown-openee</code> is weird.
   Maybe <code>disown 'opener' 'openee'</code>? Do we need origin restrictions on either/both?<a href="#issue-b04594c3"> ↵ </a></div>
    <div class="issue"> What should this do in an <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a></code>? Anything?<a href="#issue-466edd09"> ↵ </a></div>
+   <div class="issue"> Should we use <code>ancestor-source-list</code> (basically, origins as opposed to
+  paths?) It doesn’t appear that blocking navigation targets is any worse than
+  blocking any other request type with regard to leakage. Given the redirect
+  behavior, this devolves to an origin check in the presence of a malicious
+  party anyway...<a href="#issue-707b369d"> ↵ </a></div>
    <div class="issue"> This processing is meant to mitigate the risk
   of dangling markup attacks that steal the nonce from an existing element
   in order to load injected script. It is fairly expensive, however, as it
@@ -5755,6 +5793,8 @@ rest of Google’s CSP Cabal.</p>
     form-action Pre-Navigation Check </a>
     <li><a href="#ref-for-directive-value-50">6.3.2.1. 
     frame-ancestors Navigation Response Check </a>
+    <li><a href="#ref-for-directive-value-51">6.3.3.1. 
+    navigation-to Pre-Navigation Check </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="serialized-directive">
@@ -5900,6 +5940,8 @@ rest of Google’s CSP Cabal.</p>
     by Content Security Policy? </a>
     <li><a href="#ref-for-directive-pre-navigation-check-2">6.3.1.1. 
     form-action Pre-Navigation Check </a>
+    <li><a href="#ref-for-directive-pre-navigation-check-3">6.3.3.1. 
+    navigation-to Pre-Navigation Check </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="directive-navigation-response-check">
@@ -5974,6 +6016,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-grammardef-serialized-source-list-12">6.1.12. worker-src</a>
     <li><a href="#ref-for-grammardef-serialized-source-list-13">6.2.1. base-uri</a>
     <li><a href="#ref-for-grammardef-serialized-source-list-14">6.3.1. form-action</a>
+    <li><a href="#ref-for-grammardef-serialized-source-list-15">6.3.3. navigation-to</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="grammardef-none">
@@ -6686,6 +6729,12 @@ rest of Google’s CSP Cabal.</p>
    <b><a href="#grammardef-ancestor-source">#grammardef-ancestor-source</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-grammardef-ancestor-source-1">6.3.2. frame-ancestors</a> <a href="#ref-for-grammardef-ancestor-source-2">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="navigation-to">
+   <b><a href="#navigation-to">#navigation-to</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-navigation-to-1">1.3. Changes from Level 2</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="report-uri">

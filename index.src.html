@@ -362,12 +362,15 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
         <{script}> element that triggers the request specifies a set of integrity
         metadata which is whitelisted by the current policy. Details in
         [[#external-hash]].
-        
+
         ISSUE(w3c/webappsec-csp#78): SRI integration is a work in progress.
       </div>
 
   11. The <a>`disown-opener`</a> directive ensures that a resource can't be opened
       in such a way as to give another browsing context control over its contents.
+
+  12. The <a>`navigation-to`</a> directive gives a resource control over the endpoints
+      to which it can initiate navigation.
 </section>
 
 <!-- Big Text: Framework -->
@@ -3052,6 +3055,44 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
             "`Blocked`".
 
     5.  Return "`Allowed`".
+  </ol>
+
+  <h4 id="directive-navigation-to">`navigation-to`</h4>
+
+  The <dfn export>navigation-to</dfn> directive restricts the {{URL}}s to which
+  a document can navigate by any means (<{a}>, <{form}>, `window.location`,
+  `window.open`, etc.). The directive's syntax is described by the following ABNF grammar:
+
+  <pre dfn-type="grammar" link-type="grammar" class="abnf">
+    directive-name  = "navigation-to"
+    directive-value = <a>serialized-source-list</a>
+  </pre>
+
+  ISSUE: Should we use `ancestor-source-list` (basically, origins as opposed to
+  paths?) It doesn't appear that blocking navigation targets is any worse than
+  blocking any other request type with regard to leakage. Given the redirect
+  behavior, this devolves to an origin check in the presence of a malicious
+  party anyway...
+
+  <h5 algorithm id="navigation-to-pre-navigate">
+    `navigation-to` Pre-Navigation Check
+  </h5>
+
+  Given a <a>request</a> (|request|), a string (|type|, "`form-submission` or
+  "`other`") and two <a>browsing contexts</a> (|source| and |target|), this
+  algorithm returns "`Blocked`" if the navigation violates the `navigation-to`
+  directive's constraints, and "`Allowed`" otherwise. This constitutes the
+  `navigation-to`' directive's <a>pre-navigation check</a>:
+
+  <ol class="algorithm">
+    1.  Assert: |source| and |target| are unused in this algorithm, as
+        `navigation-to` is concerned only with details of the outgoing request.
+
+    2.  If the result of executing [[#match-request-to-source-list]] on
+        |request| and this directive's <a for="directive">value</a> is
+        "`Does Not Match`", return "`Blocked`".
+
+    3.  Return "`Allowed`".
   </ol>
 
   <h3 id="directives-reporting">
