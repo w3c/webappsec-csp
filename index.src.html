@@ -1429,10 +1429,14 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   fires a {{SecurityPolicyViolationEvent}} at |violation|'s
   <a for="violation">global object</a>.
 
-  1.  <a>Fire an event</a> named `securitypolicyviolation`
-      that uses the {{SecurityPolicyViolationEvent}} at |violation|'s
-      <a for="violation">global object</a> with its attributes initialized
-      as follows:
+  1.  Let |target| be |violation|'s <a for="violation">global object</a>.
+
+  2.  If |target| is a {{Window}}, set |target| to |target|'s <a>associated
+      `Document`</a>.
+
+  3.  <a>Fire an event</a> named `securitypolicyviolation`
+      that uses the {{SecurityPolicyViolationEvent}} at |target| with its
+      attributes initialized as follows:
 
       :  {{SecurityPolicyViolationEvent/documentURI}}
       :: |violation|'s <a for="violation">url</a>
@@ -1461,7 +1465,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       {{SecurityPolicyViolationEvent/violatedDirective}} are the same value.
       This is intentional to maintain backwards compatibility.
 
-  2.  If |violation|'s <a for="violation">policy</a>'s <a for="policy">directive
+  4.  If |violation|'s <a for="violation">policy</a>'s <a for="policy">directive
       set</a> contains a <a>directive</a> named "<a>`report-uri`</a>"
       (|directive|):
 
@@ -1516,7 +1520,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       is, the latter overrides the former, allowing for backwards compatibility
       with browsers that don't support the new mechanism.
 
-  3.  If |violation|'s <a for="violation">policy</a>'s <a for="policy">directive
+  5.  If |violation|'s <a for="violation">policy</a>'s <a for="policy">directive
       set</a> contains a <a>directive</a> named "<a>`report-to`</a>"
       (|directive|):
 
