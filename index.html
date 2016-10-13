@@ -2118,12 +2118,13 @@ of security-relevant policy decisions.</p>
   a non-negative integer.</p>
     <p>Each <a data-link-type="dfn" href="#violation" id="ref-for-violation-11">violation</a> has a <dfn class="dfn-paneled" data-dfn-for="violation" data-dfn-type="dfn" data-export="" id="violation-column-number">column number</dfn>, which
   is a non-negative integer.</p>
+    <p>Each <a data-link-type="dfn" href="#violation" id="ref-for-violation-12">violation</a> has a <dfn class="dfn-paneled" data-dfn-for="violation" data-dfn-type="dfn" data-export="" id="violation-element">element</dfn>, which is either <code>null</code> or an element.</p>
     <h4 class="heading settled algorithm" data-algorithm="Create a violation object for global, policy, and directive" data-level="2.3.1" id="create-violation-for-global"><span class="secno">2.3.1. </span><span class="content"> Create a violation object for <var>global</var>, <var>policy</var>, and <var>directive</var> </span><a class="self-link" href="#create-violation-for-global"></a></h4>
     <p>Given a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object">global object</a> (<var>global</var>), a <a data-link-type="dfn" href="#policy" id="ref-for-policy-14">policy</a> (<var>policy</var>), and a
-  string (<var>directive</var>), the following algorithm creates a new <a data-link-type="dfn" href="#violation" id="ref-for-violation-12">violation</a> object, and populates it with an initial set of data:</p>
+  string (<var>directive</var>), the following algorithm creates a new <a data-link-type="dfn" href="#violation" id="ref-for-violation-13">violation</a> object, and populates it with an initial set of data:</p>
     <ol>
      <li data-md="">
-      <p>Let <var>violation</var> be a new <a data-link-type="dfn" href="#violation" id="ref-for-violation-13">violation</a> whose <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-2">global
+      <p>Let <var>violation</var> be a new <a data-link-type="dfn" href="#violation" id="ref-for-violation-14">violation</a> whose <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-2">global
   object</a> is <var>global</var>, <a data-link-type="dfn" href="#violation-policy" id="ref-for-violation-policy-1">policy</a> is <var>policy</var>, <a data-link-type="dfn" href="#violation-effective-directive" id="ref-for-violation-effective-directive-1">effective directive</a> is <var>directive</var>, and <a data-link-type="dfn" href="#violation-resource" id="ref-for-violation-resource-1">resource</a> is <code>null</code>.</p>
      <li data-md="">
       <p>If the user agent is currently executing script, and can extract a source
@@ -2144,7 +2145,7 @@ of security-relevant policy decisions.</p>
     </ol>
     <h4 class="heading settled algorithm" data-algorithm="Create a violation object for request, policy, and directive" data-level="2.3.2" id="create-violation-for-request"><span class="secno">2.3.2. </span><span class="content"> Create a violation object for <var>request</var>, <var>policy</var>, and <var>directive</var> </span><a class="self-link" href="#create-violation-for-request"></a></h4>
     <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>), a <a data-link-type="dfn" href="#policy" id="ref-for-policy-15">policy</a> (<var>policy</var>), and a string
-  (<var>directive</var>), the following algorithm creates a new <a data-link-type="dfn" href="#violation" id="ref-for-violation-14">violation</a> object,
+  (<var>directive</var>), the following algorithm creates a new <a data-link-type="dfn" href="#violation" id="ref-for-violation-15">violation</a> object,
   and populates it with an initial set of data:</p>
     <ol>
      <li data-md="">
@@ -2531,6 +2532,8 @@ of security-relevant policy decisions.</p>
          <li data-md="">
           <p>Set <var>violation</var>’s <a data-link-type="dfn" href="#violation-resource" id="ref-for-violation-resource-3">resource</a> to "<code>inline</code>".</p>
          <li data-md="">
+          <p>Set <var>violation</var>’s <a data-link-type="dfn" href="#violation-element" id="ref-for-violation-element-1">element</a> to <var>element</var>.</p>
+         <li data-md="">
           <p>Execute <a href="#report-violation">§5.3 Report a violation</a> on <var>violation</var>.</p>
          <li data-md="">
           <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition-9">disposition</a> is "<code>enforce</code>", then
@@ -2679,7 +2682,7 @@ of security-relevant policy decisions.</p>
 };
 </pre>
     <h3 class="heading settled" data-level="5.2" id="deprecated-serialize-violation"><span class="secno">5.2. </span><span class="content"> Obtain the deprecated serialization of <var>violation</var> </span><a class="self-link" href="#deprecated-serialize-violation"></a></h3>
-    <p>Given a <a data-link-type="dfn" href="#violation" id="ref-for-violation-15">violation</a> (<var>violation</var>), this algorithm returns a JSON text
+    <p>Given a <a data-link-type="dfn" href="#violation" id="ref-for-violation-16">violation</a> (<var>violation</var>), this algorithm returns a JSON text
   string representation of the violation, suitable for submission to a reporting
   endpoint associated with the deprecated <a data-link-type="dfn" href="#report-uri" id="ref-for-report-uri-1"><code>report-uri</code></a> directive.</p>
     <ol>
@@ -2736,17 +2739,23 @@ of security-relevant policy decisions.</p>
       <p>Return the result of executing <code class="idl"><a data-link-type="idl" href="https://tc39.github.io/ecma262#sec-json.stringify">JSON.stringify()</a></code> on <var>object</var>.</p>
     </ol>
     <h3 class="heading settled" data-level="5.3" id="report-violation"><span class="secno">5.3. </span><span class="content"> Report a <var>violation</var> </span><a class="self-link" href="#report-violation"></a></h3>
-    <p>Given a <a data-link-type="dfn" href="#violation" id="ref-for-violation-16">violation</a> (<var>violation</var>), this algorithm reports it to the
+    <p>Given a <a data-link-type="dfn" href="#violation" id="ref-for-violation-17">violation</a> (<var>violation</var>), this algorithm reports it to the
   endpoint specified in <var>violation</var>’s <a data-link-type="dfn" href="#violation-policy" id="ref-for-violation-policy-4">policy</a>, and
   fires a <code class="idl"><a data-link-type="idl" href="#securitypolicyviolationevent" id="ref-for-securitypolicyviolationevent-1">SecurityPolicyViolationEvent</a></code> at <var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-4">global object</a>.</p>
     <ol>
      <li data-md="">
-      <p>Let <var>target</var> be <var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-5">global object</a>.</p>
+      <p>Let <var>target</var> be <var>violation</var>’s <a data-link-type="dfn" href="#violation-element" id="ref-for-violation-element-2">element</a>.</p>
      <li data-md="">
-      <p>If <var>target</var> is a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/browsers.html#window">Window</a></code>, set <var>target</var> to <var>target</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-document-window">associated <code>Document</code></a>.</p>
+      <p>If <var>target</var> is <code>null</code>:</p>
+      <ol>
+       <li data-md="">
+        <p>Set <var>target</var> be <var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-5">global object</a>.</p>
+       <li data-md="">
+        <p>If <var>target</var> is a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/browsers.html#window">Window</a></code>, set <var>target</var> to <var>target</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-document-window">associated <code>Document</code></a>.</p>
+      </ol>
      <li data-md="">
-      <p><a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-event-fire">Fire an event</a> named <code>securitypolicyviolation</code> that uses the <code class="idl"><a data-link-type="idl" href="#securitypolicyviolationevent" id="ref-for-securitypolicyviolationevent-2">SecurityPolicyViolationEvent</a></code> at <var>target</var> with its
-  attributes initialized as follows:</p>
+      <p><a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-event-fire">Fire an event</a> named <code>securitypolicyviolation</code> that uses the <code class="idl"><a data-link-type="idl" href="#securitypolicyviolationevent" id="ref-for-securitypolicyviolationevent-2">SecurityPolicyViolationEvent</a></code> interface at <var>target</var> with
+  its attributes initialized as follows:</p>
       <dl>
        <dt data-md="">
         <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-documenturi" id="ref-for-dom-securitypolicyviolationevent-documenturi-1">documentURI</a></code></p>
@@ -2792,6 +2801,10 @@ of security-relevant policy decisions.</p>
         <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-columnnumber" id="ref-for-dom-securitypolicyviolationevent-columnnumber-1">columnNumber</a></code></p>
        <dd data-md="">
         <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-column-number" id="ref-for-violation-column-number-3">column number</a></p>
+       <dt data-md="">
+        <p><code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#dom-event-bubbles">bubbles</a></code></p>
+       <dd data-md="">
+        <p><code>true</code></p>
       </dl>
       <p class="note" role="note">Note: Both <code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-effectivedirective" id="ref-for-dom-securitypolicyviolationevent-effectivedirective-2">effectiveDirective</a></code> and <code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-violateddirective" id="ref-for-dom-securitypolicyviolationevent-violateddirective-2">violatedDirective</a></code> are the same value.
   This is intentional to maintain backwards compatibility.</p>
@@ -4100,7 +4113,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
     </ol>
     <h3 class="heading settled" data-level="6.4" id="directives-reporting"><span class="secno">6.4. </span><span class="content"> Reporting Directives </span><a class="self-link" href="#directives-reporting"></a></h3>
     <p>Various algorithms in this document hook into the reporting process by
-  constructing a <a data-link-type="dfn" href="#violation" id="ref-for-violation-17">violation</a> object via <a href="#create-violation-for-request">§2.3.2 Create a violation object for request, policy, and directive</a> or <a href="#create-violation-for-global">§2.3.1 Create a violation object for global, policy, and directive</a>, and passing that object to <a href="#report-violation">§5.3 Report a violation</a> to deliver the report.</p>
+  constructing a <a data-link-type="dfn" href="#violation" id="ref-for-violation-18">violation</a> object via <a href="#create-violation-for-request">§2.3.2 Create a violation object for request, policy, and directive</a> or <a href="#create-violation-for-global">§2.3.1 Create a violation object for global, policy, and directive</a>, and passing that object to <a href="#report-violation">§5.3 Report a violation</a> to deliver the report.</p>
     <h4 class="heading settled" data-level="6.4.1" id="directive-report-uri"><span class="secno">6.4.1. </span><span class="content"><code>report-uri</code></span><a class="self-link" href="#directive-report-uri"></a></h4>
     <div class="note" role="note">
       Note: The <a data-link-type="dfn" href="#report-uri" id="ref-for-report-uri-3"><code>report-uri</code></a> directive is deprecated. Please use the <a data-link-type="dfn" href="#report-to" id="ref-for-report-to-3"><code>report-to</code></a> directive instead. If the latter directive is present,
@@ -4998,6 +5011,7 @@ rest of Google’s CSP Cabal.</p>
      <li><a href="#dom-securitypolicyviolationevent-effectivedirective">attribute for SecurityPolicyViolationEvent</a><span>, in §5.1</span>
      <li><a href="#dom-securitypolicyviolationeventinit-effectivedirective">dict-member for SecurityPolicyViolationEventInit</a><span>, in §5.1</span>
     </ul>
+   <li><a href="#violation-element">element</a><span>, in §2.3</span>
    <li><a href="#embedding-document">embedding document</a><span>, in §4.2</span>
    <li><a href="#dom-securitypolicyviolationeventdisposition-enforce">enforce</a><span>, in §5.1</span>
    <li><a href="#dom-securitypolicyviolationeventdisposition-enforce">"enforce"</a><span>, in §5.1</span>
@@ -5142,6 +5156,7 @@ rest of Google’s CSP Cabal.</p>
      <li><a href="https://dom.spec.whatwg.org/#element">Element</a>
      <li><a href="https://dom.spec.whatwg.org/#event">Event</a>
      <li><a href="https://dom.spec.whatwg.org/#dictdef-eventinit">EventInit</a>
+     <li><a href="https://dom.spec.whatwg.org/#dom-event-bubbles">bubbles</a>
      <li><a href="https://dom.spec.whatwg.org/#concept-event-fire">fire an event</a>
      <li><a href="https://dom.spec.whatwg.org/#concept-node-document">node document</a>
      <li><a href="https://dom.spec.whatwg.org/#dom-node-textcontent">textContent</a>
@@ -5168,7 +5183,8 @@ rest of Google’s CSP Cabal.</p>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-destination">destination</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-header-extract-mime-type">extracting a mime type</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-fetch">fetch</a>
-     <li><a href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a>
+     <li><a href="https://fetch.spec.whatwg.org/#concept-request-header-list">header list <small>(for request)</small></a>
+     <li><a href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list <small>(for response)</small></a>
      <li><a href="https://fetch.spec.whatwg.org/#http-fetch">http fetch</a>
      <li><a href="https://fetch.spec.whatwg.org/#http-network-fetch">http-network fetch</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-initiator">initiator</a>
@@ -5185,7 +5201,8 @@ rest of Google’s CSP Cabal.</p>
      <li><a href="https://fetch.spec.whatwg.org/#concept-response">response</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-target-browsing-context">target browsing context</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-type">type</a>
-     <li><a href="https://fetch.spec.whatwg.org/#concept-request-url">url</a>
+     <li><a href="https://fetch.spec.whatwg.org/#concept-request-url">url <small>(for request)</small></a>
+     <li><a href="https://fetch.spec.whatwg.org/#concept-response-url">url <small>(for response)</small></a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-window">window</a>
     </ul>
    <li>
@@ -5219,6 +5236,7 @@ rest of Google’s CSP Cabal.</p>
      <li><a href="https://html.spec.whatwg.org/multipage/forms.html#the-form-element">form</a>
      <li><a href="https://html.spec.whatwg.org/multipage/obsolete.html#frame">frame</a>
      <li><a href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object">global object</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-global">global object <small>(for environment settings object)</small></a>
      <li><a href="https://html.spec.whatwg.org/multipage/semantics.html#attr-base-href">href</a>
      <li><a href="https://html.spec.whatwg.org/multipage/semantics.html#attr-meta-http-equiv">http-equiv</a>
      <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a>
@@ -6233,16 +6251,16 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="violation">
    <b><a href="#violation">#violation</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-violation-1">2.3. Violations</a> <a href="#ref-for-violation-2">(2)</a> <a href="#ref-for-violation-3">(3)</a> <a href="#ref-for-violation-4">(4)</a> <a href="#ref-for-violation-5">(5)</a> <a href="#ref-for-violation-6">(6)</a> <a href="#ref-for-violation-7">(7)</a> <a href="#ref-for-violation-8">(8)</a> <a href="#ref-for-violation-9">(9)</a> <a href="#ref-for-violation-10">(10)</a> <a href="#ref-for-violation-11">(11)</a>
-    <li><a href="#ref-for-violation-12">2.3.1. 
-    Create a violation object for global, policy, and directive </a> <a href="#ref-for-violation-13">(2)</a>
-    <li><a href="#ref-for-violation-14">2.3.2. 
+    <li><a href="#ref-for-violation-1">2.3. Violations</a> <a href="#ref-for-violation-2">(2)</a> <a href="#ref-for-violation-3">(3)</a> <a href="#ref-for-violation-4">(4)</a> <a href="#ref-for-violation-5">(5)</a> <a href="#ref-for-violation-6">(6)</a> <a href="#ref-for-violation-7">(7)</a> <a href="#ref-for-violation-8">(8)</a> <a href="#ref-for-violation-9">(9)</a> <a href="#ref-for-violation-10">(10)</a> <a href="#ref-for-violation-11">(11)</a> <a href="#ref-for-violation-12">(12)</a>
+    <li><a href="#ref-for-violation-13">2.3.1. 
+    Create a violation object for global, policy, and directive </a> <a href="#ref-for-violation-14">(2)</a>
+    <li><a href="#ref-for-violation-15">2.3.2. 
     Create a violation object for request, policy, and directive </a>
-    <li><a href="#ref-for-violation-15">5.2. 
+    <li><a href="#ref-for-violation-16">5.2. 
     Obtain the deprecated serialization of violation </a>
-    <li><a href="#ref-for-violation-16">5.3. 
+    <li><a href="#ref-for-violation-17">5.3. 
     Report a violation </a>
-    <li><a href="#ref-for-violation-17">6.4. 
+    <li><a href="#ref-for-violation-18">6.4. 
     Reporting Directives </a>
    </ul>
   </aside>
@@ -6369,6 +6387,15 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-violation-column-number-2">5.2. 
     Obtain the deprecated serialization of violation </a>
     <li><a href="#ref-for-violation-column-number-3">5.3. 
+    Report a violation </a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="violation-element">
+   <b><a href="#violation-element">#violation-element</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-violation-element-1">4.2.3. 
+    Should element’s inline type behavior be blocked by Content Security Policy? </a>
+    <li><a href="#ref-for-violation-element-2">5.3. 
     Report a violation </a>
    </ul>
   </aside>

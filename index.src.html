@@ -657,6 +657,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   <dfn for="violation" id="violation-column-number" export>column number</dfn>, which
   is a non-negative integer.
 
+  Each <a>violation</a> has a
+  <dfn for="violation" id="violation-element" export>element</dfn>, which is either
+  `null` or an element.
+
   <h4 id="create-violation-for-global" algorithm>
     Create a violation object for |global|, |policy|, and |directive|
   </h4>
@@ -1198,9 +1202,11 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
           3.  Set |violation|'s <a for="violation">resource</a> to "`inline`".
 
-          4.  Execute [[#report-violation]] on |violation|.
+          4.  Set |violation|'s <a for="violation">element</a> to |element|.
 
-          5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
+          5.  Execute [[#report-violation]] on |violation|.
+
+          6.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
               set |result| to "`Blocked`".
 
   3.  Return |result|.
@@ -1429,14 +1435,18 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   fires a {{SecurityPolicyViolationEvent}} at |violation|'s
   <a for="violation">global object</a>.
 
-  1.  Let |target| be |violation|'s <a for="violation">global object</a>.
+  1.  Let |target| be |violation|'s <a for="violation">element</a>.
 
-  2.  If |target| is a {{Window}}, set |target| to |target|'s <a>associated
-      `Document`</a>.
+  2.  If |target| is `null`:
+
+      1.  Set |target| be |violation|'s <a for="violation">global object</a>.
+
+      2.  If |target| is a {{Window}}, set |target| to |target|'s <a>associated
+          `Document`</a>.
 
   3.  <a>Fire an event</a> named `securitypolicyviolation`
-      that uses the {{SecurityPolicyViolationEvent}} at |target| with its
-      attributes initialized as follows:
+      that uses the {{SecurityPolicyViolationEvent}} interface at |target| with
+      its attributes initialized as follows:
 
       :  {{SecurityPolicyViolationEvent/documentURI}}
       :: |violation|'s <a for="violation">url</a>
@@ -1460,6 +1470,8 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       :: |violation|'s <a for="violation">line number</a>
       :  {{SecurityPolicyViolationEvent/columnNumber}}
       :: |violation|'s <a for="violation">column number</a>
+      :  {{Event/bubbles}}
+      :: `true`
 
       Note: Both {{SecurityPolicyViolationEvent/effectiveDirective}} and
       {{SecurityPolicyViolationEvent/violatedDirective}} are the same value.
