@@ -2744,12 +2744,20 @@ of security-relevant policy decisions.</p>
   fires a <code class="idl"><a data-link-type="idl" href="#securitypolicyviolationevent" id="ref-for-securitypolicyviolationevent-1">SecurityPolicyViolationEvent</a></code> at <var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-4">global object</a>.</p>
     <ol>
      <li data-md="">
-      <p>Let <var>target</var> be <var>violation</var>’s <a data-link-type="dfn" href="#violation-element" id="ref-for-violation-element-2">element</a>.</p>
+      <p>Let <var>global</var> be <var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-5">global object</a>.</p>
+     <li data-md="">
+      <p>Let <var>target</var> be <var>violation</var>’s <a data-link-type="dfn" href="#violation-element" id="ref-for-violation-element-2">element</a> .</p>
+     <li data-md="">
+      <p>If <var>target</var> is not <code>null</code>, and <var>global</var> is a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/browsers.html#window">Window</a></code>, and <var>target</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-shadow-including-root">shadow-including root</a> is not <var>global</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-document-window">associated <code>Document</code></a>, set <var>target</var> to <code>null</code>.</p>
+      <p class="note" role="note">Note: This ensures that we fire events only at elements <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#connected">connected</a> to <var>policy</var>’s <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document">Document</a></code>. If a violation is caused by an element which
+  isn’t connected to that document, we’ll fire the event at the document
+  rather than the element in order to ensure that the violation is visible
+  to the document’s listeners.</p>
      <li data-md="">
       <p>If <var>target</var> is <code>null</code>:</p>
       <ol>
        <li data-md="">
-        <p>Set <var>target</var> be <var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-5">global object</a>.</p>
+        <p>Set <var>target</var> be <var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-6">global object</a>.</p>
        <li data-md="">
         <p>If <var>target</var> is a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/browsers.html#window">Window</a></code>, set <var>target</var> to <var>target</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-document-window">associated <code>Document</code></a>.</p>
       </ol>
@@ -2841,7 +2849,7 @@ of security-relevant policy decisions.</p>
          <dt data-md="">
           <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a></p>
          <dd data-md="">
-          <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-6">global object</a>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a></p>
+          <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-7">global object</a>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a></p>
          <dt data-md="">
           <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-window">window</a></p>
          <dd data-md="">
@@ -2849,7 +2857,7 @@ of security-relevant policy decisions.</p>
          <dt data-md="">
           <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a></p>
          <dd data-md="">
-          <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-7">global object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object">relevant
+          <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-8">global object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object">relevant
   settings object</a></p>
          <dt data-md="">
           <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-destination">destination</a></p>
@@ -2902,7 +2910,7 @@ of security-relevant policy decisions.</p>
        <li data-md="">
         <p>Let <var>group</var> be <var>directive</var>’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-8">value</a>.</p>
        <li data-md="">
-        <p>Let <var>settings object</var> be <var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-8">global
+        <p>Let <var>settings object</var> be <var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-9">global
   object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object">relevant settings object</a>.</p>
        <li data-md="">
         <p>Execute <a data-link-type="biblio" href="#biblio-oob-reporting">[OOB-REPORTING]</a>'s <a data-link-type="dfn" href="https://w3c.github.io/reporting/#queue-report">Queue <var>data</var> as <var>type</var> for <var>endpoint group</var> on <var>settings</var></a> algorithm with the
@@ -5165,8 +5173,10 @@ rest of Google’s CSP Cabal.</p>
      <li><a href="https://dom.spec.whatwg.org/#dictdef-eventinit">EventInit</a>
      <li><a href="https://dom.spec.whatwg.org/#dom-event-bubbles">bubbles</a>
      <li><a href="https://dom.spec.whatwg.org/#dom-event-composed">composed</a>
+     <li><a href="https://dom.spec.whatwg.org/#connected">connected</a>
      <li><a href="https://dom.spec.whatwg.org/#concept-event-fire">fire an event</a>
      <li><a href="https://dom.spec.whatwg.org/#concept-node-document">node document</a>
+     <li><a href="https://dom.spec.whatwg.org/#concept-shadow-including-root">shadow-including root</a>
      <li><a href="https://dom.spec.whatwg.org/#dom-event-target">target</a>
      <li><a href="https://dom.spec.whatwg.org/#dom-node-textcontent">textContent</a>
     </ul>
@@ -6277,7 +6287,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-violation-global-object-2">2.3.1. 
     Create a violation object for global, policy, and directive </a> <a href="#ref-for-violation-global-object-3">(2)</a>
     <li><a href="#ref-for-violation-global-object-4">5.3. 
-    Report a violation </a> <a href="#ref-for-violation-global-object-5">(2)</a> <a href="#ref-for-violation-global-object-6">(3)</a> <a href="#ref-for-violation-global-object-7">(4)</a> <a href="#ref-for-violation-global-object-8">(5)</a>
+    Report a violation </a> <a href="#ref-for-violation-global-object-5">(2)</a> <a href="#ref-for-violation-global-object-6">(3)</a> <a href="#ref-for-violation-global-object-7">(4)</a> <a href="#ref-for-violation-global-object-8">(5)</a> <a href="#ref-for-violation-global-object-9">(6)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="violation-url">

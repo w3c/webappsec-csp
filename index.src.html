@@ -1435,16 +1435,28 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   fires a {{SecurityPolicyViolationEvent}} at |violation|'s
   <a for="violation">global object</a>.
 
-  1.  Let |target| be |violation|'s <a for="violation">element</a>.
+  1.  Let |global| be |violation|'s <a for="violation">global object</a>.
 
-  2.  If |target| is `null`:
+  2.  Let |target| be |violation|'s <a for="violation">element</a> .
+  
+  3.  If |target| is not `null`, and |global| is a {{Window}}, and |target|'s
+      <a>shadow-including root</a> is not |global|'s <a>associated
+      `Document`</a>, set |target| to `null`.
+
+      Note: This ensures that we fire events only at elements <a>connected</a>
+      to |policy|'s {{Document}}. If a violation is caused by an element which
+      isn't connected to that document, we'll fire the event at the document
+      rather than the element in order to ensure that the violation is visible
+      to the document's listeners.
+
+  4.  If |target| is `null`:
 
       1.  Set |target| be |violation|'s <a for="violation">global object</a>.
 
       2.  If |target| is a {{Window}}, set |target| to |target|'s <a>associated
           `Document`</a>.
 
-  3.  <a>Fire an event</a> named `securitypolicyviolation`
+  5.  <a>Fire an event</a> named `securitypolicyviolation`
       that uses the {{SecurityPolicyViolationEvent}} interface at |target| with
       its attributes initialized as follows:
 
@@ -1483,7 +1495,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       will bubble its way out of a shadow tree. {{Event/target}}, et al will be
       automagically scoped correctly for the main tree.
 
-  4.  If |violation|'s <a for="violation">policy</a>'s <a for="policy">directive
+  6.  If |violation|'s <a for="violation">policy</a>'s <a for="policy">directive
       set</a> contains a <a>directive</a> named "<a>`report-uri`</a>"
       (|directive|):
 
@@ -1538,7 +1550,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       is, the latter overrides the former, allowing for backwards compatibility
       with browsers that don't support the new mechanism.
 
-  5.  If |violation|'s <a for="violation">policy</a>'s <a for="policy">directive
+  7.  If |violation|'s <a for="violation">policy</a>'s <a for="policy">directive
       set</a> contains a <a>directive</a> named "<a>`report-to`</a>"
       (|directive|):
 
