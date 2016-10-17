@@ -1451,7 +1451,7 @@ pre.idl.highlight { color: #708090; }
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1>Content Security Policy Level 3</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-10-14">14 October 2016</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-10-17">17 October 2016</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -2746,193 +2746,200 @@ of security-relevant policy decisions.</p>
      <li data-md="">
       <p>Let <var>global</var> be <var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-5">global object</a>.</p>
      <li data-md="">
-      <p>Let <var>target</var> be <var>violation</var>’s <a data-link-type="dfn" href="#violation-element" id="ref-for-violation-element-2">element</a> .</p>
+      <p>Let <var>target</var> be <var>violation</var>’s <a data-link-type="dfn" href="#violation-element" id="ref-for-violation-element-2">element</a>.</p>
      <li data-md="">
-      <p>If <var>target</var> is not <code>null</code>, and <var>global</var> is a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/browsers.html#window">Window</a></code>, and <var>target</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-shadow-including-root">shadow-including root</a> is not <var>global</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-document-window">associated <code>Document</code></a>, set <var>target</var> to <code>null</code>.</p>
-      <p class="note" role="note">Note: This ensures that we fire events only at elements <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#connected">connected</a> to <var>policy</var>’s <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document">Document</a></code>. If a violation is caused by an element which
+      <p>Queue a task to run the following steps:</p>
+      <p class="note" role="note">Note: We "queue a task" here to ensure that the event targeting and dispatch
+  happens after JavaScript completes execution of the task responsible for a
+  given violation (which might manipulate the DOM).</p>
+      <ol>
+       <li data-md="">
+        <p>If <var>target</var> is not <code>null</code>, and <var>global</var> is a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/browsers.html#window">Window</a></code>, and <var>target</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-shadow-including-root">shadow-including root</a> is not <var>global</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-document-window">associated <code>Document</code></a>, set <var>target</var> to <code>null</code>.</p>
+        <p class="note" role="note">Note: This ensures that we fire events only at elements <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#connected">connected</a> to <var>policy</var>’s <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document">Document</a></code>. If a violation is caused by an element which
   isn’t connected to that document, we’ll fire the event at the document
   rather than the element in order to ensure that the violation is visible
   to the document’s listeners.</p>
-     <li data-md="">
-      <p>If <var>target</var> is <code>null</code>:</p>
-      <ol>
        <li data-md="">
-        <p>Set <var>target</var> be <var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-6">global object</a>.</p>
+        <p>If <var>target</var> is <code>null</code>:</p>
+        <ol>
+         <li data-md="">
+          <p>Set <var>target</var> be <var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-6">global object</a>.</p>
+         <li data-md="">
+          <p>If <var>target</var> is a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/browsers.html#window">Window</a></code>, set <var>target</var> to <var>target</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-document-window">associated <code>Document</code></a>.</p>
+        </ol>
        <li data-md="">
-        <p>If <var>target</var> is a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/browsers.html#window">Window</a></code>, set <var>target</var> to <var>target</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-document-window">associated <code>Document</code></a>.</p>
-      </ol>
-     <li data-md="">
-      <p><a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-event-fire">Fire an event</a> named <code>securitypolicyviolation</code> that uses the <code class="idl"><a data-link-type="idl" href="#securitypolicyviolationevent" id="ref-for-securitypolicyviolationevent-2">SecurityPolicyViolationEvent</a></code> interface at <var>target</var> with
+        <p><a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-event-fire">Fire an event</a> named <code>securitypolicyviolation</code> that uses the <code class="idl"><a data-link-type="idl" href="#securitypolicyviolationevent" id="ref-for-securitypolicyviolationevent-2">SecurityPolicyViolationEvent</a></code> interface at <var>target</var> with
   its attributes initialized as follows:</p>
-      <dl>
-       <dt data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-documenturi" id="ref-for-dom-securitypolicyviolationevent-documenturi-1">documentURI</a></code></p>
-       <dd data-md="">
-        <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-url" id="ref-for-violation-url-2">url</a></p>
-       <dt data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-referrer" id="ref-for-dom-securitypolicyviolationevent-referrer-1">referrer</a></code></p>
-       <dd data-md="">
-        <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-referrer" id="ref-for-violation-referrer-3">referrer</a></p>
-       <dt data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-blockeduri" id="ref-for-dom-securitypolicyviolationevent-blockeduri-1">blockedURI</a></code></p>
-       <dd data-md="">
-        <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-resource" id="ref-for-violation-resource-7">resource</a></p>
-       <dt data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-effectivedirective" id="ref-for-dom-securitypolicyviolationevent-effectivedirective-1">effectiveDirective</a></code></p>
-       <dd data-md="">
-        <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-effective-directive" id="ref-for-violation-effective-directive-4">effective directive</a></p>
-       <dt data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-violateddirective" id="ref-for-dom-securitypolicyviolationevent-violateddirective-1">violatedDirective</a></code></p>
-       <dd data-md="">
-        <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-effective-directive" id="ref-for-violation-effective-directive-5">effective directive</a></p>
-       <dt data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-originalpolicy" id="ref-for-dom-securitypolicyviolationevent-originalpolicy-1">originalPolicy</a></code></p>
-       <dd data-md="">
-        <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-policy" id="ref-for-violation-policy-5">policy</a></p>
-       <dt data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-disposition" id="ref-for-dom-securitypolicyviolationevent-disposition-1">disposition</a></code></p>
-       <dd data-md="">
-        <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-disposition" id="ref-for-violation-disposition-1">disposition</a></p>
-       <dt data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-sourcefile" id="ref-for-dom-securitypolicyviolationevent-sourcefile-1">sourceFile</a></code></p>
-       <dd data-md="">
-        <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-source-file" id="ref-for-violation-source-file-4">source file</a></p>
-       <dt data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-statuscode" id="ref-for-dom-securitypolicyviolationevent-statuscode-1">statusCode</a></code></p>
-       <dd data-md="">
-        <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-status" id="ref-for-violation-status-3">status</a></p>
-       <dt data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-linenumber" id="ref-for-dom-securitypolicyviolationevent-linenumber-1">lineNumber</a></code></p>
-       <dd data-md="">
-        <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-line-number" id="ref-for-violation-line-number-3">line number</a></p>
-       <dt data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-columnnumber" id="ref-for-dom-securitypolicyviolationevent-columnnumber-1">columnNumber</a></code></p>
-       <dd data-md="">
-        <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-column-number" id="ref-for-violation-column-number-3">column number</a></p>
-       <dt data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#dom-event-bubbles">bubbles</a></code></p>
-       <dd data-md="">
-        <p><code>true</code></p>
-       <dt data-md="">
-        <p><code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#dom-event-composed">composed</a></code></p>
-       <dd data-md="">
-        <p><code>true</code></p>
-      </dl>
-      <p class="note" role="note">Note: Both <code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-effectivedirective" id="ref-for-dom-securitypolicyviolationevent-effectivedirective-2">effectiveDirective</a></code> and <code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-violateddirective" id="ref-for-dom-securitypolicyviolationevent-violateddirective-2">violatedDirective</a></code> are the same value.
+        <dl>
+         <dt data-md="">
+          <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-documenturi" id="ref-for-dom-securitypolicyviolationevent-documenturi-1">documentURI</a></code></p>
+         <dd data-md="">
+          <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-url" id="ref-for-violation-url-2">url</a></p>
+         <dt data-md="">
+          <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-referrer" id="ref-for-dom-securitypolicyviolationevent-referrer-1">referrer</a></code></p>
+         <dd data-md="">
+          <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-referrer" id="ref-for-violation-referrer-3">referrer</a></p>
+         <dt data-md="">
+          <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-blockeduri" id="ref-for-dom-securitypolicyviolationevent-blockeduri-1">blockedURI</a></code></p>
+         <dd data-md="">
+          <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-resource" id="ref-for-violation-resource-7">resource</a></p>
+         <dt data-md="">
+          <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-effectivedirective" id="ref-for-dom-securitypolicyviolationevent-effectivedirective-1">effectiveDirective</a></code></p>
+         <dd data-md="">
+          <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-effective-directive" id="ref-for-violation-effective-directive-4">effective directive</a></p>
+         <dt data-md="">
+          <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-violateddirective" id="ref-for-dom-securitypolicyviolationevent-violateddirective-1">violatedDirective</a></code></p>
+         <dd data-md="">
+          <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-effective-directive" id="ref-for-violation-effective-directive-5">effective directive</a></p>
+         <dt data-md="">
+          <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-originalpolicy" id="ref-for-dom-securitypolicyviolationevent-originalpolicy-1">originalPolicy</a></code></p>
+         <dd data-md="">
+          <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-policy" id="ref-for-violation-policy-5">policy</a></p>
+         <dt data-md="">
+          <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-disposition" id="ref-for-dom-securitypolicyviolationevent-disposition-1">disposition</a></code></p>
+         <dd data-md="">
+          <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-disposition" id="ref-for-violation-disposition-1">disposition</a></p>
+         <dt data-md="">
+          <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-sourcefile" id="ref-for-dom-securitypolicyviolationevent-sourcefile-1">sourceFile</a></code></p>
+         <dd data-md="">
+          <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-source-file" id="ref-for-violation-source-file-4">source file</a></p>
+         <dt data-md="">
+          <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-statuscode" id="ref-for-dom-securitypolicyviolationevent-statuscode-1">statusCode</a></code></p>
+         <dd data-md="">
+          <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-status" id="ref-for-violation-status-3">status</a></p>
+         <dt data-md="">
+          <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-linenumber" id="ref-for-dom-securitypolicyviolationevent-linenumber-1">lineNumber</a></code></p>
+         <dd data-md="">
+          <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-line-number" id="ref-for-violation-line-number-3">line number</a></p>
+         <dt data-md="">
+          <p><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-columnnumber" id="ref-for-dom-securitypolicyviolationevent-columnnumber-1">columnNumber</a></code></p>
+         <dd data-md="">
+          <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-column-number" id="ref-for-violation-column-number-3">column number</a></p>
+         <dt data-md="">
+          <p><code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#dom-event-bubbles">bubbles</a></code></p>
+         <dd data-md="">
+          <p><code>true</code></p>
+         <dt data-md="">
+          <p><code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#dom-event-composed">composed</a></code></p>
+         <dd data-md="">
+          <p><code>true</code></p>
+        </dl>
+        <p class="note" role="note">Note: Both <code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-effectivedirective" id="ref-for-dom-securitypolicyviolationevent-effectivedirective-2">effectiveDirective</a></code> and <code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-violateddirective" id="ref-for-dom-securitypolicyviolationevent-violateddirective-2">violatedDirective</a></code> are the same value.
   This is intentional to maintain backwards compatibility.</p>
-      <p class="note" role="note">Note: We set the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#dom-event-composed">composed</a></code> attribute, which means that this event
+        <p class="note" role="note">Note: We set the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#dom-event-composed">composed</a></code> attribute, which means that this event
   will bubble its way out of a shadow tree. <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#dom-event-target">target</a></code>, et al will be
   automagically scoped correctly for the main tree.</p>
-     <li data-md="">
-      <p>If <var>violation</var>’s <a data-link-type="dfn" href="#violation-policy" id="ref-for-violation-policy-6">policy</a>’s <a data-link-type="dfn" href="#policy-directive-set" id="ref-for-policy-directive-set-6">directive
+       <li data-md="">
+        <p>If <var>violation</var>’s <a data-link-type="dfn" href="#violation-policy" id="ref-for-violation-policy-6">policy</a>’s <a data-link-type="dfn" href="#policy-directive-set" id="ref-for-policy-directive-set-6">directive
   set</a> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives-12">directive</a> named "<a data-link-type="dfn" href="#report-uri" id="ref-for-report-uri-2"><code>report-uri</code></a>"
   (<var>directive</var>):</p>
-      <ol>
-       <li data-md="">
-        <p>If <var>violation</var>’s <a data-link-type="dfn" href="#violation-policy" id="ref-for-violation-policy-7">policy</a>’s <a data-link-type="dfn" href="#policy-directive-set" id="ref-for-policy-directive-set-7">directive set</a> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives-13">directive</a> named
+        <ol>
+         <li data-md="">
+          <p>If <var>violation</var>’s <a data-link-type="dfn" href="#violation-policy" id="ref-for-violation-policy-7">policy</a>’s <a data-link-type="dfn" href="#policy-directive-set" id="ref-for-policy-directive-set-7">directive set</a> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives-13">directive</a> named
   "<a data-link-type="dfn" href="#report-to" id="ref-for-report-to-1"><code>report-to</code></a>", skip the remaining substeps.</p>
-       <li data-md="">
-        <p>Let <var>endpoint</var> be the result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser">URL parser</a> on <var>directive</var>’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-7">value</a>.</p>
-       <li data-md="">
-        <p>If <var>endpoint</var> is not a valid URL, skip the remaining substeps.</p>
-       <li data-md="">
-        <p>Let <var>request</var> be a new <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a>, initialized as follows:</p>
-        <dl>
-         <dt data-md="">
-          <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-method">method</a></p>
-         <dd data-md="">
-          <p>"<code>POST</code>"</p>
-         <dt data-md="">
-          <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url">url</a></p>
-         <dd data-md="">
-          <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-url" id="ref-for-violation-url-3">url</a></p>
-         <dt data-md="">
-          <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a></p>
-         <dd data-md="">
-          <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-7">global object</a>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a></p>
-         <dt data-md="">
-          <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-window">window</a></p>
-         <dd data-md="">
-          <p>"<code>no-window</code>"</p>
-         <dt data-md="">
-          <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a></p>
-         <dd data-md="">
-          <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-8">global object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object">relevant
+         <li data-md="">
+          <p>Let <var>endpoint</var> be the result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser">URL parser</a> on <var>directive</var>’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-7">value</a>.</p>
+         <li data-md="">
+          <p>If <var>endpoint</var> is not a valid URL, skip the remaining substeps.</p>
+         <li data-md="">
+          <p>Let <var>request</var> be a new <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a>, initialized as follows:</p>
+          <dl>
+           <dt data-md="">
+            <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-method">method</a></p>
+           <dd data-md="">
+            <p>"<code>POST</code>"</p>
+           <dt data-md="">
+            <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url">url</a></p>
+           <dd data-md="">
+            <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-url" id="ref-for-violation-url-3">url</a></p>
+           <dt data-md="">
+            <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a></p>
+           <dd data-md="">
+            <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-7">global object</a>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a></p>
+           <dt data-md="">
+            <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-window">window</a></p>
+           <dd data-md="">
+            <p>"<code>no-window</code>"</p>
+           <dt data-md="">
+            <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a></p>
+           <dd data-md="">
+            <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-8">global object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object">relevant
   settings object</a></p>
-         <dt data-md="">
-          <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-destination">destination</a></p>
-         <dd data-md="">
-          <p>"<code>report</code>"</p>
-         <dt data-md="">
-          <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-initiator">initiator</a></p>
-         <dd data-md="">
-          <p>""</p>
-         <dt data-md="">
-          <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-type">type</a></p>
-         <dd data-md="">
-          <p>""</p>
-         <dt data-md="">
-          <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-cache-mode">cache mode</a></p>
-         <dd data-md="">
-          <p>"<code>no-cache</code>"</p>
-         <dt data-md="">
-          <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-credentials-mode">credentials mode</a></p>
-         <dd data-md="">
-          <p>"<code>same-origin</code>"</p>
-         <dt data-md="">
-          <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-header-list">header list</a></p>
-         <dd data-md="">
-          <p>A header list containing a single header whose name is
+           <dt data-md="">
+            <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-destination">destination</a></p>
+           <dd data-md="">
+            <p>"<code>report</code>"</p>
+           <dt data-md="">
+            <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-initiator">initiator</a></p>
+           <dd data-md="">
+            <p>""</p>
+           <dt data-md="">
+            <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-type">type</a></p>
+           <dd data-md="">
+            <p>""</p>
+           <dt data-md="">
+            <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-cache-mode">cache mode</a></p>
+           <dd data-md="">
+            <p>"<code>no-cache</code>"</p>
+           <dt data-md="">
+            <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-credentials-mode">credentials mode</a></p>
+           <dd data-md="">
+            <p>"<code>same-origin</code>"</p>
+           <dt data-md="">
+            <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-header-list">header list</a></p>
+           <dd data-md="">
+            <p>A header list containing a single header whose name is
   "<code>Content-Type</code>", and value is "<code>application/csp-report</code>"</p>
-         <dt data-md="">
-          <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-body">body</a></p>
-         <dd data-md="">
-          <p>The result of executing <a href="#deprecated-serialize-violation">§5.2 Obtain the deprecated serialization of violation</a> on <var>violation</var></p>
-         <dt data-md="">
-          <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-redirect-mode">redirect mode</a></p>
-         <dd data-md="">
-          <p>"<code>error</code>"</p>
-        </dl>
-       <li data-md="">
-        <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-fetch">Fetch</a> <var>request</var>. The result will be ignored.</p>
-      </ol>
-      <p class="note" role="note">Note: All of this should be considered deprecated. It sends a single
+           <dt data-md="">
+            <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-body">body</a></p>
+           <dd data-md="">
+            <p>The result of executing <a href="#deprecated-serialize-violation">§5.2 Obtain the deprecated serialization of violation</a> on <var>violation</var></p>
+           <dt data-md="">
+            <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-redirect-mode">redirect mode</a></p>
+           <dd data-md="">
+            <p>"<code>error</code>"</p>
+          </dl>
+         <li data-md="">
+          <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-fetch">Fetch</a> <var>request</var>. The result will be ignored.</p>
+        </ol>
+        <p class="note" role="note">Note: All of this should be considered deprecated. It sends a single
   request per violation, which simply isn’t scalable. As soon as this
   behavior can be removed from user agents, it will be.</p>
-      <p class="note" role="note">Note: <code>report-uri</code> only takes effect if <code>report-to</code> is not present. That'
+        <p class="note" role="note">Note: <code>report-uri</code> only takes effect if <code>report-to</code> is not present. That'
   is, the latter overrides the former, allowing for backwards compatibility
   with browsers that don’t support the new mechanism.</p>
-     <li data-md="">
-      <p>If <var>violation</var>’s <a data-link-type="dfn" href="#violation-policy" id="ref-for-violation-policy-8">policy</a>’s <a data-link-type="dfn" href="#policy-directive-set" id="ref-for-policy-directive-set-8">directive
+       <li data-md="">
+        <p>If <var>violation</var>’s <a data-link-type="dfn" href="#violation-policy" id="ref-for-violation-policy-8">policy</a>’s <a data-link-type="dfn" href="#policy-directive-set" id="ref-for-policy-directive-set-8">directive
   set</a> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives-14">directive</a> named "<a data-link-type="dfn" href="#report-to" id="ref-for-report-to-2"><code>report-to</code></a>"
   (<var>directive</var>):</p>
-      <ol>
-       <li data-md="">
-        <p>Let <var>group</var> be <var>directive</var>’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-8">value</a>.</p>
-       <li data-md="">
-        <p>Let <var>settings object</var> be <var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-9">global
+        <ol>
+         <li data-md="">
+          <p>Let <var>group</var> be <var>directive</var>’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-8">value</a>.</p>
+         <li data-md="">
+          <p>Let <var>settings object</var> be <var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object-9">global
   object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object">relevant settings object</a>.</p>
-       <li data-md="">
-        <p>Execute <a data-link-type="biblio" href="#biblio-oob-reporting">[OOB-REPORTING]</a>'s <a data-link-type="dfn" href="https://w3c.github.io/reporting/#queue-report">Queue <var>data</var> as <var>type</var> for <var>endpoint group</var> on <var>settings</var></a> algorithm with the
+         <li data-md="">
+          <p>Execute <a data-link-type="biblio" href="#biblio-oob-reporting">[OOB-REPORTING]</a>'s <a data-link-type="dfn" href="https://w3c.github.io/reporting/#queue-report">Queue <var>data</var> as <var>type</var> for <var>endpoint group</var> on <var>settings</var></a> algorithm with the
   following arguments:</p>
-        <dl>
-         <dt data-md="">
-          <p><var>data</var></p>
-         <dd data-md="">
-          <p><var>violation</var></p>
-         <dt data-md="">
-          <p><var>type</var></p>
-         <dd data-md="">
-          <p>"CSP"</p>
-         <dt data-md="">
-          <p><var>endpoint group</var></p>
-         <dd data-md="">
-          <p><var>group</var></p>
-         <dt data-md="">
-          <p><var>settings</var></p>
-         <dd data-md="">
-          <p><var>settings object</var></p>
-        </dl>
+          <dl>
+           <dt data-md="">
+            <p><var>data</var></p>
+           <dd data-md="">
+            <p><var>violation</var></p>
+           <dt data-md="">
+            <p><var>type</var></p>
+           <dd data-md="">
+            <p>"CSP"</p>
+           <dt data-md="">
+            <p><var>endpoint group</var></p>
+           <dd data-md="">
+            <p><var>group</var></p>
+           <dt data-md="">
+            <p><var>settings</var></p>
+           <dd data-md="">
+            <p><var>settings object</var></p>
+          </dl>
+        </ol>
       </ol>
     </ol>
    </section>

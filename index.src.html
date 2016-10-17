@@ -1437,140 +1437,146 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   1.  Let |global| be |violation|'s <a for="violation">global object</a>.
 
-  2.  Let |target| be |violation|'s <a for="violation">element</a> .
-  
-  3.  If |target| is not `null`, and |global| is a {{Window}}, and |target|'s
-      <a>shadow-including root</a> is not |global|'s <a>associated
-      `Document`</a>, set |target| to `null`.
+  2.  Let |target| be |violation|'s <a for="violation">element</a>.
 
-      Note: This ensures that we fire events only at elements <a>connected</a>
-      to |policy|'s {{Document}}. If a violation is caused by an element which
-      isn't connected to that document, we'll fire the event at the document
-      rather than the element in order to ensure that the violation is visible
-      to the document's listeners.
+  3.  Queue a task to run the following steps:
 
-  4.  If |target| is `null`:
+      Note: We "queue a task" here to ensure that the event targeting and dispatch
+      happens after JavaScript completes execution of the task responsible for a
+      given violation (which might manipulate the DOM).
 
-      1.  Set |target| be |violation|'s <a for="violation">global object</a>.
+      1.  If |target| is not `null`, and |global| is a {{Window}}, and |target|'s
+          <a>shadow-including root</a> is not |global|'s <a>associated
+          `Document`</a>, set |target| to `null`.
 
-      2.  If |target| is a {{Window}}, set |target| to |target|'s <a>associated
-          `Document`</a>.
+          Note: This ensures that we fire events only at elements <a>connected</a>
+          to |policy|'s {{Document}}. If a violation is caused by an element which
+          isn't connected to that document, we'll fire the event at the document
+          rather than the element in order to ensure that the violation is visible
+          to the document's listeners.
 
-  5.  <a>Fire an event</a> named `securitypolicyviolation`
-      that uses the {{SecurityPolicyViolationEvent}} interface at |target| with
-      its attributes initialized as follows:
+      2.  If |target| is `null`:
 
-      :  {{SecurityPolicyViolationEvent/documentURI}}
-      :: |violation|'s <a for="violation">url</a>
-      :  {{SecurityPolicyViolationEvent/referrer}}
-      :: |violation|'s <a for="violation">referrer</a>
-      :  {{SecurityPolicyViolationEvent/blockedURI}}
-      :: |violation|'s <a for="violation">resource</a>
-      :  {{SecurityPolicyViolationEvent/effectiveDirective}}
-      :: |violation|'s <a for="violation">effective directive</a>
-      :  {{SecurityPolicyViolationEvent/violatedDirective}}
-      :: |violation|'s <a for="violation">effective directive</a>
-      :  {{SecurityPolicyViolationEvent/originalPolicy}}
-      :: |violation|'s <a for="violation">policy</a>
-      :  {{SecurityPolicyViolationEvent/disposition}}
-      :: |violation|'s <a for="violation">disposition</a>
-      :  {{SecurityPolicyViolationEvent/sourceFile}}
-      :: |violation|'s <a for="violation">source file</a>
-      :  {{SecurityPolicyViolationEvent/statusCode}}
-      :: |violation|'s <a for="violation">status</a>
-      :  {{SecurityPolicyViolationEvent/lineNumber}}
-      :: |violation|'s <a for="violation">line number</a>
-      :  {{SecurityPolicyViolationEvent/columnNumber}}
-      :: |violation|'s <a for="violation">column number</a>
-      :  {{Event/bubbles}}
-      :: `true`
-      :  {{Event/composed}}
-      :: `true`
+          1.  Set |target| be |violation|'s <a for="violation">global object</a>.
 
-      Note: Both {{SecurityPolicyViolationEvent/effectiveDirective}} and
-      {{SecurityPolicyViolationEvent/violatedDirective}} are the same value.
-      This is intentional to maintain backwards compatibility.
+          2.  If |target| is a {{Window}}, set |target| to |target|'s <a>associated
+              `Document`</a>.
 
-      Note: We set the {{Event/composed}} attribute, which means that this event
-      will bubble its way out of a shadow tree. {{Event/target}}, et al will be
-      automagically scoped correctly for the main tree.
+      3.  <a>Fire an event</a> named `securitypolicyviolation`
+          that uses the {{SecurityPolicyViolationEvent}} interface at |target| with
+          its attributes initialized as follows:
 
-  6.  If |violation|'s <a for="violation">policy</a>'s <a for="policy">directive
-      set</a> contains a <a>directive</a> named "<a>`report-uri`</a>"
-      (|directive|):
+          :  {{SecurityPolicyViolationEvent/documentURI}}
+          :: |violation|'s <a for="violation">url</a>
+          :  {{SecurityPolicyViolationEvent/referrer}}
+          :: |violation|'s <a for="violation">referrer</a>
+          :  {{SecurityPolicyViolationEvent/blockedURI}}
+          :: |violation|'s <a for="violation">resource</a>
+          :  {{SecurityPolicyViolationEvent/effectiveDirective}}
+          :: |violation|'s <a for="violation">effective directive</a>
+          :  {{SecurityPolicyViolationEvent/violatedDirective}}
+          :: |violation|'s <a for="violation">effective directive</a>
+          :  {{SecurityPolicyViolationEvent/originalPolicy}}
+          :: |violation|'s <a for="violation">policy</a>
+          :  {{SecurityPolicyViolationEvent/disposition}}
+          :: |violation|'s <a for="violation">disposition</a>
+          :  {{SecurityPolicyViolationEvent/sourceFile}}
+          :: |violation|'s <a for="violation">source file</a>
+          :  {{SecurityPolicyViolationEvent/statusCode}}
+          :: |violation|'s <a for="violation">status</a>
+          :  {{SecurityPolicyViolationEvent/lineNumber}}
+          :: |violation|'s <a for="violation">line number</a>
+          :  {{SecurityPolicyViolationEvent/columnNumber}}
+          :: |violation|'s <a for="violation">column number</a>
+          :  {{Event/bubbles}}
+          :: `true`
+          :  {{Event/composed}}
+          :: `true`
 
-      1.  If |violation|'s <a for="violation">policy</a>'s
-          <a for="policy">directive set</a> contains a <a>directive</a> named
-          "<a>`report-to`</a>", skip the remaining substeps.
+          Note: Both {{SecurityPolicyViolationEvent/effectiveDirective}} and
+          {{SecurityPolicyViolationEvent/violatedDirective}} are the same value.
+          This is intentional to maintain backwards compatibility.
 
-      2.  Let |endpoint| be the result of executing the <a>URL parser</a> on
-          |directive|'s <a for="directive">value</a>.
+          Note: We set the {{Event/composed}} attribute, which means that this event
+          will bubble its way out of a shadow tree. {{Event/target}}, et al will be
+          automagically scoped correctly for the main tree.
 
-      3.  If |endpoint| is not a valid URL, skip the remaining substeps.
+      4.  If |violation|'s <a for="violation">policy</a>'s <a for="policy">directive
+          set</a> contains a <a>directive</a> named "<a>`report-uri`</a>"
+          (|directive|):
 
-      4.  Let |request| be a new <a>request</a>, initialized as follows:
+          1.  If |violation|'s <a for="violation">policy</a>'s
+              <a for="policy">directive set</a> contains a <a>directive</a> named
+              "<a>`report-to`</a>", skip the remaining substeps.
 
-          :   <a for="request">method</a>
-          ::  "`POST`"
-          :   <a for="request">url</a>
-          ::  |violation|'s <a for="violation">url</a>
-          :   <a for="request">origin</a>
-          ::  |violation|'s <a for="violation">global object</a>'s <a>origin</a>
-          :   <a for="request">window</a>
-          ::  "`no-window`"
-          :   <a for="request">client</a>
-          ::  |violation|'s <a for="violation">global object</a>'s <a>relevant
-              settings object</a>
-          :   <a for="request">destination</a>
-          ::  "`report`"
-          :   <a for="request">initiator</a>
-          ::  ""
-          :   <a for="request">type</a>
-          ::  ""
-          :   <a for="request">cache mode</a>
-          ::  "`no-cache`"
-          :   <a for="request">credentials mode</a>
-          ::  "`same-origin`"
-          :   <a for="request">header list</a>
-          ::  A header list containing a single header whose name is
-              "`Content-Type`", and value is "`application/csp-report`"
-          :   <a for="request">body</a>
-          ::  The result of executing [[#deprecated-serialize-violation]] on
-              |violation|
-          :   <a for="request">redirect mode</a>
-          ::  "`error`"
+          2.  Let |endpoint| be the result of executing the <a>URL parser</a> on
+              |directive|'s <a for="directive">value</a>.
 
-      5.  <a>Fetch</a> |request|. The result will be ignored.
+          3.  If |endpoint| is not a valid URL, skip the remaining substeps.
 
-      Note: All of this should be considered deprecated. It sends a single
-      request per violation, which simply isn't scalable. As soon as this
-      behavior can be removed from user agents, it will be.
+          4.  Let |request| be a new <a>request</a>, initialized as follows:
 
-      Note: `report-uri` only takes effect if `report-to` is not present. That'
-      is, the latter overrides the former, allowing for backwards compatibility
-      with browsers that don't support the new mechanism.
+              :   <a for="request">method</a>
+              ::  "`POST`"
+              :   <a for="request">url</a>
+              ::  |violation|'s <a for="violation">url</a>
+              :   <a for="request">origin</a>
+              ::  |violation|'s <a for="violation">global object</a>'s <a>origin</a>
+              :   <a for="request">window</a>
+              ::  "`no-window`"
+              :   <a for="request">client</a>
+              ::  |violation|'s <a for="violation">global object</a>'s <a>relevant
+                  settings object</a>
+              :   <a for="request">destination</a>
+              ::  "`report`"
+              :   <a for="request">initiator</a>
+              ::  ""
+              :   <a for="request">type</a>
+              ::  ""
+              :   <a for="request">cache mode</a>
+              ::  "`no-cache`"
+              :   <a for="request">credentials mode</a>
+              ::  "`same-origin`"
+              :   <a for="request">header list</a>
+              ::  A header list containing a single header whose name is
+                  "`Content-Type`", and value is "`application/csp-report`"
+              :   <a for="request">body</a>
+              ::  The result of executing [[#deprecated-serialize-violation]] on
+                  |violation|
+              :   <a for="request">redirect mode</a>
+              ::  "`error`"
 
-  7.  If |violation|'s <a for="violation">policy</a>'s <a for="policy">directive
-      set</a> contains a <a>directive</a> named "<a>`report-to`</a>"
-      (|directive|):
+          5.  <a>Fetch</a> |request|. The result will be ignored.
 
-      1.  Let |group| be |directive|'s <a for="directive">value</a>.
+          Note: All of this should be considered deprecated. It sends a single
+          request per violation, which simply isn't scalable. As soon as this
+          behavior can be removed from user agents, it will be.
 
-      2.  Let |settings object| be |violation|'s <a for="violation">global
-          object</a>'s <a>relevant settings object</a>.
+          Note: `report-uri` only takes effect if `report-to` is not present. That'
+          is, the latter overrides the former, allowing for backwards compatibility
+          with browsers that don't support the new mechanism.
 
-      3.  Execute [[!OOB-REPORTING]]'s <a lt="queue report">Queue |data| as
-          |type| for |endpoint group| on |settings|</a> algorithm with the
-          following arguments:
+      5.  If |violation|'s <a for="violation">policy</a>'s <a for="policy">directive
+          set</a> contains a <a>directive</a> named "<a>`report-to`</a>"
+          (|directive|):
 
-          :   |data|
-          ::  |violation|
-          :   |type|
-          ::  "CSP"
-          :   |endpoint group|
-          ::  |group|
-          :   |settings|
-          ::  |settings object|
+          1.  Let |group| be |directive|'s <a for="directive">value</a>.
+
+          2.  Let |settings object| be |violation|'s <a for="violation">global
+              object</a>'s <a>relevant settings object</a>.
+
+          3.  Execute [[!OOB-REPORTING]]'s <a lt="queue report">Queue |data| as
+              |type| for |endpoint group| on |settings|</a> algorithm with the
+              following arguments:
+
+              :   |data|
+              ::  |violation|
+              :   |type|
+              ::  "CSP"
+              :   |endpoint group|
+              ::  |group|
+              :   |settings|
+              ::  |settings object|
 </section>
 
 <!-- Big Text: Directives -->
