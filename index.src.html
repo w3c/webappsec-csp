@@ -352,15 +352,15 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
         ISSUE(w3c/webappsec-csp#13): `unsafe-hashed-attributes` is a work in progress.
       </div>
 
-  9.  The <a>source expression</a> matching has been changed to require explicit whitelisting
+  9.  The <a>source expression</a> matching has been changed to require explicit presence
       of any non-<a>network scheme</a>, rather than <a>local scheme</a>,
       unless that non-<a>network scheme</a> is the same as the scheme of protected resource,
       as described in [[#match-url-to-source-expression]].
 
   10. <div class="wip">
-        Hash-based source expressions may now whitelist external scripts if the
+        Hash-based source expressions may now match external scripts if the
         <{script}> element that triggers the request specifies a set of integrity
-        metadata which is whitelisted by the current policy. Details in
+        metadata which is listed in the current policy. Details in
         [[#external-hash]].
 
         ISSUE(w3c/webappsec-csp#78): SRI integration is a work in progress.
@@ -1612,10 +1612,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     Fetch Directives
   </h3>
 
-  <dfn export>Fetch directives</dfn> control the locations from which certain resourc
-  types may be loaded. For instance, <a>script-src</a> allows developers to
-  whitelist trusted sources of script to execute on a page, while
-  <a>font-src</a> controls the sources of web fonts.
+  <dfn export>Fetch directives</dfn> control the locations from which certain resource
+  types may be loaded. For instance, <a>script-src</a> allows developers to allow
+  trusted sources of script to execute on a page, while <a>font-src</a> controls the
+  sources of web fonts.
 
   <h4 id="directive-child-src">`child-src`</h4>
 
@@ -2381,7 +2381,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   3.  Inline <{script}> blocks MUST pass through [[#should-block-inline]]. Their
       behavior will be blocked unless every policy allows inline script, either
       implicitly by not specifying a `script-src` (or `default-src`) directive,
-      or explicitly, by whitelisting "`unsafe-inline`", a
+      or explicitly, by specifying "`unsafe-inline`", a
       <a grammar>nonce-source</a> or a <a grammar>hash-source</a> that matches
       the inline block.
 
@@ -2442,7 +2442,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
           Note: Here, we verify only that the |request| contains a set of
           <a for="request">integrity metadata</a> which is a subset of the
-          <a grammar>hash-source</a> <a>source expressions</a> whitelisted by
+          <a grammar>hash-source</a> <a>source expressions</a> specified by
           this directive. We rely on the browser's enforcement of Subresource
           Integrity [[!SRI]] to block non-matching resources upon response.
 
@@ -2558,7 +2558,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   3.  Inline <{style}> blocks MUST pass through [[#should-block-inline]]. The
       styles will be blocked unless every policy allows inline style, either
       implicitly by not specifying a `style-src` (or `default-src`) directive,
-      or explicitly, by whitelisting "`unsafe-inline`", a
+      or explicitly, by specifying "`unsafe-inline`", a
       <a grammar>nonce-source</a> or a <a grammar>hash-source</a> that matches
       the inline block.
 
@@ -3330,7 +3330,8 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       2. |url|'s {{URL/scheme}} is the same as |origin|'s {{URL/scheme}}.
 
       Note: This logic means that in order to allow resource from a non-<a>network scheme</a>,
-      it has to be either explicitly whitelisted: `default-src * data: custom-scheme-1: custom-scheme-2:`,
+      it has to be either explicitly specified (e.g.
+      `default-src * data: custom-scheme-1: custom-scheme-2:`,
       or the protected resource must be loaded from the same scheme.
 
   2.  If |expression| matches the <a grammar>`scheme-source`</a> or
@@ -3683,7 +3684,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   random number generator in order to ensure that the value is difficult for
   an attacker to predict.
 
-  Note: Using a nonce to whitelist inline script or style is less secure than
+  Note: Using a nonce to allow inline script or style is less secure than
   not using a nonce, as nonces override the restrictions in the directive in
   which they are present. An attacker who can gain access to the nonce can
   execute whatever script they like, whenever they like. That said, nonces
@@ -3737,7 +3738,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   The violation reporting mechanism in this document has been designed to
   mitigate the risk that a malicious web site could use violation reports to
   probe the behavior of other servers. For example, consider a malicious web
-  site that whitelists `https://example.com` as a source of images. If the
+  site that allows `https://example.com` as a source of images. If the
   malicious site attempts to load `https://example.com/login` as an image, and
   the `example.com` server redirects to an identity provider (e.g.
   `identityprovider.example.net`), CSP will block the request. If violation
@@ -3791,17 +3792,17 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     Usage of "`'strict-dynamic'`"
   </h3>
 
-  Whitelists are tough to get right, especially on sprawling origins like CDNs.
+  Host- and path-based policies are tough to get right, especially on sprawling origins like CDNs.
   The <a href="https://github.com/cure53/XSSChallengeWiki/wiki/H5SC-Minichallenge-3:-%22Sh*t,-it%27s-CSP!%22#107-bytes">solutions
-  to Cure53's H5SC Minichallenge 3: "Sh*t, it's CSP!"</a> [[H5SC3]] are good
-  examples of the kinds of bypasses which whitelists can enable, and though CSP
-  is capable of mitigating these bypasses via extensive whitelists, those end
-  up being brittle, awkward, and difficult to implement and maintain.
+  to Cure53's H5SC Minichallenge 3: "Sh*t, it's CSP!"</a> [[H5SC3]] are good examples of the
+  kinds of bypasses which such policies can enable, and though CSP is capable of mitigating these
+  bypasses via exhaustive declaration of specific resoueces, those lists end up being brittle,
+  awkward, and difficult to implement and maintain.
 
   The "<a grammar>`'strict-dynamic'`</a>" source expression aims to make Content
   Security Policy simpler to deploy for existing applications who have a high
   degree of confidence in the scripts they load directly, but low confidence in
-  their ability to provide a reasonably secure whitelist.
+  their ability to provide a reasonable list of resources to load up front.
 
   If present in a <a>`script-src`</a> or <a>`default-src`</a> directive, it has
   two main effects:
@@ -3874,12 +3875,12 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
     Legacy websites and websites with legacy dependencies might find it difficult
     to entirely externalize event handlers. These sites could enable such handlers
-    by whitelisting `'unsafe-inline'`, but that's a big hammer with a lot of
+    by allowing `'unsafe-inline'`, but that's a big hammer with a lot of
     associated risk (and cannot be used in conjunction with nonces or hashes).
 
     The "<a grammar>`'unsafe-hashed-attributes'`</a>" source expression aims to make
     CSP deployment simpler and safer in these situations by allowing developers
-    to whitelist specific handlers via hashes.
+    to enable specific handlers via hashes.
 
     <div class="example">
       MegaCorp, Inc. can't quite get rid of the following HTML on anything
@@ -3889,7 +3890,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
         &lt;button id="action" onclick="doSubmit()"&gt;
       </pre>
 
-      Rather than whitelisting "`'unsafe-inline'`", they decide to use
+      Rather than reducing security by specifying "`'unsafe-inline'`", they decide to use
       "`'unsafe-hashed-attributes'`" along with a hash source expression, as follows:
 
       <pre>
@@ -3900,14 +3901,14 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   <section class="wip">
     <h3 id="external-hash">
-      Whitelisting external JavaScript with hashes
+      Allowing external JavaScript via hashes
     </h3>
 
     <em>This section is not normative.</em>
 
     ISSUE(w3c/webappsec-csp#78): Work in progress.
 
-    In [[CSP2]], hash <a>source expressions</a> could only whitelist inlined
+    In [[CSP2]], hash <a>source expressions</a> could only match inlined
     script, but now that Subresource Integrity is widely deployed, we can expand
     the scope to enable externalized JavaScript as well.
 
@@ -3917,7 +3918,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     <em>each</em> item in a <{script}>'s integrity metadata matches the policy.
 
     <div class="example">
-      MegaCorp, Inc. wishes to whitelist two specific scripts on a page in a way
+      MegaCorp, Inc. wishes to allow two specific scripts on a page in a way
       that ensures that the content matches their expectations. They do so by
       setting the following policy:
 
@@ -3926,8 +3927,8 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       </pre>
 
       In the presence of that policy, the following <{script}> elements would be
-      whitelisted because they contain only integrity metadata that matches the
-      policy:
+      allowed to execute because they contain only integrity metadata that matches
+      the policy:
 
       <pre>
         &lt;script integrity="sha256-abc123" ...&gt;&lt;/script&gt;
@@ -3935,7 +3936,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
         &lt;script integrity="sha256-abc123 sha512-321cba" ...&gt;&lt;/script&gt;
       </pre>
 
-      While the following <{script}> elements would not be whitelisted because they
+      While the following <{script}> elements would not execute because they
       contain metadata that does not match the policy (even though other metadata
       does match):
 

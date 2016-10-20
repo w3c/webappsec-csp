@@ -1451,7 +1451,7 @@ pre.idl.highlight { color: #708090; }
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1>Content Security Policy Level 3</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-10-18">18 October 2016</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-10-20">20 October 2016</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1757,7 +1757,7 @@ of security-relevant policy decisions.</p>
       <li><a href="#multiple-policies"><span class="secno">8.1</span> <span class="content"> The effect of multiple policies </span></a>
       <li><a href="#strict-dynamic-usage"><span class="secno">8.2</span> <span class="content"> Usage of "<code>'strict-dynamic'</code>" </span></a>
       <li><a href="#unsafe-hashed-attributes-usage"><span class="secno">8.3</span> <span class="content"> Usage of "<code>'unsafe-hashed-attributes'</code>" </span></a>
-      <li><a href="#external-hash"><span class="secno">8.4</span> <span class="content"> Whitelisting external JavaScript with hashes </span></a>
+      <li><a href="#external-hash"><span class="secno">8.4</span> <span class="content"> Allowing external JavaScript via hashes </span></a>
      </ol>
     <li>
      <a href="#implementation-considerations"><span class="secno">9</span> <span class="content">Implementation Considerations</span></a>
@@ -1890,14 +1890,14 @@ of security-relevant policy decisions.</p>
        <p class="issue" id="issue-2f321613"><a class="self-link" href="#issue-2f321613"></a> <code>unsafe-hashed-attributes</code> is a work in progress. <a href="https://github.com/w3c/webappsec-csp/issues/13">&lt;https://github.com/w3c/webappsec-csp/issues/13></a></p>
       </div>
      <li data-md="">
-      <p>The <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-1">source expression</a> matching has been changed to require explicit whitelisting
+      <p>The <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-1">source expression</a> matching has been changed to require explicit presence
   of any non-<a data-link-type="dfn" href="https://url.spec.whatwg.org/#network-scheme">network scheme</a>, rather than <a data-link-type="dfn" href="https://url.spec.whatwg.org/#local-scheme">local scheme</a>,
   unless that non-<a data-link-type="dfn" href="https://url.spec.whatwg.org/#network-scheme">network scheme</a> is the same as the scheme of protected resource,
   as described in <a href="#match-url-to-source-expression">§6.6.1.6 Does url match expression in origin with redirect count?</a>.</p>
      <li data-md="">
       <div class="wip">
-        Hash-based source expressions may now whitelist external scripts if the <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code> element that triggers the request specifies a set of integrity
-    metadata which is whitelisted by the current policy. Details in <a href="#external-hash">§8.4 Whitelisting external JavaScript with hashes</a>. 
+        Hash-based source expressions may now match external scripts if the <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code> element that triggers the request specifies a set of integrity
+    metadata which is listed in the current policy. Details in <a href="#external-hash">§8.4 Allowing external JavaScript via hashes</a>. 
        <p class="issue" id="issue-d4c4d0f5"><a class="self-link" href="#issue-d4c4d0f5"></a> SRI integration is a work in progress. <a href="https://github.com/w3c/webappsec-csp/issues/78">&lt;https://github.com/w3c/webappsec-csp/issues/78></a></p>
       </div>
      <li data-md="">
@@ -2968,9 +2968,10 @@ of security-relevant policy decisions.</p>
   sources in their policies. Both enable XSS attacks by allowing code to be
   included directly in the document itself; they are best avoided completely.</p>
     <h3 class="heading settled" data-level="6.1" id="directives-fetch"><span class="secno">6.1. </span><span class="content"> Fetch Directives </span><a class="self-link" href="#directives-fetch"></a></h3>
-    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="fetch-directives">Fetch directives</dfn> control the locations from which certain resourc
-  types may be loaded. For instance, <a data-link-type="dfn" href="#script-src" id="ref-for-script-src-2">script-src</a> allows developers to
-  whitelist trusted sources of script to execute on a page, while <a data-link-type="dfn" href="#font-src" id="ref-for-font-src-1">font-src</a> controls the sources of web fonts.</p>
+    <p><dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="fetch-directives">Fetch directives</dfn> control the locations from which certain resource
+  types may be loaded. For instance, <a data-link-type="dfn" href="#script-src" id="ref-for-script-src-2">script-src</a> allows developers to allow
+  trusted sources of script to execute on a page, while <a data-link-type="dfn" href="#font-src" id="ref-for-font-src-1">font-src</a> controls the
+  sources of web fonts.</p>
     <h4 class="heading settled" data-level="6.1.1" id="directive-child-src"><span class="secno">6.1.1. </span><span class="content"><code>child-src</code></span><a class="self-link" href="#directive-child-src"></a></h4>
     <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="child-src">child-src</dfn> directive governs the creation of <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context">nested browsing
   contexts</a> (e.g. <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a></code> and <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/obsolete.html#frame">frame</a></code> navigations) and Worker execution
@@ -3532,7 +3533,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <p>Inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code> blocks MUST pass through <a href="#should-block-inline">§4.2.3 Should element’s inline type behavior be blocked by Content Security Policy?</a>. Their
   behavior will be blocked unless every policy allows inline script, either
   implicitly by not specifying a <code>script-src</code> (or <code>default-src</code>) directive,
-  or explicitly, by whitelisting "<code>unsafe-inline</code>", a <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source-2">nonce-source</a> or a <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source-2">hash-source</a> that matches
+  or explicitly, by specifying "<code>unsafe-inline</code>", a <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source-2">nonce-source</a> or a <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source-2">hash-source</a> that matches
   the inline block.</p>
      <li data-md="">
       <p>The following JavaScript execution sinks are gated on the "<code>unsafe-eval</code>"
@@ -3586,7 +3587,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
           <p>If <var>bypass due to integrity match</var> is <code>true</code>, return
   "<code>Allowed</code>".</p>
         </ol>
-        <p class="note" role="note">Note: Here, we verify only that the <var>request</var> contains a set of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-integrity-metadata">integrity metadata</a> which is a subset of the <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source-4">hash-source</a> <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-6">source expressions</a> whitelisted by
+        <p class="note" role="note">Note: Here, we verify only that the <var>request</var> contains a set of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-integrity-metadata">integrity metadata</a> which is a subset of the <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source-4">hash-source</a> <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-6">source expressions</a> specified by
   this directive. We rely on the browser’s enforcement of Subresource
   Integrity <a data-link-type="biblio" href="#biblio-sri">[SRI]</a> to block non-matching resources upon response.</p>
        <li data-md="">
@@ -3686,7 +3687,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <p>Inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-style-element">style</a></code> blocks MUST pass through <a href="#should-block-inline">§4.2.3 Should element’s inline type behavior be blocked by Content Security Policy?</a>. The
   styles will be blocked unless every policy allows inline style, either
   implicitly by not specifying a <code>style-src</code> (or <code>default-src</code>) directive,
-  or explicitly, by whitelisting "<code>unsafe-inline</code>", a <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source-3">nonce-source</a> or a <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source-5">hash-source</a> that matches
+  or explicitly, by specifying "<code>unsafe-inline</code>", a <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source-3">nonce-source</a> or a <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source-5">hash-source</a> that matches
   the inline block.</p>
      <li data-md="">
       <p>The following CSS algorithms are gated on the <code>unsafe-eval</code> source
@@ -4273,7 +4274,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
         <p><var>url</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code> is the same as <var>origin</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></code>.</p>
       </ol>
       <p class="note" role="note">Note: This logic means that in order to allow resource from a non-<a data-link-type="dfn" href="https://url.spec.whatwg.org/#network-scheme">network scheme</a>,
-  it has to be either explicitly whitelisted: <code>default-src * data: custom-scheme-1: custom-scheme-2:</code>,
+  it has to be either explicitly specified (e.g. <code>default-src * data: custom-scheme-1: custom-scheme-2:</code>,
   or the protected resource must be loaded from the same scheme.</p>
      <li data-md="">
       <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-scheme-source" id="ref-for-grammardef-scheme-source-3"><code>scheme-source</code></a> or <a data-link-type="grammar" href="#grammardef-host-source" id="ref-for-grammardef-host-source-3"><code>host-source</code></a> grammar:</p>
@@ -4626,7 +4627,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
   (before encoding), and SHOULD be generated via a cryptographically secure
   random number generator in order to ensure that the value is difficult for
   an attacker to predict.</p>
-    <p class="note" role="note">Note: Using a nonce to whitelist inline script or style is less secure than
+    <p class="note" role="note">Note: Using a nonce to allow inline script or style is less secure than
   not using a nonce, as nonces override the restrictions in the directive in
   which they are present. An attacker who can gain access to the nonce can
   execute whatever script they like, whenever they like. That said, nonces
@@ -4663,7 +4664,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
     <p>The violation reporting mechanism in this document has been designed to
   mitigate the risk that a malicious web site could use violation reports to
   probe the behavior of other servers. For example, consider a malicious web
-  site that whitelists <code>https://example.com</code> as a source of images. If the
+  site that allows <code>https://example.com</code> as a source of images. If the
   malicious site attempts to load <code>https://example.com/login</code> as an image, and
   the <code>example.com</code> server redirects to an identity provider (e.g. <code>identityprovider.example.net</code>), CSP will block the request. If violation
   reports contained the full blocked URL, the violation report might contain
@@ -4699,16 +4700,16 @@ Content-Security-Policy: connect-src http://example.com/;
   it meets both policy’s criteria: in this case, the only origin that can match
   is <code>http://example.com</code>, as both policies allow it.</p>
     <h3 class="heading settled" data-level="8.2" id="strict-dynamic-usage"><span class="secno">8.2. </span><span class="content"> Usage of "<code>'strict-dynamic'</code>" </span><a class="self-link" href="#strict-dynamic-usage"></a></h3>
-    <p>Whitelists are tough to get right, especially on sprawling origins like CDNs.
+    <p>Host- and path-based policies are tough to get right, especially on sprawling origins like CDNs.
   The <a href="https://github.com/cure53/XSSChallengeWiki/wiki/H5SC-Minichallenge-3:-%22Sh*t,-it%27s-CSP!%22#107-bytes">solutions
-  to Cure53’s H5SC Minichallenge 3: "Sh*t, it’s CSP!"</a> <a data-link-type="biblio" href="#biblio-h5sc3">[H5SC3]</a> are good
-  examples of the kinds of bypasses which whitelists can enable, and though CSP
-  is capable of mitigating these bypasses via extensive whitelists, those end
-  up being brittle, awkward, and difficult to implement and maintain.</p>
+  to Cure53’s H5SC Minichallenge 3: "Sh*t, it’s CSP!"</a> <a data-link-type="biblio" href="#biblio-h5sc3">[H5SC3]</a> are good examples of the
+  kinds of bypasses which such policies can enable, and though CSP is capable of mitigating these
+  bypasses via exhaustive declaration of specific resoueces, those lists end up being brittle,
+  awkward, and difficult to implement and maintain.</p>
     <p>The "<a data-link-type="grammar" href="#grammardef-strict-dynamic" id="ref-for-grammardef-strict-dynamic-7"><code>'strict-dynamic'</code></a>" source expression aims to make Content
   Security Policy simpler to deploy for existing applications who have a high
   degree of confidence in the scripts they load directly, but low confidence in
-  their ability to provide a reasonably secure whitelist.</p>
+  their ability to provide a reasonable list of resources to load up front.</p>
     <p>If present in a <a data-link-type="dfn" href="#script-src" id="ref-for-script-src-6"><code>script-src</code></a> or <a data-link-type="dfn" href="#default-src" id="ref-for-default-src-5"><code>default-src</code></a> directive, it has
   two main effects:</p>
     <ol>
@@ -4753,45 +4754,45 @@ document.write('&lt;scr' + 'ipt src='/sadness.js'>&lt;/scr' + 'ipt>');
      <p class="issue" id="issue-0e25e974"><a class="self-link" href="#issue-0e25e974"></a> Work in progress. <a href="https://github.com/w3c/webappsec-csp/issues/13">&lt;https://github.com/w3c/webappsec-csp/issues/13></a></p>
      <p>Legacy websites and websites with legacy dependencies might find it difficult
     to entirely externalize event handlers. These sites could enable such handlers
-    by whitelisting <code>'unsafe-inline'</code>, but that’s a big hammer with a lot of
+    by allowing <code>'unsafe-inline'</code>, but that’s a big hammer with a lot of
     associated risk (and cannot be used in conjunction with nonces or hashes).</p>
      <p>The "<a data-link-type="grammar" href="#grammardef-unsafe-hashed-attributes" id="ref-for-grammardef-unsafe-hashed-attributes-4"><code>'unsafe-hashed-attributes'</code></a>" source expression aims to make
     CSP deployment simpler and safer in these situations by allowing developers
-    to whitelist specific handlers via hashes.</p>
-     <div class="example" id="example-ad917da8">
-      <a class="self-link" href="#example-ad917da8"></a> MegaCorp, Inc. can’t quite get rid of the following HTML on anything
+    to enable specific handlers via hashes.</p>
+     <div class="example" id="example-98a5eadd">
+      <a class="self-link" href="#example-98a5eadd"></a> MegaCorp, Inc. can’t quite get rid of the following HTML on anything
       resembling a reasonable schedule: 
 <pre>&lt;button id="action" onclick="doSubmit()">
 </pre>
-      <p>Rather than whitelisting "<code>'unsafe-inline'</code>", they decide to use
+      <p>Rather than reducing security by specifying "<code>'unsafe-inline'</code>", they decide to use
       "<code>'unsafe-hashed-attributes'</code>" along with a hash source expression, as follows:</p>
 <pre><a data-link-type="dfn" href="#header-content-security-policy" id="ref-for-header-content-security-policy-8">Content-Security-Policy</a>:  <a data-link-type="dfn" href="#script-src" id="ref-for-script-src-8">script-src</a> <a data-link-type="grammar" href="#grammardef-unsafe-hashed-attributes" id="ref-for-grammardef-unsafe-hashed-attributes-5">'unsafe-hashed-attributes'</a> 'sha256-jzgBGA4UWFFmpOBq0JpdsySukE1FrEN5bUpoK8Z29fY='
 </pre>
      </div>
     </section>
     <section class="wip">
-     <h3 class="heading settled" data-level="8.4" id="external-hash"><span class="secno">8.4. </span><span class="content"> Whitelisting external JavaScript with hashes </span><a class="self-link" href="#external-hash"></a></h3>
+     <h3 class="heading settled" data-level="8.4" id="external-hash"><span class="secno">8.4. </span><span class="content"> Allowing external JavaScript via hashes </span><a class="self-link" href="#external-hash"></a></h3>
      <p><em>This section is not normative.</em></p>
      <p class="issue" id="issue-0e25e9740"><a class="self-link" href="#issue-0e25e9740"></a> Work in progress. <a href="https://github.com/w3c/webappsec-csp/issues/78">&lt;https://github.com/w3c/webappsec-csp/issues/78></a></p>
-     <p>In <a data-link-type="biblio" href="#biblio-csp2">[CSP2]</a>, hash <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-13">source expressions</a> could only whitelist inlined
+     <p>In <a data-link-type="biblio" href="#biblio-csp2">[CSP2]</a>, hash <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-13">source expressions</a> could only match inlined
     script, but now that Subresource Integrity is widely deployed, we can expand
     the scope to enable externalized JavaScript as well.</p>
      <p>If multiple sets of integrity metadata are specified for a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code>, the
     request will match a policy’s <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source-10">hash-source</a>s if and only if <em>each</em> item in a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code>'s integrity metadata matches the policy.</p>
-     <div class="example" id="example-ba2c75cc">
-      <a class="self-link" href="#example-ba2c75cc"></a> MegaCorp, Inc. wishes to whitelist two specific scripts on a page in a way
+     <div class="example" id="example-b14b93b7">
+      <a class="self-link" href="#example-b14b93b7"></a> MegaCorp, Inc. wishes to allow two specific scripts on a page in a way
       that ensures that the content matches their expectations. They do so by
       setting the following policy: 
 <pre>Content-Security-Policy: script-src 'sha256-abc123' 'sha512-321cba'
 </pre>
       <p>In the presence of that policy, the following <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code> elements would be
-      whitelisted because they contain only integrity metadata that matches the
-      policy:</p>
+      allowed to execute because they contain only integrity metadata that matches
+      the policy:</p>
 <pre>&lt;script integrity="sha256-abc123" ...>&lt;/script>
 &lt;script integrity="sha512-321cba" ...>&lt;/script>
 &lt;script integrity="sha256-abc123 sha512-321cba" ...>&lt;/script>
 </pre>
-      <p>While the following <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code> elements would not be whitelisted because they
+      <p>While the following <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code> elements would not execute because they
       contain metadata that does not match the policy (even though other metadata
       does match):</p>
 <pre>&lt;script integrity="<b>sha384-xyz789</b>" ...>&lt;/script>
@@ -5210,7 +5211,8 @@ rest of Google’s CSP Cabal.</p>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-destination">destination</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-header-extract-mime-type">extracting a mime type</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-fetch">fetch</a>
-     <li><a href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a>
+     <li><a href="https://fetch.spec.whatwg.org/#concept-request-header-list">header list <small>(for request)</small></a>
+     <li><a href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list <small>(for response)</small></a>
      <li><a href="https://fetch.spec.whatwg.org/#http-fetch">http fetch</a>
      <li><a href="https://fetch.spec.whatwg.org/#http-network-fetch">http-network fetch</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-initiator">initiator</a>
@@ -5227,7 +5229,8 @@ rest of Google’s CSP Cabal.</p>
      <li><a href="https://fetch.spec.whatwg.org/#concept-response">response</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-target-browsing-context">target browsing context</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-type">type</a>
-     <li><a href="https://fetch.spec.whatwg.org/#concept-request-url">url</a>
+     <li><a href="https://fetch.spec.whatwg.org/#concept-request-url">url <small>(for request)</small></a>
+     <li><a href="https://fetch.spec.whatwg.org/#concept-response-url">url <small>(for response)</small></a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-window">window</a>
     </ul>
    <li>
@@ -5261,6 +5264,7 @@ rest of Google’s CSP Cabal.</p>
      <li><a href="https://html.spec.whatwg.org/multipage/forms.html#the-form-element">form</a>
      <li><a href="https://html.spec.whatwg.org/multipage/obsolete.html#frame">frame</a>
      <li><a href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object">global object</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-global">global object <small>(for environment settings object)</small></a>
      <li><a href="https://html.spec.whatwg.org/multipage/semantics.html#attr-base-href">href</a>
      <li><a href="https://html.spec.whatwg.org/multipage/semantics.html#attr-meta-http-equiv">http-equiv</a>
      <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a>
@@ -5350,7 +5354,7 @@ rest of Google’s CSP Cabal.</p>
      <li><a href="https://tools.ietf.org/html/rfc7231#section-3">resource representation</a>
     </ul>
    <li>
-    <a data-link-type="biblio">[service-workers]</a> defines the following terms:
+    <a data-link-type="biblio">[service-workers-1]</a> defines the following terms:
     <ul>
      <li><a href="https://www.w3.org/TR/service-workers/#service-worker-interface">ServiceWorker</a>
     </ul>
@@ -5416,8 +5420,8 @@ rest of Google’s CSP Cabal.</p>
    <dd>R. Fielding, Ed.; J. Reschke, Ed.. <a href="https://tools.ietf.org/html/rfc7231">Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content</a>. June 2014. Proposed Standard. URL: <a href="https://tools.ietf.org/html/rfc7231">https://tools.ietf.org/html/rfc7231</a>
    <dt id="biblio-rfc7762">[RFC7762]
    <dd>M. West. <a href="https://tools.ietf.org/html/rfc7762">Initial Assignment for the Content Security Policy Directives Registry</a>. January 2016. Informational. URL: <a href="https://tools.ietf.org/html/rfc7762">https://tools.ietf.org/html/rfc7762</a>
-   <dt id="biblio-service-workers">[SERVICE-WORKERS]
-   <dd>Alex Russell; Jungkee Song; Jake Archibald. <a href="https://slightlyoff.github.io/ServiceWorker/spec/service_worker/">Service Workers</a>. 25 June 2015. WD. URL: <a href="https://slightlyoff.github.io/ServiceWorker/spec/service_worker/">https://slightlyoff.github.io/ServiceWorker/spec/service_worker/</a>
+   <dt id="biblio-service-workers-1">[SERVICE-WORKERS-1]
+   <dd>Alex Russell; et al. <a href="https://w3c.github.io/ServiceWorker/v1/">Service Workers 1</a>. 11 October 2016. WD. URL: <a href="https://w3c.github.io/ServiceWorker/v1/">https://w3c.github.io/ServiceWorker/v1/</a>
    <dt id="biblio-sha2">[SHA2]
    <dd><a href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf">FIPS PUB 180-4, Secure Hash Standard</a>. URL: <a href="http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf">http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf</a>
    <dt id="biblio-sri">[SRI]
@@ -5430,7 +5434,7 @@ rest of Google’s CSP Cabal.</p>
   <h3 class="no-num no-ref heading settled" id="informative"><span class="content">Informative References</span><a class="self-link" href="#informative"></a></h3>
   <dl>
    <dt id="biblio-appmanifest">[APPMANIFEST]
-   <dd>Marcos Caceres; et al. <a href="https://w3c.github.io/manifest/">Web App Manifest</a>. 12 September 2016. WD. URL: <a href="https://w3c.github.io/manifest/">https://w3c.github.io/manifest/</a>
+   <dd>Marcos Caceres; et al. <a href="https://w3c.github.io/manifest/">Web App Manifest</a>. 13 October 2016. WD. URL: <a href="https://w3c.github.io/manifest/">https://w3c.github.io/manifest/</a>
    <dt id="biblio-beacon">[BEACON]
    <dd>Ilya Grigorik; et al. <a href="https://w3c.github.io/beacon/">Beacon</a>. 30 August 2016. WD. URL: <a href="https://w3c.github.io/beacon/">https://w3c.github.io/beacon/</a>
    <dt id="biblio-csp2">[CSP2]
@@ -6057,7 +6061,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-source-expression-12">6.6.2.2. 
     Does element match source list for type and source? </a>
     <li><a href="#ref-for-source-expression-13">8.4. 
-      Whitelisting external JavaScript with hashes </a>
+      Allowing external JavaScript via hashes </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="grammardef-serialized-source-list">
@@ -6260,7 +6264,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-grammardef-hash-source-9">8.2. 
     Usage of "'strict-dynamic'" </a>
     <li><a href="#ref-for-grammardef-hash-source-10">8.4. 
-      Whitelisting external JavaScript with hashes </a>
+      Allowing external JavaScript via hashes </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="grammardef-hash-algorithm">
