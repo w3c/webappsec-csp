@@ -968,6 +968,8 @@ Possible extra rowspan handling
 		/* Reverse color scheme */
 		color: black;
 		border-color: #3980B5;
+		border-bottom-width: 3px !important;
+		margin-bottom: 0px !important;
 	}
 	.toc a:visited {
 		border-color: #054572;
@@ -1498,7 +1500,9 @@ restrictions upon itself.</p>
       <li>
        <a href="#subsume-policy"><span class="secno">3.3</span> <span class="content"> Is <var>policy list</var> subsumed under <var>subsuming policy</var>? </span></a>
        <ol class="toc">
-        <li><a href="#subsume-se"><span class="secno">3.3.1</span> <span class="content"> Does <code>source expression</code> <var>A</var> subsume <code>source expression</code> <var>B</var>? </span></a>
+        <li><a href="#rewrite-self"><span class="secno">3.3.1</span> <span class="content"> Rewrite <code>'self'</code> into a host-source expression for <var>origin</var>. </span></a>
+        <li><a href="#subsume-se"><span class="secno">3.3.2</span> <span class="content"> Does <code>source expression</code> <var>A</var> subsume <code>source expression</code> <var>B</var>? </span></a>
+        <li><a href="#subsume-source-list"><span class="secno">3.3.3</span> <span class="content"> Does <span>serialized-source-list</span> <var>A</var> subsume <span>serialized-source-list</span> <var>B</var> given their respective <span>origins</span>? </span></a>
        </ol>
       <li><a href="#required-csp-for-context"><span class="secno">3.4</span> <span class="content"> Obtain the required CSP for <var>context</var>. </span></a>
      </ol>
@@ -1681,7 +1685,7 @@ Host: advertisements-r-us.example.com
 </pre>
     <h3 class="heading settled" data-level="2.4" id="policy-subsumption"><span class="secno">2.4. </span><span class="content">Policy Subsumption</span><a class="self-link" href="#policy-subsumption"></a></h3>
     <p>If an embedee does not wish to accept any <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> specified by its
-  embedder via the <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-4">Allow-CSP-From</a> header, it can deliver a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> that is as strict, or stricter than the policy requested in the <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-6">Embedding-CSP</a> header. That is, if the embedder requests <code>object-src https://cdn.example.com/</code>, the embedee can respond with <code>object-src 'none'</code>. Because every possible <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> blocked by <code>object-src https://cdn.example.com/</code> would also be blocked by <code>object-src 'none'</code>, it is said that the embedder’s required <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> <dfn data-dfn-type="dfn" data-noexport="" id="subsumes">subsumes<a class="self-link" href="#subsumes"></a></dfn> the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> delivered by the embedee.</p>
+  embedder via the <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-4">Allow-CSP-From</a> header, it can deliver a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> that is as strict, or stricter than the policy requested in the <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-6">Embedding-CSP</a> header. That is, if the embedder requests <code>object-src https://cdn.example.com/</code>, the embedee can respond with <code>object-src 'none'</code>. Because every possible <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> blocked by <code>object-src https://cdn.example.com/</code> would also be blocked by <code>object-src 'none'</code>, it is said that the embedder’s required <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport="" id="subsumes">subsumes</dfn> the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> delivered by the embedee.</p>
     <p>Given the complexity of CSP’s syntax, subsumption is not trivial to calculate.
   The details are spelled out in [[#subsume-policy].</p>
    </section>
@@ -1799,25 +1803,38 @@ Host: advertisements-r-us.example.com
      <li data-md="">
       <p>Return "<code>Not Subsumed</code>".</p>
     </ol>
-    <h4 class="heading settled algorithm" data-algorithm="Does source expression A subsume source expression B?" data-level="3.3.1" id="subsume-se"><span class="secno">3.3.1. </span><span class="content"> Does <code>source expression</code> <var>A</var> subsume <code>source expression</code> <var>B</var>? </span><a class="self-link" href="#subsume-se"></a></h4>
+    <h4 class="heading settled algorithm" data-algorithm="Rewrite &apos;self&apos; into a host-source expression for origin." data-level="3.3.1" id="rewrite-self"><span class="secno">3.3.1. </span><span class="content"> Rewrite <code>'self'</code> into a host-source expression for <var>origin</var>. </span><a class="self-link" href="#rewrite-self"></a></h4>
+    <p>Given an origin (<var>origin</var>), this algorithm returns a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a> expression that has the same effect
+  as <code>'self'</code> for that origin:</p>
+    <ol>
+     <li data-md="">
+      <p>If <var>origin</var> is an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin-opaque">opaque origin</a>, return the empty string.</p>
+     <li data-md="">
+      <p>Return the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#ascii-serialisation-of-an-origin">ASCII
+  serialization</a> of <var>origin</var>.</p>
+    </ol>
+    <h4 class="heading settled algorithm" data-algorithm="Does source expression A subsume source expression B?" data-level="3.3.2" id="subsume-se"><span class="secno">3.3.2. </span><span class="content"> Does <code>source expression</code> <var>A</var> subsume <code>source expression</code> <var>B</var>? </span><a class="self-link" href="#subsume-se"></a></h4>
     <p>Given two <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expressions</a> <var>A</var> and <var>B</var>, this algorithm returns
-  "<code>Subsumes</code>" if <var>A</var> subsumes <var>B</var>, and returns "<code>Does Not Subsume</code>" otherwise.</p>
+  "<code>Subsumes</code>" if <var>A</var> <a data-link-type="dfn" href="#subsumes" id="ref-for-subsumes-1">subsumes</a> <var>B</var>, and returns "<code>Does Not Subsume</code>"
+  otherwise.</p>
     <p>A <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expression</a> has a <dfn data-dfn-type="dfn" data-noexport="" id="wildcard-host">wildcard host<a class="self-link" href="#wildcard-host"></a></dfn> if the first
   character of the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expression</a>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-part"><code>host-part</code></a> is an 
   U+002A ASTERISK character (<code>*</code>).
   A <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expression</a> has a <dfn data-dfn-type="dfn" data-noexport="" id="wildcard-port">wildcard port<a class="self-link" href="#wildcard-port"></a></dfn> if the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-port-part"><code>port-part</code></a> of the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expression</a> is equal to "*".</p>
     <ol>
      <li data-md="">
-      <p>If both <var>A</var> and <var>B</var> match either <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source">host-source</a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source">scheme-source</a> grammar:</p>
+      <p class="assertion">Assert: Neither <var>A</var> nor <var>B</var> match the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> grammar.</p>
+     <li data-md="">
+      <p>If both <var>A</var> and <var>B</var> match either <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> grammar:</p>
       <ol>
        <li data-md="">
         <p>If <a href="https://w3c.github.io/webappsec-csp/#match-schemes">Content Security Policy Level 3 §match-schemes</a> returns "<code>Does Not Match</code>" given <var>A</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-part"><code>scheme-part</code></a> (or <code>null</code> if <var>A</var> does not contain a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-part"><code>scheme-part</code></a>) and <var>B</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-part"><code>scheme-part</code></a> (or <code>null</code> if <var>B</var> does not contain a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-part"><code>scheme-part</code></a>), 
   return "<code>Does Not Subsume</code>".</p>
        <li data-md="">
-        <p>If <var>A</var> or <var>B</var> matches the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source">scheme-source</a> grammar:</p>
+        <p>If <var>A</var> or <var>B</var> matches the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> grammar:</p>
         <ol>
          <li data-md="">
-          <p>If <var>A</var> matches the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source">scheme-source</a> grammar, return
+          <p>If <var>A</var> matches the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> grammar, return
   "<code>Subsumes</code>". Otherwise, return "<code>Does Not Subsume</code>".</p>
         </ol>
        <li data-md="">
@@ -1850,26 +1867,137 @@ Host: advertisements-r-us.example.com
         <p>Return "<code>Subsumes</code>".</p>
       </ol>
      <li data-md="">
-      <p>If both <var>A</var> and <var>B</var> match the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source">keyword-source</a> grammar:</p>
+      <p>If both <var>A</var> and <var>B</var> match the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-hash-source"><code>hash-source</code></a> grammar:</p>
+      <ol>
+       <li data-md="">
+        <p>If <var>A</var> is a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#case-sensitive">case-sensitive</a> match to <var>B</var>, return "<code>Subsumes</code>".
+  Otherwise, return "<code>Does Not Subsume</code>".</p>
+      </ol>
+     <li data-md="">
+      <p>If both <var>A</var> and <var>B</var> match the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-nonce-source"><code>nonce-source</code></a> grammar:</p>
       <ol>
        <li data-md="">
         <p class="issue" id="issue-95f2d23a"><a class="self-link" href="#issue-95f2d23a"></a> TODO.</p>
       </ol>
      <li data-md="">
-      <p>If both <var>A</var> and <var>B</var> match the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-hash-source">hash-source</a> grammar:</p>
+      <p>Return "<code>Does Not Subsume</code>".</p>
+    </ol>
+    <h4 class="heading settled algorithm" data-algorithm="Does serialized-source-list A subsume 
+    serialized-source-list B given their respective 
+    origins?" data-level="3.3.3" id="subsume-source-list"><span class="secno">3.3.3. </span><span class="content"> Does <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-source-list">serialized-source-list</a> <var>A</var> subsume <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-source-list">serialized-source-list</a> <var>B</var> given their respective <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origins</a>? </span><a class="self-link" href="#subsume-source-list"></a></h4>
+    <p>Given a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-source-list">serialized-source-list</a> <var>A</var> with <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a> (<var>origin A</var>) and a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-source-list">serialized-source-list</a> <var>B</var> with <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a> (<var>origin B</var>), this algorithm returns "<code>Subsumes</code>"
+  if <var>A</var> <a data-link-type="dfn" href="#subsumes" id="ref-for-subsumes-2">subsumes</a> <var>B</var>, and returns "<code>Does Not Subsume</code>" otherwise.</p>
+    <p>A <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-source-list">serialized-source-list</a> is a <dfn data-dfn-type="dfn" data-noexport="" id="wildcard-list">wildcard list<a class="self-link" href="#wildcard-list"></a></dfn> if it
+  is a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#case-sensitive">case-sensitive</a> match to the U+002A ASTERISK character (<code>*</code>).</p>
+    <p>A <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-source-list">serialized-source-list</a> is <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport="" id="non-strict-inline">non-strict inline</dfn> if it
+  contains <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> expression "<code>unsafe-inline</code>" or
+  "<code>unsafe-eval</code>", but does not contain a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> expression "<code>strict-dynamic</code>" or any <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-nonce-source"><code>nonce-source</code></a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-hash-source"><code>hash-source</code></a> expressions.</p>
+    <p class="issue" id="issue-ec1f4448"><a class="self-link" href="#issue-ec1f4448"></a> Align with <code>allow unsafe-inline</code> definition in CSP3.</p>
+    <ol>
+     <li data-md="">
+      <p>If <var>A</var> is empty, return "<code>Subsumes</code>".</p>
+     <li data-md="">
+      <p>If <var>B</var> is empty, return "<code>Does Not Subsume</code>".</p>
+     <li data-md="">
+      <p>If <var>B</var> is <code>none</code>, return "<code>Subsumes</code>".</p>
+     <li data-md="">
+      <p>If <var>A</var> is <code>none</code>, return "<code>Does Not Subsume</code>".</p>
+     <li data-md="">
+      <p>If <var>A</var> is a <code>wildcard list</code>:</p>
       <ol>
        <li data-md="">
         <p class="issue" id="issue-95f2d23a0"><a class="self-link" href="#issue-95f2d23a0"></a> TODO.</p>
       </ol>
      <li data-md="">
-      <p>If both <var>A</var> and <var>B</var> match the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-nonce-source">nonce-source</a> grammar:</p>
+      <p>If <var>B</var> is a <code>wildcard list</code>:</p>
       <ol>
        <li data-md="">
         <p class="issue" id="issue-95f2d23a1"><a class="self-link" href="#issue-95f2d23a1"></a> TODO.</p>
       </ol>
      <li data-md="">
-      <p>Return "<code>Does Not Subsume</code>".</p>
+      <p>If <var>B</var> contains a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> expression
+  "<code>strict-dynamic</code>" but <var>A</var> does not contain it, return 
+  "<code>Does Not Subsume</code>".</p>
+     <li data-md="">
+      <p>If <var>B</var> is <a data-link-type="dfn" href="#non-strict-inline" id="ref-for-non-strict-inline-1">non-strict inline</a> but <var>A</var> is not, return
+  "<code>Does Not Subsume</code>".</p>
+     <li data-md="">
+      <p>Let <var>list A</var> and <var>list B</var> be empty lists.</p>
+     <li data-md="">
+      <p>For each <var>expression A</var> in the result of splitting <var>A</var> on spaces:</p>
+      <ol>
+       <li data-md="">
+        <p>If <var>expression A</var> is "<code>self</code>", append a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a>,
+   returned by <a href="#rewrite-self">§3.3.1 Rewrite 'self' into a host-source expression for origin.</a> given <var>origin A</var> to <var>list A</var>.</p>
+       <li data-md="">
+        <p>If <var>expression A</var> does not match <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> grammar,
+   append <var>expression A</var> to <var>list A</var>.</p>
+      </ol>
+     <li data-md="">
+      <p>For each <var>expression B</var> in the result of splitting <var>B</var> on spaces:</p>
+      <ol>
+       <li data-md="">
+        <p>If <var>expression B</var> is "<code>self</code>", append a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a>,
+   returned by <a href="#rewrite-self">§3.3.1 Rewrite 'self' into a host-source expression for origin.</a> given <var>origin B</var> to <var>list B</var>.</p>
+       <li data-md="">
+        <p>If <var>expression B</var> does not match <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> grammar,
+   append <var>expression B</var> to <var>list B</var>.</p>
+      </ol>
+     <li data-md="">
+      <p>If <var>list B</var> is empty, return "<code>Subsumes</code>".</p>
+     <li data-md="">
+      <p>If <var>list A</var> is empty, return "<code>Does Not Subsume</code>".</p>
+     <li data-md="">
+      <p>For each <var>expression B</var> in <var>list B</var>:</p>
+      <ol>
+       <li data-md="">
+        <p>Let <var>found match</var> be <code>false</code>.</p>
+       <li data-md="">
+        <p>For each <var>expression A</var> in <var>list A</var>:</p>
+        <ol>
+         <li data-md="">
+          <p>If <var>list A</var> is <a data-link-type="dfn" href="#non-strict-inline" id="ref-for-non-strict-inline-2">non-strict inline</a> and <var>expression B</var> matches <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-hash-source"><code>hash-source</code></a> grammar or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-nonce-source"><code>nonce-source</code></a> grammar, continue to  the next expression.</p>
+         <li data-md="">
+          <p>If <a href="#subsume-se">§3.3.2 Does source expression A subsume source expression B?</a> returns "<code>Subsumes</code>" given <var>expression A</var> and <var>expression B</var>, set <var>found match</var> to <code>true</code>.
+  Break out of this inner loop.</p>
+        </ol>
+       <li data-md="">
+        <p>If <var>found match</var> is <code>false</code>, return "<code>Does Not Subsume</code>".</p>
+      </ol>
+     <li data-md="">
+      <p>Return "<code>Subsumes</code>".</p>
     </ol>
+    <div class="example" id="example-2cdbcf37">
+     <a class="self-link" href="#example-2cdbcf37"></a> 
+<pre>A = "http://example.com 'sha256-xzi4zkCjuC8'"
+B = "http://example.com"
+</pre>
+     <p>Since <var>B</var> does not allow <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-hash-source"><code>hash-source</code></a> expressions, but its
+    value is found in <var>A</var>, <var>A</var> subsumes <var>B</var>. It is, however, not true that <var>A</var> <a data-link-type="dfn" href="#subsumes" id="ref-for-subsumes-3">subsumes</a> <var>B</var>.</p>
+    </div>
+    <div class="example" id="example-1023389f">
+     <a class="self-link" href="#example-1023389f"></a> 
+<pre>A = "https://example.com 'sha256-xzi4zkCjuC8'"
+B = "http://example.com"
+</pre>
+     <p>In this case, <var>A</var> does not subsume <var>B</var> since "https://example.com" does
+    not <a data-link-type="dfn" href="#subsumes" id="ref-for-subsumes-4">subsume</a> "http://example.com".</p>
+    </div>
+    <div class="example" id="example-aa98efdc">
+     <a class="self-link" href="#example-aa98efdc"></a> 
+<pre>A = "http://example.com 'sha256-xzi4zkCjuC8'"
+B = "http://example.com 'unsafe-eval'"
+</pre>
+     <p>Since <var>B</var> is <a data-link-type="dfn" href="#non-strict-inline" id="ref-for-non-strict-inline-3">non-strict inline</a>, but <var>A</var> is not, <var>A</var> does not <a data-link-type="dfn" href="#subsumes" id="ref-for-subsumes-5">subsume</a> <var>B</var>. However, <var>B</var> does <a data-link-type="dfn" href="#subsumes" id="ref-for-subsumes-6">subsume</a> <var>A</var>.</p>
+    </div>
+    <div class="example" id="example-000f449a">
+     <a class="self-link" href="#example-000f449a"></a> 
+<pre>A = "http://example.com 'sha256-xzi4zkCjuC8' 'strict-dynamic'"
+B = "http://example.com 'unsafe-eval' 'strict-dynamic'"
+</pre>
+     <p>Neither <var>B</var> not <var>A</var> is <a data-link-type="dfn" href="#non-strict-inline" id="ref-for-non-strict-inline-4">non-strict inline</a>.
+    In this case, <var>A</var> <a data-link-type="dfn" href="#subsumes" id="ref-for-subsumes-7">subsumes</a> <var>B</var>.</p>
+    </div>
     <h3 class="heading settled algorithm" data-algorithm="Obtain the required CSP for context." data-level="3.4" id="required-csp-for-context"><span class="secno">3.4. </span><span class="content"> Obtain the required CSP for <var>context</var>. </span><a class="self-link" href="#required-csp-for-context"></a></h3>
     <p>Given a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a> (<var>context</var>), the following algorithm returns
   its <a data-link-type="dfn" href="#required-csp" id="ref-for-required-csp-5">required CSP</a>:</p>
@@ -2004,10 +2132,12 @@ Host: advertisements-r-us.example.com
      <li><a href="#dom-htmliframeelement-csp">attribute for HTMLIFrameElement</a><span>, in §2.1</span>
     </ul>
    <li><a href="#http-headerdef-embedding-csp">Embedding-CSP</a><span>, in §2.2</span>
+   <li><a href="#non-strict-inline">non-strict inline</a><span>, in §3.3.3</span>
    <li><a href="#required-csp">required CSP</a><span>, in §2.1</span>
    <li><a href="#subsumes">subsumes</a><span>, in §2.4</span>
-   <li><a href="#wildcard-host">wildcard host</a><span>, in §3.3.1</span>
-   <li><a href="#wildcard-port">wildcard port</a><span>, in §3.3.1</span>
+   <li><a href="#wildcard-host">wildcard host</a><span>, in §3.3.2</span>
+   <li><a href="#wildcard-list">wildcard list</a><span>, in §3.3.3</span>
+   <li><a href="#wildcard-port">wildcard port</a><span>, in §3.3.2</span>
   </ul>
   <h3 class="no-num no-ref heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
   <ul class="index">
@@ -2032,6 +2162,7 @@ Host: advertisements-r-us.example.com
      <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source">scheme-source</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#serialized-csp">serialized csp</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-policy">serialized-policy</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-source-list">serialized-source-list</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#source-expression">source expression</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>
     </ul>
@@ -2067,8 +2198,10 @@ Host: advertisements-r-us.example.com
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#ascii-serialisation-of-an-origin">ascii serialization of an origin</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context-container">browsing context container</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/infrastructure.html#case-sensitive">case-sensitive</a>
      <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context">nested browsing context</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin-opaque">opaque origin</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-fetch">process a navigate fetch</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-response">process a navigate response</a>
     </ul>
@@ -2120,6 +2253,7 @@ Host: advertisements-r-us.example.com
    <div class="issue"> W3C’s HTML is not based on Fetch, and does not have
   a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-fetch">process a navigate fetch</a> algorithm into which to hook. <a href="https://github.com/w3c/html/issues/584">&lt;https://github.com/w3c/html/issues/584></a><a href="#issue-7b3609ea"> ↵ </a></div>
    <div class="issue"> TODO.<a href="#issue-95f2d23a"> ↵ </a></div>
+   <div class="issue"> Align with <code>allow unsafe-inline</code> definition in CSP3.<a href="#issue-ec1f4448"> ↵ </a></div>
    <div class="issue"> TODO.<a href="#issue-95f2d23a0"> ↵ </a></div>
    <div class="issue"> TODO.<a href="#issue-95f2d23a1"> ↵ </a></div>
   </div>
@@ -2167,6 +2301,26 @@ Host: advertisements-r-us.example.com
     <li><a href="#ref-for-http-headerdef-allow-csp-from-5">3.2. 
     Does response allow blanket enforcment of policy from request? </a>
     <li><a href="#ref-for-http-headerdef-allow-csp-from-6">5. IANA Considerations</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="subsumes">
+   <b><a href="#subsumes">#subsumes</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-subsumes-1">3.3.2. 
+    Does source expression A subsume source expression B? </a>
+    <li><a href="#ref-for-subsumes-2">3.3.3. 
+    Does serialized-source-list A subsume 
+    serialized-source-list B given their respective 
+    origins? </a> <a href="#ref-for-subsumes-3">(2)</a> <a href="#ref-for-subsumes-4">(3)</a> <a href="#ref-for-subsumes-5">(4)</a> <a href="#ref-for-subsumes-6">(5)</a> <a href="#ref-for-subsumes-7">(6)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="non-strict-inline">
+   <b><a href="#non-strict-inline">#non-strict-inline</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-non-strict-inline-1">3.3.3. 
+    Does serialized-source-list A subsume 
+    serialized-source-list B given their respective 
+    origins? </a> <a href="#ref-for-non-strict-inline-2">(2)</a> <a href="#ref-for-non-strict-inline-3">(3)</a> <a href="#ref-for-non-strict-inline-4">(4)</a>
    </ul>
   </aside>
 <script>/* script-dfn-panel */
