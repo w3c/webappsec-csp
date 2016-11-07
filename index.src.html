@@ -21,10 +21,14 @@ At Risk: The [[#is-element-nonceable]] algorithm.
 </pre>
 <pre class="link-defaults">
 spec:dom; type:interface; text:Document
+spec:encoding
+  type: dfn
+    text: ascii byte
+    text: ascii case-insensitive
 spec:html
   type: dfn
-    text: ascii case-insensitive
     text: case-sensitive
+    text: browsing context; for: /
   type: element
     text: a
     text: link
@@ -379,9 +383,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   <h3 id="framework-policy">Policies</h3>
 
-  A <dfn export>policy</dfn> defines a set of allowed and
-  restricted behaviors, and may be applied to a {{Window}} or
-  {{WorkerGlobalScope}} as described in [[#initialize-global-object-csp]].
+  A <dfn export lt="content security policy object" local-lt="policy">policy</dfn>
+  defines a set of allowed and restricted behaviors, and may be applied to a
+  {{Window}} or {{WorkerGlobalScope}} as described in
+  [[#initialize-global-object-csp]].
 
   Each policy has an associated <dfn for="policy" export>directive set</dfn>, which
   is a set of <a>directives</a> that define the policy's implications when
@@ -390,9 +395,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   Each policy has an associated <dfn for="policy" export>disposition</dfn>, which is
   either "`enforce`" or "`report`".
 
-  A <dfn export>serialized CSP</dfn> is an ASCII string, consisting of a
-  semicolon-delimited series of <a>serialized directives</a>, adhering to the
-  following ABNF grammar [[!RFC5234]]:
+  A <dfn export>serialized CSP</dfn> is a string of <a>ASCII bytes</a>,
+  consisting of a semicolon-delimited series of <a>serialized directives</a>,
+  adhering to the following ABNF grammar [[!RFC5234]]:
 
   <pre dfn-type="grammar" link-type="grammar">
     <dfn>serialized-policy</dfn> = <a>serialized-directive</a> *( <a>OWS</a> ";" [ <a>OWS</a> <a>serialized-directive</a> ] )
@@ -405,10 +410,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   Given a <a>serialized CSP</a> (|serialized CSP|), and a
   <a for="policy">disposition</a> (|disposition|), this algorithm will return a
-  <a>policy</a> object. If the string cannot be parsed, the resulting
-  <a>policy</a>'s <a>directive set</a> will be empty.
+  <a for="/">policy</a> object. If the string cannot be parsed, the resulting
+  <a for="/">policy</a>'s <a>directive set</a> will be empty.
 
-  1.  Let |policy| be a new <a>policy</a> with an empty
+  1.  Let |policy| be a new <a for="/">policy</a> with an empty
       <a for="policy">directive set</a>, and a <a for="policy">disposition</a>
       of |disposition|.
 
@@ -451,7 +456,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   Given a string (|list|) and a <a for="policy">disposition</a> (|disposition|)
   which contains a comma-delimited series of <a>serialized CSP</a> strings, the
-  following algorithm will return a list of <a>policy</a> objects:
+  following algorithm will return a list of <a for="/">policy</a> objects:
 
   1.  Let |policies| be an empty list.
 
@@ -470,17 +475,18 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   <h3 id="framework-directives">Directives</h3>
 
-  Each <a>policy</a> contain a set of <dfn export>directives</dfn>, each of which controls
-  a specific behavior. The directives defined in this document are described in
-  detail in [[#csp-directives]].
+  Each <a for="/">policy</a> contain a set of <dfn export>directives</dfn>, each
+  of which controls a specific behavior. The directives defined in this document
+  are described in detail in [[#csp-directives]].
 
   Each <a>directive</a> is a <dfn for="directive" export>name</dfn> /
   <dfn for="directive" export>value</dfn> pair. The <a for="directive">name</a> is a
   non-empty string, and the <a>value</a> is a set of non-empty strings. The
   <a>value</a> set MAY be empty.
 
-  A <dfn export>serialized directive</dfn> is an ASCII string, consisting of one or more
-  whitespace-delimited tokens, and adhering to the following ABNF [[!RFC5234]]:
+  A <dfn export>serialized directive</dfn> is a string of <a>ASCII bytes</a>,
+  consisting of one or more whitespace-delimited tokens, and adhering to the
+  following ABNF [[!RFC5234]]:
 
   <pre dfn-type="grammar" link-type="grammar">
     <dfn>serialized-directive</dfn> = <a>directive-name</a> [ <a>RWS</a> <a>directive-value</a> ]
@@ -496,18 +502,18 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   <a>Directives</a> have a number of associated algorithms:
 
   1.  A <dfn for="directive" export>pre-request check</dfn>, which takes a
-      <a>request</a> and a <a>policy</a> as an argument, and is executed during
-      [[#should-block-request]]. This algorithm returns "`Allowed`" unless
+      <a>request</a> and a <a for="/">policy</a> as an argument, and is executed
+      during [[#should-block-request]]. This algorithm returns "`Allowed`" unless
       otherwise specified.
 
   2.  A <dfn for="directive" export>post-request check</dfn>, which takes a
-      <a>request</a>, a <a>response</a>, and a <a>policy</a> as arguments, and
-      is executed during [[#should-block-response]]. This algorithm returns
+      <a>request</a>, a <a>response</a>, and a <a for="/">policy</a> as arguments,
+      and is executed during [[#should-block-response]]. This algorithm returns
       "`Allowed`" unless otherwise specified.
 
   3.  A <dfn for="directive" export>response check</dfn>, which takes a
-      <a>request</a>, a <a>response</a>, and a <a>policy</a> as arguments, and
-      is executed during [[#should-block-response]]. This algorithm returns
+      <a>request</a>, a <a>response</a>, and a <a for="/">policy</a> as arguments,
+      and is executed during [[#should-block-response]]. This algorithm returns
       "`Allowed`" unless otherwise specified.
 
   4.  An <dfn for="directive" export>inline check</dfn>, which takes an {{Element}} a
@@ -516,8 +522,8 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       otherwise specified.
 
   5.  An <dfn for="directive" export>initialization</dfn>, which takes a {{Document}}
-      or <a for="/">global object</a>, a <a>response</a>, and a <a>policy</a> as
-      arguments. This algorithm is executed during [[#initialize-document-csp]],
+      or <a for="/">global object</a>, a <a>response</a>, and a <a for="/">policy</a>
+      as arguments. This algorithm is executed during [[#initialize-document-csp]],
       and has no effect unless otherwise specified.
 
   6.  A <dfn for="directive" export>pre-navigation check</dfn>, which takes a
@@ -559,9 +565,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   6.  Digests such as `'sha256-abcd...'` (which can match specific
       elements on a page)
 
-  A <dfn export>serialized source list</dfn> is an ASCII string, consisting of a
-  space-delimited series of <a>source expressions</a>, adhering to the
-  following ABNF grammar [[!RFC5234]]:
+  A <dfn export>serialized source list</dfn> is a string of <a>ASCII bytes</a>,
+  consisting of a space-delimited series of <a>source expressions</a>, adhering
+  to the following ABNF grammar [[!RFC5234]]:
 
   <pre dfn-type="grammar" link-type="grammar">
     <dfn>serialized-source-list</dfn> = ( <a>source-expression</a> *( <a>RWS</a> <a>source-expression</a> ) ) / "<dfn>'none'</dfn>"
@@ -608,11 +614,11 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   <h3 id="framework-violation">Violations</h3>
 
   A <dfn export>violation</dfn> represents an action or resource which goes against the
-  set of <a>policy</a> objects associated with a <a for="/">global object</a>.
+  set of <a for="/">policy</a> objects associated with a <a for="/">global object</a>.
 
   Each <a>violation</a> has a
   <dfn for="violation" id="violation-global-object" export>global object</dfn>, which
-  is the <a for="/">global object</a> whose <a>policy</a> has been violated.
+  is the <a for="/">global object</a> whose <a for="/">policy</a> has been violated.
 
   Each <a>violation</a> has a <dfn for="violation" id="violation-url" export>url</dfn>
   which is its <a for="violation">global object</a>'s {{URL}}.
@@ -634,11 +640,11 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   Each <a>violation</a> has a
   <dfn for="violation" id="violation-policy" export>policy</dfn>, which is the
-  <a>policy</a> that has been violated.
+  <a for="/">policy</a> that has been violated.
 
   Each <a>violation</a> has a
   <dfn for="violation" id="violation-disposition" export>disposition</dfn>, which is the
-  <a for="policy">disposition</a> of the <a>policy</a> that has been violated.
+  <a for="policy">disposition</a> of the <a for="/">policy</a> that has been violated.
 
   Each <a>violation</a> has an
   <dfn for="violation" id="violation-effective-directive" export>effective directive</dfn>
@@ -665,7 +671,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     Create a violation object for |global|, |policy|, and |directive|
   </h4>
 
-  Given a <a for="/">global object</a> (|global|), a <a>policy</a> (|policy|), and a
+  Given a <a for="/">global object</a> (|global|), a <a for="/">policy</a> (|policy|), and a
   string (|directive|), the following algorithm creates a new <a>violation</a>
   object, and populates it with an initial set of data:
 
@@ -699,7 +705,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     Create a violation object for |request|, |policy|, and |directive|
   </h4>
 
-  Given a <a>request</a> (|request|), a <a>policy</a> (|policy|), and a string
+  Given a <a>request</a> (|request|), a <a for="/">policy</a> (|policy|), and a string
   (|directive|), the following algorithm creates a new <a>violation</a> object,
   and populates it with an initial set of data:
 
@@ -724,13 +730,13 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     Policy Delivery
   </h2>
 
-  A server MAY declare a <a>policy</a> for a particular <a>resource
+  A server MAY declare a <a for="/">policy</a> for a particular <a>resource
   representation</a> via an HTTP response header field whose value is a
   <a>serialized CSP</a>. This mechanism is defined in detail in
   [[#csp-header]] and [[#cspro-header]], and the integration with Fetch
   and HTML is described in [[#fetch-integration]] and [[#html-integration]].
 
-  A <a>policy</a> may also be declared inline in an HTML document via a
+  A <a for="/">policy</a> may also be declared inline in an HTML document via a
   <{meta}> element's <{meta/http-equiv}> attribute, as described in
   [[#meta-element]].
 
@@ -876,7 +882,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       and <a>response checks</a> to be executed on the <a>response</a> delivered
       from the network or from a Service Worker.
 
-  A <a>policy</a> is generally enforced upon a <a for="/">global object</a>, but the
+  A <a for="/">policy</a> is generally enforced upon a <a for="/">global object</a>, but the
   user agent needs to <a lt="parse a serialized CSP">parse</a> any policy
   delivered via an HTTP response header field before any <a for="/">global object</a>
   is created in order to handle directives that require knowledge of a
@@ -1043,19 +1049,19 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   1.  The {{Document}} and {{WorkerGlobalScope}} objects have a
       <dfn for="global object" id="global-object-csp-list">CSP list</dfn>,
-      which holds all the <a>policy</a> objects which are active for a given
+      which holds all the <a for="/">policy</a> objects which are active for a given
       context. This list is empty unless otherwise specified, and is populated
       via the [[#initialize-global-object-csp]] algorithm.
 
       ISSUE(w3c/html#187): This concept is missing from W3C's Workers.
 
-  2.  A <a>policy</a> is <dfn export>enforced</dfn> or <dfn export>monitored</dfn> for a
+  2.  A <a for="/">policy</a> is <dfn export>enforced</dfn> or <dfn export>monitored</dfn> for a
       <a for="/">global object</a> by inserting it into the <a for="/">global object</a>'s
       <a for="global object">CSP list</a>.
 
   3.  [[#initialize-global-object-csp]] is called during the <a>initializing a
       new `Document` object</a> and <a>run a worker</a> algorithms in order to
-      bind a set of <a>policy</a> objects associated with a <a>response</a> to a
+      bind a set of <a for="/">policy</a> objects associated with a <a>response</a> to a
       newly created <a for="/">global object</a>.
 
   4.  [[#should-block-inline]] is called during the <a>prepare a script</a> and
@@ -1066,7 +1072,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       handlers (like `onclick`) and inline `style` attributes in order to
       determine whether or not they ought to be allowed to execute/render.
 
-  5.  <a>Policy</a> is <a>enforced</a> during processing of the <{meta}>
+  5.  <a for="/">policy</a> is <a>enforced</a> during processing of the <{meta}>
       element's <{meta/http-equiv}>.
 
   6.  A {{Document}}'s <dfn>embedding document</dfn> is the {{Document}}
@@ -1133,7 +1139,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       therefore alias the <a>embedding document</a>'s policies for <a>an iframe
       `srcdoc` `Document`</a>.
 
-      Note: We do all this to ensure that a page cannot bypass its <a>policy</a>
+      Note: We do all this to ensure that a page cannot bypass its <a for="/">policy</a>
       by embedding a frame or popping up a new window containing content it
       controls (`blob:` resources, or `document.write()`).
 
@@ -1312,8 +1318,8 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   if not:
 
   1.  Let |globals| be a list containing |callerRealm|'s
-      <a lt="the Realm's global object">global object</a> and |calleeRealm|'s
-      <a lt="the Realm's global object">global object</a>.
+      <a for="Realm">global object</a> and |calleeRealm|'s
+      <a for="Realm">global object</a>.
 
   2.  For each |global| in |globals|:
 
@@ -1341,9 +1347,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     Reporting
   </h2>
 
-  When one or more of a <a>policy</a>'s directives is violated, a <dfn export>violation
+  When one or more of a <a for="/">policy</a>'s directives is violated, a <dfn export>violation
   report</dfn> may be generated and sent out to a reporting endpoint associated
-  with the <a>policy</a>.
+  with the <a for="/">policy</a>.
 
   <h3 id="violation-events">
     Violation DOM Events
@@ -1431,7 +1437,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   3.  Return the result of executing {{JSON.stringify()}} on |object|.
 
-  <h3 id="report-violation">
+  <h3 id="report-violation" algorithm>
     Report a |violation|
   </h3>
 
@@ -1455,10 +1461,11 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           `Document`</a>, set |target| to `null`.
 
           Note: This ensures that we fire events only at elements <a>connected</a>
-          to |policy|'s {{Document}}. If a violation is caused by an element which
-          isn't connected to that document, we'll fire the event at the document
-          rather than the element in order to ensure that the violation is visible
-          to the document's listeners.
+          to |violation|'s <a for="violation">policy</a>'s {{Document}}. If a
+          violation is caused by an element which isn't connected to that
+          document, we'll fire the event at the document rather than the element
+          in order to ensure that the violation is visible to the document's
+          listeners.
 
       2.  If |target| is `null`:
 
@@ -1527,7 +1534,8 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
               :   <a for="request">url</a>
               ::  |violation|'s <a for="violation">url</a>
               :   <a for="request">origin</a>
-              ::  |violation|'s <a for="violation">global object</a>'s <a>origin</a>
+              ::  |violation|'s <a for="violation">global object</a>'s <a>relevant settings
+                  object</a>'s <a for="environment settings object">origin</a>
               :   <a for="request">window</a>
               ::  "`no-window`"
               :   <a for="request">client</a>
@@ -1672,7 +1680,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
+  Given a <a>request</a> (|request|) and a <a for="/">policy</a> (|policy|):
 
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
@@ -1694,7 +1702,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   This directive's <a for="directive">post-request check</a> is as follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
-  <a>policy</a> (|policy|):
+  <a for="/">policy</a> (|policy|):
 
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
@@ -1771,7 +1779,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
+  Given a <a>request</a> (|request|) and a <a for="/">policy</a> (|policy|):
 
   1.  Assert: |policy| is unused.
 
@@ -1792,7 +1800,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   This directive's <a for="directive">post-request check</a> is as follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
-  <a>policy</a> (|policy|):
+  <a for="/">policy</a> (|policy|):
 
   1.  Assert: |policy| is unused.
 
@@ -1886,7 +1894,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
+  Given a <a>request</a> (|request|) and a <a for="/">policy</a> (|policy|):
 
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
@@ -1916,7 +1924,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   This directive's <a for="directive">post-request check</a> is as follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
-  <a>policy</a> (|policy|):
+  <a for="/">policy</a> (|policy|):
 
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
@@ -1979,7 +1987,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
+  Given a <a>request</a> (|request|) and a <a for="/">policy</a> (|policy|):
 
   1.  Assert: |policy| is unused.
 
@@ -1998,7 +2006,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   This directive's <a for="directive">post-request check</a> is as follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
-  <a>policy</a> (|policy|):
+  <a for="/">policy</a> (|policy|):
 
   1.  Assert: |policy| is unused.
 
@@ -2044,7 +2052,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
+  Given a <a>request</a> (|request|) and a <a for="/">policy</a> (|policy|):
 
   1.  Assert: |policy| is unused.
 
@@ -2065,7 +2073,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   This directive's <a for="directive">post-request check</a> is as follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
-  <a>policy</a> (|policy|):
+  <a for="/">policy</a> (|policy|):
 
   1.  Assert: |policy| is unused.
 
@@ -2116,7 +2124,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
+  Given a <a>request</a> (|request|) and a <a for="/">policy</a> (|policy|):
 
   1.  Assert: |policy| is unused.
 
@@ -2135,7 +2143,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   This directive's <a for="directive">post-request check</a> is as follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
-  <a>policy</a> (|policy|):
+  <a for="/">policy</a> (|policy|):
 
   1.  Assert: |policy| is unused.
 
@@ -2180,7 +2188,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
+  Given a <a>request</a> (|request|) and a <a for="/">policy</a> (|policy|):
 
   1.  Assert: |policy| is unused.
 
@@ -2200,7 +2208,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   This directive's <a for="directive">post-request check</a> is as follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
-  <a>policy</a> (|policy|):
+  <a for="/">policy</a> (|policy|):
 
   1.  Assert: |policy| is unused.
 
@@ -2249,7 +2257,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
+  Given a <a>request</a> (|request|) and a <a for="/">policy</a> (|policy|):
 
   1.  Assert: |policy| is unused.
 
@@ -2269,7 +2277,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   This directive's <a for="directive">post-request check</a> is as follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
-  <a>policy</a> (|policy|):
+  <a for="/">policy</a> (|policy|):
 
   1.  Assert: |policy| is unused.
 
@@ -2330,7 +2338,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
+  Given a <a>request</a> (|request|) and a <a for="/">policy</a> (|policy|):
 
   1.  Assert: |policy| is unused.
 
@@ -2350,7 +2358,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   This directive's <a for="directive">post-request check</a> is as follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
-  <a>policy</a> (|policy|):
+  <a for="/">policy</a> (|policy|):
 
   1.  Assert: |policy| is unused.
 
@@ -2407,7 +2415,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
+  Given a <a>request</a> (|request|) and a <a for="/">policy</a> (|policy|):
 
   1.  Assert: |policy| is unused.
 
@@ -2476,7 +2484,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   This directive's <a for="directive">post-request check</a> is as follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
-  <a>policy</a> (|policy|):
+  <a for="/">policy</a> (|policy|):
 
   1.  Assert: |policy| is unused.
 
@@ -2587,7 +2595,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
+  Given a <a>request</a> (|request|) and a <a for="/">policy</a> (|policy|):
 
   1.  Assert: |policy| is unused.
 
@@ -2611,7 +2619,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   This directive's <a for="directive">post-request check</a> is as follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
-  <a>policy</a> (|policy|):
+  <a for="/">policy</a> (|policy|):
 
   1.  Assert: |policy| is unused.
 
@@ -2687,7 +2695,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|):
+  Given a <a>request</a> (|request|) and a <a for="/">policy</a> (|policy|):
 
   1.  Assert: |policy| is unused.
 
@@ -2707,7 +2715,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   This directive's <a for="directive">post-request check</a> is as follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
-  <a>policy</a> (|policy|):
+  <a for="/">policy</a> (|policy|):
 
   1.  Assert: |policy| is unused.
 
@@ -2847,7 +2855,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
-  <a>policy</a> (|policy|):
+  <a for="/">policy</a> (|policy|):
 
   1.  Assert: |policy| is unused.
 
@@ -2922,7 +2930,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   follows:
 
   Given a <a>request</a> (|request|), a <a>response</a> (|response|), and a
-  <a>policy</a> (|policy|):
+  <a for="/">policy</a> (|policy|):
 
   1.  Assert: |response| is unused.
 
@@ -2953,7 +2961,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   follows:
 
   Given a {{Document}} or <a for="/">global object</a> (|context|), a <a>response</a>
-  (|response|), and a <a>policy</a> (|policy|):
+  (|response|), and a <a for="/">policy</a> (|policy|):
 
   1.  Assert: |response| is unused.
 
@@ -2996,7 +3004,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   follows:
 
   Given a {{Document}} or <a for="/">global object</a> (|context|), a <a>response</a>
-  (|response|), and a <a>policy</a> (|policy|):
+  (|response|), and a <a for="/">policy</a> (|policy|):
 
   1.  Assert: |response| and |policy| are unused.
 
@@ -3137,6 +3145,8 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   <ol class="algorithm">
     1.  Assert: |source| and |target| are unused in this algorithm, as
         `navigation-to` is concerned only with details of the outgoing request.
+        Likewise, |type| is unused, as all navigation requests are treated
+        identically.
 
     2.  If the result of executing [[#match-request-to-source-list]] on
         |request| and this directive's <a for="directive">value</a> is
@@ -3223,7 +3233,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     Does |request| violate |policy|?
   </h5>
 
-  Given a <a>request</a> (|request|) and a <a>policy</a> (|policy|), this
+  Given a <a>request</a> (|request|) and a <a for="/">policy</a> (|policy|), this
   algorithm returns the violated <a>directive</a> if the request violates the
   policy, and "`Does Not Violate`" otherwise.
 
@@ -3290,7 +3300,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   </h5>
 
   Given a {{URL}} (|url|), a <a>source list</a> (|source list|), an
-  <a>origin</a> (|origin|), and a number (|redirect count|), this
+  <a for="/">origin</a> (|origin|), and a number (|redirect count|), this
   algorithm returns "`Matches`" if the URL matches one or more source
   expressions in |source list|, or "`Does Not Match`" otherwise:
 
@@ -3319,11 +3329,11 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   </h5>
 
   Given a {{URL}} (|url|), a <a>source expression</a> (|expression|), an
-  <a>origin</a> (|origin|), and a number (|redirect count|), this algorithm
+  <a for="/">origin</a> (|origin|), and a number (|redirect count|), this algorithm
   returns "`Matches`" if |url| matches |expression|, and "`Does Not Match`"
   otherwise.
 
-  Note: |origin| is the <a>origin</a> of the resource relative to which the
+  Note: |origin| is the <a for="/">origin</a> of the resource relative to which the
   |expression| should be resolved. "`'self'`", for instance, will have distinct
   meaning depending on that bit of context.
 
@@ -3476,8 +3486,8 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     Does |scheme-part| match another |scheme-part|?
   </h5>
 
-  Given two <a>ASCII strings</a> A and B, this algorithm returns "`Matches`" if A 
-  matches B, and returns "`Does Not Match`" otherwise.
+  Given two strings of <a>ASCII bytes</a> A and B, this algorithm returns
+  "`Matches`" if A matches B, and returns "`Does Not Match`" otherwise.
 
   Note: This algorithm is not transitive. That is, A matching B does not mean 
   that B will match A.
@@ -3696,7 +3706,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   bypassing a resource's policy is otherwise trivial.
 
   If a server delivers a <a grammar>nonce-source</a> expression as part of a
-  <a>policy</a>, the server MUST generate a unique value each time it
+  <a for="/">policy</a>, the server MUST generate a unique value each time it
   transmits a policy. The generated value SHOULD be at least 128 bits long
   (before encoding), and SHOULD be generated via a cryptographically secure
   random number generator in order to ensure that the value is difficult for
@@ -3972,7 +3982,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   <h3 id="extensions">Vendor-specific Extensions and Addons</h3>
 
-  <a>Policy</a> enforced on a resource SHOULD NOT interfere with the operation
+  <a for="/">Policy</a> enforced on a resource SHOULD NOT interfere with the operation
   of user-agent features like addons, extensions, or bookmarklets. These kinds
   of features generally advance the user's priority over page authors, as
   espoused in [[HTML-DESIGN]].
