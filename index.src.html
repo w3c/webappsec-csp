@@ -1024,14 +1024,18 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       handlers (like `onclick`) and inline `style` attributes in order to
       determine whether or not they ought to be allowed to execute/render.
 
-  5.  <a for="/">policy</a> is <a>enforced</a> during processing of the <{meta}>
+  6.  [[#should-block-inline]] is called during handling of navigations to
+      `javascript:` URLs in order to determine whether they ought to be allowed
+      to execute.
+
+  7.  <a for="/">policy</a> is <a>enforced</a> during processing of the <{meta}>
       element's <{meta/http-equiv}>.
 
-  6.  A {{Document}}'s <dfn>embedding document</dfn> is the {{Document}}
+  8.  A {{Document}}'s <dfn>embedding document</dfn> is the {{Document}}
       <a lt="nested through">through which</a> the {{Document}}'s
       <a>browsing context</a> is nested.
 
-  7.  HTML populates each <a for="/">request</a>'s <a for="request">cryptographic nonce
+  9.  HTML populates each <a for="/">request</a>'s <a for="request">cryptographic nonce
       metadata</a> and <a>parser metadata</a> with relevant data from the
       elements responsible for resource loading.
 
@@ -1041,11 +1045,11 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       ISSUE(whatwg/html#968): Stylesheet loading is not yet integrated with
       Fetch in WHATWG's HTML.
 
-  8.  [[#allow-base-for-document]] is called during <{base}>'s <a>set the frozen
+  10. [[#allow-base-for-document]] is called during <{base}>'s <a>set the frozen
       base URL</a> algorithm to ensure that the <{base/href}> attribute's value
       is valid.
 
-  9.  [[#should-plugin-element-be-blocked-a-priori-by-content-security-policy]]
+  11.  [[#should-plugin-element-be-blocked-a-priori-by-content-security-policy]]
       is called during the processing of <{object}>, <{embed}>, and <{applet}>
       elements to determine whether they may trigger a fetch.
 
@@ -1053,7 +1057,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
       ISSUE(w3c/html#547): This hook is missing from W3C's HTML.
 
-  10. [[#should-block-navigation-request]] is called during the <a>process a
+  12. [[#should-block-navigation-request]] is called during the <a>process a
       navigate fetch</a> algorithm, and [[#should-block-navigation-response]]
       is called during the <a>process a navigate response</a> algorithm to
       apply directive's navigation checks.
@@ -1146,9 +1150,14 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   definition of a particular type of behavior (script execution, style
   application, event handlers, etc.), and "`Blocked`" otherwise:
 
-  1.  Let |result| be "`Allowed`".
+  Note: The valid values for |type| are "`script`", "`script attribute`",
+  "`style`", "`style attribute`", and "`navigation`".
 
-  2.  For each |policy| in |element|'s {{Document}}'s <a for="/">global object</a>'s
+  1.  Assert: If |type| is not "`navigation`", |element| is not `null`.
+
+  2.  Let |result| be "`Allowed`".
+
+  3.  For each |policy| in |element|'s {{Document}}'s <a for="/">global object</a>'s
       <a for="global object">CSP list</a>:
 
       1.  For each |directive| in |policy|:
@@ -1172,7 +1181,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           6.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
               set |result| to "`Blocked`".
 
-  3.  Return |result|.
+  4.  Return |result|.
 
   <h4 id="should-block-navigation-request" algorithm>
     Should |navigation request| of |type| from |source| in |target| be blocked
@@ -2452,9 +2461,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           directive's <a for="directive">value</a> is "`Matches`", return
           "`Allowed`".
 
-      2.  Assert: This directive's <a for="directive">value</a>
-          does not contain "<a grammar>`'strict-dynamic'`</a>", or |request|'s
-          <a for="request">parser metadata</a> is not <a>"parser-inserted"</a>.
+      2.  If this directive's <a for="directive">value</a> contains
+          "<a grammar>`'strict-dynamic'`</a>", and |request|'s
+          <a for="request">parser metadata</a> is not <a>"parser-inserted"</a>,
+          return "`Allowed`".
 
       3.  If the result of executing [[#match-response-to-source-list]] on
           |response|, |request|, and this directive's
@@ -2471,31 +2481,35 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   Given an {{Element}} (|element|), a string (|type|), and a string (|source|):
 
-  1.  If |type| is "`script attribute`":
+  1.  If |type| is "`script attribute`" or "`script`":
 
-      1.  If |list| contains a <a>source expression</a> which is an <a>ASCII
-          case-insensitive</a> match for the <a grammar>keyword-source</a>
-          "<a grammar>`'strict-dynamic'`</a>", and does not contain a
-          <a>source expression</a> which is an <a>ASCII case-insensitive</a>
-          match for the <a grammar>keyword-source</a>
-          "<a grammar>`'unsafe-hashed-attributes'`</a>", return "`Blocked`".
+      1.  Assert: |element| is not `null`.
 
       2.  If the result of executing [[#match-element-to-source-list]] on
           |element|, this directive's <a for="directive">value</a>, |type|,
           and |source|, is "`Does Not Match`", return "`Blocked`".
 
-  2.  If |type| is "`script`":
+  2.  If |type| is "`navigation`":
 
-      1.  If |list| contains a <a>source expression</a> which is an <a>ASCII
-          case-insensitive</a> match for the <a grammar>keyword-source</a>
-          "<a grammar>`'strict-dynamic'`</a>", return "`Blocked`".
+      1.  Let |unsafe-inline flag| be `false`.
 
-          Note: "<a grammar>`'strict-dynamic'`</a>" is explained in more detail
-          in [[#strict-dynamic-usage]].
+      2.  For each |expression| in this directive's
+          <a for="directive">value</a>:
 
-      2.  If the result of executing [[#match-element-to-source-list]] on
-          |element|, this directive's <a for="directive">value</a>, |type|,
-          and |source|, is "`Does Not Match`", return "`Blocked`".
+          1.  If |expression| matches the <a grammar>`nonce-source`</a> or
+              <a grammar>`hash-source`</a> grammar, return "`Blocked`".
+
+          2.  If |expression| matches the <a grammar>keyword-source</a>
+              "<a grammar>`'strict-dynamic'`</a>", return "`Blocked`".
+
+          3.  If |expression| matches the <a grammar>keyword-source</a>
+              "<a grammar>`'unsafe-inline'`</a>", set |unsafe-inline flag| to `true`.
+
+      3.  If |unsafe-inline flag| is `false`, return "`Blocked`".
+
+      Note: Navigating to a `javascript:` URL is allowed only in the presence
+      of "<a grammar>`'unsafe-inline'`</a>" that isn't overridden by a nonce,
+      hash, or "<a grammar>`'strict-dynamic'`</a>".
 
   3.  Return "`Allowed`".
 
@@ -3620,20 +3634,28 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       of the page in which it is embedded. See the integration points
       in [[#html-integration]] for more detail.
 
-  2.  Let |contains nonce or hash| and |hashes match attributes| be `false`.
+  2.  Let |allow unsafe-inline| be `true`, and |hashes match attributes| be `false`.
 
   3.  For each |expression| in |list|:
 
       1.  If |expression| matches the <a grammar>`nonce-source`</a> or
-          <a grammar>`hash-source`</a> grammar, set |contains nonce or hash|
-          to `true`.
+          <a grammar>`hash-source`</a> grammar, set |allow unsafe-inline| to
+          `false`.
 
-      2.  If |expression| is an <a>ASCII case-insensitive</a> match for the
+      2.  If |type| is "`script`" or "`script attribute`", and |expression|
+          matches the <a grammar>keyword-source</a>
+          "<a grammar>`'strict-dynamic'`</a>", set |allow unsafe-inline| to
+          `false`.
+
+          Note: `'strict-dynamic'` only applies to scripts, not other resource
+          types. Usage is explained in more detail in [[#strict-dynamic-usage]].
+
+      3.  If |expression| is an <a>ASCII case-insensitive</a> match for the
           <a grammar>`keyword-source`</a>
           "<a grammar>`'unsafe-hashed-attributes'`</a>", set |hashes match
           attributes| to `true`.
 
-  4.  If |contains nonce or hash| is `false`, and |list| contains a
+  4.  If |allow unsafe-inline| is `true`, and |list| contains a
       <a>source expression</a> which is an <a>ASCII case-insensitive</a> match
       for the string "'unsafe-inline'", then return "`Matches`".
 
