@@ -1423,7 +1423,7 @@ pre.idl.highlight { color: #708090; }
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1>Content Security Policy: Embedded Enforcement</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-11-11">11 November 2016</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-11-28">28 November 2016</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1500,9 +1500,11 @@ restrictions upon itself.</p>
       <li>
        <a href="#subsume-policy"><span class="secno">3.3</span> <span class="content"> Is <var>policy list</var> subsumed under <var>subsuming policy</var>? </span></a>
        <ol class="toc">
-        <li><a href="#rewrite-self"><span class="secno">3.3.1</span> <span class="content"> Rewrite <code>'self'</code> into a host-source expression for <var>origin</var>. </span></a>
-        <li><a href="#subsume-se"><span class="secno">3.3.2</span> <span class="content"> Does <code>source expression</code> <var>A</var> subsume <code>source expression</code> <var>B</var>? </span></a>
-        <li><a href="#subsume-source-list"><span class="secno">3.3.3</span> <span class="content"> Does <span>serialized-source-list</span> <var>A</var> subsume <span>serialized-source-list</span> <var>B</var> given their respective <span>origins</span>? </span></a>
+        <li><a href="#source-expression-similarity"><span class="secno">3.3.1</span> <span class="content"> Is an expression matching <span><code>scheme-source</code></span> or <span><code>host-source</code></span> grammar <var>A</var> similar to an expression matching <span><code>scheme-source</code></span> or <span><code>host-source</code></span> grammar <var>B</var>? </span></a>
+        <li><a href="#intersection-source-expressions"><span class="secno">3.3.2</span> <span class="content"> What is an intersection of two expressions matching <span><code>scheme-source</code></span> or <span><code>host-source</code></span> grammar <var>A</var> and <var>B</var>? </span></a>
+        <li><a href="#rewrite-self"><span class="secno">3.3.3</span> <span class="content"> Rewrite <code>'self'</code> into a host-source expression for <var>origin</var>. </span></a>
+        <li><a href="#subsume-se"><span class="secno">3.3.4</span> <span class="content"> Does <code>source expression</code> <var>A</var> subsume <code>source expression</code> <var>B</var>? </span></a>
+        <li><a href="#subsume-source-list"><span class="secno">3.3.5</span> <span class="content"> Does <span>serialized-source-list</span> <var>A</var> subsume <span>serialized-source-list</span> <var>B</var> given their respective <span>origins</span>? </span></a>
        </ol>
       <li><a href="#required-csp-for-context"><span class="secno">3.4</span> <span class="content"> Obtain the required CSP for <var>context</var>. </span></a>
      </ol>
@@ -1803,7 +1805,194 @@ Host: advertisements-r-us.example.com
      <li data-md="">
       <p>Return "<code>Not Subsumed</code>".</p>
     </ol>
-    <h4 class="heading settled algorithm" data-algorithm="Rewrite &apos;self&apos; into a host-source expression for origin." data-level="3.3.1" id="rewrite-self"><span class="secno">3.3.1. </span><span class="content"> Rewrite <code>'self'</code> into a host-source expression for <var>origin</var>. </span><a class="self-link" href="#rewrite-self"></a></h4>
+    <h4 class="heading settled algorithm" data-algorithm="Is an expression matching scheme-source or 
+    host-source grammar A similar to an expression matching 
+    scheme-source or host-source grammar B?" data-level="3.3.1" id="source-expression-similarity"><span class="secno">3.3.1. </span><span class="content"> Is an expression matching <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a> grammar <var>A</var> similar to an expression matching <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a> grammar <var>B</var>? </span><a class="self-link" href="#source-expression-similarity"></a></h4>
+    <p>Given two expressions matching the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a> grammar (<var>A</var> and <var>B</var>), return "<code>Similar</code>" if <var>A</var> is <a data-link-type="dfn" href="#similar-similar" id="ref-for-similar-similar-1">similar</a> to <var>B</var>. Otherwise, return "<code>Not Similar</code>".</p>
+    <p><var>A</var> and <var>B</var> are said to be <dfn class="dfn-paneled" data-dfn-for="similar" data-dfn-type="dfn" data-noexport="" id="similar-similar">similar</dfn> if their parts
+  individually match, that is <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-part"><code>scheme-part</code></a>, <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-part"><code>host-part</code></a>, <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-port-part"><code>port-part</code></a>, and <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-path-part"><code>path-part</code></a>.</p>
+    <p class="note" role="note">NOTE: This property is symmetric. That is if <var>A</var> is <a data-link-type="dfn" href="#similar-similar" id="ref-for-similar-similar-2">similar</a> to <var>B</var>, it must be that <var>B</var> is <a data-link-type="dfn" href="#similar-similar" id="ref-for-similar-similar-3">similar</a> to <var>A</var>.</p>
+    <div class="example" id="example-858029b1">
+     <a class="self-link" href="#example-858029b1"></a> Cases when <var>A</var> is <a data-link-type="dfn" href="#similar-similar" id="ref-for-similar-similar-4">similar</a> to <var>B</var>. 
+<pre>A = http://*.example.com
+B = https://example.com:*
+</pre>
+<pre>A = https://inner.example.com/foo/
+B = http://*.example.com/foo/bar/
+</pre>
+<pre>A = http://example.com:80/page1/html
+B = https://example.com:443/
+</pre>
+     <p>Cases when <var>A</var> is not <a data-link-type="dfn" href="#similar-similar" id="ref-for-similar-similar-5">similar</a> to <var>B</var>.</p>
+<pre>A = http://example.com:80
+B = http://example.com:334
+</pre>
+     <p>In this case, ports of <var>A</var> and <var>B</var> do not match so that the two sources are
+    not <a data-link-type="dfn" href="#similar-similar" id="ref-for-similar-similar-6">similar</a> .</p>
+<pre>A = http://example.com/page.html
+B = http://example.com/index.html
+</pre>
+     <p>The two sources are not <a data-link-type="dfn" href="#similar-similar" id="ref-for-similar-similar-7">similar</a> beucase their paths
+    do not match.</p>
+    </div>
+    <p>A <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expression</a> has a <dfn class="dfn-paneled" data-dfn-for="source expression" data-dfn-type="dfn" data-noexport="" id="source-expression-wildcard-host">wildcard host</dfn> if the first character of the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expression</a>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-part"><code>host-part</code></a> is an U+002A ASTERISK 
+  character (<code>*</code>).</p>
+    <p>A <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expression</a> has a <dfn class="dfn-paneled" data-dfn-for="source expression" data-dfn-type="dfn" data-noexport="" id="source-expression-wildcard-port">wildcard port</dfn> if the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-port-part"><code>port-part</code></a> of the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expression</a> is an U+002A 
+  ASTERISK character (<code>*</code>).</p>
+    <ol>
+     <li data-md="">
+      <p>Let <var>scheme A</var> be <var>A</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-part"><code>scheme-part</code></a>, if present, and <code>null</code> otherwise.</p>
+     <li data-md="">
+      <p>Let <var>scheme B</var> be <var>B</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-part"><code>scheme-part</code></a>, if present, and <code>null</code> otherwise.</p>
+     <li data-md="">
+      <p>If the result of executing <a href="https://w3c.github.io/webappsec-csp/#match-schemes">Content Security Policy Level 3 §match-schemes</a> returns
+  "<code>Does Not Match</code>" given <var>scheme A</var> and <var>scheme B</var>, and the result of 
+  executing <a href="https://w3c.github.io/webappsec-csp/#match-schemes">Content Security Policy Level 3 §match-schemes</a> on <var>scheme B</var> and <var>scheme A</var> is 
+  "<code>Does Not Match</code>", return "<code>Not Similar</code>".</p>
+     <li data-md="">
+      <p>If <var>A</var> or <var>B</var> matches <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> grammar,
+  return "<code>Similar</code>".</p>
+     <li data-md="">
+      <p>Return "<code>Not Similar</code>" if any of the following is true:</p>
+      <ol>
+       <li data-md="">
+        <p>Let <var>host A</var> be <var>A</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-part"><code>host-part</code></a>, if present, and <code>null</code> otherwise.</p>
+       <li data-md="">
+        <p>Let <var>host B</var> be <var>B</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-part"><code>host-part</code></a>, if present, and <code>null</code> otherwise.</p>
+       <li data-md="">
+        <p>Both <var>A</var> and <var>B</var> have a <a data-link-type="dfn" href="#source-expression-wildcard-host" id="ref-for-source-expression-wildcard-host-1">wildcard host</a>,
+  but <var>host A</var> is not an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive</a> match to <var>host B</var>.</p>
+       <li data-md="">
+        <p>At most one of <var>A</var> and <var>B</var> has a <a data-link-type="dfn" href="#source-expression-wildcard-host" id="ref-for-source-expression-wildcard-host-2">wildcard host</a>, the result of executing <a href="https://w3c.github.io/webappsec-csp/#match-hosts">Content Security Policy Level 3 §match-hosts</a> is "<code>Does Not Match</code>" given <var>host A</var> and <var>host B</var>, and the result of executing <a href="https://w3c.github.io/webappsec-csp/#match-hosts">Content Security Policy Level 3 §match-hosts</a> on <var>host B</var> and <var>host A</var> is also "<code>Does Not Match</code>".</p>
+       <li data-md="">
+        <p>Let <var>port A</var> be <var>A</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-port-part"><code>port-part</code></a>, if present, and <code>null</code> otherwise.</p>
+       <li data-md="">
+        <p>Let <var>port B</var> be <var>B</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-port-part"><code>port-part</code></a>, if present, and <code>null</code> otherwise.</p>
+       <li data-md="">
+        <p>Neither <var>A</var> nor <var>B</var> has a <a data-link-type="dfn" href="#source-expression-wildcard-port" id="ref-for-source-expression-wildcard-port-1">wildcard port</a>,
+  the result of executing <a href="https://w3c.github.io/webappsec-csp/#match-ports">Content Security Policy Level 3 §match-ports</a> is "<code>Does Not Match</code>"
+  given <var>port A</var> and <var>port B</var>, and the result of executing <a href="https://w3c.github.io/webappsec-csp/#match-ports">Content Security Policy Level 3 §match-ports</a> given <var>port B</var> and <var>port A</var> is also 
+  "<code>Does Not Match</code>".</p>
+       <li data-md="">
+        <p>Let <var>path A</var> be <var>A</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-path-part"><code>path-part</code></a>, if present, and <code>null</code> otherwise.</p>
+       <li data-md="">
+        <p>Let <var>path B</var> be <var>B</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-path-part"><code>path-part</code></a>, if present, and <code>null</code> otherwise.</p>
+       <li data-md="">
+        <p>The result of executing <a href="https://w3c.github.io/webappsec-csp/#match-paths">Content Security Policy Level 3 §match-paths</a> is "<code>Does Not Match</code>"
+   given <var>path A</var> and <var>path B</var> and the result of executing <a href="https://w3c.github.io/webappsec-csp/#match-paths">Content Security Policy Level 3 §match-paths</a> given <var>path B</var> and <var>path A</var> is also 
+   "<code>Does Not Match</code>".</p>
+      </ol>
+     <li data-md="">
+      <p>Return "<code>Similar</code>".</p>
+    </ol>
+    <h4 class="heading settled algorithm" data-algorithm="What is an intersection of two expressions matching 
+    scheme-source or host-source 
+    grammar A and B?" data-level="3.3.2" id="intersection-source-expressions"><span class="secno">3.3.2. </span><span class="content"> What is an intersection of two expressions matching <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a> grammar <var>A</var> and <var>B</var>? </span><a class="self-link" href="#intersection-source-expressions"></a></h4>
+    <p><a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">Source expression</a> is said to be an <dfn class="dfn-paneled" data-dfn-for="source expression" data-dfn-type="dfn" data-noexport="" id="source-expression-intersection">intersection</dfn> of two other 
+  expressions matching <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a> grammar <var>A</var> and <var>B</var> if it contains the more
+  restrictive <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-part"><code>scheme-part</code></a>, <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-part"><code>host-part</code></a>, <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-port-part"><code>port-part</code></a>, and <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-path-part"><code>path-part</code></a> of the two.</p>
+    <div class="example" id="example-b7889eb8">
+     <a class="self-link" href="#example-b7889eb8"></a> In these cases, <code>Intersect</code> is an <a data-link-type="dfn" href="#source-expression-intersection" id="ref-for-source-expression-intersection-1">intersection</a> for <var>A</var> and <var>B</var>. 
+<pre>A = https:
+B = http:
+Intersect = https:
+</pre>
+<pre>A = http://*.example.com
+B = https://example.com:*
+Intersect = https://example.com:443
+</pre>
+<pre>A = http://example.com:80/page1/html
+B = https://example.com:443/
+Intersect = https://example.com:443/page1/html
+</pre>
+<pre>A = https:
+B = http://example.com
+Intersect = <code>https://example.com</code>.
+</pre>
+<pre>A = https://example.com:*
+B = http://*.example.com/page.html
+Intersect = <code>https://example.com/page.html</code>
+</pre>
+    </div>
+    <p>Given two expressions matching the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a> grammar (<var>A</var> and <var>B</var>), return their <a data-link-type="dfn" href="#source-expression-intersection" id="ref-for-source-expression-intersection-2">intersection</a> if <var>A</var> is <a data-link-type="dfn" href="#similar-similar" id="ref-for-similar-similar-8">similar</a> to <var>B</var>. Otherwise, return <code>null</code>.</p>
+    <ol>
+     <li data-md="">
+      <p>If the result of executing <a href="#source-expression-similarity">§3.3.1 Is an expression matching scheme-source or 
+    host-source grammar A similar to an expression matching 
+    scheme-source or host-source grammar B?</a> on <var>A</var> and <var>B</var> is "<code>Not Similar</code>", return <code>null</code>.</p>
+     <li data-md="">
+      <p>Let <var>source</var> be an empty string.</p>
+     <li data-md="">
+      <p>Let <var>scheme A</var> be <var>A</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-part"><code>scheme-part</code></a>, if present, and <code>null</code> otherwise.</p>
+     <li data-md="">
+      <p>Let <var>scheme B</var> be <var>B</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-part"><code>scheme-part</code></a>, if present, and <code>null</code> otherwise.</p>
+     <li data-md="">
+      <p>Let <var>more secure scheme B</var> be <code>true</code> if the result of executing <a href="https://w3c.github.io/webappsec-csp/#match-schemes">Content Security Policy Level 3 §match-schemes</a> is "<code>Does Not match</code>" given <var>scheme A</var> and <var>scheme B</var>, and <code>false</code> otherwise.</p>
+     <li data-md="">
+      <p>Append <var>scheme A</var> and ":" to <var>source</var> if <var>scheme A</var> is not <code>null</code> and <var>more secure scheme B</var> is <code>false</code>. Otherwise, append <var>scheme B</var> and ":"
+  to <var>source</var> if <var>scheme B</var> is not <code>null</code>.</p>
+     <li data-md="">
+      <p>If both <var>A</var> and <var>B</var> match the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> grammar,
+  return <var>source</var>.</p>
+     <li data-md="">
+      <p>Append "//" to <var>source</var> if it is not empty.</p>
+     <li data-md="">
+      <p>Let <var>host A</var> be <var>A</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-part"><code>host-part</code></a>, if present, and <code>null</code> otherwise.</p>
+     <li data-md="">
+      <p>Let <var>host B</var> be <var>B</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-part"><code>host-part</code></a>, if present, and <code>null</code> otherwise.</p>
+     <li data-md="">
+      <p>If <var>host A</var> is not <code>null</code>:</p>
+      <ol>
+       <li data-md="">
+        <p>If <var>host B</var> is <code>null</code>, append <var>host A</var> to <var>source</var>.
+   Continue to the next step in the main algorithm.</p>
+       <li data-md="">
+        <p>If <var>A</var> doesn’t match the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> grammar and
+   doesn’t have a <a data-link-type="dfn" href="#source-expression-wildcard-host" id="ref-for-source-expression-wildcard-host-3">wildcard host</a>, append <var>host A</var> to <var>source</var>.</p>
+       <li data-md="">
+        <p>Otherwise, append <var>host B</var> to <var>source</var>.</p>
+      </ol>
+     <li data-md="">
+      <p>If <var>host A</var> is <code>null</code>, append <var>host B</var> to <var>source</var>.</p>
+     <li data-md="">
+      <p>Let <var>port A</var> be <var>A</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-port-part"><code>port-part</code></a>, if present, and <code>null</code> otherwise.</p>
+     <li data-md="">
+      <p>Let <var>port B</var> be <var>B</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-port-part"><code>port-part</code></a>, if present, and <code>null</code> otherwise.</p>
+     <li data-md="">
+      <p>If <var>port A</var> is <code>null</code>, append ":" and <var>port B</var> to <var>source</var> if it is
+   not <code>null</code>.</p>
+     <li data-md="">
+      <p>If <var>port A</var> is not <code>null</code>:</p>
+      <ol>
+       <li data-md="">
+        <p>If <var>port B</var> is <code>null</code>, append ":" and <var>port A</var> to <var>source</var>.
+   Continue to the next step in the main algorithm.</p>
+       <li data-md="">
+        <p>If <var>A</var> doesn’t have a <a data-link-type="dfn" href="#source-expression-wildcard-port" id="ref-for-source-expression-wildcard-port-2">wildcard port</a> and <var>more secure scheme B</var> is <code>false</code>, append ":" and <var>port A</var> to <var>source</var>.</p>
+       <li data-md="">
+        <p>Otherwise, append ":" and <var>port B</var> to <var>source</var>.</p>
+      </ol>
+     <li data-md="">
+      <p>Let <var>path A</var> be <var>A</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-path-part"><code>path-part</code></a>, if present, and <code>null</code> otherwise.</p>
+     <li data-md="">
+      <p>Let <var>path B</var> be <var>B</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-path-part"><code>path-part</code></a>, if present, and <code>null</code> otherwise.</p>
+     <li data-md="">
+      <p>If <var>path A</var> is <code>null</code>, append <var>path B</var> to <var>source</var> if it is not <code>null</code>.</p>
+     <li data-md="">
+      <p>If <var>path A</var> is not <code>null</code>:</p>
+      <ol>
+       <li data-md="">
+        <p>If <var>path B</var> is <code>null</code>, append <var>path A</var> to <var>source</var>.
+   Continue to the next step in the main algorithm.</p>
+       <li data-md="">
+        <p>If the result of executing <a href="https://w3c.github.io/webappsec-csp/#match-paths">Content Security Policy Level 3 §match-paths</a> on <var>path A</var> and <var>path B</var> is "<code>Does Not Match</code>", append <var>path A</var> to <var>source</var>.</p>
+       <li data-md="">
+        <p>Otherwise, append <var>path B</var> to <var>source</var>.</p>
+      </ol>
+     <li data-md="">
+      <p>Return <var>source</var>.</p>
+    </ol>
+    <h4 class="heading settled algorithm" data-algorithm="Rewrite &apos;self&apos; into a host-source expression for origin." data-level="3.3.3" id="rewrite-self"><span class="secno">3.3.3. </span><span class="content"> Rewrite <code>'self'</code> into a host-source expression for <var>origin</var>. </span><a class="self-link" href="#rewrite-self"></a></h4>
     <p>Given an origin (<var>origin</var>), this algorithm returns a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a> expression that has the same effect
   as <code>'self'</code> for that origin:</p>
     <ol>
@@ -1813,14 +2002,10 @@ Host: advertisements-r-us.example.com
       <p>Return the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#ascii-serialisation-of-an-origin">ASCII
   serialization</a> of <var>origin</var>.</p>
     </ol>
-    <h4 class="heading settled algorithm" data-algorithm="Does source expression A subsume source expression B?" data-level="3.3.2" id="subsume-se"><span class="secno">3.3.2. </span><span class="content"> Does <code>source expression</code> <var>A</var> subsume <code>source expression</code> <var>B</var>? </span><a class="self-link" href="#subsume-se"></a></h4>
+    <h4 class="heading settled algorithm" data-algorithm="Does source expression A subsume source expression B?" data-level="3.3.4" id="subsume-se"><span class="secno">3.3.4. </span><span class="content"> Does <code>source expression</code> <var>A</var> subsume <code>source expression</code> <var>B</var>? </span><a class="self-link" href="#subsume-se"></a></h4>
     <p>Given two <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expressions</a> <var>A</var> and <var>B</var>, this algorithm returns
   "<code>Subsumes</code>" if <var>A</var> <a data-link-type="dfn" href="#subsumes" id="ref-for-subsumes-1">subsumes</a> <var>B</var>, and returns "<code>Does Not Subsume</code>"
   otherwise.</p>
-    <p>A <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expression</a> has a <dfn data-dfn-type="dfn" data-noexport="" id="wildcard-host">wildcard host<a class="self-link" href="#wildcard-host"></a></dfn> if the first
-  character of the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expression</a>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-part"><code>host-part</code></a> is an 
-  U+002A ASTERISK character (<code>*</code>).
-  A <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expression</a> has a <dfn data-dfn-type="dfn" data-noexport="" id="wildcard-port">wildcard port<a class="self-link" href="#wildcard-port"></a></dfn> if the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-port-part"><code>port-part</code></a> of the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expression</a> is equal to "*".</p>
     <ol>
      <li data-md="">
       <p class="assertion">Assert: Neither <var>A</var> nor <var>B</var> match the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> grammar.</p>
@@ -1884,7 +2069,7 @@ Host: advertisements-r-us.example.com
     </ol>
     <h4 class="heading settled algorithm" data-algorithm="Does serialized-source-list A subsume 
     serialized-source-list B given their respective 
-    origins?" data-level="3.3.3" id="subsume-source-list"><span class="secno">3.3.3. </span><span class="content"> Does <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-source-list">serialized-source-list</a> <var>A</var> subsume <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-source-list">serialized-source-list</a> <var>B</var> given their respective <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origins</a>? </span><a class="self-link" href="#subsume-source-list"></a></h4>
+    origins?" data-level="3.3.5" id="subsume-source-list"><span class="secno">3.3.5. </span><span class="content"> Does <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-source-list">serialized-source-list</a> <var>A</var> subsume <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-source-list">serialized-source-list</a> <var>B</var> given their respective <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origins</a>? </span><a class="self-link" href="#subsume-source-list"></a></h4>
     <p>Given a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-source-list">serialized-source-list</a> <var>A</var> with <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a> (<var>origin A</var>) and a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-source-list">serialized-source-list</a> <var>B</var> with <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a> (<var>origin B</var>), this algorithm returns "<code>Subsumes</code>"
   if <var>A</var> <a data-link-type="dfn" href="#subsumes" id="ref-for-subsumes-2">subsumes</a> <var>B</var>, and returns "<code>Does Not Subsume</code>" otherwise.</p>
     <p>A <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-source-list">serialized-source-list</a> is a <dfn data-dfn-type="dfn" data-noexport="" id="wildcard-list">wildcard list<a class="self-link" href="#wildcard-list"></a></dfn> if it
@@ -1928,7 +2113,7 @@ Host: advertisements-r-us.example.com
       <ol>
        <li data-md="">
         <p>If <var>expression A</var> is "<code>self</code>", append a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a>,
-   returned by <a href="#rewrite-self">§3.3.1 Rewrite 'self' into a host-source expression for origin.</a> given <var>origin A</var> to <var>list A</var>.</p>
+   returned by <a href="#rewrite-self">§3.3.3 Rewrite 'self' into a host-source expression for origin.</a> given <var>origin A</var> to <var>list A</var>.</p>
        <li data-md="">
         <p>If <var>expression A</var> does not match <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> grammar,
    append <var>expression A</var> to <var>list A</var>.</p>
@@ -1938,7 +2123,7 @@ Host: advertisements-r-us.example.com
       <ol>
        <li data-md="">
         <p>If <var>expression B</var> is "<code>self</code>", append a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a>,
-   returned by <a href="#rewrite-self">§3.3.1 Rewrite 'self' into a host-source expression for origin.</a> given <var>origin B</var> to <var>list B</var>.</p>
+   returned by <a href="#rewrite-self">§3.3.3 Rewrite 'self' into a host-source expression for origin.</a> given <var>origin B</var> to <var>list B</var>.</p>
        <li data-md="">
         <p>If <var>expression B</var> does not match <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> grammar,
    append <var>expression B</var> to <var>list B</var>.</p>
@@ -1958,7 +2143,7 @@ Host: advertisements-r-us.example.com
          <li data-md="">
           <p>If <var>list A</var> is <a data-link-type="dfn" href="#non-strict-inline" id="ref-for-non-strict-inline-2">non-strict inline</a> and <var>expression B</var> matches <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-hash-source"><code>hash-source</code></a> grammar or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-nonce-source"><code>nonce-source</code></a> grammar, continue to  the next expression.</p>
          <li data-md="">
-          <p>If <a href="#subsume-se">§3.3.2 Does source expression A subsume source expression B?</a> returns "<code>Subsumes</code>" given <var>expression A</var> and <var>expression B</var>, set <var>found match</var> to <code>true</code>.
+          <p>If <a href="#subsume-se">§3.3.4 Does source expression A subsume source expression B?</a> returns "<code>Subsumes</code>" given <var>expression A</var> and <var>expression B</var>, set <var>found match</var> to <code>true</code>.
   Break out of this inner loop.</p>
         </ol>
        <li data-md="">
@@ -2132,12 +2317,14 @@ B = "http://example.com 'unsafe-eval' 'strict-dynamic'"
      <li><a href="#dom-htmliframeelement-csp">attribute for HTMLIFrameElement</a><span>, in §2.1</span>
     </ul>
    <li><a href="#http-headerdef-embedding-csp">Embedding-CSP</a><span>, in §2.2</span>
-   <li><a href="#non-strict-inline">non-strict inline</a><span>, in §3.3.3</span>
+   <li><a href="#source-expression-intersection">intersection</a><span>, in §3.3.2</span>
+   <li><a href="#non-strict-inline">non-strict inline</a><span>, in §3.3.5</span>
    <li><a href="#required-csp">required CSP</a><span>, in §2.1</span>
+   <li><a href="#similar-similar">similar</a><span>, in §3.3.1</span>
    <li><a href="#subsumes">subsumes</a><span>, in §2.4</span>
-   <li><a href="#wildcard-host">wildcard host</a><span>, in §3.3.2</span>
-   <li><a href="#wildcard-list">wildcard list</a><span>, in §3.3.3</span>
-   <li><a href="#wildcard-port">wildcard port</a><span>, in §3.3.2</span>
+   <li><a href="#source-expression-wildcard-host">wildcard host</a><span>, in §3.3.1</span>
+   <li><a href="#wildcard-list">wildcard list</a><span>, in §3.3.5</span>
+   <li><a href="#source-expression-wildcard-port">wildcard port</a><span>, in §3.3.1</span>
   </ul>
   <h3 class="no-num no-ref heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
   <ul class="index">
@@ -2195,6 +2382,7 @@ B = "http://example.com 'unsafe-eval' 'strict-dynamic'"
     <ul>
      <li><a href="https://html.spec.whatwg.org/multipage/scripting.html#cereactions">CEReactions</a>
      <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#htmliframeelement">HTMLIFrameElement</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/infrastructure.html#ascii-case-insensitive">ascii case-insensitive</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#ascii-serialisation-of-an-origin">ascii serialization of an origin</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context-container">browsing context container</a>
@@ -2306,18 +2494,66 @@ B = "http://example.com 'unsafe-eval' 'strict-dynamic'"
   <aside class="dfn-panel" data-for="subsumes">
    <b><a href="#subsumes">#subsumes</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-subsumes-1">3.3.2. 
+    <li><a href="#ref-for-subsumes-1">3.3.4. 
     Does source expression A subsume source expression B? </a>
-    <li><a href="#ref-for-subsumes-2">3.3.3. 
+    <li><a href="#ref-for-subsumes-2">3.3.5. 
     Does serialized-source-list A subsume 
     serialized-source-list B given their respective 
     origins? </a> <a href="#ref-for-subsumes-3">(2)</a> <a href="#ref-for-subsumes-4">(3)</a> <a href="#ref-for-subsumes-5">(4)</a> <a href="#ref-for-subsumes-6">(5)</a> <a href="#ref-for-subsumes-7">(6)</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="similar-similar">
+   <b><a href="#similar-similar">#similar-similar</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-similar-similar-1">3.3.1. 
+    Is an expression matching scheme-source or 
+    host-source grammar A similar to an expression matching 
+    scheme-source or host-source grammar B? </a> <a href="#ref-for-similar-similar-2">(2)</a> <a href="#ref-for-similar-similar-3">(3)</a> <a href="#ref-for-similar-similar-4">(4)</a> <a href="#ref-for-similar-similar-5">(5)</a> <a href="#ref-for-similar-similar-6">(6)</a> <a href="#ref-for-similar-similar-7">(7)</a>
+    <li><a href="#ref-for-similar-similar-8">3.3.2. 
+    What is an intersection of two expressions matching 
+    scheme-source or host-source 
+    grammar A and B? </a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="source-expression-wildcard-host">
+   <b><a href="#source-expression-wildcard-host">#source-expression-wildcard-host</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-source-expression-wildcard-host-1">3.3.1. 
+    Is an expression matching scheme-source or 
+    host-source grammar A similar to an expression matching 
+    scheme-source or host-source grammar B? </a> <a href="#ref-for-source-expression-wildcard-host-2">(2)</a>
+    <li><a href="#ref-for-source-expression-wildcard-host-3">3.3.2. 
+    What is an intersection of two expressions matching 
+    scheme-source or host-source 
+    grammar A and B? </a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="source-expression-wildcard-port">
+   <b><a href="#source-expression-wildcard-port">#source-expression-wildcard-port</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-source-expression-wildcard-port-1">3.3.1. 
+    Is an expression matching scheme-source or 
+    host-source grammar A similar to an expression matching 
+    scheme-source or host-source grammar B? </a>
+    <li><a href="#ref-for-source-expression-wildcard-port-2">3.3.2. 
+    What is an intersection of two expressions matching 
+    scheme-source or host-source 
+    grammar A and B? </a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="source-expression-intersection">
+   <b><a href="#source-expression-intersection">#source-expression-intersection</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-source-expression-intersection-1">3.3.2. 
+    What is an intersection of two expressions matching 
+    scheme-source or host-source 
+    grammar A and B? </a> <a href="#ref-for-source-expression-intersection-2">(2)</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="non-strict-inline">
    <b><a href="#non-strict-inline">#non-strict-inline</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-non-strict-inline-1">3.3.3. 
+    <li><a href="#ref-for-non-strict-inline-1">3.3.5. 
     Does serialized-source-list A subsume 
     serialized-source-list B given their respective 
     origins? </a> <a href="#ref-for-non-strict-inline-2">(2)</a> <a href="#ref-for-non-strict-inline-3">(3)</a> <a href="#ref-for-non-strict-inline-4">(4)</a>

@@ -21,6 +21,7 @@ Markup Shorthands: css off, markdown on
 <pre class="link-defaults">
 spec:html; type:dfn; for:/; text:browsing context  
 spec:html; type:dfn; text:case-sensitive
+spec:html; type:dfn; text:ascii case-insensitive
 spec:fetch; type:dfn; for:/; text:request
 spec:dom; type:interface; text:Document
 spec:encoding; type: dfn; text: ascii case-insensitive
@@ -407,6 +408,262 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
     3.  Return "`Not Subsumed`".
   </ol>
 
+  <h4 id="source-expression-similarity" algorithm>
+    Is an expression matching <a grammar>`scheme-source`</a> or 
+    <a grammar>`host-source`</a> grammar |A| similar to an expression matching 
+    <a grammar>`scheme-source`</a> or <a grammar>`host-source`</a> grammar |B|?
+  </h4>
+
+  Given two expressions matching the <a grammar>`scheme-source`</a>  or 
+  <a grammar>`host-source`</a> grammar (|A| and |B|), return "`Similar`" if |A|
+  is <a for="similar">similar</a> to |B|. Otherwise, return "`Not Similar`".
+
+  |A| and |B| are said to be <dfn for="similar">similar</dfn> if their parts 
+  individually match, that is <a grammar>`scheme-part`</a>, 
+  <a grammar>`host-part`</a>, <a grammar>`port-part`</a>, and 
+  <a grammar>`path-part`</a>. 
+
+  NOTE: This property is symmetric. That is if |A| is 
+  <a for="similar">similar</a> to |B|, it must be that |B| is 
+  <a for="similar">similar</a> to |A|.
+
+  <div class="example">
+    Cases when |A| is <a for="similar">similar</a> to |B|.
+
+    <pre>
+      A = http://*.example.com
+      B = https://example.com:*
+    </pre>
+
+    <pre>
+      A = https://inner.example.com/foo/
+      B = http://*.example.com/foo/bar/
+    </pre>
+
+    <pre>
+      A = http://example.com:80/page1/html
+      B = https://example.com:443/
+    </pre>
+
+    Cases when |A| is not <a for="similar">similar</a> to |B|.
+
+    <pre>
+      A = http://example.com:80
+      B = http://example.com:334
+    </pre>
+    In this case, ports of |A| and |B| do not match so that the two sources are
+    not <a for="similar">similar</a> .
+
+    <pre>
+      A = http://example.com/page.html
+      B = http://example.com/index.html
+    </pre>
+    The two sources are not <a for="similar">similar</a> beucase their paths
+    do not match.
+  </div>
+
+  A <a>source expression</a> has a 
+  <dfn for="source expression">wildcard host</dfn> if the first character of the
+  <a>source expression</a>'s <a grammar>`host-part`</a> is an U+002A ASTERISK 
+  character (`*`).
+
+  A <a>source expression</a> has a 
+  <dfn for="source expression">wildcard port</dfn> if the 
+  <a grammar>`port-part`</a> of the <a>source expression</a> is an U+002A 
+  ASTERISK character (`*`).
+
+  1.  Let |scheme A| be |A|'s <a grammar>`scheme-part`</a>, if present, and 
+      `null` otherwise.
+      
+  2.  Let |scheme B| be |B|'s <a grammar>`scheme-part`</a>, if present, and 
+      `null` otherwise.
+
+  3.  If the result of executing [[csp3#match-schemes]] returns 
+      "`Does Not Match`" given |scheme A| and |scheme B|, and the result of 
+      executing [[csp3#match-schemes]] on |scheme B| and |scheme A| is 
+      "`Does Not Match`", return "`Not Similar`".
+
+  4.  If |A| or |B| matches  <a grammar>`scheme-source`</a> grammar,
+      return "`Similar`".
+
+  5.  Return "`Not Similar`" if any of the following is true:
+
+      1.  Let |host A| be |A|'s <a grammar>`host-part`</a>, if present, and 
+          `null` otherwise.
+      
+      2.  Let |host B| be |B|'s <a grammar>`host-part`</a>, if present, and 
+          `null` otherwise.
+
+      3.  Both |A| and |B| have a <a for="source expression">wildcard host</a>,
+          but |host A| is not an <a>ASCII case-insensitive</a> match to |host B|.
+
+      4.  At most one of |A| and |B| has a 
+          <a for="source expression">wildcard host</a>, the result of executing 
+          [[csp3#match-hosts]] is "`Does Not Match`" given |host A| and 
+          |host B|, and the result of executing [[csp3#match-hosts]] on |host B|
+          and |host A| is also "`Does Not Match`".
+
+      5.  Let |port A| be |A|'s <a grammar>`port-part`</a>, if present, and 
+          `null` otherwise.
+      
+      6.  Let |port B| be |B|'s <a grammar>`port-part`</a>, if present, and 
+          `null` otherwise.
+
+      7.  Neither |A| nor |B| has a <a for="source expression">wildcard port</a>,
+          the result of executing [[csp3#match-ports]] is "`Does Not Match`"
+          given |port A| and |port B|, and the result of executing 
+          [[csp3#match-ports]] given |port B| and |port A| is also 
+          "`Does Not Match`".
+
+      8.  Let |path A| be |A|'s <a grammar>`path-part`</a>, if present, and 
+          `null` otherwise.
+      
+      9.  Let |path B| be |B|'s <a grammar>`path-part`</a>, if present, and 
+          `null` otherwise.
+
+      10.  The result of executing [[csp3#match-paths]] is "`Does Not Match`"
+           given |path A| and |path B| and the result of executing 
+           [[csp3#match-paths]] given |path B| and |path A| is also 
+           "`Does Not Match`".
+
+  6.  Return "`Similar`".
+
+  <h4 id="intersection-source-expressions" algorithm>
+    What is an intersection of two expressions matching 
+    <a grammar>`scheme-source`</a> or <a grammar>`host-source`</a> 
+    grammar |A| and |B|?
+  </h4>
+
+  <a>Source expression</a> is said to be an 
+  <dfn for="source expression">intersection</dfn> of two other 
+  expressions matching <a grammar>`scheme-source`</a> or 
+  <a grammar>`host-source`</a>  grammar |A| and |B| if it contains the more
+  restrictive <a grammar>`scheme-part`</a>, <a grammar>`host-part`</a>, 
+  <a grammar>`port-part`</a>, and <a grammar>`path-part`</a> of the two. 
+
+  <div class="example">
+    In these cases, `Intersect` is an 
+    <a for="source expression">intersection</a> for |A| and |B|.
+      
+    <pre>
+      A = https:
+      B = http:
+      Intersect = https:
+    </pre>
+
+    <pre>
+      A = http://*.example.com
+      B = https://example.com:*
+      Intersect = https://example.com:443
+    </pre>
+
+    <pre>
+      A = http://example.com:80/page1/html
+      B = https://example.com:443/
+      Intersect = https://example.com:443/page1/html
+    </pre>
+
+    <pre>
+      A = https:
+      B = http://example.com
+      Intersect = `https://example.com`.
+    </pre>
+
+    <pre>
+      A = https://example.com:*
+      B = http://*.example.com/page.html
+      Intersect = `https://example.com/page.html`
+    </pre>
+  </div>
+
+  Given two expressions matching the <a grammar>`scheme-source`</a> or 
+  <a grammar>`host-source`</a> grammar (|A| and |B|), return their 
+  <a for="source expression">intersection</a> if |A| is 
+  <a for="similar">similar</a> to |B|. Otherwise, return `null`.
+
+  1.  If the result of executing [[#source-expression-similarity]] on |A| and 
+      |B| is "`Not Similar`", return `null`.
+
+  2.  Let |source| be an empty string.
+
+  3.  Let |scheme A| be |A|'s <a grammar>`scheme-part`</a>, if present, and 
+      `null` otherwise.
+      
+  4.  Let |scheme B| be |B|'s <a grammar>`scheme-part`</a>, if present, and 
+      `null` otherwise.
+
+  5.  Let |more secure scheme B| be `true` if the result of executing 
+      [[csp3#match-schemes]] is "`Does Not match`" given |scheme A| and 
+      |scheme B|, and `false` otherwise.
+
+  6.  Append |scheme A| and ":" to |source| if |scheme A| is not `null` and 
+      |more secure scheme B| is `false`. Otherwise, append |scheme B| and ":"
+      to |source| if |scheme B| is not `null`.
+
+  7.  If both |A| and |B| match the <a grammar>`scheme-source`</a> grammar,
+      return |source|. 
+
+  8.  Append "//" to |source| if it is not empty.
+
+  9.  Let |host A| be |A|'s <a grammar>`host-part`</a>, if present, and 
+      `null` otherwise.
+      
+  10.  Let |host B| be |B|'s <a grammar>`host-part`</a>, if present, and 
+       `null` otherwise.
+
+  11.  If |host A| is not `null`:
+
+       1.  If |host B| is `null`, append |host A| to |source|.
+           Continue to the next step in the main algorithm.
+
+       2.  If |A| doesn't match the <a grammar>`scheme-source`</a> grammar and 
+           doesn't have a <a for="source expression">wildcard host</a>, append 
+           |host A| to |source|.
+
+       3.  Otherwise, append |host B| to |source|.
+
+  12.  If |host A| is `null`, append |host B| to |source|.
+
+  13.  Let |port A| be |A|'s <a grammar>`port-part`</a>, if present, and 
+       `null` otherwise.
+      
+  14.  Let |port B| be |B|'s <a grammar>`port-part`</a>, if present, and 
+       `null` otherwise.
+
+  15.  If |port A| is `null`, append ":" and |port B| to |source| if it is 
+       not `null`. 
+
+  16.  If |port A| is not `null`:
+
+       1.  If |port B| is `null`, append ":" and |port A| to |source|.
+           Continue to the next step in the main algorithm.
+
+       2.  If |A| doesn't have a <a for="source expression">wildcard port</a> 
+           and |more secure scheme B| is `false`, append ":" and |port A| 
+           to |source|.
+       
+       3.  Otherwise, append ":" and |port B| to |source|.
+
+  17.  Let |path A| be |A|'s <a grammar>`path-part`</a>, if present, and 
+      `null` otherwise.
+      
+  18.  Let |path B| be |B|'s <a grammar>`path-part`</a>, if present, and 
+      `null` otherwise.
+
+  19.  If |path A| is `null`, append |path B| to |source| if it is not `null`. 
+
+  20.  If |path A| is not `null`:
+
+       1.  If |path B| is `null`, append |path A| to |source|.
+           Continue to the next step in the main algorithm.
+
+       2.  If the result of executing [[csp3#match-paths]] on |path A| and 
+           |path B| is "`Does Not Match`", append |path A| to |source|.
+       
+       3.  Otherwise, append |path B| to |source|.
+
+  21.  Return |source|.
+
   <h4 id="rewrite-self" algorithm>
     Rewrite `'self'` into a host-source expression for |origin|.
   </h4>
@@ -427,12 +684,6 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   Given two <a>source expressions</a> |A| and |B|, this algorithm returns 
   "`Subsumes`" if |A| <a>subsumes</a> |B|, and returns "`Does Not Subsume`"
   otherwise.
-
-  A <a>source expression</a> has a <dfn>wildcard host</dfn> if the first 
-  character of the <a>source expression</a>'s <a grammar>`host-part`</a> is an 
-  U+002A ASTERISK character (`*`).
-  A <a>source expression</a> has a <dfn>wildcard port</dfn> if the
-  <a grammar>`port-part`</a> of the <a>source expression</a> is equal to "*".
 
   1.  Assert: Neither |A| nor |B| match the <a grammar>`keyword-source`</a>
       grammar.
