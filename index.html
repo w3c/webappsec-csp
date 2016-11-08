@@ -1451,7 +1451,7 @@ pre.idl.highlight { color: #708090; }
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1>Content Security Policy Level 3</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-11-07">7 November 2016</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-11-08">8 November 2016</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1733,8 +1733,11 @@ of security-relevant policy decisions.</p>
           <li><a href="#match-response-to-source-list"><span class="secno">6.6.1.4</span> <span class="content"> Does <var>response</var> to <var>request</var> match <var>source list</var>? </span></a>
           <li><a href="#match-url-to-source-list"><span class="secno">6.6.1.5</span> <span class="content"> Does <var>url</var> match <var>source list</var> in <var>origin</var> with <var>redirect count</var>? </span></a>
           <li><a href="#match-url-to-source-expression"><span class="secno">6.6.1.6</span> <span class="content"> Does <var>url</var> match <var>expression</var> in <var>origin</var> with <var>redirect count</var>? </span></a>
-          <li><a href="#match-schemes"><span class="secno">6.6.1.7</span> <span class="content"> Does <var>scheme-part</var> match another <var>scheme-part</var>? </span></a>
-          <li><a href="#effective-directive-for-a-request"><span class="secno">6.6.1.8</span> <span class="content"> Get the effective directive for <var>request</var> </span></a>
+          <li><a href="#match-schemes"><span class="secno">6.6.1.7</span> <span class="content"> Does <code>scheme-part</code> <var>A</var> match <code>scheme-part</code> <var>B</var>? </span></a>
+          <li><a href="#match-hosts"><span class="secno">6.6.1.8</span> <span class="content"> Does <code>host-part</code> <var>A</var> match <code>host-part</code> <var>B</var>? </span></a>
+          <li><a href="#match-ports"><span class="secno">6.6.1.9</span> <span class="content"> Does <code>port-part</code> <var>A</var> match <code>port-part</code> <var>B</var> for <var>scheme B</var>? </span></a>
+          <li><a href="#match-paths"><span class="secno">6.6.1.10</span> <span class="content"> Does <code>path-part</code> <var>A</var> match <code>path-part</code> <var>B</var>? </span></a>
+          <li><a href="#effective-directive-for-a-request"><span class="secno">6.6.1.11</span> <span class="content"> Get the effective directive for <var>request</var> </span></a>
          </ol>
         <li>
          <a href="#matching-elements"><span class="secno">6.6.2</span> <span class="content">Element Matching Algorithms</span></a>
@@ -2068,12 +2071,12 @@ of security-relevant policy decisions.</p>
 <dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" id="grammardef-scheme-source">scheme-source</dfn> = <a data-link-type="grammar" href="#grammardef-scheme-part" id="ref-for-grammardef-scheme-part-1">scheme-part</a> ":"
 
 ; Hosts: "example.com" / "*.example.com" / "https://*.example.com:12/path/to/file.js"
-<dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" id="grammardef-host-source">host-source</dfn> = [ <a data-link-type="grammar" href="#grammardef-scheme-part" id="ref-for-grammardef-scheme-part-2">scheme-part</a> "://" ] <a data-link-type="grammar" href="#grammardef-host-part" id="ref-for-grammardef-host-part-1">host-part</a> [ <a data-link-type="grammar" href="#grammardef-port-part" id="ref-for-grammardef-port-part-1">port-part</a> ] [ <a data-link-type="grammar" href="#grammardef-path-part" id="ref-for-grammardef-path-part-1">path-part</a> ]
+<dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" id="grammardef-host-source">host-source</dfn> = [ <a data-link-type="grammar" href="#grammardef-scheme-part" id="ref-for-grammardef-scheme-part-2">scheme-part</a> "://" ] <a data-link-type="grammar" href="#grammardef-host-part" id="ref-for-grammardef-host-part-1">host-part</a> [ ":" <a data-link-type="grammar" href="#grammardef-port-part" id="ref-for-grammardef-port-part-1">port-part</a> ] [ <a data-link-type="grammar" href="#grammardef-path-part" id="ref-for-grammardef-path-part-1">path-part</a> ]
 <dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" id="grammardef-scheme-part">scheme-part</dfn> = <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc3986#section-3.1">scheme</a>
               ; <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc3986#section-3.1">scheme</a> is defined in section 3.1 of RFC 3986.
 <dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" id="grammardef-host-part">host-part</dfn>   = "*" / [ "*." ] 1*<a data-link-type="grammar" href="#grammardef-host-char" id="ref-for-grammardef-host-char-1">host-char</a> *( "." 1*<a data-link-type="grammar" href="#grammardef-host-char" id="ref-for-grammardef-host-char-2">host-char</a> )
 <dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" id="grammardef-host-char">host-char</dfn>   = <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc5234#appendix-B.1">ALPHA</a> / <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc5234#appendix-B.1">DIGIT</a> / "-"
-<dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" id="grammardef-port-part">port-part</dfn>   = ":" ( 1*<a data-link-type="grammar" href="https://tools.ietf.org/html/rfc5234#appendix-B.1">DIGIT</a> / "*" )
+<dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" id="grammardef-port-part">port-part</dfn>   = 1*<a data-link-type="grammar" href="https://tools.ietf.org/html/rfc5234#appendix-B.1">DIGIT</a> / "*"
 <dfn class="dfn-paneled" data-dfn-type="grammar" data-export="" id="grammardef-path-part">path-part</dfn>   = <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc3986#section-3.3">path-abempty</a>
               ; <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc3986#section-3.3">path-abempty</a> is defined in section 3.3 of RFC 3986.
 
@@ -2885,13 +2888,13 @@ of security-relevant policy decisions.</p>
            <dd data-md="">
             <p>""</p>
            <dt data-md="">
-            <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-cache-mode">cache mode</a></p>
-           <dd data-md="">
-            <p>"<code>no-cache</code>"</p>
-           <dt data-md="">
             <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-credentials-mode">credentials mode</a></p>
            <dd data-md="">
             <p>"<code>same-origin</code>"</p>
+           <dt data-md="">
+            <p><a data-link-type="dfn">keepalive flag</a></p>
+           <dd data-md="">
+            <p>"<code>true</code>"</p>
            <dt data-md="">
             <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-header-list">header list</a></p>
            <dd data-md="">
@@ -2906,6 +2909,7 @@ of security-relevant policy decisions.</p>
            <dd data-md="">
             <p>"<code>error</code>"</p>
           </dl>
+          <p class="note" role="note">Note: <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-mode">mode</a> defaults to "<code>no-cors</code>"; the response is ignored entirely.</p>
          <li data-md="">
           <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-fetch">Fetch</a> <var>request</var>. The result will be ignored.</p>
         </ol>
@@ -2995,7 +2999,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
  context</a> (e.g. requests which will populate an <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a></code> or <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/obsolete.html#frame">frame</a></code> element)</p>
      <li data-md="">
       <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-destination">destination</a> is either "<code>serviceworker</code>",
- "<code>sharedworker</code>", or "<code>worker</code>" (which are fed to the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/workers.html#run-a-worker">run a worker</a> algorithm for <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/ServiceWorker/#service-worker-interface">ServiceWorker</a></code>, <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#sharedworker">SharedWorker</a></code>, and <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#worker">Worker</a></code>,
+ "<code>sharedworker</code>", or "<code>worker</code>" (which are fed to the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/workers.html#run-a-worker">run a worker</a> algorithm for <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/ServiceWorker/#serviceworker">ServiceWorker</a></code>, <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#sharedworker">SharedWorker</a></code>, and <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#worker">Worker</a></code>,
  respectively).</p>
     </ul>
     <div class="example" id="example-1cff8d33">
@@ -3015,7 +3019,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
     <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>) and a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object-26">policy</a> (<var>policy</var>):</p>
     <ol>
      <li data-md="">
-      <p>Let <var>name</var> be the result of executing <a href="#effective-directive-for-a-request">§6.6.1.8 Get the effective directive for request</a> on <var>request</var>.</p>
+      <p>Let <var>name</var> be the result of executing <a href="#effective-directive-for-a-request">§6.6.1.11 Get the effective directive for request</a> on <var>request</var>.</p>
      <li data-md="">
       <p>If <var>name</var> is not <code>frame-src</code> or <code>worker-src</code>, return "<code>Allowed</code>".</p>
      <li data-md="">
@@ -3029,7 +3033,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
     <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), and a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object-27">policy</a> (<var>policy</var>):</p>
     <ol>
      <li data-md="">
-      <p>Let <var>name</var> be the result of executing <a href="#effective-directive-for-a-request">§6.6.1.8 Get the effective directive for request</a> on <var>request</var>.</p>
+      <p>Let <var>name</var> be the result of executing <a href="#effective-directive-for-a-request">§6.6.1.11 Get the effective directive for request</a> on <var>request</var>.</p>
      <li data-md="">
       <p>If <var>name</var> is not <code>frame-src</code> or <code>worker-src</code>, return "<code>Allowed</code>".</p>
      <li data-md="">
@@ -3170,7 +3174,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
     <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>) and a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object-30">policy</a> (<var>policy</var>):</p>
     <ol>
      <li data-md="">
-      <p>Let <var>name</var> be the result of executing <a href="#effective-directive-for-a-request">§6.6.1.8 Get the effective directive for request</a> on <var>request</var>.</p>
+      <p>Let <var>name</var> be the result of executing <a href="#effective-directive-for-a-request">§6.6.1.11 Get the effective directive for request</a> on <var>request</var>.</p>
      <li data-md="">
       <p>If <var>name</var> is <code>null</code>, return "<code>Allowed</code>".</p>
      <li data-md="">
@@ -3190,7 +3194,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
     <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>), and a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object-31">policy</a> (<var>policy</var>):</p>
     <ol>
      <li data-md="">
-      <p>Let <var>name</var> be the result of executing <a href="#effective-directive-for-a-request">§6.6.1.8 Get the effective directive for request</a> on <var>request</var>.</p>
+      <p>Let <var>name</var> be the result of executing <a href="#effective-directive-for-a-request">§6.6.1.11 Get the effective directive for request</a> on <var>request</var>.</p>
      <li data-md="">
       <p>If <var>name</var> is <code>null</code>, return "<code>Allowed</code>".</p>
      <li data-md="">
@@ -3771,7 +3775,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
   let’s work with them to put something reasonable together.</p>
     <h4 class="heading settled" data-level="6.1.12" id="directive-worker-src"><span class="secno">6.1.12. </span><span class="content"><code>worker-src</code></span><a class="self-link" href="#directive-worker-src"></a></h4>
     <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="worker-src">worker-src</dfn> directive restricts the URLs which may be loaded as
-  a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#worker">Worker</a></code>, <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#sharedworker">SharedWorker</a></code>, or <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/ServiceWorker/#service-worker-interface">ServiceWorker</a></code>. The syntax for the
+  a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#worker">Worker</a></code>, <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#sharedworker">SharedWorker</a></code>, or <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/ServiceWorker/#serviceworker">ServiceWorker</a></code>. The syntax for the
   directive’s name and value is described by the following ABNF:</p>
 <pre>directive-name  = "worker-src"
 directive-value = <a data-link-type="grammar" href="#grammardef-serialized-source-list" id="ref-for-grammardef-serialized-source-list-12">serialized-source-list</a>
@@ -4290,95 +4294,35 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
       <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-scheme-source" id="ref-for-grammardef-scheme-source-3"><code>scheme-source</code></a> or <a data-link-type="grammar" href="#grammardef-host-source" id="ref-for-grammardef-host-source-3"><code>host-source</code></a> grammar:</p>
       <ol>
        <li data-md="">
-        <p>If <var>expression</var> has a <a data-link-type="grammar" href="#grammardef-scheme-part" id="ref-for-grammardef-scheme-part-3"><code>scheme-part</code></a> and <a href="#match-schemes">§6.6.1.7 Does scheme-part match another scheme-part?</a> returns "<code>Does Not Match</code>" given <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-scheme-part" id="ref-for-grammardef-scheme-part-4"><code>scheme-part</code></a> and <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a>, return "<code>Does Not Match</code>".</p>
+        <p>If <var>expression</var> has a <a data-link-type="grammar" href="#grammardef-scheme-part" id="ref-for-grammardef-scheme-part-3"><code>scheme-part</code></a> and <a href="#match-schemes">§6.6.1.7 Does scheme-part A match scheme-part B?</a> returns "<code>Does Not Match</code>" given <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-scheme-part" id="ref-for-grammardef-scheme-part-4"><code>scheme-part</code></a> and <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a>, 
+  return "<code>Does Not Match</code>".</p>
        <li data-md="">
         <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-scheme-source" id="ref-for-grammardef-scheme-source-4"><code>scheme-source</code></a> grammar,
   return "<code>Matches</code>".</p>
       </ol>
-      <p class="note" role="note">Note: This logic effectively means that <code>script-src http:</code> is
-  equivalent to <code>script-src http: https:</code>, and <code>script-src http://example.com/</code> is equivalent to <code>script-src http://example.com https://example.com</code>. As well as WebSocket
-  schemes are equivalent to corresponding HTTP schemes. In short,
-  we always allow a secure upgrade from an explicitly insecure expression.</p>
      <li data-md="">
       <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-host-source" id="ref-for-grammardef-host-source-4"><code>host-source</code></a> grammar:</p>
       <ol>
        <li data-md="">
         <p>If <var>url</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-host">host</a></code> is <code>null</code>, return "<code>Does Not Match</code>".</p>
        <li data-md="">
-        <p>If <var>expression</var> does not have a <a data-link-type="grammar" href="#grammardef-scheme-part" id="ref-for-grammardef-scheme-part-5"><code>scheme-part</code></a>, then
-  return "<code>Does Not Match</code>" unless one of the following conditions is
-  met:</p>
-        <ol>
-         <li data-md="">
-          <p><var>origin</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a> is <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a></p>
-         <li data-md="">
-          <p><var>origin</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a> is "<code>http</code>", and <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a> one of "<code>https</code>", "<code>ws</code>", or "<code>wss</code>".</p>
-         <li data-md="">
-          <p><var>origin</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a> is "<code>https</code>", and <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a> is "<code>wss</code>".</p>
-        </ol>
+        <p>If <var>expression</var> does not have a <a data-link-type="grammar" href="#grammardef-scheme-part" id="ref-for-grammardef-scheme-part-5"><code>scheme-part</code></a> and
+  and <a href="#match-schemes">§6.6.1.7 Does scheme-part A match scheme-part B?</a> returns "<code>Does Not Match</code>" given <code>null</code> and <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a>, return "<code>Does Not Match</code>".</p>
         <p class="note" role="note">Note: As with <a data-link-type="grammar" href="#grammardef-scheme-part" id="ref-for-grammardef-scheme-part-6"><code>scheme-part</code></a> above, we allow schemeless <a data-link-type="grammar" href="#grammardef-host-source" id="ref-for-grammardef-host-source-5"><code>host-source</code></a> expressions to be upgraded from insecure
   schemes to secure schemes.</p>
        <li data-md="">
-        <p>If the first character of <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-host-part" id="ref-for-grammardef-host-part-2"><code>host-part</code></a> is an U+002A ASTERISK character (<code>*</code>):</p>
-        <ol>
-         <li data-md="">
-          <p>Let <var>remaining</var> be the result of removing the leading "<code>*</code>" from <var>expression</var>.</p>
-         <li data-md="">
-          <p>If <var>remaining</var> (including the leading U+002E FULL STOP character
-  (<code>.</code>)) is not an <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#ascii-case-insensitive">ASCII case-insensitive</a> match for the
-  rightmost characters of <var>url</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-host">host</a></code>, then return "<code>Does Not Match</code>".</p>
-        </ol>
+        <p>If <a href="#match-hosts">§6.6.1.8 Does host-part A match host-part B?</a> returns "<code>Does Not Match</code>" given <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-host-part" id="ref-for-grammardef-host-part-2"><code>host-part</code></a> and <var>url</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-host">host</a></code>, return "<code>Does Not Match</code>".</p>
        <li data-md="">
-        <p>If the first character of <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-host-part" id="ref-for-grammardef-host-part-3"><code>host-part</code></a> is not an U+002A ASTERISK character (<code>*</code>), and <var>url</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-host">host</a></code> is not an <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#ascii-case-insensitive">ASCII case-insensitive</a> match for <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-host-part" id="ref-for-grammardef-host-part-4"><code>host-part</code></a>, return "<code>Does Not Match</code>".</p>
-       <li data-md="">
-        <p>If <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-host-part" id="ref-for-grammardef-host-part-5"><code>host-part</code></a> matches the <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc3986#section-3.2.2">IPv4address</a> rule from <a data-link-type="biblio" href="#biblio-rfc3986">[RFC3986]</a>, and is not
-  "<code>127.0.0.1</code>"; or if <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-host-part" id="ref-for-grammardef-host-part-6"><code>host-part</code></a> is an <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-ipv6">IPv6 address</a>, return "<code>Does Not Match</code>".</p>
-        <p class="note" role="note">Note: A future version of this specification may allow literal IPv6
-  and IPv4 addresses, depending on usage and demand. Given the weak
-  security properties of IP addresses in relation to named hosts,
-  however, authors are encouraged to prefer the latter whenever
-  possible.</p>
-       <li data-md="">
-        <p>If <var>expression</var> does not contain a <a data-link-type="grammar" href="#grammardef-port-part" id="ref-for-grammardef-port-part-2"><code>port-part</code></a>, and <var>url</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-port">port</a></code> is not the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#default-port">default port</a> for <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a>, return "<code>Does Not Match</code>".</p>
-       <li data-md="">
-        <p>If <var>expression</var> does contain a <a data-link-type="grammar" href="#grammardef-port-part" id="ref-for-grammardef-port-part-3"><code>port-part</code></a>, return
-  "<code>Does Not Match</code>" unless one of the following conditions is met:</p>
-        <ol>
-         <li data-md="">
-          <p><var>expression</var>’s <a data-link-type="grammar" href="#grammardef-port-part" id="ref-for-grammardef-port-part-4"><code>port-part</code></a> is "<code>*</code>".</p>
-         <li data-md="">
-          <p><var>expression</var>’s <a data-link-type="grammar" href="#grammardef-port-part" id="ref-for-grammardef-port-part-5"><code>port-part</code></a> is the same number as <var>url</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-port">port</a></code>.</p>
-         <li data-md="">
-          <p><var>expression</var>’s <a data-link-type="grammar" href="#grammardef-port-part" id="ref-for-grammardef-port-part-6"><code>port-part</code></a> is <code>80</code>, and <var>url</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-port">port</a></code> is <code>443</code>.</p>
-        </ol>
+        <p>If <a href="#match-ports">§6.6.1.9 Does port-part A match port-part B for scheme B?</a> returns "<code>Does Not Match</code>" given <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-port-part" id="ref-for-grammardef-port-part-2"><code>port-part</code></a> (or <code>null</code> if <var>expression</var> does not 
+  contain a <a data-link-type="grammar" href="#grammardef-port-part" id="ref-for-grammardef-port-part-3"><code>port-part</code></a>) and <var>url</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-port">port</a></code>, return 
+  "<code>Does Not Match</code>".</p>
        <li data-md="">
         <p>If <var>expression</var> contains a non-empty <a data-link-type="grammar" href="#grammardef-path-part" id="ref-for-grammardef-path-part-2"><code>path-part</code></a>, and <var>redirect count</var> is 0, then:</p>
         <ol>
          <li data-md="">
-          <p>Let <var>exact match</var> be <code>false</code> if the final character of <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-path-part" id="ref-for-grammardef-path-part-3"><code>path-part</code></a> is the U+002F SOLIDUS
-  character (<code>/</code>), and <code>true</code> otherwise.</p>
+          <p>Let <var>path</var> be the resulting of joining <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-path">path</a> on the U+002F SOLIDUS character (<code>/</code>).</p>
          <li data-md="">
-          <p>Let <var>path list</var> be the result of <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#strictly-split-a-string">strictly splitting</a> <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-path-part" id="ref-for-grammardef-path-part-4"><code>path-part</code></a> on the U+002F SOLIDUS
-  character (<code>/</code>).</p>
-         <li data-md="">
-          <p>If <var>path list</var> has more items than <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-path">path</a>, return
-  "<code>Does Not Match</code>".</p>
-         <li data-md="">
-          <p>If <var>exact match</var> is <code>true</code>, and <var>path list</var> does not have the same
-  number of items as <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-path">path</a>, return "<code>Does Not Match</code>".</p>
-         <li data-md="">
-          <p>For each <var>expression piece</var> in <var>path list</var>:</p>
-          <ol>
-           <li data-md="">
-            <p>Let <var>url piece</var> be the next item in <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-path">path</a>.</p>
-           <li data-md="">
-            <p><a data-link-type="dfn" href="https://url.spec.whatwg.org/#percent-decode">Percent decode</a> <var>expression piece</var>.</p>
-           <li data-md="">
-            <p><a data-link-type="dfn" href="https://url.spec.whatwg.org/#percent-decode">Percent decode</a> <var>url piece</var>.</p>
-           <li data-md="">
-            <p>If <var>expression piece</var> is not a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#case-sensitive">case-sensitive</a> match
-  for <var>url piece</var>, return "<code>Does Not Match</code>".</p>
-          </ol>
+          <p>If <a href="#match-paths">§6.6.1.10 Does path-part A match path-part B?</a> returns "<code>Does Not Match</code>" given <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-path-part" id="ref-for-grammardef-path-part-3"><code>path-part</code></a> and <var>path</var>, return "<code>Does Not Match</code>".</p>
         </ol>
        <li data-md="">
         <p>Return "<code>Matches</code>".</p>
@@ -4409,29 +4353,129 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
      <li data-md="">
       <p>Return "<code>Does Not Match</code>".</p>
     </ol>
-    <h5 class="heading settled algorithm" data-algorithm="Does scheme-part match another scheme-part?" data-level="6.6.1.7" id="match-schemes"><span class="secno">6.6.1.7. </span><span class="content"> Does <var>scheme-part</var> match another <var>scheme-part</var>? </span><a class="self-link" href="#match-schemes"></a></h5>
-    <p>Given two strings of <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#ascii-byte">ASCII bytes</a> A and B, this algorithm returns
-  "<code>Matches</code>" if A matches B, and returns "<code>Does Not Match</code>" otherwise.</p>
-    <p class="note" role="note">Note: This algorithm is not transitive. That is, A matching B does not mean
-  that B will match A.</p>
+    <h5 class="heading settled algorithm" data-algorithm="Does scheme-part A match scheme-part B?" data-level="6.6.1.7" id="match-schemes"><span class="secno">6.6.1.7. </span><span class="content"> Does <code>scheme-part</code> <var>A</var> match <code>scheme-part</code> <var>B</var>? </span><a class="self-link" href="#match-schemes"></a></h5>
+    <p>Given two strings of <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#ascii-byte">ASCII bytes</a> <var>A</var> and <var>B</var>, this algorithm returns
+  "<code>Matches</code>" if <var>A</var> matches <var>B</var>, and returns "<code>Does Not Match</code>" otherwise.</p>
+    <p class="note" role="note">Note: The matching relation is assymetric. That is, <var>A</var> matching <var>B</var> does not
+  mean that <var>B</var> will match <var>A</var>.</p>
     <ol>
      <li data-md="">
       <p>If one of the following is true, return "<code>Matches</code>":</p>
       <ol>
        <li data-md="">
-        <p>A is an <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#ascii-case-insensitive">ASCII case-insensitive</a> match for B.</p>
+        <p><var>A</var> is an <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#ascii-case-insensitive">ASCII case-insensitive</a> match for <var>B</var>.</p>
        <li data-md="">
-        <p>A is an <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#ascii-case-insensitive">ASCII case-insensitive</a> match for "<code>http</code>", and B is an <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#ascii-case-insensitive">ASCII case-insensitive</a> match for "<code>https</code>".</p>
+        <p><var>A</var> is an <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#ascii-case-insensitive">ASCII case-insensitive</a> match for "<code>http</code>", and <var>B</var> is an <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#ascii-case-insensitive">ASCII case-insensitive</a> match for "<code>https</code>".</p>
        <li data-md="">
-        <p>A is an <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#ascii-case-insensitive">ASCII case-insensitive</a> match for "<code>ws</code>", and B is an <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#ascii-case-insensitive">ASCII case-insensitive</a> match for "<code>wss</code>", "<code>http</code>", or 
+        <p><var>A</var> is an <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#ascii-case-insensitive">ASCII case-insensitive</a> match for "<code>ws</code>", and <var>B</var> is an <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#ascii-case-insensitive">ASCII case-insensitive</a> match for "<code>wss</code>", "<code>http</code>", or 
   "<code>https</code>".</p>
        <li data-md="">
-        <p>A is an <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#ascii-case-insensitive">ASCII case-insensitive</a> match for "<code>wss</code>", and B is an <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#ascii-case-insensitive">ASCII case-insensitive</a> match for "<code>https</code>".</p>
+        <p><var>A</var> is an <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#ascii-case-insensitive">ASCII case-insensitive</a> match for "<code>wss</code>", and <var>B</var> is an <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#ascii-case-insensitive">ASCII case-insensitive</a> match for "<code>https</code>".</p>
       </ol>
      <li data-md="">
       <p>Return "<code>Does Not Match</code>".</p>
     </ol>
-    <h5 class="heading settled algorithm" data-algorithm="Get the effective directive for request" data-level="6.6.1.8" id="effective-directive-for-a-request"><span class="secno">6.6.1.8. </span><span class="content"> Get the effective directive for <var>request</var> </span><a class="self-link" href="#effective-directive-for-a-request"></a></h5>
+    <p class="note" role="note">Note: We always allow a secure upgrade from an explicitly insecure expression.
+  That is, script-src http: is treated as equivalent to script-src http: https:,
+  script-src http://example.com to script-src http://example.com 
+  https://example.com, and connect-src ws: to connect-src ws: wss:.</p>
+    <p class="issue" id="issue-fd0833bf"><a class="self-link" href="#issue-fd0833bf"></a> Add a reference to https://github.com/diracdeltas/sniffly.</p>
+    <h5 class="heading settled algorithm" data-algorithm="Does host-part A match host-part B?" data-level="6.6.1.8" id="match-hosts"><span class="secno">6.6.1.8. </span><span class="content"> Does <code>host-part</code> <var>A</var> match <code>host-part</code> <var>B</var>? </span><a class="self-link" href="#match-hosts"></a></h5>
+    <p>Given two strings of <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#ascii-byte">ASCII bytes</a> (<var>A</var> and <var>B</var>), this algorithm returns
+  "<code>Matches</code>" if <var>A</var> matches <var>B</var>, and returns "<code>Does Not Match</code>" otherwise.</p>
+    <p class="note" role="note">Note: The matching relation is assymetric. That is, <var>A</var> matching <var>B</var> does not
+  mean that <var>B</var> will match <var>A</var>.</p>
+    <ol>
+     <li data-md="">
+      <p>If the first character of <var>A</var> is an U+002A ASTERISK character (<code>*</code>):</p>
+      <ol>
+       <li data-md="">
+        <p>Let <var>remaining</var> be the result of removing the leading ("*") from <var>A</var>.</p>
+       <li data-md="">
+        <p>If <var>remaining</var> (including the leading U+002E FULL STOP character
+  (<code>.</code>)) is an <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#ascii-case-insensitive">ASCII case-insensitive</a> match for the rightmost 
+  characters of <var>B</var>, then return "<code>Matches</code>". Otherwise, return 
+  "<code>Does Not Match</code>".</p>
+      </ol>
+     <li data-md="">
+      <p>If <var>A</var> is not an <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#ascii-case-insensitive">ASCII case-insensitive</a> match for <var>B</var>, return
+  "<code>Does Not Match</code>".</p>
+     <li data-md="">
+      <p>If <var>A</var> matches the <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc3986#section-3.2.2">IPv4address</a> rule from <a data-link-type="biblio" href="#biblio-rfc3986">[RFC3986]</a>, and
+  is not "<code>127.0.0.1</code>"; or if <var>A</var> is an <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-ipv6">IPv6 address</a>, return 
+  "<code>Does Not Match</code>".</p>
+      <p class="note" role="note">Note: A future version of this specification may allow literal IPv6
+  and IPv4 addresses, depending on usage and demand. Given the weak
+  security properties of IP addresses in relation to named hosts,
+  however, authors are encouraged to prefer the latter whenever
+  possible.</p>
+     <li data-md="">
+      <p>Return "<code>Matches</code>".</p>
+    </ol>
+    <h5 class="heading settled algorithm" data-algorithm="Does port-part A match port-part B for scheme B?" data-level="6.6.1.9" id="match-ports"><span class="secno">6.6.1.9. </span><span class="content"> Does <code>port-part</code> <var>A</var> match <code>port-part</code> <var>B</var> for <var>scheme B</var>? </span><a class="self-link" href="#match-ports"></a></h5>
+    <p>Given three strings of <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#ascii-byte">ASCII bytes</a> <var>port A</var>, <var>port B</var>, and <var>scheme B</var>,
+  this algorithm returns "<code>Matches</code>" if <var>A</var> matches <var>B</var>, and returns 
+  "<code>Does Not Match</code>" otherwise.</p>
+    <p class="note" role="note">Note: The matching relation is assymetric. That is, <var>port A</var> matching <var>port B</var> does not mean that <var>port B</var> will match <var>port A</var>.</p>
+    <ol>
+     <li data-md="">
+      <p>If <var>port A</var> is empty:</p>
+      <ol>
+       <li data-md="">
+        <p>If <var>port B</var> is the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#default-port">default port</a> for <var>scheme B</var>, return
+  "<code>Matches</code>". Otherwise, return "<code>Does Not Match</code>".</p>
+      </ol>
+     <li data-md="">
+      <p>If <var>port A</var> is equal to "*", return "<code>Matches</code>".</p>
+     <li data-md="">
+      <p>If <var>port A</var> is a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#case-sensitive">case-sensitive</a> match for <var>port B</var>, return
+  "<code>Matches</code>".</p>
+     <li data-md="">
+      <p>If <var>port B</var> is empty:</p>
+      <ol>
+       <li data-md="">
+        <p>If <var>port A</var> is the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#default-port">default port</a> for <var>scheme B</var>, return
+  "<code>Matches</code>". Otherwise, return "<code>Does not Match</code>".</p>
+      </ol>
+     <li data-md="">
+      <p>Return "<code>Does Not Match</code>".</p>
+    </ol>
+    <h5 class="heading settled algorithm" data-algorithm="Does path-part A match path-part B?" data-level="6.6.1.10" id="match-paths"><span class="secno">6.6.1.10. </span><span class="content"> Does <code>path-part</code> <var>A</var> match <code>path-part</code> <var>B</var>? </span><a class="self-link" href="#match-paths"></a></h5>
+    <p>Given two strings of <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#ascii-byte">ASCII bytes</a> (<var>A</var> and <var>B</var>), this algorithm returns
+  "<code>Matches</code>" if <var>A</var> matches <var>B</var>, and returns "<code>Does Not Match</code>" otherwise.</p>
+    <p class="note" role="note">Note: The matching relation is assymetric. That is, <var>A</var> matching <var>B</var> does not
+  mean that <var>B</var> will match <var>A</var>.</p>
+    <ol>
+     <li data-md="">
+      <p>If <var>A</var> is empty, return "<code>Matches</code>".</p>
+     <li data-md="">
+      <p>Let <var>exact match</var> be <code>false</code> if the final character of <var>A</var> is the U+002F
+  SOLIDUS character (<code>/</code>), and <code>true</code> otherwise.</p>
+     <li data-md="">
+      <p>Let <var>path list A</var> and <var>path list B</var> be the result of <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#strictly-split-a-string">strictly splitting</a> <var>A</var> and <var>B</var> respestively on the U+002F SOLIDUS character (<code>/</code>).</p>
+     <li data-md="">
+      <p>If <var>path list A</var> has more items than <var>path list B</var>, return
+  "<code>Does Not Match</code>".</p>
+     <li data-md="">
+      <p>If <var>exact match</var> is <code>true</code>, and <var>path list A</var> does not have the same
+  number of items as <var>path list B</var>, return "<code>Does Not Match</code>".</p>
+     <li data-md="">
+      <p>For each <var>piece A</var> in <var>path list A</var>:</p>
+      <ol>
+       <li data-md="">
+        <p>Let <var>piece B</var> be the next item in <var>path list B</var>.</p>
+       <li data-md="">
+        <p><a data-link-type="dfn" href="https://url.spec.whatwg.org/#percent-decode">Percent decode</a> <var>piece A</var>.</p>
+       <li data-md="">
+        <p><a data-link-type="dfn" href="https://url.spec.whatwg.org/#percent-decode">Percent decode</a> <var>piece B</var>.</p>
+       <li data-md="">
+        <p>If <var>piece A</var> is not a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#case-sensitive">case-sensitive</a> match
+  for <var>piece B</var>, return "<code>Does Not Match</code>".</p>
+      </ol>
+     <li data-md="">
+      <p>Return "<code>Matches</code>".</p>
+    </ol>
+    <h5 class="heading settled algorithm" data-algorithm="Get the effective directive for request" data-level="6.6.1.11" id="effective-directive-for-a-request"><span class="secno">6.6.1.11. </span><span class="content"> Get the effective directive for <var>request</var> </span><a class="self-link" href="#effective-directive-for-a-request"></a></h5>
     <p>Each <a data-link-type="dfn" href="#fetch-directives" id="ref-for-fetch-directives-3">fetch directive</a> controls a specific type of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a>. Given
   a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>), the following algorithm returns either <code>null</code> or the <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name-19">name</a> of the request’s <dfn data-dfn-for="request" data-dfn-type="dfn" data-export="" id="request-effective-directive">effective directive<a class="self-link" href="#request-effective-directive"></a></dfn>:</p>
     <ol>
@@ -5047,7 +5091,7 @@ rest of Google’s CSP Cabal.</p>
     effective directive
     <ul>
      <li><a href="#violation-effective-directive">dfn for violation</a><span>, in §2.3</span>
-     <li><a href="#request-effective-directive">dfn for request</a><span>, in §6.6.1.8</span>
+     <li><a href="#request-effective-directive">dfn for request</a><span>, in §6.6.1.11</span>
     </ul>
    <li>
     effectiveDirective
@@ -5228,7 +5272,6 @@ rest of Google’s CSP Cabal.</p>
     <a data-link-type="biblio">[FETCH]</a> defines the following terms:
     <ul>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-body">body</a>
-     <li><a href="https://fetch.spec.whatwg.org/#concept-request-cache-mode">cache mode</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-credentials-mode">credentials mode</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-nonce-metadata">cryptographic nonce metadata</a>
@@ -5245,6 +5288,7 @@ rest of Google’s CSP Cabal.</p>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-integrity-metadata">integrity metadata</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-main-fetch">main fetch</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-method">method</a>
+     <li><a href="https://fetch.spec.whatwg.org/#concept-request-mode">mode</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-network-error">network error</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-header-parse">parse a header value</a>
@@ -5385,7 +5429,7 @@ rest of Google’s CSP Cabal.</p>
    <li>
     <a data-link-type="biblio">[service-workers-1]</a> defines the following terms:
     <ul>
-     <li><a href="https://w3c.github.io/ServiceWorker/#service-worker-interface">ServiceWorker</a>
+     <li><a href="https://w3c.github.io/ServiceWorker/#serviceworker">ServiceWorker</a>
     </ul>
    <li>
     <a data-link-type="biblio">[SHA2]</a> defines the following terms:
@@ -5469,7 +5513,7 @@ rest of Google’s CSP Cabal.</p>
    <dt id="biblio-beacon">[BEACON]
    <dd>Ilya Grigorik; et al. <a href="https://w3c.github.io/beacon/">Beacon</a>. URL: <a href="https://w3c.github.io/beacon/">https://w3c.github.io/beacon/</a>
    <dt id="biblio-csp2">[CSP2]
-   <dd>Mike West; Adam Barth; Daniel Veditz. <a href="https://w3c.github.io/webappsec/specs/CSP2/">Content Security Policy Level 2</a>. URL: <a href="https://w3c.github.io/webappsec/specs/CSP2/">https://w3c.github.io/webappsec/specs/CSP2/</a>
+   <dd>Mike West; Adam Barth; Daniel Veditz. <a href="https://w3c.github.io/webappsec-csp/">Content Security Policy Level 2</a>. URL: <a href="https://w3c.github.io/webappsec-csp/">https://w3c.github.io/webappsec-csp/</a>
    <dt id="biblio-css-abuse">[CSS-ABUSE]
    <dd>Chris Evans. <a href="https://scarybeastsecurity.blogspot.com/2009/12/generic-cross-browser-cross-domain.html">Generic cross-browser cross-domain theft</a>. 28 December 2009. URL: <a href="https://scarybeastsecurity.blogspot.com/2009/12/generic-cross-browser-cross-domain.html">https://scarybeastsecurity.blogspot.com/2009/12/generic-cross-browser-cross-domain.html</a>
    <dt id="biblio-eventsource">[EVENTSOURCE]
@@ -5561,6 +5605,7 @@ rest of Google’s CSP Cabal.</p>
   blocking any other request type with regard to leakage. Given the redirect
   behavior, this devolves to an origin check in the presence of a malicious
   party anyway...<a href="#issue-707b369d"> ↵ </a></div>
+   <div class="issue"> Add a reference to https://github.com/diracdeltas/sniffly.<a href="#issue-fd0833bf"> ↵ </a></div>
    <div class="issue"> This processing is meant to mitigate the risk
   of dangling markup attacks that steal the nonce from an existing element
   in order to load injected script. It is fairly expensive, however, as it
@@ -5807,7 +5852,7 @@ rest of Google’s CSP Cabal.</p>
     default-src Post-request check </a> <a href="#ref-for-directive-name-16">(2)</a> <a href="#ref-for-directive-name-17">(3)</a>
     <li><a href="#ref-for-directive-name-18">6.2.1.1. 
     Is base allowed for document? </a>
-    <li><a href="#ref-for-directive-name-19">6.6.1.8. 
+    <li><a href="#ref-for-directive-name-19">6.6.1.11. 
     Get the effective directive for request </a>
    </ul>
   </aside>
@@ -6169,7 +6214,7 @@ rest of Google’s CSP Cabal.</p>
    <ul>
     <li><a href="#ref-for-grammardef-host-part-1">2.2.1. Source Lists</a>
     <li><a href="#ref-for-grammardef-host-part-2">6.6.1.6. 
-    Does url match expression in origin with redirect count? </a> <a href="#ref-for-grammardef-host-part-3">(2)</a> <a href="#ref-for-grammardef-host-part-4">(3)</a> <a href="#ref-for-grammardef-host-part-5">(4)</a> <a href="#ref-for-grammardef-host-part-6">(5)</a>
+    Does url match expression in origin with redirect count? </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="grammardef-host-char">
@@ -6183,7 +6228,7 @@ rest of Google’s CSP Cabal.</p>
    <ul>
     <li><a href="#ref-for-grammardef-port-part-1">2.2.1. Source Lists</a>
     <li><a href="#ref-for-grammardef-port-part-2">6.6.1.6. 
-    Does url match expression in origin with redirect count? </a> <a href="#ref-for-grammardef-port-part-3">(2)</a> <a href="#ref-for-grammardef-port-part-4">(3)</a> <a href="#ref-for-grammardef-port-part-5">(4)</a> <a href="#ref-for-grammardef-port-part-6">(5)</a>
+    Does url match expression in origin with redirect count? </a> <a href="#ref-for-grammardef-port-part-3">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="grammardef-path-part">
@@ -6191,7 +6236,7 @@ rest of Google’s CSP Cabal.</p>
    <ul>
     <li><a href="#ref-for-grammardef-path-part-1">2.2.1. Source Lists</a>
     <li><a href="#ref-for-grammardef-path-part-2">6.6.1.6. 
-    Does url match expression in origin with redirect count? </a> <a href="#ref-for-grammardef-path-part-3">(2)</a> <a href="#ref-for-grammardef-path-part-4">(3)</a>
+    Does url match expression in origin with redirect count? </a> <a href="#ref-for-grammardef-path-part-3">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="grammardef-keyword-source">
@@ -6645,7 +6690,7 @@ rest of Google’s CSP Cabal.</p>
    <b><a href="#fetch-directives">#fetch-directives</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-fetch-directives-1">6.1.3. default-src</a> <a href="#ref-for-fetch-directives-2">(2)</a>
-    <li><a href="#ref-for-fetch-directives-3">6.6.1.8. 
+    <li><a href="#ref-for-fetch-directives-3">6.6.1.11. 
     Get the effective directive for request </a>
    </ul>
   </aside>
