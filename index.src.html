@@ -533,12 +533,12 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     <dfn>scheme-source</dfn> = <a>scheme-part</a> ":"
 
     ; Hosts: "example.com" / "*.example.com" / "https://*.example.com:12/path/to/file.js"
-    <dfn>host-source</dfn> = [ <a>scheme-part</a> "://" ] <a>host-part</a> [ <a>port-part</a> ] [ <a>path-part</a> ]
+    <dfn>host-source</dfn> = [ <a>scheme-part</a> "://" ] <a>host-part</a> [ ":" <a>port-part</a> ] [ <a>path-part</a> ]
     <dfn>scheme-part</dfn> = <a>scheme</a>
                   ; <a>scheme</a> is defined in section 3.1 of RFC 3986.
     <dfn>host-part</dfn>   = "*" / [ "*." ] 1*<a>host-char</a> *( "." 1*<a>host-char</a> )
     <dfn>host-char</dfn>   = <a>ALPHA</a> / <a>DIGIT</a> / "-"
-    <dfn>port-part</dfn>   = ":" ( 1*<a>DIGIT</a> / "*" )
+    <dfn>port-part</dfn>   = 1*<a>DIGIT</a> / "*"
     <dfn>path-part</dfn>   = <a>path-abempty</a>
                   ; <a>path-abempty</a> is defined in section 3.3 of RFC 3986.
 
@@ -3310,113 +3310,45 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   2.  If |expression| matches the <a grammar>`scheme-source`</a> or
       <a grammar>`host-source`</a> grammar:
 
-      1.  If |expression| has a <a grammar>`scheme-part`</a> and [[#match-schemes]]
-          returns "`Does Not Match`" given |expression|'s <a grammar>`scheme-part`</a> and 
-          |url|'s <a for="url">scheme</a>, return "`Does Not Match`".
+      1.  If |expression| has a <a grammar>`scheme-part`</a> and 
+          [[#match-schemes]] returns "`Does Not Match`" given |expression|'s 
+          <a grammar>`scheme-part`</a> and |url|'s <a for="url">scheme</a>, 
+          return "`Does Not Match`".
 
       2.  If |expression| matches the <a grammar>`scheme-source`</a> grammar,
           return "`Matches`".
-
-      Note: This logic effectively means that `script-src http:` is
-      equivalent to `script-src http: https:`, and
-      `script-src http://example.com/` is equivalent to `script-src
-      http://example.com https://example.com`. As well as WebSocket
-      schemes are equivalent to corresponding HTTP schemes. In short,
-      we always allow a secure upgrade from an explicitly insecure expression.
 
   3.  If |expression| matches the <a grammar>`host-source`</a> grammar:
 
       1.  If |url|'s {{URL/host}} is `null`, return "`Does Not Match`".
 
-      2.  If |expression| does not have a <a grammar>`scheme-part`</a>, then
-          return "`Does Not Match`" unless one of the following conditions is
-          met:
-
-          1.  |origin|'s <a for="url">scheme</a> is |url|'s <a for="url">scheme</a>
-
-          2.  |origin|'s <a for="url">scheme</a> is "`http`", and |url|'s <a for="url">scheme</a>
-              one of "`https`", "`ws`", or "`wss`".
-
-          3.  |origin|'s <a for="url">scheme</a> is "`https`", and |url|'s <a for="url">scheme</a>
-              is "`wss`".
+      2.  If |expression| does not have a <a grammar>`scheme-part`</a> and
+          and [[#match-schemes]] returns "`Does Not Match`" given `null` and 
+          |url|'s {{URL/scheme}}, return "`Does Not Match`".
 
           Note: As with <a grammar>`scheme-part`</a> above, we allow schemeless
           <a grammar>`host-source`</a> expressions to be upgraded from insecure
           schemes to secure schemes.
 
-      3.  If the first character of |expression|'s <a grammar>`host-part`</a>
-          is an U+002A ASTERISK character (`*`):
+      3.  If [[#match-hosts]] returns "`Does Not Match`" given |expression|'s 
+          <a grammar>`host-part`</a> and |url|'s {{URL/host}}, return "`Does 
+          Not Match`".
 
-          1.  Let |remaining| be the result of removing the leading "`*`" from
-              |expression|.
+      4.  If [[#match-ports]] returns "`Does Not Match`" given |expression|'s 
+          <a grammar>`port-part`</a> (or `null` if |expression| does not 
+          contain a <a grammar>`port-part`</a>) and |url|'s {{URL/port}}, return 
+          "`Does Not Match`".
 
-          2.  If |remaining| (including the leading U+002E FULL STOP character
-              (`.`)) is not an <a>ASCII case-insensitive</a> match for the
-              rightmost characters of |url|'s {{URL/host}}, then return "`Does
-              Not Match`".
-
-      4.  If the first character of |expression|'s <a grammar>`host-part`</a>
-          is not an U+002A ASTERISK character (`*`), and |url|'s {{URL/host}}
-          is not an <a>ASCII case-insensitive</a> match for |expression|'s
-          <a grammar>`host-part`</a>, return "`Does Not Match`".
-
-      5.  If |expression|'s <a grammar>`host-part`</a> matches the
-          <a grammar>IPv4address</a> rule from [[!RFC3986]], and is not
-          "`127.0.0.1`"; or if |expression|'s <a grammar>`host-part`</a> is an
-          <a>IPv6 address</a>, return "`Does Not Match`".
-
-          Note: A future version of this specification may allow literal IPv6
-          and IPv4 addresses, depending on usage and demand. Given the weak
-          security properties of IP addresses in relation to named hosts,
-          however, authors are encouraged to prefer the latter whenever
-          possible.
-
-      6.  If |expression| does not contain a <a grammar>`port-part`</a>, and
-          |url|'s {{URL/port}} is not the <a>default port</a> for |url|'s
-          <a for="url">scheme</a>, return "`Does Not Match`".
-
-      7.  If |expression| does contain a <a grammar>`port-part`</a>, return
-          "`Does Not Match`" unless one of the following conditions is met:
-
-          1.  |expression|'s <a grammar>`port-part`</a> is "`*`".
-
-          2.  |expression|'s <a grammar>`port-part`</a> is the same number as
-              |url|'s {{URL/port}}.
-
-          3.  |expression|'s <a grammar>`port-part`</a> is `80`, and |url|'s
-              {{URL/port}} is `443`.
-
-      8.  If |expression| contains a non-empty <a grammar>`path-part`</a>, and
+      5.  If |expression| contains a non-empty <a grammar>`path-part`</a>, and
           |redirect count| is 0, then:
 
-          1.  Let |exact match| be `false` if the final character of
-              |expression|'s <a grammar>`path-part`</a> is the U+002F SOLIDUS
-              character (`/`), and `true` otherwise.
+          1.  Let |path| be the resulting of joining |url|'s {{URL/path}} on the 
+              U+002F SOLIDUS character (`/`).
 
-          2.  Let |path list| be the result of
-              <a lt="strictly split a string">strictly splitting</a>
-              |expression|'s <a grammar>`path-part`</a> on the U+002F SOLIDUS
-              character (`/`).
+          2.  If [[#match-paths]] returns "`Does Not Match`" given |expression|'s 
+              <a grammar>`path-part`</a> and |path|, return "`Does Not Match`".
 
-          3.  If |path list| has more items than |url|'s <a for="url">path</a>, return
-              "`Does Not Match`".
-
-          4.  If |exact match| is `true`, and |path list| does not have the same
-              number of items as |url|'s <a for="url">path</a>, return "`Does Not
-              Match`".
-
-          5.  For each |expression piece| in |path list|:
-
-              1.  Let |url piece| be the next item in |url|'s <a for="url">path</a>.
-
-              2.  <a>Percent decode</a> |expression piece|.
-
-              3.  <a>Percent decode</a> |url piece|.
-
-              4.  If |expression piece| is not a <a>case-sensitive</a> match
-                  for |url piece|, return "`Does Not Match`".
-
-      9. Return "`Matches`".
+      6.  Return "`Matches`".
 
   4.  If |expression| is an <a>ASCII case-insensitive</a> match for "`'self'`",
       return "`Matches`" if one or more of the following conditions is met:
@@ -3441,30 +3373,137 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   5.  Return "`Does Not Match`".
 
   <h5 id="match-schemes" algorithm>
-    Does |scheme-part| match another |scheme-part|?
+    Does `scheme-part` |A| match `scheme-part` |B|?
   </h5>
 
-  Given two strings of <a>ASCII bytes</a> A and B, this algorithm returns
-  "`Matches`" if A matches B, and returns "`Does Not Match`" otherwise.
+  Given two strings of <a>ASCII bytes</a> |A| and |B|, this algorithm returns
+  "`Matches`" if |A| matches |B|, and returns "`Does Not Match`" otherwise.
 
-  Note: This algorithm is not transitive. That is, A matching B does not mean 
-  that B will match A.
+  Note: The matching relation is assymetric. That is, |A| matching |B| does not
+  mean that |B| will match |A|.
 
   1.  If one of the following is true, return "`Matches`":
 
-      1.  A is an <a>ASCII case-insensitive</a> match for B.
+      1.  |A| is an <a>ASCII case-insensitive</a> match for |B|.
 
-      2.  A is an <a>ASCII case-insensitive</a> match for "`http`", and B is an 
-          <a>ASCII case-insensitive</a> match for "`https`".
+      2.  |A| is an <a>ASCII case-insensitive</a> match for "`http`", and |B| 
+          is an <a>ASCII case-insensitive</a> match for "`https`".
 
-      3.  A is an <a>ASCII case-insensitive</a> match for "`ws`", and B is an 
-          <a>ASCII case-insensitive</a> match for "`wss`", "`http`", or 
+      3.  |A| is an <a>ASCII case-insensitive</a> match for "`ws`", and |B| 
+          is an <a>ASCII case-insensitive</a> match for "`wss`", "`http`", or 
           "`https`".
 
-      4.  A is an <a>ASCII case-insensitive</a> match for "`wss`", and B is an 
-          <a>ASCII case-insensitive</a> match for "`https`".
+      4.  |A| is an <a>ASCII case-insensitive</a> match for "`wss`", and |B| 
+          is an <a>ASCII case-insensitive</a> match for "`https`".
 
   2.  Return "`Does Not Match`".
+
+  Note: We always allow a secure upgrade from an explicitly insecure expression.
+  That is, script-src http: is treated as equivalent to script-src http: https:,
+  script-src http://example.com to script-src http://example.com 
+  https://example.com, and connect-src ws: to connect-src ws: wss:.
+
+  ISSUE: Add a reference to https://github.com/diracdeltas/sniffly.
+
+  <h5 id="match-hosts" algorithm>
+    Does `host-part` |A| match `host-part` |B|?
+  </h5>
+
+  Given two strings of <a>ASCII bytes</a> (|A| and |B|), this algorithm returns
+  "`Matches`" if |A| matches |B|, and returns "`Does Not Match`" otherwise.
+
+  Note: The matching relation is assymetric. That is, |A| matching |B| does not 
+  mean that |B| will match |A|.
+
+  1.  If the first character of |A| is an U+002A ASTERISK character (`*`):
+
+      1.  Let |remaining| be the result of removing the leading ("*") from |A|.
+
+      2.  If |remaining| (including the leading U+002E FULL STOP character 
+          (`.`)) is an <a>ASCII case-insensitive</a> match for the rightmost 
+          characters of |B|, then return "`Matches`". Otherwise, return 
+          "`Does Not Match`".      
+
+  2.  If |A| is not an <a>ASCII case-insensitive</a> match for |B|, return 
+      "`Does Not Match`".
+
+  3.  If |A| matches the <a grammar>IPv4address</a> rule from [[!RFC3986]], and
+      is not "`127.0.0.1`"; or if |A| is an <a>IPv6 address</a>, return 
+      "`Does Not Match`".
+
+      Note: A future version of this specification may allow literal IPv6
+      and IPv4 addresses, depending on usage and demand. Given the weak
+      security properties of IP addresses in relation to named hosts,
+      however, authors are encouraged to prefer the latter whenever
+      possible.
+
+  4.  Return "`Matches`".
+
+  <h5 id="match-ports" algorithm>
+    Does `port-part` |A| match `port-part` |B| for |scheme B|?
+  </h5>
+
+  Given three strings of <a>ASCII bytes</a> |port A|, |port B|, and |scheme B|,
+  this algorithm returns "`Matches`" if |A| matches |B|, and returns 
+  "`Does Not Match`" otherwise.
+
+  Note: The matching relation is assymetric. That is, |port A| matching |port B|
+  does not mean that |port B| will match |port A|.
+
+  1.  If |port A| is empty:
+
+      1.  If |port B| is the <a>default port</a> for |scheme B|, return 
+          "`Matches`". Otherwise, return "`Does Not Match`".
+
+  2.  If |port A| is equal to "*", return "`Matches`".
+
+  3.  If |port A| is a <a>case-sensitive</a> match for |port B|, return 
+      "`Matches`".
+
+  4.  If |port B| is empty:
+
+      1.  If |port A| is the <a>default port</a> for |scheme B|, return 
+          "`Matches`". Otherwise, return "`Does not Match`".
+
+  5. Return "`Does Not Match`".
+
+  <h5 id="match-paths" algorithm>
+    Does `path-part` |A| match `path-part` |B|?
+  </h5>
+
+  Given two strings of <a>ASCII bytes</a> (|A| and |B|), this algorithm returns 
+  "`Matches`" if |A| matches |B|, and returns "`Does Not Match`" otherwise.
+
+  Note: The matching relation is assymetric. That is, |A| matching |B| does not
+  mean that |B| will match |A|.
+
+  1.  If |A| is empty, return "`Matches`".
+
+  2.  Let |exact match| be `false` if the final character of |A| is the U+002F 
+      SOLIDUS character (`/`), and `true` otherwise.
+
+  3.  Let |path list A| and |path list B| be the result of 
+      <a lt="strictly split a string">strictly splitting</a> |A| and |B| 
+      respestively on the U+002F SOLIDUS character (`/`).
+
+  4.  If |path list A| has more items than |path list B|, return 
+      "`Does Not Match`".
+
+  5.  If |exact match| is `true`, and |path list A| does not have the same
+      number of items as |path list B|, return "`Does Not Match`".
+
+  6.  For each |piece A| in |path list A|:
+
+      1.  Let |piece B| be the next item in |path list B|.
+
+      2.  <a>Percent decode</a> |piece A|.
+
+      3.  <a>Percent decode</a> |piece B|.
+
+      4.  If |piece A| is not a <a>case-sensitive</a> match
+          for |piece B|, return "`Does Not Match`".
+
+  7.  Return "`Matches`".
 
   <h5 id="effective-directive-for-a-request" algorithm>
     Get the effective directive for |request|
