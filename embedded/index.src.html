@@ -414,6 +414,79 @@ spec:dom; type:interface; text:Document
     3.  Return "`Not Subsumed`".
   </ol>
 
+  <h4 id="subsume-se" algorithm>
+    Does `source expression` |A| subsume `source expression` |B|?
+  </h4>
+
+  Given two <a>source expressions</a> |A| and |B|, this algorithm returns 
+  "`Subsumes`" if |A| subsumes |B|, and returns "`Does Not Subsume`" otherwise.
+
+  A <a>source expression</a> has a <dfn>wildcard host</dfn> if the first 
+  character of the <a>source expression</a>'s <a grammar>`host-part`</a> is an 
+  U+002A ASTERISK character (`*`).
+  A <a>source expression</a> has a <dfn>wildcard port</dfn> if the
+  <a grammar>`port-part`</a> of the <a>source expression</a> is equal to "*".
+
+  1.  If both |A| and |B| match either <a grammar>host-source</a> or 
+      <a grammar>scheme-source</a> grammar:
+
+      1.  If [[csp3#match-schemes]] returns "`Does Not Match`" given |A|'s 
+          <a grammar>`scheme-part`</a> (or `null` if |A| does not contain a 
+          <a grammar>`scheme-part`</a>) and |B|'s <a grammar>`scheme-part`</a> 
+          (or `null` if |B| does not contain a <a grammar>`scheme-part`</a>), 
+          return "`Does Not Subsume`".
+
+      2.  If |A| or |B| matches the <a grammar>scheme-source</a> grammar:
+
+          1.  If |A| matches the <a grammar>scheme-source</a> grammar, return 
+              "`Subsumes`". Otherwise, return "`Does Not Subsume`".
+
+      3.  If |B| has a `wildcard host`:
+
+          1.  If |A| doesn't have a `wildcard host`, return "`Does not Subsume`".
+
+          2.  Let |remaining host B| be the result of removing the leading 
+              ("*.") from |B|'s <a grammar>`host-part`</a>.
+
+          3.  If [[csp3#match-hosts]] returns "`Does Not Match`" given |A|'s 
+              <a grammar>`host-part`</a> and |remaining host B|, return 
+              "`Does Not Subsume`".
+
+      3.  If |B| doesn't have a `wildcard host` and [[csp3#match-hosts]] returns 
+          "`Does Not Match`" given |A|'s  <a grammar>`host-part`</a> and |B|'s 
+          <a grammar>`host-part`</a>, return "`Does Not Subsume`".
+
+      4.  If |A| has a `wildcard port` but |B| doesn't have a `wildcard port`, 
+          return "`Does Not Subsume`".
+
+      5.  If |A| doesn't have a `wildcard port` and [[csp3#match-ports]] returns 
+          "`Does Not Match`" given |A|'s <a grammar>`port-part`</a> 
+          (or `null` if |A| does not contain a <a grammar>`port-part`</a>)
+          and |B|'s <a grammar>`port-part`</a> (or `null` if |B| does not 
+          contain a <a grammar>`port-part`</a>), return "`Does Not Subsume`".
+
+      6.  If [[csp3#match-paths]] returns "`Does Not Match`" given |A|'s 
+          <a grammar>`path-part`</a> (or `null` if |A| does not contain a 
+          <a grammar>`path-part`</a>) and |B|'s <a grammar>`path-part`</a> (or 
+          `null` if |B| does not contain a <a grammar>`path-part`</a>), return 
+          "`Does Not Subsume`".
+
+      7.  Return "`Subsumes`".
+
+  2.  If both |A| and |B| match the <a grammar>keyword-source</a> grammar:
+
+      1.  ISSUE: TODO.
+
+  3.  If both |A| and |B| match the <a grammar>hash-source</a> grammar:
+
+      1.  ISSUE: TODO.
+
+  4.  If both |A| and |B| match the <a grammar>nonce-source</a> grammar:
+
+      1.  ISSUE: TODO.
+
+  5.  Return "`Does Not Subsume`".
+
   <h3 id="required-csp-for-context" algorithm>
     Obtain the required CSP for |context|.
   </h3>
