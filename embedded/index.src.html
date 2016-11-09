@@ -475,17 +475,90 @@ spec:dom; type:interface; text:Document
 
   2.  If both |A| and |B| match the <a grammar>keyword-source</a> grammar:
 
-      1.  ISSUE: TODO.
+      1.  If |A| is a <a>case-sensitive</a> match for |B|, return "`Subsumes`".
+          Otherwise, return "`Does Not Subsume`".
 
   3.  If both |A| and |B| match the <a grammar>hash-source</a> grammar:
 
-      1.  ISSUE: TODO.
+      1.  If |A|'s <a grammar>`base64-value`</a> is a <a>case-sensitive</a> 
+          match to that of |B|, return "`Subsmes`". 
+          Otherwise, return "`Does Not Subsume`".
 
   4.  If both |A| and |B| match the <a grammar>nonce-source</a> grammar:
 
       1.  ISSUE: TODO.
 
   5.  Return "`Does Not Subsume`".
+
+  <h4 id="subsume-lists-se" algorithm>
+    Does a list of `source expressions` |A| subsume a list of 
+    `source expressions` |B|?
+  </h4>
+
+  Given two lists of `source expressions` |A| and |B|, this algorithm returns
+  "`Subsumes`" if |A| subsumes |B|, and returns "`Does Not Subsume`" otherwise.
+
+  1.  If |A| is empty, return "`Subsumes`".
+
+  2.  If |B| is empty, return "`Does Not Subsume`".
+
+  3.  For each |expression B| in |B|:
+
+      1.  Let |found match| be `false`.
+
+      2.  For each |expression A| in |A|:
+
+          1.  If [[#subsume-se]] returns "`Subsumes`" given |expression A| and 
+              |expression B|, set |found match| to `true`.
+
+      3.  If |found match| is equal to `false`, return "`Does Not Subsume`".
+
+  4.  Return "`Subsumes`".
+
+  <h4 id="subsume-ssl" algorithm>
+    Does <a grammar>serialized-source-list</a> |A| subsume 
+    <a grammar>serialized-source-list</a> |B|?
+  </h4>
+
+  Given two <a grammar>serialized-source-list</a>s |A| and |B|, this algorithm 
+  returns "`Subsumes`" if |A| subsumes |B|, and returns "`Does Not Subsume`"
+  otherwise.
+
+  A a list of `source expressions` is `non-strict inline` if it contains 
+  `unsafe-inline` or `unsafe-eval` but does not contain `strict-dynamic`,
+  <a>nonce-source</a> and <a>hash-source</a> expressions. 
+  A <a grammar>serialized-source-list</a> is a <dfn>wildcard list</dfn> if it
+  is a <a>case-sensitive</a> to the U+002A ASTERISK character (`*`).
+
+  1.  If |B| matches `none`, return "`Subsumes`".
+
+  2.  If |A| matches `none, return "`Does Not Subsume`".
+
+  3.  If |B| is a `wildcard list` but |A| is not, return "`Does Not Subsume`".
+
+  4.  Let |list A| be a list of <a>source-expressions</a>, obtained
+      by <a lt="strictly split a string">strictly splitting</a> |A| on the
+      whitespaces and converting `self` whenever it is encountered to its 
+      equivalent <a grammar>`host-source`</a> expression.
+      Similarly, |list B| in |B|.
+
+  5.  If |list B| is `non-strict inline`:
+
+      1.  If |list A| is not `non-strict inline`, return "`Does Not Subsume`".
+
+      2.  If |list B| contains `unsafe-inline` but |list A| does not, return 
+          "`Does Not Subsume`".
+
+      3.  If |list B| contains `unsafe-eval` but |list A| does not, return 
+          "`Does Not Subsume`".
+
+  6.  If |list A| contains `strict-dynamic` but |list B| does not, return
+      "`Does Not Subsume`".
+
+  7.  If [[#subsume-lists-se]] returns "`Does Not Subsume`" given 
+      |list A| and |list B|, return "`Does Not Subsume`".
+
+  8.  Return "`Subsumes`".
 
   <h3 id="required-csp-for-context" algorithm>
     Obtain the required CSP for |context|.
