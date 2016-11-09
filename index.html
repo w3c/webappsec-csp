@@ -1451,7 +1451,7 @@ pre.idl.highlight { color: #708090; }
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1>Content Security Policy Level 3</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-11-08">8 November 2016</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-11-09">9 November 2016</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1899,11 +1899,8 @@ of security-relevant policy decisions.</p>
   unless that non-<a data-link-type="dfn" href="https://url.spec.whatwg.org/#network-scheme">network scheme</a> is the same as the scheme of protected resource,
   as described in <a href="#match-url-to-source-expression">§6.6.1.6 Does url match expression in origin with redirect count?</a>.</p>
      <li data-md="">
-      <div class="wip">
-        Hash-based source expressions may now match external scripts if the <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code> element that triggers the request specifies a set of integrity
-    metadata which is listed in the current policy. Details in <a href="#external-hash">§8.4 Allowing external JavaScript via hashes</a>. 
-       <p class="issue" id="issue-d4c4d0f5"><a class="self-link" href="#issue-d4c4d0f5"></a> SRI integration is a work in progress. <a href="https://github.com/w3c/webappsec-csp/issues/78">&lt;https://github.com/w3c/webappsec-csp/issues/78></a></p>
-      </div>
+      <p>Hash-based source expressions may now match external scripts if the <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code> element that triggers the request specifies a set of integrity
+  metadata which is listed in the current policy. Details in <a href="#external-hash">§8.4 Allowing external JavaScript via hashes</a>.</p>
      <li data-md="">
       <p>The <a data-link-type="dfn" href="#disown-opener" id="ref-for-disown-opener-1"><code>disown-opener</code></a> directive ensures that a resource can’t be opened
   in such a way as to give another browsing context control over its contents.</p>
@@ -3574,13 +3571,17 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
   directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-27">value</a> is "<code>Matches</code>", return
   "<code>Allowed</code>".</p>
        <li data-md="">
-        <p>If this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-28">value</a> contains one or more <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-4">source expressions</a> that match the <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source-3">hash-source</a> grammar, and <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-integrity-metadata">integrity metadata</a> is
-  not the empty string, then:</p>
+        <p>Let <var>integrity expressions</var> be the set of <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-4">source expressions</a> in
+  this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-28">value</a> that match the <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source-3">hash-source</a> grammar.</p>
+       <li data-md="">
+        <p>If <var>integrity expressions</var> is not empty:</p>
         <ol>
          <li data-md="">
-          <p>Let <var>integrity sources</var> be the result of executing the <a href="https://w3c.github.io/webappsec-subresource-integrity/#parse-metadata">Subresource Integrity §parse-metadata</a> algorithm on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-integrity-metadata">integrity metadata</a>. <a data-link-type="biblio" href="#biblio-sri">[SRI]</a></p>
+          <p>Let <var>integrity sources</var> be the result of executing the algorithn
+  defined in <a href="https://w3c.github.io/webappsec-subresource-integrity/#parse-metadata">Subresource Integrity §parse-metadata</a> on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-integrity-metadata">integrity metadata</a>. <a data-link-type="biblio" href="#biblio-sri">[SRI]</a></p>
          <li data-md="">
-          <p class="assertion">Assert: <var>integrity sources</var> is not "<code>no metadata</code>".</p>
+          <p>If <var>integrity sources</var> is "<code>no metadata</code>" or an empty set, skip
+  the remaining substeps.</p>
          <li data-md="">
           <p>Let <var>bypass due to integrity match</var> be <code>true</code>.</p>
          <li data-md="">
@@ -4833,17 +4834,15 @@ document.write('&lt;scr' + 'ipt src='/sadness.js'>&lt;/scr' + 'ipt>');
 </pre>
      </div>
     </section>
-    <section class="wip">
+    <section>
      <h3 class="heading settled" data-level="8.4" id="external-hash"><span class="secno">8.4. </span><span class="content"> Allowing external JavaScript via hashes </span><a class="self-link" href="#external-hash"></a></h3>
-     <p><em>This section is not normative.</em></p>
-     <p class="issue" id="issue-0e25e9740"><a class="self-link" href="#issue-0e25e9740"></a> Work in progress. <a href="https://github.com/w3c/webappsec-csp/issues/78">&lt;https://github.com/w3c/webappsec-csp/issues/78></a></p>
      <p>In <a data-link-type="biblio" href="#biblio-csp2">[CSP2]</a>, hash <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression-13">source expressions</a> could only match inlined
     script, but now that Subresource Integrity is widely deployed, we can expand
     the scope to enable externalized JavaScript as well.</p>
      <p>If multiple sets of integrity metadata are specified for a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code>, the
     request will match a policy’s <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source-10">hash-source</a>s if and only if <em>each</em> item in a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code>'s integrity metadata matches the policy.</p>
-     <div class="example" id="example-b14b93b7">
-      <a class="self-link" href="#example-b14b93b7"></a> MegaCorp, Inc. wishes to allow two specific scripts on a page in a way
+     <div class="example" id="example-13be02f2">
+      <a class="self-link" href="#example-13be02f2"></a> MegaCorp, Inc. wishes to allow two specific scripts on a page in a way
       that ensures that the content matches their expectations. They do so by
       setting the following policy: 
 <pre>Content-Security-Policy: script-src 'sha256-abc123' 'sha512-321cba'
@@ -4856,11 +4855,21 @@ document.write('&lt;scr' + 'ipt src='/sadness.js'>&lt;/scr' + 'ipt>');
 &lt;script integrity="sha256-abc123 sha512-321cba" ...>&lt;/script>
 </pre>
       <p>While the following <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code> elements would not execute because they
-      contain metadata that does not match the policy (even though other metadata
-      does match):</p>
+      contain valid metadata that does not match the policy (even though other
+      metadata does match):</p>
 <pre>&lt;script integrity="<b>sha384-xyz789</b>" ...>&lt;/script>
 &lt;script integrity="<b>sha384-xyz789</b> sha512-321cba" ...>&lt;/script>
 &lt;script integrity="sha256-abc123 <b>sha384-xyz789</b> sha512-321cba" ...>&lt;/script>
+</pre>
+      <p>Metadata that is not recognized (either because it’s entirely invalid, or
+      because it specifies a not-yet-supported hashing algorithm) does not affect
+      the behavior described here. That is, the following elements would be
+      allowed to execute in the presence of the above policy, as the additional
+      metadata is invalid and therefore wouldn’t allow a script whose content
+      wasn’t listed explicitly in the policy to execute:</p>
+<pre>&lt;script integrity="sha256-abc123 <b>sha1024-abcd</b>" ...>&lt;/script>
+&lt;script integrity="sha512-321cba <b>entirely-invalid</b>" ...>&lt;/script>
+&lt;script integrity="sha256-abc123 <b>not-a-hash-at-all</b> sha512-321cba" ...>&lt;/script>
 </pre>
      </div>
     </section>
@@ -5577,7 +5586,6 @@ rest of Google’s CSP Cabal.</p>
   <h2 class="no-num no-ref heading settled" id="issues-index"><span class="content">Issues Index</span><a class="self-link" href="#issues-index"></a></h2>
   <div style="counter-reset:issue">
    <div class="issue"> <code>unsafe-hashed-attributes</code> is a work in progress. <a href="https://github.com/w3c/webappsec-csp/issues/13">&lt;https://github.com/w3c/webappsec-csp/issues/13></a><a href="#issue-2f321613"> ↵ </a></div>
-   <div class="issue"> SRI integration is a work in progress. <a href="https://github.com/w3c/webappsec-csp/issues/78">&lt;https://github.com/w3c/webappsec-csp/issues/78></a><a href="#issue-d4c4d0f5"> ↵ </a></div>
    <div class="issue"> Is this kind of thing specified anywhere? I didn’t see anything
   that looked useful in <a data-link-type="biblio" href="#biblio-ecma262">[ECMA262]</a>.<a href="#issue-c404edb5"> ↵ </a></div>
    <div class="issue"> How, exactly, do we get the status code? We don’t actually store it
@@ -5615,7 +5623,6 @@ rest of Google’s CSP Cabal.</p>
   present, but we should probably consider this algorithm as "at risk" until
   we know its impact. <a href="https://github.com/w3c/webappsec-csp/issues/98">&lt;https://github.com/w3c/webappsec-csp/issues/98></a><a href="#issue-c41e2850"> ↵ </a></div>
    <div class="issue"> Work in progress. <a href="https://github.com/w3c/webappsec-csp/issues/13">&lt;https://github.com/w3c/webappsec-csp/issues/13></a><a href="#issue-0e25e974"> ↵ </a></div>
-   <div class="issue"> Work in progress. <a href="https://github.com/w3c/webappsec-csp/issues/78">&lt;https://github.com/w3c/webappsec-csp/issues/78></a><a href="#issue-0e25e9740"> ↵ </a></div>
   </div>
   <aside class="dfn-panel" data-for="content-security-policy-object">
    <b><a href="#content-security-policy-object">#content-security-policy-object</a></b><b>Referenced in:</b>

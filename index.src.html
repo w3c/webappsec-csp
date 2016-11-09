@@ -317,14 +317,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       unless that non-<a>network scheme</a> is the same as the scheme of protected resource,
       as described in [[#match-url-to-source-expression]].
 
-  10. <div class="wip">
-        Hash-based source expressions may now match external scripts if the
-        <{script}> element that triggers the request specifies a set of integrity
-        metadata which is listed in the current policy. Details in
-        [[#external-hash]].
-
-        ISSUE(w3c/webappsec-csp#78): SRI integration is a work in progress.
-      </div>
+  10. Hash-based source expressions may now match external scripts if the
+      <{script}> element that triggers the request specifies a set of integrity
+      metadata which is listed in the current policy. Details in
+      [[#external-hash]].
 
   11. The <a>`disown-opener`</a> directive ensures that a resource can't be opened
       in such a way as to give another browsing context control over its contents.
@@ -2385,20 +2381,22 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           directive's <a for="directive">value</a> is "`Matches`", return
           "`Allowed`".
 
-      2.  If this directive's <a for="directive">value</a> contains one or more
-          <a>source expressions</a> that match the <a grammar>hash-source</a>
-          grammar, and |request|'s <a for="request">integrity metadata</a> is
-          not the empty string, then:
+      2.  Let |integrity expressions| be the set of <a>source expressions</a> in
+          this directive's <a for="directive">value</a> that match the
+          <a grammar>hash-source</a> grammar.
 
-          1.  Let |integrity sources| be the result of executing the
-              [[SRI#parse-metadata]] algorithm on |request|'s
+      3.  If |integrity expressions| is not empty:
+
+          1.  Let |integrity sources| be the result of executing the algorithn
+              defined in [[SRI#parse-metadata]] on |request|'s
               <a for="request">integrity metadata</a>. [[!SRI]]
 
-          2.  Assert: |integrity sources| is not "`no metadata`".
+          2.  If |integrity sources| is "`no metadata`" or an empty set, skip
+              the remaining substeps.
 
           3.  Let |bypass due to integrity match| be `true`.
 
-          3.  For each |source| in |integrity sources|:
+          4.  For each |source| in |integrity sources|:
 
               1.  If this directive's <a for="directive">value</a> does not
                   contain a <a>source expression</a> whose
@@ -2408,7 +2406,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
                   for |source|'s `base64-value`, then set |bypass due to
                   integrity match| to `false`.
 
-          4.  If |bypass due to integrity match| is `true`, return
+          5.  If |bypass due to integrity match| is `true`, return
               "`Allowed`".
 
           Note: Here, we verify only that the |request| contains a set of
@@ -3925,19 +3923,14 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     </div>
   </section>
 
-  <section class="wip">
+  <section>
     <h3 id="external-hash">
       Allowing external JavaScript via hashes
     </h3>
 
-    <em>This section is not normative.</em>
-
-    ISSUE(w3c/webappsec-csp#78): Work in progress.
-
     In [[CSP2]], hash <a>source expressions</a> could only match inlined
     script, but now that Subresource Integrity is widely deployed, we can expand
     the scope to enable externalized JavaScript as well.
-
 
     If multiple sets of integrity metadata are specified for a <{script}>, the
     request will match a policy's <a grammar>hash-source</a>s if and only if
@@ -3963,13 +3956,26 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       </pre>
 
       While the following <{script}> elements would not execute because they
-      contain metadata that does not match the policy (even though other metadata
-      does match):
+      contain valid metadata that does not match the policy (even though other
+      metadata does match):
 
       <pre>
         &lt;script integrity="<b>sha384-xyz789</b>" ...&gt;&lt;/script&gt;
         &lt;script integrity="<b>sha384-xyz789</b> sha512-321cba" ...&gt;&lt;/script&gt;
         &lt;script integrity="sha256-abc123 <b>sha384-xyz789</b> sha512-321cba" ...&gt;&lt;/script&gt;
+      </pre>
+
+      Metadata that is not recognized (either because it's entirely invalid, or
+      because it specifies a not-yet-supported hashing algorithm) does not affect
+      the behavior described here. That is, the following elements would be
+      allowed to execute in the presence of the above policy, as the additional
+      metadata is invalid and therefore wouldn't allow a script whose content
+      wasn't listed explicitly in the policy to execute:
+
+      <pre>
+        &lt;script integrity="sha256-abc123 <b>sha1024-abcd</b>" ...&gt;&lt;/script&gt;
+        &lt;script integrity="sha512-321cba <b>entirely-invalid</b>" ...&gt;&lt;/script&gt;
+        &lt;script integrity="sha256-abc123 <b>not-a-hash-at-all</b> sha512-321cba" ...&gt;&lt;/script&gt;
       </pre>
     </div>
   </section>
