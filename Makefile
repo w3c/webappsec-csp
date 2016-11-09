@@ -29,5 +29,5 @@ embedded/index.html: embedded/index.src.html
 	bikeshed -f spec ./embedded/index.src.html
 	
 publish:
-	git push origin master master:gh-pages
+	git push origin master
 
