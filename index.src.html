@@ -1024,18 +1024,14 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       handlers (like `onclick`) and inline `style` attributes in order to
       determine whether or not they ought to be allowed to execute/render.
 
-  6.  [[#should-block-inline]] is called during handling of navigations to
-      `javascript:` URLs in order to determine whether they ought to be allowed
-      to execute.
-
-  7.  <a for="/">policy</a> is <a>enforced</a> during processing of the <{meta}>
+  6.  <a for="/">policy</a> is <a>enforced</a> during processing of the <{meta}>
       element's <{meta/http-equiv}>.
 
-  8.  A {{Document}}'s <dfn>embedding document</dfn> is the {{Document}}
+  7.  A {{Document}}'s <dfn>embedding document</dfn> is the {{Document}}
       <a lt="nested through">through which</a> the {{Document}}'s
       <a>browsing context</a> is nested.
 
-  9.  HTML populates each <a for="/">request</a>'s <a for="request">cryptographic nonce
+  8.  HTML populates each <a for="/">request</a>'s <a for="request">cryptographic nonce
       metadata</a> and <a>parser metadata</a> with relevant data from the
       elements responsible for resource loading.
 
@@ -1045,11 +1041,11 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       ISSUE(whatwg/html#968): Stylesheet loading is not yet integrated with
       Fetch in WHATWG's HTML.
 
-  10. [[#allow-base-for-document]] is called during <{base}>'s <a>set the frozen
+  9.  [[#allow-base-for-document]] is called during <{base}>'s <a>set the frozen
       base URL</a> algorithm to ensure that the <{base/href}> attribute's value
       is valid.
 
-  11.  [[#should-plugin-element-be-blocked-a-priori-by-content-security-policy]]
+  10.  [[#should-plugin-element-be-blocked-a-priori-by-content-security-policy]]
       is called during the processing of <{object}>, <{embed}>, and <{applet}>
       elements to determine whether they may trigger a fetch.
 
@@ -1057,10 +1053,11 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
       ISSUE(w3c/html#547): This hook is missing from W3C's HTML.
 
-  12. [[#should-block-navigation-request]] is called during the <a>process a
+  11. [[#should-block-navigation-request]] is called during the <a>process a
       navigate fetch</a> algorithm, and [[#should-block-navigation-response]]
       is called during the <a>process a navigate response</a> algorithm to
-      apply directive's navigation checks.
+      apply directive's navigation checks, as well as inline checks for
+      navigations to `javascript:`.
 
       ISSUE(w3c/html#548): W3C's HTML is not based on Fetch, and does not
       have a <a>process a navigate response</a> algorithm into which to hook.
@@ -1151,9 +1148,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   application, event handlers, etc.), and "`Blocked`" otherwise:
 
   Note: The valid values for |type| are "`script`", "`script attribute`",
-  "`style`", "`style attribute`", and "`navigation`".
+  "`style`", and "`style attribute`".
 
-  1.  Assert: If |type| is not "`navigation`", |element| is not `null`.
+  1.  Assert: |element| is not `null`.
 
   2.  Let |result| be "`Allowed`".
 
@@ -1197,7 +1194,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     1.  Let |result| be "`Allowed`".
 
     2.  For each |policy| in |source|'s <a>active document</a>'s
-        <a for="response">CSP list</a>:
+        <a for="Document">CSP list</a>:
 
         1.  For each |directive| in |policy|:
 
@@ -1217,7 +1214,31 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
             5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
                 set |result| to "`Blocked`".
 
-    3.  Return |result|.
+    3.  If |result| is "`Allowed`", and if |navigation request|'s
+        <a for="request">url</a>'s <a for="url">scheme</a> is `javascript`:
+
+        1.  For each |policy| in |source|'s <a>active document</a>'s
+            <a for="Document">CSP List</a>:
+
+            1.  For each |directive| in |policy|:
+
+                1.  If |directive|'s <a for="directive">inline check</a>
+                    returns "`Allowed`" when executed upon |navigation request|,
+                    |type|, |source|, and |target|, skip to the next |directive|.
+
+            2.  Otherwise, let |violation| be the result of executing
+                [[#create-violation-for-global]] on |source|'s <a>relevant global
+                object</a>, |policy|, and |directive|'s <a for="directive">name</a>.
+
+            3.  Set |violation|'s <a for="violation">resource</a> to |navigation
+                request|'s <a for="response">URL</a>.
+
+            4.  Execute [[#report-violation]] on |violation|.
+
+            5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
+                set |result| to "`Blocked`".
+
+    4.  Return |result|.
   </ol>
 
   <h4 id="should-block-navigation-response" algorithm>
