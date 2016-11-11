@@ -1421,7 +1421,7 @@ pre.idl.highlight { color: #708090; }
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1>Content Security Policy: Embedded Enforcement</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-09-26">26 September 2016</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-11-11">11 November 2016</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1488,13 +1488,18 @@ restrictions upon itself.</p>
       <li><a href="#html-integration"><span class="secno">2.1</span> <span class="content">Integration with HTML</span></a>
       <li><a href="#embedding-csp-http-header"><span class="secno">2.2</span> <span class="content">The <code>Embedding-CSP</code> HTTP Request Header</span></a>
       <li><a href="#allow-csp-from-http-header"><span class="secno">2.3</span> <span class="content">The <code>Allow-CSP-From</code> HTTP Response Header</span></a>
+      <li><a href="#policy-subsumption"><span class="secno">2.4</span> <span class="content">Policy Subsumption</span></a>
      </ol>
     <li>
      <a href="#algorithms"><span class="secno">3</span> <span class="content">Algorithms</span></a>
      <ol class="toc">
       <li><a href="#process-response"><span class="secno">3.1</span> <span class="content"> Is <var>response</var> to <var>request</var> blocked by <var>context</var>’s required CSP? </span></a>
       <li><a href="#origin-allowed"><span class="secno">3.2</span> <span class="content"> Does <var>response</var> allow blanket enforcment of policy from <var>request</var>? </span></a>
-      <li><a href="#subsume-policy"><span class="secno">3.3</span> <span class="content"> Is <var>policy list</var> subsumed under <var>subsuming policy</var>? </span></a>
+      <li>
+       <a href="#subsume-policy"><span class="secno">3.3</span> <span class="content"> Is <var>policy list</var> subsumed under <var>subsuming policy</var>? </span></a>
+       <ol class="toc">
+        <li><a href="#subsume-se"><span class="secno">3.3.1</span> <span class="content"> Does <code>source expression</code> <var>A</var> subsume <code>source expression</code> <var>B</var>? </span></a>
+       </ol>
       <li><a href="#required-csp-for-context"><span class="secno">3.4</span> <span class="content"> Obtain the required CSP for <var>context</var>. </span></a>
      </ol>
     <li>
@@ -1574,7 +1579,7 @@ Host: advertisements-r-us.example.com
     acceptable, and reflects it in the response:</p>
 <pre>HTTP/1.1 200 OK
 ...
-<a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#content-security-policy-header-field">Content-Security-Policy</a>: script-src https://trusted-cdn.example.com/
+<a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#header-content-security-policy">Content-Security-Policy</a>: script-src https://trusted-cdn.example.com/
 </pre>
      <p>Since the policy asserted by the response matches the policy required by the
     request, the frame loads successfully.</p>
@@ -1595,10 +1600,10 @@ Host: advertisements-r-us.example.com
     prevents plugin loading:</p>
 <pre>HTTP/1.1 200 OK
 ...
-<a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#content-security-policy-header-field">Content-Security-Policy</a>: script-src https://trusted-cdn.example.com/,
+<a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#header-content-security-policy">Content-Security-Policy</a>: script-src https://trusted-cdn.example.com/,
                          object-src 'none'
 </pre>
-     <p>The "<code>,</code>" in the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#content-security-policy-header-field"><code>Content-Security-Policy</code></a> header’s value splits the
+     <p>The "<code>,</code>" in the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#header-content-security-policy"><code>Content-Security-Policy</code></a> header’s value splits the
     string into two serialized policies, each of which is enforced. The user
     agent verifies that one of the policies delivered with the response matches
     the requirement, and since additional policies can only make the <em>effective</em> policy for the page more restrictive, allows the frame
@@ -1626,7 +1631,7 @@ Host: advertisements-r-us.example.com
     <ol>
      <li data-md="">
       <p><code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a></code> elements have a <dfn class="dfn-paneled" data-dfn-for="iframe" data-dfn-type="element-attr" data-export="" id="element-attrdef-iframe-csp">csp</dfn> attribute which specifies the policy that an embedded document must agree
-  to enforce upon itself. Valid attribute values match the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp#grammardef-serialized-policy">serialized-policy</a> grammar from <a data-link-type="biblio" href="#biblio-csp3">[CSP3]</a>.</p>
+  to enforce upon itself. Valid attribute values match the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-policy">serialized-policy</a> grammar from <a data-link-type="biblio" href="#biblio-csp3">[CSP3]</a>.</p>
 <pre class="idl highlight def"><span class="kt">partial</span> <span class="kt">interface</span> <a class="nv idl-code" data-link-type="interface" href="https://html.spec.whatwg.org/multipage/embedded-content.html#htmliframeelement">HTMLIFrameElement</a> {
   [<a class="nv idl-code" data-link-type="extended-attribute" href="https://html.spec.whatwg.org/multipage/scripting.html#cereactions">CEReactions</a>] <span class="kt">attribute</span> <span class="kt">DOMString</span> <dfn class="nv dfn-paneled idl-code" data-dfn-for="HTMLIFrameElement" data-dfn-type="attribute" data-export="" data-type="DOMString" id="dom-htmliframeelement-csp">csp</dfn>;
 };
@@ -1635,7 +1640,7 @@ Host: advertisements-r-us.example.com
       <p class="issue" id="issue-2a91d948"><a class="self-link" href="#issue-2a91d948"></a> Upstream this to all the HTMLs.</p>
      <li data-md="">
       <p>A <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a> has a <dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="required-csp">required CSP</dfn>, which is
-  either <code>null</code> or a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#serialized-csp">serialized CSP</a>. For a given <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing
+  either <code>null</code> or a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#serialized-csp">serialized CSP</a>. For a given <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing
   context</a> (<var>context</var>), the value is the result of executing <a href="#required-csp-for-context">§3.4 Obtain the required CSP for context.</a> on <var>context</var>.</p>
       <p class="issue" id="issue-98d5483e"><a class="self-link" href="#issue-98d5483e"></a> Does this need to be upstreamed? Probably not.</p>
      <li data-md="">
@@ -1663,10 +1668,10 @@ Host: advertisements-r-us.example.com
     <p>In order to ensure that the embedded resource can decide whether or not it is
   willing to adhere to the embedder’s requirements, the policy expressed in an <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a></code>'s <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-4">csp</a></code> attribute is communicated along with some <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">requests</a> via an "<dfn class="dfn-paneled" data-dfn-type="http-header" data-export="" id="http-headerdef-embedding-csp"><code>Embedding-CSP</code></dfn>" HTTP
   request header. The header’s value is represented by the following ABNF <a data-link-type="biblio" href="#biblio-rfc5234">[RFC5234]</a>:</p>
-<pre>Embedding-CSP = <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp#grammardef-serialized-policy">serialized-policy</a>
+<pre>Embedding-CSP = <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-policy">serialized-policy</a>
 </pre>
     <p>A user agent MUST NOT send more than one HTTP response header field named
-  "<code>Embedding-CSP</code>", and any such header MUST NOT contain more than one <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp#grammardef-serialized-policy">serialized-policy</a>.</p>
+  "<code>Embedding-CSP</code>", and any such header MUST NOT contain more than one <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-policy">serialized-policy</a>.</p>
     <p>Servers MUST process only the first policy in the first such header received.</p>
     <h3 class="heading settled" data-level="2.3" id="allow-csp-from-http-header"><span class="secno">2.3. </span><span class="content">The <code>Allow-CSP-From</code> HTTP Response Header</span><a class="self-link" href="#allow-csp-from-http-header"></a></h3>
     <p>An embedee can opt-into accepting a policy specified by an embedder by
@@ -1674,6 +1679,11 @@ Host: advertisements-r-us.example.com
   response header. The header’s value is represented by the following ABNF <a data-link-type="biblio" href="#biblio-rfc5234">[RFC5234]</a>:</p>
 <pre>Allow-CSP-From = <a data-link-type="grammar" href="https://fetch.spec.whatwg.org/#http-origin">origin-or-null</a> / <a data-link-type="grammar" href="https://fetch.spec.whatwg.org/#http-new-header-syntax">wildcard</a>
 </pre>
+    <h3 class="heading settled" data-level="2.4" id="policy-subsumption"><span class="secno">2.4. </span><span class="content">Policy Subsumption</span><a class="self-link" href="#policy-subsumption"></a></h3>
+    <p>If an embedee does not wish to accept any <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> specified by its
+  embedder via the <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-4">Allow-CSP-From</a> header, it can deliver a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> that is as strict, or stricter than the policy requested in the <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-6">Embedding-CSP</a> header. That is, if the embedder requests <code>object-src https://cdn.example.com/</code>, the embedee can respond with <code>object-src 'none'</code>. Because every possible <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> blocked by <code>object-src https://cdn.example.com/</code> would also be blocked by <code>object-src 'none'</code>, it is said that the embedder’s required <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> <dfn data-dfn-type="dfn" data-noexport="" id="subsumes">subsumes<a class="self-link" href="#subsumes"></a></dfn> the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> delivered by the embedee.</p>
+    <p>Given the complexity of CSP’s syntax, subsumption is not trivial to calculate.
+  The details are spelled out in [[#subsume-policy].</p>
    </section>
    <section>
     <h2 class="heading settled" data-level="3" id="algorithms"><span class="secno">3. </span><span class="content">Algorithms</span><a class="self-link" href="#algorithms"></a></h2>
@@ -1696,7 +1706,7 @@ Host: advertisements-r-us.example.com
       <p>If the <a href="#origin-allowed">§3.2 Does response allow blanket enforcment of policy from request?</a> algorithm returns "<code>Allowed</code>" when executed upon <var>response</var> and <var>request</var>:</p>
       <ol>
        <li data-md="">
-        <p>Append <var>embedding policy</var> to <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-policy-list">CSP
+        <p>Append <var>embedding policy</var> to <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">CSP
   list</a>.</p>
        <li data-md="">
         <p>Return "<code>Allowed</code>".</p>
@@ -1706,7 +1716,7 @@ Host: advertisements-r-us.example.com
   a cross-origin, <a data-link-type="dfn" href="https://url.spec.whatwg.org/#network-scheme">network schemed</a> resource.</p>
      <li data-md="">
       <p>If the <a href="#subsume-policy">§3.3 Is policy list subsumed under subsuming policy?</a> algorithm returns "<code>Subsumed</code>" when executed
-  upon <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-policy-list">CSP list</a> and <var>embedding policy</var>,
+  upon <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">CSP list</a> and <var>embedding policy</var>,
   return "<code>Allowed</code>".</p>
      <li data-md="">
       <p>Return "<code>Blocked</code>".</p>
@@ -1728,7 +1738,7 @@ Host: advertisements-r-us.example.com
   from the embedder, so we allow the embedder to tighten that policy via this
   embedding mechanism.</p>
      <li data-md="">
-      <p>If <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-header-list">header list</a> has a header named <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-4"><code>Allow-CSP-From</code></a> (<var>header</var>):</p>
+      <p>If <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a> has a header named <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-5"><code>Allow-CSP-From</code></a> (<var>header</var>):</p>
       <ol>
        <li data-md="">
         <p>If <var>header</var>’s value is "<code>*</code>", return "<code>Allowed</code>".</p>
@@ -1740,9 +1750,9 @@ Host: advertisements-r-us.example.com
       <p>Return "<code>Not Allowed</code>".</p>
     </ol>
     <h3 class="heading settled algorithm" data-algorithm="Is policy list subsumed under subsuming policy?" data-level="3.3" id="subsume-policy"><span class="secno">3.3. </span><span class="content"> Is <var>policy list</var> subsumed under <var>subsuming policy</var>? </span><a class="self-link" href="#subsume-policy"></a></h3>
-    <p>Given a list of <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#policy">policy</a> objects (<var>policy list</var>), this algorithm returns
-  "<code>Subsumed</code>" if that list enforces a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#policy">policy</a> which is an exact match for
-  a given <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#policy">policy</a> object (<var>subsuming policy</var>). It returns "<code>Not Subsumed</code>"
+    <p>Given a list of <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> objects (<var>policy list</var>), this algorithm returns
+  "<code>Subsumed</code>" if that list enforces a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> which is an exact match for
+  a given <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> object (<var>subsuming policy</var>). It returns "<code>Not Subsumed</code>"
   otherwise.</p>
     <p class="note" role="note">Note: Ideally, we’ll someday define a real subsumption algorithm
   which would verify that the policy <code>default-src 'none'; script-src https://example.com</code> is subsumbed under <code>default-src example.com</code> (as
@@ -1758,28 +1768,28 @@ Host: advertisements-r-us.example.com
       <p>For each <var>policy</var> in <var>policy list</var>:</p>
       <ol>
        <li data-md="">
-        <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#disposition">disposition</a> is not
+        <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-disposition">disposition</a> is not
   "<code>enforce</code>", set skip to the next <var>policy</var>.</p>
        <li data-md="">
-        <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#directive-set">directive set</a> is not the
-  same size as <var>subsuming policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#directive-set">directive
+        <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a> is not the
+  same size as <var>subsuming policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive
   set</a>, skip to the next <var>policy</var>.</p>
        <li data-md="">
-        <p>For each <var>directive</var> in <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#directive-set">directive set</a>:</p>
+        <p>For each <var>directive</var> in <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a>:</p>
         <ol>
          <li data-md="">
-          <p>Let <var>subsuming directive</var> be the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#directive">directive</a> in <var>subsuming policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#directive-set">directive
-  set</a> whose <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#name">name</a> matches <var>directive</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#name">name</a>, or <code>null</code> if no such <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#directive">directive</a> is present.</p>
+          <p>Let <var>subsuming directive</var> be the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a> in <var>subsuming policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive
+  set</a> whose <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a> matches <var>directive</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a>, or <code>null</code> if no such <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a> is present.</p>
          <li data-md="">
           <p>If <var>subsuming directive</var> is <code>null</code>, skip to the next <var>policy</var>.</p>
          <li data-md="">
-          <p>If <var>subsuming directive</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#value">value</a> list is not the same size as <var>directive</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#value">value</a> list, skip to the next <var>policy</var>.</p>
+          <p>If <var>subsuming directive</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a> list is not the same size as <var>directive</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a> list, skip to the next <var>policy</var>.</p>
          <li data-md="">
-          <p>For each <var>token</var> in <var>directive</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#value">value</a>:</p>
+          <p>For each <var>token</var> in <var>directive</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>:</p>
           <ol>
            <li data-md="">
             <p>If <var>token</var> is not present in <var>subsuming
-  directive</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#value">value</a>, skip to the
+  directive</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>, skip to the
   next <var>policy</var>.</p>
           </ol>
         </ol>
@@ -1789,6 +1799,77 @@ Host: advertisements-r-us.example.com
      <li data-md="">
       <p>Return "<code>Not Subsumed</code>".</p>
     </ol>
+    <h4 class="heading settled algorithm" data-algorithm="Does source expression A subsume source expression B?" data-level="3.3.1" id="subsume-se"><span class="secno">3.3.1. </span><span class="content"> Does <code>source expression</code> <var>A</var> subsume <code>source expression</code> <var>B</var>? </span><a class="self-link" href="#subsume-se"></a></h4>
+    <p>Given two <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expressions</a> <var>A</var> and <var>B</var>, this algorithm returns
+  "<code>Subsumes</code>" if <var>A</var> subsumes <var>B</var>, and returns "<code>Does Not Subsume</code>" otherwise.</p>
+    <p>A <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expression</a> has a <dfn data-dfn-type="dfn" data-noexport="" id="wildcard-host">wildcard host<a class="self-link" href="#wildcard-host"></a></dfn> if the first
+  character of the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expression</a>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-part"><code>host-part</code></a> is an 
+  U+002A ASTERISK character (<code>*</code>).
+  A <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expression</a> has a <dfn data-dfn-type="dfn" data-noexport="" id="wildcard-port">wildcard port<a class="self-link" href="#wildcard-port"></a></dfn> if the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-port-part"><code>port-part</code></a> of the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expression</a> is equal to "*".</p>
+    <ol>
+     <li data-md="">
+      <p>If both <var>A</var> and <var>B</var> match either <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source">host-source</a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source">scheme-source</a> grammar:</p>
+      <ol>
+       <li data-md="">
+        <p>If <a href="https://w3c.github.io/webappsec-csp/#match-schemes">Content Security Policy Level 3 §match-schemes</a> returns "<code>Does Not Match</code>" given <var>A</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-part"><code>scheme-part</code></a> (or <code>null</code> if <var>A</var> does not contain a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-part"><code>scheme-part</code></a>) and <var>B</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-part"><code>scheme-part</code></a> (or <code>null</code> if <var>B</var> does not contain a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-part"><code>scheme-part</code></a>), 
+  return "<code>Does Not Subsume</code>".</p>
+       <li data-md="">
+        <p>If <var>A</var> or <var>B</var> matches the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source">scheme-source</a> grammar:</p>
+        <ol>
+         <li data-md="">
+          <p>If <var>A</var> matches the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source">scheme-source</a> grammar, return
+  "<code>Subsumes</code>". Otherwise, return "<code>Does Not Subsume</code>".</p>
+        </ol>
+       <li data-md="">
+        <p>If <var>B</var> has a <code>wildcard host</code>:</p>
+        <ol>
+         <li data-md="">
+          <p>If <var>A</var> doesn’t have a <code>wildcard host</code>, return "<code>Does not Subsume</code>".</p>
+         <li data-md="">
+          <p>Let <var>remaining host B</var> be the result of removing the leading
+  ("*.") from <var>B</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-part"><code>host-part</code></a>.</p>
+         <li data-md="">
+          <p>If <a href="https://w3c.github.io/webappsec-csp/#match-hosts">Content Security Policy Level 3 §match-hosts</a> returns "<code>Does Not Match</code>" given <var>A</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-part"><code>host-part</code></a> and <var>remaining host B</var>, return 
+  "<code>Does Not Subsume</code>".</p>
+        </ol>
+       <li data-md="">
+        <p>If <var>B</var> doesn’t have a <code>wildcard host</code> and <a href="https://w3c.github.io/webappsec-csp/#match-hosts">Content Security Policy Level 3 §match-hosts</a> returns
+  "<code>Does Not Match</code>" given <var>A</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-part"><code>host-part</code></a> and <var>B</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-part"><code>host-part</code></a>, return "<code>Does Not Subsume</code>".</p>
+       <li data-md="">
+        <p>If <var>A</var> has a <code>wildcard port</code> but <var>B</var> doesn’t have a <code>wildcard port</code>,
+  return "<code>Does Not Subsume</code>".</p>
+       <li data-md="">
+        <p>If <var>A</var> doesn’t have a <code>wildcard port</code> and <a href="https://w3c.github.io/webappsec-csp/#match-ports">Content Security Policy Level 3 §match-ports</a> returns
+  "<code>Does Not Match</code>" given <var>A</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-port-part"><code>port-part</code></a> (or <code>null</code> if <var>A</var> does not contain a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-port-part"><code>port-part</code></a>)
+  and <var>B</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-port-part"><code>port-part</code></a> (or <code>null</code> if <var>B</var> does not 
+  contain a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-port-part"><code>port-part</code></a>), return "<code>Does Not Subsume</code>".</p>
+       <li data-md="">
+        <p>If <a href="https://w3c.github.io/webappsec-csp/#match-paths">Content Security Policy Level 3 §match-paths</a> returns "<code>Does Not Match</code>" given <var>A</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-path-part"><code>path-part</code></a> (or <code>null</code> if <var>A</var> does not contain a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-path-part"><code>path-part</code></a>) and <var>B</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-path-part"><code>path-part</code></a> (or <code>null</code> if <var>B</var> does not contain a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-path-part"><code>path-part</code></a>), return 
+  "<code>Does Not Subsume</code>".</p>
+       <li data-md="">
+        <p>Return "<code>Subsumes</code>".</p>
+      </ol>
+     <li data-md="">
+      <p>If both <var>A</var> and <var>B</var> match the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source">keyword-source</a> grammar:</p>
+      <ol>
+       <li data-md="">
+        <p class="issue" id="issue-95f2d23a"><a class="self-link" href="#issue-95f2d23a"></a> TODO.</p>
+      </ol>
+     <li data-md="">
+      <p>If both <var>A</var> and <var>B</var> match the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-hash-source">hash-source</a> grammar:</p>
+      <ol>
+       <li data-md="">
+        <p class="issue" id="issue-95f2d23a0"><a class="self-link" href="#issue-95f2d23a0"></a> TODO.</p>
+      </ol>
+     <li data-md="">
+      <p>If both <var>A</var> and <var>B</var> match the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-nonce-source">nonce-source</a> grammar:</p>
+      <ol>
+       <li data-md="">
+        <p class="issue" id="issue-95f2d23a1"><a class="self-link" href="#issue-95f2d23a1"></a> TODO.</p>
+      </ol>
+     <li data-md="">
+      <p>Return "<code>Does Not Subsume</code>".</p>
+    </ol>
     <h3 class="heading settled algorithm" data-algorithm="Obtain the required CSP for context." data-level="3.4" id="required-csp-for-context"><span class="secno">3.4. </span><span class="content"> Obtain the required CSP for <var>context</var>. </span><a class="self-link" href="#required-csp-for-context"></a></h3>
     <p>Given a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a> (<var>context</var>), the following algorithm returns
   its <a data-link-type="dfn" href="#required-csp" id="ref-for-required-csp-5">required CSP</a>:</p>
@@ -1797,7 +1878,7 @@ Host: advertisements-r-us.example.com
       <p>If <var>context</var> is a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context">nested browsing context</a>.</p>
       <ol>
        <li data-md="">
-        <p>If <var>context</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/#browsing-context-container">browsing context container</a> has an <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-5">csp</a></code> content attribute, return its value.</p>
+        <p>If <var>context</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context-container">browsing context container</a> has an <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-5">csp</a></code> content attribute, return its value.</p>
       </ol>
      <li data-md="">
       <p>Return <code>null</code>.</p>
@@ -1812,17 +1893,17 @@ Host: advertisements-r-us.example.com
   code which are essential for its own protection.</p>
     <p>In particular, documents which do not expect to be embedded should continue to
   respond to any such request with a Content Security Policy containing an
-  appropriate <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#frame-ancestors"><code>frame-ancestors</code></a> directive.</p>
+  appropriate <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#frame-ancestors"><code>frame-ancestors</code></a> directive.</p>
     <h3 class="heading settled" data-level="4.2" id="policy-leakage"><span class="secno">4.2. </span><span class="content">Policy Leakage</span><a class="self-link" href="#policy-leakage"></a></h3>
     <p>The enforcement mechanism allows a malicious embedder to read a page’s policy
   cross-origin by brute-forcing its constraints. This could leak interesting
   data about the page or the user loading the page if the policy contains secret
   tokens or usernames.</p>
     <p>Again, the best defense here is to control the contexts allowed to embed a
-  given resource via an appropriate <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp#frame-ancestors"><code>frame-ancestors</code></a> directive.</p>
+  given resource via an appropriate <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#frame-ancestors"><code>frame-ancestors</code></a> directive.</p>
     <h3 class="heading settled" data-level="4.3" id="exfiltration"><span class="secno">4.3. </span><span class="content">Data Exfiltration</span><a class="self-link" href="#exfiltration"></a></h3>
     <p>This feature allows an embedder to send information to a third-party endpoint
-  via the <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-6"><code>Embedding-CSP</code></a> HTTP header. This doesn’t seem to
+  via the <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-7"><code>Embedding-CSP</code></a> HTTP header. This doesn’t seem to
   expose any information that couldn’t be tunneled in the HTTP request itself
   (via GET parameters, etc), and embedders remain in control over the endpoints
   to which such requests may be made by enforcing a Content Security Policy with
@@ -1831,7 +1912,7 @@ Host: advertisements-r-us.example.com
    <section>
     <h2 class="heading settled" data-level="5" id="iana"><span class="secno">5. </span><span class="content">IANA Considerations</span><a class="self-link" href="#iana"></a></h2>
     <p>The permanent message header field registry should be updated
-  with the following registration for the <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-7"><code>Embedding-CSP</code></a> header: <a data-link-type="biblio" href="#biblio-rfc3864">[RFC3864]</a></p>
+  with the following registration for the <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-8"><code>Embedding-CSP</code></a> header: <a data-link-type="biblio" href="#biblio-rfc3864">[RFC3864]</a></p>
     <dl>
      <dt data-md="">
       <p>Header field name</p>
@@ -1855,7 +1936,7 @@ Host: advertisements-r-us.example.com
       <p>This specification (See <a href="#embedding-csp-http-header">§2.2 The Embedding-CSP HTTP Request Header</a>)</p>
     </dl>
     <p>Likewise, the registry should be updated with the following registration
-  for the <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-5"><code>Allow-CSP-From</code></a> header: <a data-link-type="biblio" href="#biblio-rfc3864">[RFC3864]</a></p>
+  for the <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-6"><code>Allow-CSP-From</code></a> header: <a data-link-type="biblio" href="#biblio-rfc3864">[RFC3864]</a></p>
     <dl>
      <dt data-md="">
       <p>Header field name</p>
@@ -1924,22 +2005,35 @@ Host: advertisements-r-us.example.com
     </ul>
    <li><a href="#http-headerdef-embedding-csp">Embedding-CSP</a><span>, in §2.2</span>
    <li><a href="#required-csp">required CSP</a><span>, in §2.1</span>
+   <li><a href="#subsumes">subsumes</a><span>, in §2.4</span>
+   <li><a href="#wildcard-host">wildcard host</a><span>, in §3.3.1</span>
+   <li><a href="#wildcard-port">wildcard port</a><span>, in §3.3.1</span>
   </ul>
   <h3 class="no-num no-ref heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
   <ul class="index">
    <li>
     <a data-link-type="biblio">[CSP3]</a> defines the following terms:
     <ul>
-     <li><a href="https://w3c.github.io/webappsec-csp#content-security-policy-header-field">content-security-policy</a>
-     <li><a href="https://w3c.github.io/webappsec-csp#directive">directive</a>
-     <li><a href="https://w3c.github.io/webappsec-csp#directive-set">directive set</a>
-     <li><a href="https://w3c.github.io/webappsec-csp#disposition">disposition</a>
-     <li><a href="https://w3c.github.io/webappsec-csp#frame-ancestors">frame-ancestors</a>
-     <li><a href="https://w3c.github.io/webappsec-csp#name">name</a>
-     <li><a href="https://w3c.github.io/webappsec-csp#policy">policy</a>
-     <li><a href="https://w3c.github.io/webappsec-csp#serialized-csp">serialized csp</a>
-     <li><a href="https://w3c.github.io/webappsec-csp#grammardef-serialized-policy">serialized-policy</a>
-     <li><a href="https://w3c.github.io/webappsec-csp#value">value</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#header-content-security-policy">content-security-policy</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#directives">directives</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#policy-disposition">disposition</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#frame-ancestors">frame-ancestors</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-hash-source">hash-source</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-host-part">host-part</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-host-source">host-source</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source">keyword-source</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#directive-name">name</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-nonce-source">nonce-source</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-path-part">path-part</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-port-part">port-part</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-part">scheme-part</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source">scheme-source</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#serialized-csp">serialized csp</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-policy">serialized-policy</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#source-expression">source expression</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>
     </ul>
    <li>
     <a data-link-type="biblio">[WHATWG-DOM]</a> defines the following terms:
@@ -1955,8 +2049,9 @@ Host: advertisements-r-us.example.com
     <a data-link-type="biblio">[FETCH]</a> defines the following terms:
     <ul>
      <li><a href="https://fetch.spec.whatwg.org/#concept-header-list-append">append</a>
-     <li><a href="https://fetch.spec.whatwg.org/#concept-response-policy-list">csp list</a>
-     <li><a href="https://fetch.spec.whatwg.org/#concept-request-header-list">header list</a>
+     <li><a href="https://fetch.spec.whatwg.org/#concept-response-csp-list">csp list</a>
+     <li><a href="https://fetch.spec.whatwg.org/#concept-request-header-list">header list <small>(for request)</small></a>
+     <li><a href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list <small>(for response)</small></a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a>
      <li><a href="https://fetch.spec.whatwg.org/#http-origin">origin-or-null</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request">request</a>
@@ -1971,7 +2066,7 @@ Host: advertisements-r-us.example.com
      <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#htmliframeelement">HTMLIFrameElement</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#ascii-serialisation-of-an-origin">ascii serialization of an origin</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a>
-     <li><a href="https://html.spec.whatwg.org/#browsing-context-container">browsing context container</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context-container">browsing context container</a>
      <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context">nested browsing context</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-fetch">process a navigate fetch</a>
@@ -1990,7 +2085,7 @@ Host: advertisements-r-us.example.com
   <h3 class="no-num no-ref heading settled" id="normative"><span class="content">Normative References</span><a class="self-link" href="#normative"></a></h3>
   <dl>
    <dt id="biblio-csp3">[CSP3]
-   <dd>Mike West. <a href="https://w3c.github.io/webappsec-csp/">Content Security Policy Level 3</a>. 1 September 2016. WD. URL: <a href="https://w3c.github.io/webappsec-csp/">https://w3c.github.io/webappsec-csp/</a>
+   <dd>Mike West. <a href="https://w3c.github.io/webappsec-csp/">Content Security Policy Level 3</a>. URL: <a href="https://w3c.github.io/webappsec-csp/">https://w3c.github.io/webappsec-csp/</a>
    <dt id="biblio-fetch">[FETCH]
    <dd>Anne van Kesteren. <a href="https://fetch.spec.whatwg.org/">Fetch Standard</a>. Living Standard. URL: <a href="https://fetch.spec.whatwg.org/">https://fetch.spec.whatwg.org/</a>
    <dt id="biblio-html">[HTML]
@@ -2024,6 +2119,9 @@ Host: advertisements-r-us.example.com
    <div class="issue"> Upstream this to WHATWG’s HTML.<a href="#issue-fdc1da1f0"> ↵ </a></div>
    <div class="issue"> W3C’s HTML is not based on Fetch, and does not have
   a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-fetch">process a navigate fetch</a> algorithm into which to hook. <a href="https://github.com/w3c/html/issues/584">&lt;https://github.com/w3c/html/issues/584></a><a href="#issue-7b3609ea"> ↵ </a></div>
+   <div class="issue"> TODO.<a href="#issue-95f2d23a"> ↵ </a></div>
+   <div class="issue"> TODO.<a href="#issue-95f2d23a0"> ↵ </a></div>
+   <div class="issue"> TODO.<a href="#issue-95f2d23a1"> ↵ </a></div>
   </div>
   <aside class="dfn-panel" data-for="element-attrdef-iframe-csp">
    <b><a href="#element-attrdef-iframe-csp">#element-attrdef-iframe-csp</a></b><b>Referenced in:</b>
@@ -2056,17 +2154,19 @@ Host: advertisements-r-us.example.com
    <ul>
     <li><a href="#ref-for-http-headerdef-embedding-csp-1">1.1. Examples</a> <a href="#ref-for-http-headerdef-embedding-csp-2">(2)</a> <a href="#ref-for-http-headerdef-embedding-csp-3">(3)</a> <a href="#ref-for-http-headerdef-embedding-csp-4">(4)</a>
     <li><a href="#ref-for-http-headerdef-embedding-csp-5">2.1. Integration with HTML</a>
-    <li><a href="#ref-for-http-headerdef-embedding-csp-6">4.3. Data Exfiltration</a>
-    <li><a href="#ref-for-http-headerdef-embedding-csp-7">5. IANA Considerations</a>
+    <li><a href="#ref-for-http-headerdef-embedding-csp-6">2.4. Policy Subsumption</a>
+    <li><a href="#ref-for-http-headerdef-embedding-csp-7">4.3. Data Exfiltration</a>
+    <li><a href="#ref-for-http-headerdef-embedding-csp-8">5. IANA Considerations</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="http-headerdef-allow-csp-from">
    <b><a href="#http-headerdef-allow-csp-from">#http-headerdef-allow-csp-from</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-http-headerdef-allow-csp-from-1">1.1. Examples</a> <a href="#ref-for-http-headerdef-allow-csp-from-2">(2)</a> <a href="#ref-for-http-headerdef-allow-csp-from-3">(3)</a>
-    <li><a href="#ref-for-http-headerdef-allow-csp-from-4">3.2. 
+    <li><a href="#ref-for-http-headerdef-allow-csp-from-4">2.4. Policy Subsumption</a>
+    <li><a href="#ref-for-http-headerdef-allow-csp-from-5">3.2. 
     Does response allow blanket enforcment of policy from request? </a>
-    <li><a href="#ref-for-http-headerdef-allow-csp-from-5">5. IANA Considerations</a>
+    <li><a href="#ref-for-http-headerdef-allow-csp-from-6">5. IANA Considerations</a>
    </ul>
   </aside>
 <script>/* script-dfn-panel */
