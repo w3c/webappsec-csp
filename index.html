@@ -968,6 +968,8 @@ Possible extra rowspan handling
 		/* Reverse color scheme */
 		color: black;
 		border-color: #3980B5;
+		border-bottom-width: 3px !important;
+		margin-bottom: 0px !important;
 	}
 	.toc a:visited {
 		border-color: #054572;
@@ -1451,7 +1453,7 @@ pre.idl.highlight { color: #708090; }
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1>Content Security Policy Level 3</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-11-10">10 November 2016</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-11-14">14 November 2016</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1459,7 +1461,7 @@ pre.idl.highlight { color: #708090; }
      <dt>Latest published version:
      <dd><a href="https://www.w3.org/TR/CSP3/">https://www.w3.org/TR/CSP3/</a>
      <dt>Previous Versions:
-     <dd><a href="https://www.w3.org/TR/2016/WD-CSP3-20160901/" rel="previous">https://www.w3.org/TR/2016/WD-CSP3-20160901/</a>
+     <dd><a href="https://www.w3.org/TR/2016/WD-CSP3-20160913/" rel="previous">https://www.w3.org/TR/2016/WD-CSP3-20160913/</a>
      <dt>Version History:
      <dd><a href="https://github.com/w3c/webappsec-csp/commits/master/index.src.html">https://github.com/w3c/webappsec-csp/commits/master/index.src.html</a>
      <dt>Feedback:
@@ -1868,8 +1870,9 @@ of security-relevant policy decisions.</p>
   Service Workers in particular).</p>
      <li data-md="">
       <p>The <code>frame-src</code> directive, which was deprecated in CSP Level
-  2, has been undeprecated, and a <code>worker-src</code> directive added. Both defer
-  to <code>child-src</code> if not present (which defers to <code>default-src</code> in turn).</p>
+  2, has been undeprecated, and a <code>worker-src</code> directive has been added.
+  Both continue to defer to <code>child-src</code> if not present (which defers to <code>default-src</code> in turn), but <code>child-src</code> is now deprecated.</p>
+      <p class="issue" id="issue-f16cc5a8"><a class="self-link" href="#issue-f16cc5a8"></a> This still might not be the right model. <a href="https://github.com/w3c/webappsec-csp/issues/146">&lt;https://github.com/w3c/webappsec-csp/issues/146></a></p>
      <li data-md="">
       <p>The URL matching algorithm now treats insecure schemes and ports as
   matching their secure variants. That is, the source expression <code>http://example.com:80</code> will match both <code>http://example.com:80</code> and <code>https://example.com:443</code>.</p>
@@ -2051,8 +2054,8 @@ of security-relevant policy decisions.</p>
   matches any resource on the host or any of its subdomains (and any of
   its subdomains' subdomains, and so on))</p>
      <li data-md="">
-      <p>Nonces such as <code>'nonce-qwertyu12345'</code> (which can match specific
-  elements on a page)</p>
+      <p>Nonces such as <code>'nonce-ch4hvvbHDpv7xCSvXCs3BrNggHdTzxUA'</code> (which can match
+  specific elements on a page)</p>
      <li data-md="">
       <p>Digests such as <code>'sha256-abcd...'</code> (which can match specific
   elements on a page)</p>
@@ -3010,7 +3013,9 @@ of security-relevant policy decisions.</p>
   trusted sources of script to execute on a page, while <a data-link-type="dfn" href="#font-src" id="ref-for-font-src-1">font-src</a> controls the
   sources of web fonts.</p>
     <h4 class="heading settled" data-level="6.1.1" id="directive-child-src"><span class="secno">6.1.1. </span><span class="content"><code>child-src</code></span><a class="self-link" href="#directive-child-src"></a></h4>
-    <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="child-src">child-src</dfn> directive governs the creation of <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context">nested browsing
+    <p>The <a data-link-type="dfn" href="#child-src" id="ref-for-child-src-1"><code>child-src</code></a> directive is <em>deprecated</em>. Authors who wish to regulate
+  nested browsing contexts and workers SHOULD use the <a data-link-type="dfn" href="#frame-src" id="ref-for-frame-src-1"><code>frame-src</code></a> and <a data-link-type="dfn" href="#worker-src" id="ref-for-worker-src-1"><code>worker-src</code></a> directives, respectively.</p>
+    <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="child-src"><code>child-src</code></dfn> directive governs the creation of <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context">nested browsing
   contexts</a> (e.g. <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a></code> and <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/obsolete.html#frame">frame</a></code> navigations) and Worker execution
   contexts. The syntax for the directive’s name and value is described by the
   following ABNF:</p>
@@ -3031,7 +3036,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
     </ul>
     <div class="example" id="example-1cff8d33">
      <a class="self-link" href="#example-1cff8d33"></a> Given a page with the following Content Security Policy: 
-<pre>Content-Security-Policy: <a data-link-type="dfn" href="#child-src" id="ref-for-child-src-1">child-src</a> https://example.com/
+<pre>Content-Security-Policy: <a data-link-type="dfn" href="#child-src" id="ref-for-child-src-2">child-src</a> https://example.com/
 </pre>
      <p>Fetches for the following code will all return network errors, as the URLs
     provided do not match <code>child-src</code>'s <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists-1">source list</a>:</p>
@@ -3161,14 +3166,14 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
      <p>will have the same behavior as the following header:</p>
 <pre><a data-link-type="dfn" href="#header-content-security-policy" id="ref-for-header-content-security-policy-3">Content-Security-Policy</a>: <a data-link-type="dfn" href="#connect-src" id="ref-for-connect-src-2">connect-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-3">'self'</a>;
                          <a data-link-type="dfn" href="#font-src" id="ref-for-font-src-2">font-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-4">'self'</a>;
-                         <a data-link-type="dfn" href="#frame-src" id="ref-for-frame-src-1">frame-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-5">'self'</a>;
+                         <a data-link-type="dfn" href="#frame-src" id="ref-for-frame-src-2">frame-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-5">'self'</a>;
                          <a data-link-type="dfn" href="#img-src" id="ref-for-img-src-1">img-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-6">'self'</a>;
                          <a data-link-type="dfn" href="#manifest-src" id="ref-for-manifest-src-1">manifest-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-7">'self'</a>;
                          <a data-link-type="dfn" href="#media-src" id="ref-for-media-src-1">media-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-8">'self'</a>;
                          <a data-link-type="dfn" href="#object-src" id="ref-for-object-src-2">object-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-9">'self'</a>;
                          <a data-link-type="dfn" href="#script-src" id="ref-for-script-src-3">script-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-10">'self'</a>;
                          <a data-link-type="dfn" href="#style-src" id="ref-for-style-src-1">style-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-11">'self'</a>;
-                         <a data-link-type="dfn" href="#worker-src" id="ref-for-worker-src-1">worker-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-12">'self'</a>
+                         <a data-link-type="dfn" href="#worker-src" id="ref-for-worker-src-2">worker-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-12">'self'</a>
 </pre>
      <p>That is, when <code>default-src</code> is set, every <a data-link-type="dfn" href="#fetch-directives" id="ref-for-fetch-directives-2">fetch directive</a> that isn’t
     explicitly set will fall back to the value <code>default-src</code> specifies.</p>
@@ -3182,14 +3187,14 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
      <p>will have the same behavior as the following header:</p>
 <pre><a data-link-type="dfn" href="#header-content-security-policy" id="ref-for-header-content-security-policy-5">Content-Security-Policy</a>: <a data-link-type="dfn" href="#connect-src" id="ref-for-connect-src-3">connect-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-14">'self'</a>;
                          <a data-link-type="dfn" href="#font-src" id="ref-for-font-src-3">font-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-15">'self'</a>;
-                         <a data-link-type="dfn" href="#frame-src" id="ref-for-frame-src-2">frame-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-16">'self'</a>;
+                         <a data-link-type="dfn" href="#frame-src" id="ref-for-frame-src-3">frame-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-16">'self'</a>;
                          <a data-link-type="dfn" href="#img-src" id="ref-for-img-src-2">img-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-17">'self'</a>;
                          <a data-link-type="dfn" href="#manifest-src" id="ref-for-manifest-src-2">manifest-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-18">'self'</a>;
                          <a data-link-type="dfn" href="#media-src" id="ref-for-media-src-2">media-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-19">'self'</a>;
                          <a data-link-type="dfn" href="#object-src" id="ref-for-object-src-3">object-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-20">'self'</a>;
                          <a data-link-type="dfn" href="#script-src" id="ref-for-script-src-5">script-src</a> https://example.com;
                          <a data-link-type="dfn" href="#style-src" id="ref-for-style-src-2">style-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-21">'self'</a>;
-                         <a data-link-type="dfn" href="#worker-src" id="ref-for-worker-src-2">worker-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-22">'self'</a>
+                         <a data-link-type="dfn" href="#worker-src" id="ref-for-worker-src-3">worker-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-22">'self'</a>
 </pre>
      <p>Given this behavior, one good way to build a policy for a site would be to
     begin with a <code>default-src</code> of <code>'none'</code>, and to build up a policy from there
@@ -3300,7 +3305,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 </pre>
     <div class="example" id="example-be3f1952">
      <a class="self-link" href="#example-be3f1952"></a> Given a page with the following Content Security Policy: 
-<pre>Content-Security-Policy: <a data-link-type="dfn" href="#frame-src" id="ref-for-frame-src-3">frame-src</a> https://example.com/
+<pre>Content-Security-Policy: <a data-link-type="dfn" href="#frame-src" id="ref-for-frame-src-4">frame-src</a> https://example.com/
 </pre>
      <p>Fetches for the following code will return a network errors, as the URL
     provided do not match <code>frame-src</code>'s <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists-5">source list</a>:</p>
@@ -3823,7 +3828,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 </pre>
     <div class="example" id="example-3cd57774">
      <a class="self-link" href="#example-3cd57774"></a> Given a page with the following Content Security Policy: 
-<pre>Content-Security-Policy: <a data-link-type="dfn" href="#worker-src" id="ref-for-worker-src-3">worker-src</a> https://example.com/
+<pre>Content-Security-Policy: <a data-link-type="dfn" href="#worker-src" id="ref-for-worker-src-4">worker-src</a> https://example.com/
 </pre>
      <p>Fetches for the following code will return a network errors, as the URL
     provided do not match <code>worker-src</code>'s <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists-10">source list</a>:</p>
@@ -4831,17 +4836,18 @@ Content-Security-Policy: connect-src http://example.com/;
       <p>Script requests which are triggered by non-<a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted">"parser-inserted"</a> <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code> elements are allowed.</p>
     </ol>
     <p>The first change allows you to deploy "<a data-link-type="grammar" href="#grammardef-strict-dynamic" id="ref-for-grammardef-strict-dynamic-8"><code>'strict-dynamic'</code></a> in a
-  backwards compatible way, without requiring user-agent sniffing: the policy <code>'unsafe-inline' https: 'nonce-abcdefg' 'strict-dynamic'</code> will act like <code>'unsafe-inline' https:</code> in browsers that support CSP1, <code>https: 'nonce-abcdefg'</code> in browsers that support CSP2, and <code>'nonce-abcdefg' 'strict-dynamic'</code> in browsers that support CSP3.</p>
+  backwards compatible way, without requiring user-agent sniffing: the policy <code>'unsafe-inline' https: 'nonce-abcdefg' 'strict-dynamic'</code> will act like <code>'unsafe-inline' https:</code> in browsers that support CSP1, <code>https: 'nonce-DhcnhD3khTMePgXwdayK9BsMqXjhguVV'</code> in browsers that support CSP2, and <code>'nonce-DhcnhD3khTMePgXwdayK9BsMqXjhguVV' 'strict-dynamic'</code> in browsers that
+  support CSP3.</p>
     <p>The second allows scripts which are given access to the page via nonces or
   hashes to bring in their dependencies without adding them explicitly to the
   page’s policy.</p>
-    <div class="example" id="example-18587805">
-     <a class="self-link" href="#example-18587805"></a> Suppose MegaCorp, Inc. deploys the following policy: 
-<pre><a data-link-type="dfn" href="#header-content-security-policy" id="ref-for-header-content-security-policy-7">Content-Security-Policy</a>: <a data-link-type="dfn" href="#script-src" id="ref-for-script-src-7">script-src</a> 'nonce-abcdefg' <a data-link-type="grammar" href="#grammardef-strict-dynamic" id="ref-for-grammardef-strict-dynamic-9">'strict-dynamic'</a>
+    <div class="example" id="example-e9366ef5">
+     <a class="self-link" href="#example-e9366ef5"></a> Suppose MegaCorp, Inc. deploys the following policy: 
+<pre><a data-link-type="dfn" href="#header-content-security-policy" id="ref-for-header-content-security-policy-7">Content-Security-Policy</a>: <a data-link-type="dfn" href="#script-src" id="ref-for-script-src-7">script-src</a> 'nonce-DhcnhD3khTMePgXwdayK9BsMqXjhguVV' <a data-link-type="grammar" href="#grammardef-strict-dynamic" id="ref-for-grammardef-strict-dynamic-9">'strict-dynamic'</a>
 </pre>
      <p>And serves the following HTML with that policy active:</p>
 <pre>...
-&lt;script src="https://cdn.example.com/script.js" nonce="abcdefg" >&lt;/script>
+&lt;script src="https://cdn.example.com/script.js" nonce="DhcnhD3khTMePgXwdayK9BsMqXjhguVV" >&lt;/script>
 ...
 </pre>
      <p>This will generate a request for <code>https://cdn.example.com/script.js</code>, which
@@ -4943,7 +4949,7 @@ document.write('&lt;scr' + 'ipt src='/sadness.js'>&lt;/scr' + 'ipt>');
      <dd data-md="">
       <p>This document (see <a href="#directive-base-uri">§6.2.1 base-uri</a>)</p>
      <dt data-md="">
-      <p><a data-link-type="dfn" href="#child-src" id="ref-for-child-src-2"><code>child-src</code></a></p>
+      <p><a data-link-type="dfn" href="#child-src" id="ref-for-child-src-3"><code>child-src</code></a></p>
      <dd data-md="">
       <p>This document (see <a href="#directive-child-src">§6.1.1 child-src</a>)</p>
      <dt data-md="">
@@ -4971,7 +4977,7 @@ document.write('&lt;scr' + 'ipt src='/sadness.js'>&lt;/scr' + 'ipt>');
      <dd data-md="">
       <p>This document (see <a href="#directive-frame-ancestors">§6.3.2 frame-ancestors</a>)</p>
      <dt data-md="">
-      <p><a data-link-type="dfn" href="#frame-src" id="ref-for-frame-src-4"><code>frame-src</code></a></p>
+      <p><a data-link-type="dfn" href="#frame-src" id="ref-for-frame-src-5"><code>frame-src</code></a></p>
      <dd data-md="">
       <p>This document (see <a href="#directive-frame-src">§6.1.5 frame-src</a>)</p>
      <dt data-md="">
@@ -5015,7 +5021,7 @@ document.write('&lt;scr' + 'ipt src='/sadness.js'>&lt;/scr' + 'ipt>');
      <dd data-md="">
       <p>This document (see <a href="#directive-style-src">§6.1.11 style-src</a>)</p>
      <dt data-md="">
-      <p><a data-link-type="dfn" href="#worker-src" id="ref-for-worker-src-4"><code>worker-src</code></a></p>
+      <p><a data-link-type="dfn" href="#worker-src" id="ref-for-worker-src-5"><code>worker-src</code></a></p>
      <dd data-md="">
       <p>This document (see <a href="#directive-worker-src">§6.1.12 worker-src</a>)</p>
     </dl>
@@ -5630,6 +5636,7 @@ rest of Google’s CSP Cabal.</p>
 </pre>
   <h2 class="no-num no-ref heading settled" id="issues-index"><span class="content">Issues Index</span><a class="self-link" href="#issues-index"></a></h2>
   <div style="counter-reset:issue">
+   <div class="issue"> This still might not be the right model. <a href="https://github.com/w3c/webappsec-csp/issues/146">&lt;https://github.com/w3c/webappsec-csp/issues/146></a><a href="#issue-f16cc5a8"> ↵ </a></div>
    <div class="issue"> <code>unsafe-hashed-attributes</code> is a work in progress. <a href="https://github.com/w3c/webappsec-csp/issues/13">&lt;https://github.com/w3c/webappsec-csp/issues/13></a><a href="#issue-2f321613"> ↵ </a></div>
    <div class="issue"> Is this kind of thing specified anywhere? I didn’t see anything
   that looked useful in <a data-link-type="biblio" href="#biblio-ecma262">[ECMA262]</a>.<a href="#issue-c404edb5"> ↵ </a></div>
@@ -6756,8 +6763,8 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="child-src">
    <b><a href="#child-src">#child-src</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-child-src-1">6.1.1. child-src</a>
-    <li><a href="#ref-for-child-src-2">10.1. 
+    <li><a href="#ref-for-child-src-1">6.1.1. child-src</a> <a href="#ref-for-child-src-2">(2)</a>
+    <li><a href="#ref-for-child-src-3">10.1. 
     Directive Registry </a>
    </ul>
   </aside>
@@ -6796,9 +6803,10 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="frame-src">
    <b><a href="#frame-src">#frame-src</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-frame-src-1">6.1.3. default-src</a> <a href="#ref-for-frame-src-2">(2)</a>
-    <li><a href="#ref-for-frame-src-3">6.1.5. frame-src</a>
-    <li><a href="#ref-for-frame-src-4">10.1. 
+    <li><a href="#ref-for-frame-src-1">6.1.1. child-src</a>
+    <li><a href="#ref-for-frame-src-2">6.1.3. default-src</a> <a href="#ref-for-frame-src-3">(2)</a>
+    <li><a href="#ref-for-frame-src-4">6.1.5. frame-src</a>
+    <li><a href="#ref-for-frame-src-5">10.1. 
     Directive Registry </a>
    </ul>
   </aside>
@@ -6868,9 +6876,10 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="worker-src">
    <b><a href="#worker-src">#worker-src</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-worker-src-1">6.1.3. default-src</a> <a href="#ref-for-worker-src-2">(2)</a>
-    <li><a href="#ref-for-worker-src-3">6.1.12. worker-src</a>
-    <li><a href="#ref-for-worker-src-4">10.1. 
+    <li><a href="#ref-for-worker-src-1">6.1.1. child-src</a>
+    <li><a href="#ref-for-worker-src-2">6.1.3. default-src</a> <a href="#ref-for-worker-src-3">(2)</a>
+    <li><a href="#ref-for-worker-src-4">6.1.12. worker-src</a>
+    <li><a href="#ref-for-worker-src-5">10.1. 
     Directive Registry </a>
    </ul>
   </aside>
