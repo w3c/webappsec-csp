@@ -23,6 +23,7 @@ spec:html; type:dfn; for:/; text:browsing context
 spec:html; type:dfn; text:case-sensitive
 spec:fetch; type:dfn; for:/; text:request
 spec:dom; type:interface; text:Document
+spec:encoding; type: dfn; text: ascii case-insensitive
 </pre>
 <pre class="anchors">
 spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
@@ -496,89 +497,100 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   <h4 id="subsume-source-list" algorithm>
     Does <a grammar>serialized-source-list</a> |A| subsume 
     <a grammar>serialized-source-list</a> |B| given their respective 
-    <a for="request">origins</a>?
+    <a for="request">origins</a> and directive names?
   </h4>
 
-  Given a <a grammar>serialized-source-list</a> |A| with <a for="request">origin</a> 
-  (|origin A|) and a <a grammar>serialized-source-list</a> |B| with 
-  <a for="request">origin</a> (|origin B|), this algorithm returns "`Subsumes`"
-  if |A| <a>subsumes</a> |B|, and returns "`Does Not Subsume`" otherwise.
+  Given a <a grammar>serialized-source-list</a> |A| with 
+  <a for="request">origin</a> (|origin A|) and a string (|directive A|), 
+  <a grammar>serialized-source-list</a> |B| with <a for="request">origin</a> 
+  (|origin B|) and a string (|directive B|), this algorithm
+  returns "`Subsumes`" if |A| <a>subsumes</a> |B|, and returns 
+  "`Does Not Subsume`" otherwise.
 
   A <a grammar>serialized-source-list</a> is a <dfn>wildcard list</dfn> if it
   is a <a>case-sensitive</a> match to the U+002A ASTERISK character (`*`).
 
-  A <a grammar>serialized-source-list</a> is <dfn>non-strict inline</dfn> if it
-  contains <a grammar>`keyword-source`</a> expression "`unsafe-inline`" or
-  "`unsafe-eval`", but does not contain a <a grammar>`keyword-source`</a>
-  expression "`strict-dynamic`" or any <a grammar>`nonce-source`</a> or
-  <a grammar>`hash-source`</a> expressions.
+  1.  If |directive A| is not an <a>ASCII case-insensitive</a> match to 
+      |directive B|, return "`Does Not Subsume`".
 
-  ISSUE: Align with `allow unsafe-inline` definition in CSP3.
+  2.  If |A| is empty or |B| is `none`, return "`Subsumes`".
 
-  1.  If |A| is empty, return "`Subsumes`".
+  3.  If |B| is empty or |A| is `none`, return "`Does Not Subsume`".
 
-  2.  If |B| is empty, return "`Does Not Subsume`".
-
-  3.  If |B| is `none`, return "`Subsumes`".
-
-  4.  If |A| is `none`, return "`Does Not Subsume`".
-
-  5.  If |A| is a `wildcard list`:
+  4.  If |A| is a `wildcard list`:
 
       1. ISSUE: TODO.
 
-  6.  If |B| is a `wildcard list`:
+  5.  If |B| is a `wildcard list`:
 
       1.  ISSUE: TODO.
 
-  7.  If |B| contains a <a grammar>`keyword-source`</a> expression 
-      "`strict-dynamic`" but |A| does not contain it, return 
-      "`Does Not Subsume`".
+  6.  If |directive B| is "`script-src`" and |B| contains a 
+      <a grammar>`keyword-source`</a> expression "`strict-dynamic`" but |A| does
+      not contain it, return "`Does Not Subsume`".
 
-  8.  If |B| is <a>non-strict inline</a> but |A| is not, return 
-      "`Does Not Subsume`".
+  7.  If |directive B| is "`script-src`" or "`style-src`":
 
-  9.  Let |list A| and |list B| be empty lists.
+      1.  If |B| contains a <a grammar>`keyword-source`</a> expression 
+          "`unsafe-eval`" but |A| does not contain it, return 
+          "`Does Not Subsume`".
 
-  10.  For each |expression A| in the result of splitting |A| on spaces:
+      2.  If |B| contains a <a grammar>`keyword-source`</a> expression 
+          "`unsafe-hashed-attributes`" but |A| does not contain it, return 
+          "`Does Not Subsume`".
 
-       1.  If |expression A| is "`self`", append a <a grammar>`host-source`</a>,
-           returned by [[#rewrite-self]] given |origin A| to |list A|.
+      3.  Let |type B| be "`script`" if |directive B| is "`script-src`" and 
+          "`style`" otherwise. Similarly, let |type A| be "`script`" if 
+          |directive A| is "`script-src`" and "`style`" otherwise.
 
-       2.  If |expression A| does not match <a grammar>`keyword-source`</a> grammar,
-           append |expression A| to |list A|.
+      4.  If [[csp3#allow-all-inline]] returns "`Allows`" given |B| with 
+          |type B|, but returns "`Does Not Allow`" given |A| with 
+          |type A|, return "`Does Not Subsume`".
 
-  11.  For each |expression B| in the result of splitting |B| on spaces:
+  8.  Let |list A| and |list B| be empty lists.
+
+  9.  For each |expression A| in the result of splitting |A| on spaces:
+
+      1.  If |expression A| is "`self`", append a <a grammar>`host-source`</a>,
+          returned by [[#rewrite-self]] given |origin A| to |list A|.
+
+      2.  If |expression A| does not match <a grammar>`keyword-source`</a>
+          grammar, append |expression A| to |list A|.
+
+  10.  For each |expression B| in the result of splitting |B| on spaces:
 
        1.  If |expression B| is "`self`", append a <a grammar>`host-source`</a>,
            returned by [[#rewrite-self]] given |origin B| to |list B|.
 
-       2.  If |expression B| does not match <a grammar>`keyword-source`</a> grammar,
-           append |expression B| to |list B|.
+       2.  If |expression B| does not match <a grammar>`keyword-source`</a>
+           grammar, append |expression B| to |list B|.
 
-  12.  If |list B| is empty, return "`Subsumes`".
+  11.  If |list B| is empty, return "`Subsumes`".
 
-  13.  If |list A| is empty, return "`Does Not Subsume`".
+  12.  If |list A| is empty, return "`Does Not Subsume`".
 
-  14.  For each |expression B| in |list B|:
+  13.  For each |expression B| in |list B|:
 
-      1.  Let |found match| be `false`.
+      1.  If |expression B| matches the <a grammar>`hash-source`</a> gramar, or
+          <a grammar>`nonce-source`</a> grammar, continue to the next expression
+          unless |directive A| is "`script-src`" or "`style-src`".
 
-      2.  For each |expression A| in |list A|:
+      2.  Let |found match| be `false`.
 
-          1.  If |list A| is <a>non-strict inline</a> and |expression B| matches
-              <a grammar>`hash-source`</a> grammar or <a grammar>`nonce-source`</a>
-              grammar, continue to  the next expression.
+      3.  For each |expression A| in |list A|:
 
-          2.  If [[#subsume-se]] returns "`Subsumes`" given |expression A| and
+          1.  If [[#subsume-se]] returns "`Subsumes`" given |expression A| and
               |expression B|, set |found match| to `true`.
               Break out of this inner loop.
 
-      3.  If |found match| is `false`, return "`Does Not Subsume`".
+      4.  If |found match| is `false`, return "`Does Not Subsume`".
 
-  15.  Return "`Subsumes`".
+  14.  Return "`Subsumes`".
 
   <div class="example">
+    Let |directive A| and |directive B| be "`script-src`". Consider
+    the following examples:
+
     <pre>
       A = "http://example.com 'sha256-xzi4zkCjuC8'"
       B = "http://example.com"
@@ -586,32 +598,26 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
     Since |B| does not allow <a grammar>`hash-source`</a> expressions, but its
     value is found in |A|, |A| subsumes |B|. It is, however, not true that |A|
     <a>subsumes</a> |B|.
-  </div>
 
-  <div class="example">
     <pre>
       A = "https://example.com 'sha256-xzi4zkCjuC8'"
       B = "http://example.com"
     </pre>
     In this case, |A| does not subsume |B| since "https://example.com" does
     not <a>subsume</a> "http://example.com".
-  </div>
 
-  <div class="example">
     <pre>
       A = "http://example.com 'sha256-xzi4zkCjuC8'"
-      B = "http://example.com 'unsafe-eval'"
+      B = "http://example.com 'unsafe-inline'"
     </pre>
-    Since |B| is <a>non-strict inline</a>, but |A| is not, |A| does not <a>subsume</a>
-    |B|. However, |B| does <a>subsume</a> |A|. 
-  </div>
+    Since |B| <a lt="allow all inline behavior" for="source list">allows all inline behavior</a>, 
+    but |A| does not, |A| doesn't <a>subsume</a> |B|. 
 
-  <div class="example">
     <pre>
       A = "http://example.com 'sha256-xzi4zkCjuC8' 'strict-dynamic'"
-      B = "http://example.com 'unsafe-eval' 'strict-dynamic'"
+      B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
     </pre>
-    Neither |B| not |A| is <a>non-strict inline</a>. 
+    Neither |A| nor |B| <a for="source list">allow all inline behavior</a>.
     In this case, |A| <a>subsumes</a> |B|.
   </div>
 
