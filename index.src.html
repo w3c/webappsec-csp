@@ -3669,9 +3669,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       1.  If |expression| matches the <a grammar>`nonce-source`</a> or
           <a grammar>`hash-source`</a> grammar, return "`Does Not Allow`".
 
-      2.  If |type| is "`script`" and |expression| matches the 
-          <a grammar>keyword-source</a> "<a grammar>`'strict-dynamic'`</a>", 
-          return "`Does Not Allow`".
+      2.  If |type| is "`script`" or "`script attribute`" and |expression| 
+          matches the <a grammar>keyword-source</a> 
+          "<a grammar>`'strict-dynamic'`</a>", return "`Does Not Allow`".
 
           Note: `'strict-dynamic'` only applies to scripts, not other resource
           types. Usage is explained in more detail in [[#strict-dynamic-usage]].
@@ -3684,34 +3684,32 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       Otherwise, return "`Does Not Allow`".
 
   <div class="example">
-    The following <a>source lists</a>
-    <a for="source list">allow all inline behavior</a> for all types:
+    <a>Source lists</a> that
+    <a for="source list">allow all inline behavior</a>:
 
     <pre>
-      <a>style</a> 'unsafe-inline' http://a.com http://b.com
-      <a>script attribute</a> http://example.com 'unsafe-inline'
-      <a>script</a> 'unsafe-inline'
+      'unsafe-inline' http://a.com http://b.com
+      'unsafe-inline'
     </pre>
 
-    The following <a>source lists</a> do not 
-    <a for="source list">allow all inline behavior</a> for all types due to
+    <a>Source lists</a> that do not 
+    <a for="source list">allow all inline behavior</a> due to
     the presence of nonces and/or hashes, or absence of '`unsafe-inline`':
 
     <pre>
-      <a>style</a> 'sha512-321cba' 'nonce-abc'
-      <a>style attribute</a> http://example.com
-      <a>script</a> http://example.com 'unsafe-inline' 'nonce-abc'
+      'sha512-321cba' 'nonce-abc'
+      http://example.com 'unsafe-inline' 'nonce-abc'
     </pre>
 
-     The following <a>source lists</a> do not 
+     <a>Source lists</a> that do not 
      <a for="source list">allow all inline behavior</a> when |type| is 
-     '`script`' due to the presence of '`strict-dynamic`', but 
-     <a for="source list">allow all inline behavior</a> otherwise:
+     '`script`' or '`script attribute`' due to the presence of 
+     '`strict-dynamic`', but <a for="source list">allow all inline behavior</a> 
+     otherwise:
 
      <pre>
-      <a>script</a> 'unsafe-inline' 'strict-dynamic'
-      <a>style</a> http://example.com 'strict-dynamic' 'unsafe-inline'
-      <a>script attribute</a> http://example.com 'unsafe-inline' 'strict-dynamic'
+      'unsafe-inline' 'strict-dynamic'
+      http://example.com 'strict-dynamic' 'unsafe-inline'
     </pre>
   </div>
 
