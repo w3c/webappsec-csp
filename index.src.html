@@ -3648,8 +3648,73 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   present, but we should probably consider this algorithm as "at risk" until
   we know its impact.
 
+  <h5 id="allow-all-inline" algorithm>
+    Does a source list allow all inline behavior for |type|?
+  </h5>
+
+  A <a>source list</a>  <dfn for="source list" local-lt="allow all inline 
+  behavior">allows all inline behavior</dfn> of a given |type| if it contains
+  the <a grammar>`keyword-source`</a> expression 
+  <a grammar>`'unsafe-inline'`</a>, and does not override that expression as 
+  described in the following algorithm:
+
+  Given a <a>source list</a> (|list|) and a string (|type|), the following
+  algorithm returns "`Allows`" if all inline content of a given |type| is 
+  allowed and "`Does Not Allow`" otherwise.
+
+  1.  Let |allow all inline| be `false`.
+
+  2.  For each |expression| in |list|:
+
+      1.  If |expression| matches the <a grammar>`nonce-source`</a> or
+          <a grammar>`hash-source`</a> grammar, return "`Does Not Allow`".
+
+      2.  If |type| is "`script`" or "`script attribute`" and |expression| 
+          matches the <a grammar>keyword-source</a> 
+          "<a grammar>`'strict-dynamic'`</a>", return "`Does Not Allow`".
+
+          Note: `'strict-dynamic'` only applies to scripts, not other resource
+          types. Usage is explained in more detail in [[#strict-dynamic-usage]].
+
+      3.  If |expression| is an <a>ASCII case-insensitive</a> match for the
+          <a grammar>`keyword-source`</a> "<a grammar>`'unsafe-inline'`</a>", 
+          set |allow all inline| to `true`.
+
+  3.  If |allow all inline| is `true`, return "`Allows`".
+      Otherwise, return "`Does Not Allow`".
+
+  <div class="example">
+    <a>Source lists</a> that
+    <a for="source list">allow all inline behavior</a>:
+
+    <pre>
+      'unsafe-inline' http://a.com http://b.com
+      'unsafe-inline'
+    </pre>
+
+    <a>Source lists</a> that do not 
+    <a for="source list">allow all inline behavior</a> due to
+    the presence of nonces and/or hashes, or absence of '`unsafe-inline`':
+
+    <pre>
+      'sha512-321cba' 'nonce-abc'
+      http://example.com 'unsafe-inline' 'nonce-abc'
+    </pre>
+
+     <a>Source lists</a> that do not 
+     <a for="source list">allow all inline behavior</a> when |type| is 
+     '`script`' or '`script attribute`' due to the presence of 
+     '`strict-dynamic`', but <a for="source list">allow all inline behavior</a> 
+     otherwise:
+
+     <pre>
+      'unsafe-inline' 'strict-dynamic'
+      http://example.com 'strict-dynamic' 'unsafe-inline'
+    </pre>
+  </div>
+
   <h5 id="match-element-to-source-list" algorithm>
-    Does |element| match source |list| for |type| and |source|?
+    Does |element| match source list for |type| and |source|?
   </h5>
 
   Given an {{Element}} (|element|), a <a>source list</a> (|list|), a string
@@ -3665,36 +3730,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       of the page in which it is embedded. See the integration points
       in [[#html-integration]] for more detail.
 
-  2.  Let |allow unsafe-inline| be `true`, and |hashes match attributes| be `false`.
+  2.  If [[#allow-all-inline]] returns "`Allows`" given |list| and |type|,
+      return "`Matches`".
 
-  3.  For each |expression| in |list|:
-
-      1.  If |expression| matches the <a grammar>`nonce-source`</a> or
-          <a grammar>`hash-source`</a> grammar, set |allow unsafe-inline| to
-          `false`.
-
-      2.  If |type| is "`script`" or "`script attribute`", and |expression|
-          matches the <a grammar>keyword-source</a>
-          "<a grammar>`'strict-dynamic'`</a>", set |allow unsafe-inline| to
-          `false`.
-
-          Note: `'strict-dynamic'` only applies to scripts, not other resource
-          types. Usage is explained in more detail in [[#strict-dynamic-usage]].
-
-      3.  If |expression| is an <a>ASCII case-insensitive</a> match for the
-          <a grammar>`keyword-source`</a>
-          "<a grammar>`'unsafe-hashed-attributes'`</a>", set |hashes match
-          attributes| to `true`.
-
-  4.  If |allow unsafe-inline| is `true`, and |list| contains a
-      <a>source expression</a> which is an <a>ASCII case-insensitive</a> match
-      for the string "'unsafe-inline'", then return "`Matches`".
-
-      Note: This logic means that if |list| contains both "'unsafe-inline'"
-      and either <a grammar>`nonce-source`</a> or <a grammar>`hash-source`</a>,
-      "'unsafe-inline'" will have no effect.
-
-  5.  If |type| is "`script`" or "`style`", and [[#is-element-nonceable]]
+  3.  If |type| is "`script`" or "`style`", and [[#is-element-nonceable]]
       returns "`Nonceable`" when executed upon |element|:
 
       1.  For each |expression| in |list|:
@@ -3706,6 +3745,15 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
       Note: Nonces only apply to inline <{script}> and inline <{style}>, not to
       attributes of either element.
+
+  4.  Let |hashes match attributes| be `false`.
+
+  5.  For each |expression| in |list|:
+
+      1.  If |expression| is an <a>ASCII case-insensitive</a> match for the
+          <a grammar>`keyword-source`</a> 
+          "<a grammar>`'unsafe-hashed-attributes'`</a>", 
+          set |hashes match attributes| to `true`. Break out of the loop.
 
   6.  If |type| is "`script`" or "`style`", or |hashes match attributes| is
       `true`:
