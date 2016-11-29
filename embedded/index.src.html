@@ -416,50 +416,58 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
 
   Given two expressions matching the <a grammar>`scheme-source`</a>  or 
   <a grammar>`host-source`</a> grammar (|A| and |B|), return "`Similar`" if |A|
-  is <a for="similar">similar</a> to |B|. Otherwise, return "`Not Similar`".
+  is <a for="source expression">similar</a> to |B|. Otherwise, return 
+  "`Not Similar`".
 
-  |A| and |B| are said to be <dfn for="similar">similar</dfn> if their parts 
-  individually match, that is <a grammar>`scheme-part`</a>, 
+  |A| and |B| are said to be <dfn for="source expression">similar</dfn> if their
+  parts individually match, that is <a grammar>`scheme-part`</a>, 
   <a grammar>`host-part`</a>, <a grammar>`port-part`</a>, and 
   <a grammar>`path-part`</a>. 
 
   NOTE: This property is symmetric. That is if |A| is 
-  <a for="similar">similar</a> to |B|, it must be that |B| is 
-  <a for="similar">similar</a> to |A|.
+  <a for="source expression">similar</a> to |B|, it must be that |B| is 
+  <a for="source expression">similar</a> to |A|.
 
   <div class="example">
-    Cases when |A| is <a for="similar">similar</a> to |B|.
-
-    <pre>
-      A = http://*.example.com
-      B = https://example.com:*
-    </pre>
+    Cases when |A| is <a for="source expression">similar</a> to |B|.
 
     <pre>
       A = https://inner.example.com/foo/
       B = http://*.example.com/foo/bar/
     </pre>
+    Since |A| has a <a for="source expression">wildcard host</a>, it matches any
+    subdomain which in this case is "inner" so that |A| is similar to |B|.
+
+    <pre>
+      A = http://*.example.com
+      B = https://example.com:*
+    </pre>
+    Even though |A| and |B|'s ports are different, |A| and |B| are similar 
+    because "http" matches both "http" and a more secure variant "https".
 
     <pre>
       A = http://example.com:80/page1/html
       B = https://example.com:443/
     </pre>
+    In both sources specified ports are defalt ports for the respective schemes
+    and |B|'s path would match any path, |A| is similar to |B|.
 
-    Cases when |A| is not <a for="similar">similar</a> to |B|.
+
+    Cases when |A| is not <a for="source expression">similar</a> to |B|.
 
     <pre>
       A = http://example.com:80
       B = http://example.com:334
     </pre>
     In this case, ports of |A| and |B| do not match so that the two sources are
-    not <a for="similar">similar</a> .
+    not <a for="source expression">similar</a> .
 
     <pre>
       A = http://example.com/page.html
       B = http://example.com/index.html
     </pre>
-    The two sources are not <a for="similar">similar</a> beucase their paths
-    do not match.
+    The two sources are not <a for="source expression">similar</a> beucase their
+    paths do not match.
   </div>
 
   A <a>source expression</a> has a 
@@ -579,7 +587,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   Given two expressions matching the <a grammar>`scheme-source`</a> or 
   <a grammar>`host-source`</a> grammar (|A| and |B|), return their 
   <a for="source expression">intersection</a> if |A| is 
-  <a for="similar">similar</a> to |B|. Otherwise, return `null`.
+  <a for="source expression">similar</a> to |B|. Otherwise, return `null`.
 
   1.  If the result of executing [[#source-expression-similarity]] on |A| and 
       |B| is "`Not Similar`", return `null`.
