@@ -896,7 +896,112 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
     In this case, |A| <a>subsumes</a> |B|.
   </div>
 
-  <h4 id="subsume-directive" algorithm>
+  <h4 id="effective-directive" algorithm>
+    Get the effective directive value for |name| and |policy|.
+  </h4>
+
+  Given a string (|name|) and <a>policy</a> (|policy|), the following algorithm
+  returns either `null` or a set of non-empty strings.
+
+  1.  Switch on |name|'s and execute the associated steps:
+
+      : "`child-src`"
+      ::
+
+      : "`connect-src`"
+      ::
+
+      : "`font-src`"
+      ::
+
+      : "`img-src`"
+      ::
+
+      : "`manifest-src`"
+      ::
+
+      : "`media-src`"
+      ::
+
+      : "`object-src`"
+      ::
+
+      : "`script-src`"
+      ::
+
+      : "`style-src`"
+      ::
+        1.  If |policy|'s <a>directive set</a> contains at least one 
+            <a>directive</a> whose <a for="directive">name</a> is |name|,
+            let |directive| be the first such <a>directive</a>.
+            Return |directive|'s <a for="directive">value</a>.
+
+        2.  If |policy|'s <a>directive set</a> contains a
+            <a>directive</a> whose <a for="directive">name</a> is 
+            "`default-src`", return that <a>directive</a>'s
+            <a for="directive">value</a>.
+
+        3.  Return `null`.
+
+      : "`frame-src`"
+      ::
+
+      : "`worker-src`"
+      ::
+        1.  If |policy|'s <a>directive set</a> contains at least one 
+            <a>directive</a> whose <a for="directive">name</a> is |name|, 
+            let |directive| be the first such <a>directive</a>.
+            Return |directive|'s <a for="directive">value</a>.
+
+        2.  If |policy|'s <a>directive set</a> contains a
+            <a>directive</a> whose <a for="directive">name</a> is 
+            "`child-src`", return that <a>directive</a>'s
+            <a for="directive">value</a>.
+
+        3.  If |policy|'s <a>directive set</a> contains a
+            <a>directive</a> whose <a for="directive">name</a> is 
+            "`default-src`", return that <a>directive</a>'s
+            <a for="directive">value</a>.
+
+        4.  Return `null`.
+
+      : "`base-uri`"
+      ::
+
+      : "`block-all-mixed-content`"
+      ::
+
+      : "`default-src`"
+      ::
+
+      : "`frame-ancestors`"
+      ::
+
+      : "`form-action`"
+      ::
+
+      : "`plugin-types`"
+      ::
+
+      : "`report-uri`"
+      ::
+
+      : "`require-sri-for`"
+      ::
+
+      : "`sandbox`"
+      ::
+
+      : "`upgrade-insecure-requests`"
+      ::
+        1.  If |policy|'s <a>directive set</a> contains at least one 
+            <a>directive</a> whose <a for="directive">name</a> is |name|, 
+            let |directive| be the first such <a>directive</a>.
+            Return |directive|'s <a for="directive">value</a>.
+
+  2.  Return `null`.
+
+  <h4 id="subsume-policies" algorithm>
     Does <a>policy</a> |A| subsume <a>policy</a> |B| given their respective
     <a for="request">origins</a>?
   </h4>
@@ -914,7 +1019,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
       1.  Let |directive name| be |directive A|'s <a for="directive">name</a>.
 
       2.  If |directive name| is "`default-src`", "`report-uri`", "`report-to`",
-          <a for="iteration">continue</a> to the next |directive A|.
+          <a for="iteration">continue</a>.
 
       3.  Let |effective directive A| be the result of executing
           [[#operative-directive]] given |directive name| and |A|.
@@ -922,8 +1027,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
       4.  Let |effective directive B| be the result of executing
           [[#operative-directive]] given |directive name| and |B|.
 
-      5.  If |effective directive A| is `null`, <a for="iteration">continue</a>
-          to the next |directive A|.
+      5.  If |effective directive A| is `null`, <a for="iteration">continue</a>.
 
       6.  If |effective directive B| is `null`, return "`Does Not Subsume`".
 
@@ -940,7 +1044,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
           1.  ISSUE: TODO.
 
       10.  If |directive A|'s <a for="directive">name</a> is "`disown-opener`",
-           <a for="iteration">continue</a> to the next |directive A|.
+           <a for="iteration">continue</a>.
 
       11.  Otherwise:
 
