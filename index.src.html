@@ -281,10 +281,18 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       requirements and restrictions with other specifications (and with
       Service Workers in particular).
 
-  2.  The `frame-src` directive, which was deprecated in CSP Level
-      2, has been undeprecated, and a `worker-src` directive has been added.
-      Both continue to defer to `child-src` if not present (which defers to
-      `default-src` in turn), but `child-src` is now deprecated.
+  2.  The `child-src` model has been substantially altered:
+
+      1. The `frame-src` directive, which was deprecated in CSP Level
+         2, has been undeprecated, but continues to defer to `child-src` if
+         not present (which defers to `default-src` in turn).
+
+      2. A `worker-src` directive has been added, deferring to `script-src`
+         if not present (which likewise defers to `default-src` in turn).
+
+      3. `child-src` is now deprecated.
+
+      4. Dedicated workers now always inherit their creator's policy.
 
       ISSUE(w3c/webappsec-csp#146): This still might not be the right model.
 
@@ -1120,7 +1128,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   to initialize |global|'s <a for="global object">CSP list</a>:
 
   1.  If |response|'s <a for="response">url</a>'s <a for="url">scheme</a> is a
-      <a>local scheme</a>:
+      <a>local scheme</a>, or if |global| is a {{DedicatedWorkerGlobalScope}}:
 
       1.  Let |documents| be an empty list.
 
@@ -1139,9 +1147,11 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       therefore alias the <a>embedding document</a>'s policies for <a>an iframe
       `srcdoc` `Document`</a>.
 
-  2.  For each |policy| in |response|'s
-      <a for="response">CSP list</a>, insert |policy| into
-      |global|'s <a for="global object">CSP list</a>.
+  2.  If |global| is a {{SharedWorkerGlobalScope}} or {{ServiceWorkerGlobalScope}}:
+
+      1.  For each |policy| in |response|'s
+          <a for="response">CSP list</a>, insert |policy| into
+          |global|'s <a for="global object">CSP list</a>.
 
   <h4 id="should-block-inline" algorithm>
     Should |element|'s inline |type| behavior be blocked by Content Security Policy?
@@ -1678,7 +1688,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
 
-  2.  If |name| is not `frame-src` or `worker-src`, return "`Allowed`".
+  2.  If |name| is not `frame-src`, return "`Allowed`".
 
   3.  If |policy| contains a directive whose <a for="directive">name</a>
       is |name|, return "`Allowed`"
@@ -1700,7 +1710,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
 
-  2.  If |name| is not `frame-src` or `worker-src`, return "`Allowed`".
+  2.  If |name| is not `frame-src`, return "`Allowed`".
 
   3.  If |policy| contains a directive whose <a for="directive">name</a>
       is |name|, return "`Allowed`"
@@ -1897,15 +1907,13 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   3.  If |policy| contains a <a>directive</a> whose <a for="directive">name</a>
       is |name|, return "`Allowed`".
 
-  4.  If |name| is "`frame-src`" or "`worker-src`", and |policy| contains a
-      <a>directive</a> whose <a for="directive">name</a> is "`child-src`",
-      return "`Allowed`".
+  4.  If |name| is "`frame-src`", and |policy| contains a <a>directive</a> whose
+      <a for="directive">name</a> is "`child-src`", return "`Allowed`".
 
-      Note: It would be lovely to remove this special case. Perhaps "effective
-      directive" could return "`child-src`" and that could delegate out in the
-      same way this algorithm does?
+  5.  If |name| is "`worker-src`", and |policy| contains a <a>directive</a> whose
+      <a for="directive">name</a> is "`script-src`", return "`Allowed`".
 
-  5.  Otherwise, return the result of executing the
+  6.  Otherwise, return the result of executing the
       <a for="directive">pre-request check</a> for the <a>directive</a> whose
       <a for="directive">name</a> is |name| on |request| and |policy|, using
       this directive's <a for="directive">value</a> for the comparison.
@@ -1927,15 +1935,13 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   3.  If |policy| contains a <a>directive</a> whose <a for="directive">name</a>
       is |name|, return "`Allowed`".
 
-  4.  If |name| is "`frame-src`" or "`worker-src`", and |policy| contains a
-      <a>directive</a> whose <a for="directive">name</a> is "`child-src`",
-      return "`Allowed`".
+  4.  If |name| is "`frame-src`", and |policy| contains a <a>directive</a> whose
+      <a for="directive">name</a> is "`child-src`", return "`Allowed`".
 
-      Note: It would be lovely to remove this special case. Perhaps "effective
-      directive" could return "`child-src`" and that could delegate out in the
-      same way this algorithm does?
+  5.  If |name| is "`worker-src`", and |policy| contains a <a>directive</a> whose
+      <a for="directive">name</a> is "`script-src`", return "`Allowed`".
 
-  5.  Otherwise, return the result of executing the
+  6.  Otherwise, return the result of executing the
       <a for="directive">post-request check</a> for the <a>directive</a> whose
       <a for="directive">name</a> is |name| on |request|, |response|, and
       |policy|, using this directive's <a for="directive">value</a> for the
@@ -2410,7 +2416,11 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
 
-  1.  Assert: |policy| is unused.
+  1.  If the result of executing [[#effective-directive-for-a-request]] on |request|
+      is "`worker-src`", and |policy| contains a <a>directive</a> whose
+      <a for="directive">name</a> is "`worker-src`", return "`Allowed`".
+
+      Note: If `worker-src` is present, we'll defer to it when handling worker requests.
 
   2.  If |request|'s <a for="request">type</a> is "`script`", and its
       <a for="request">destination</a> is "`subresource`":
@@ -2481,7 +2491,11 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
   <a for="/">policy</a> (|policy|):
 
-  1.  Assert: |policy| is unused.
+  1.  If the result of executing [[#effective-directive-for-a-request]] on |request|
+      is "`worker-src`", and |policy| contains a <a>directive</a> whose
+      <a for="directive">name</a> is "`worker-src`", return "`Allowed`".
+
+      Note: If `worker-src` is present, we'll defer to it when handling worker requests.
 
   2.  If |request|'s <a for="request">type</a> is "`script`", and its
       <a for="request">destination</a> is "`subresource`":
