@@ -507,9 +507,6 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   returns "`Subsumes`" if |A| <a>subsumes</a> |B|, and returns 
   "`Does Not Subsume`" otherwise.
 
-  A <a grammar>serialized-source-list</a> is a <dfn>wildcard list</dfn> if it
-  is a <a>case-sensitive</a> match to the U+002A ASTERISK character (`*`).
-
   1.  If |directive A| is not an <a>ASCII case-insensitive</a> match to 
       |directive B|, return "`Does Not Subsume`".
 
@@ -517,19 +514,11 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
 
   3.  If |B| is empty or |A| is `none`, return "`Does Not Subsume`".
 
-  4.  If |A| is a `wildcard list`:
-
-      1. ISSUE: TODO.
-
-  5.  If |B| is a `wildcard list`:
-
-      1.  ISSUE: TODO.
-
-  6.  If |directive B| is "`script-src`" and |B| contains a 
+  4.  If |directive B| is "`script-src`" and |B| contains a 
       <a grammar>`keyword-source`</a> expression "`strict-dynamic`" but |A| does
       not contain it, return "`Does Not Subsume`".
 
-  7.  If |directive B| is "`script-src`" or "`style-src`":
+  5.  If |directive B| is "`script-src`" or "`style-src`":
 
       1.  If |B| contains a <a grammar>`keyword-source`</a> expression 
           "`unsafe-eval`" but |A| does not contain it, return 
@@ -547,29 +536,55 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
           |type B|, but returns "`Does Not Allow`" given |A| with 
           |type A|, return "`Does Not Subsume`".
 
-  8.  Let |list A| and |list B| be empty lists.
+  6.  Let |list A| and |list B| be empty lists.
 
-  9.  For each |expression A| in the result of splitting |A| on spaces:
+  7.  For each |expression A| in the result of splitting |A| on spaces:
 
       1.  If |expression A| is "`self`", append a <a grammar>`host-source`</a>,
           returned by [[#rewrite-self]] given |origin A| to |list A|.
 
-      2.  If |expression A| does not match <a grammar>`keyword-source`</a>
-          grammar, append |expression A| to |list A|.
+      2.  If |expression A| matches the U+002A ASTERISK character (`*`),
+           append to |list A| the following <a grammar>`scheme-source`</a>
+           expressions: "`ftp:`", "`http:`", "`https:`", "`ws:`", "`wss:`",
+           and |origin A|'s <a for="origin">scheme</a>.
+           
+           1.  If |directive A| is either "`img-src`" or "`media-src", append a 
+               <a grammar>`scheme-source`</a> expression "`data:`" to |list A|.
+           
+           2.  If |directive A| is "`media-src", append a 
+               <a grammar>`scheme-source`</a> expression "`blob:`" to |list A|.
 
-  10.  For each |expression B| in the result of splitting |B| on spaces:
+           3.  Continue to the next |expression A|. 
 
-       1.  If |expression B| is "`self`", append a <a grammar>`host-source`</a>,
-           returned by [[#rewrite-self]] given |origin B| to |list B|.
+       3.  If |expression A| does not match <a grammar>`keyword-source`</a>
+           grammar, append |expression A| to |list A|.
 
-       2.  If |expression B| does not match <a grammar>`keyword-source`</a>
-           grammar, append |expression B| to |list B|.
+  8.  For each |expression B| in the result of splitting |B| on spaces:
 
-  11.  If |list B| is empty, return "`Subsumes`".
+      1.  If |expression B| is "`self`", append a <a grammar>`host-source`</a>,
+          returned by [[#rewrite-self]] given |origin B| to |list B|.
 
-  12.  If |list A| is empty, return "`Does Not Subsume`".
+      2.  If |expression B| matches the U+002A ASTERISK character (`*`),
+          append to |list B| the following <a grammar>`scheme-source`</a>
+          expressions: "`ftp:`", "`http:`", "`https:`", "`ws:`", "`wss:`",
+          and |origin B|'s <a for="origin">scheme</a>.
 
-  13.  For each |expression B| in |list B|:
+          1.  If |directive B| is either "`img-src`" or "`media-src", append a 
+              <a grammar>`scheme-source`</a> expression "`data:`" to |list B|.
+           
+          2.  If |directive B| is "`media-src", append a 
+              <a grammar>`scheme-source`</a> expression "`blob:`" to |list B|.
+
+          3.  Continue to the next |expression B|. 
+
+      3.  If |expression B| does not match <a grammar>`keyword-source`</a>
+          grammar, append |expression B| to |list B|.
+
+  9.  If |list B| is empty, return "`Subsumes`".
+
+  10.  If |list A| is empty, return "`Does Not Subsume`".
+
+  11.  For each |expression B| in |list B|:
 
       1.  If |expression B| matches the <a grammar>`hash-source`</a> gramar, or
           <a grammar>`nonce-source`</a> grammar, continue to the next expression
@@ -585,7 +600,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
 
       4.  If |found match| is `false`, return "`Does Not Subsume`".
 
-  14.  Return "`Subsumes`".
+  12.  Return "`Subsumes`".
 
   <div class="example">
     Let |directive A| and |directive B| be "`script-src`". Consider
