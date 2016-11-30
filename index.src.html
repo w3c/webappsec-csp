@@ -52,6 +52,13 @@ spec:cssom
 spec:css-cascade
   type: at-rule
     text: @import
+spec:infra;
+  type:dfn;
+    text:string; for: /
+    text:list; for: / 
+    text:set; for: / 
+    text:append; for: set
+    text:empty; for: set
 </pre>
 <pre class="anchors">
 spec: RFC6454; urlPrefix: https://tools.ietf.org/html/rfc6454
@@ -348,21 +355,18 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   <h3 id="framework-policy">Policies</h3>
 
-  A <dfn export lt="content security policy object" local-lt="policy">policy</dfn>
-  defines a set of allowed and restricted behaviors, and may be applied to a
-  {{Window}} or {{WorkerGlobalScope}} as described in
-  [[#initialize-global-object-csp]].
+  A <dfn export lt="content security policy object" local-lt="policy">policy</dfn> defines allowed
+  and restricted behaviors, and may be applied to a {{Window}} or {{WorkerGlobalScope}} as described
+  in [[#initialize-global-object-csp]].
 
-  Each policy has an associated <dfn for="policy" export>directive set</dfn>, which
-  is a set of <a>directives</a> that define the policy's implications when
-  applied.
+  Each policy has an associated <dfn for="policy" export>directive set</dfn>, which is an <a>ordered
+  set</a> of <a>directives</a> that define the policy's implications when applied.
 
-  Each policy has an associated <dfn for="policy" export>disposition</dfn>, which is
-  either "`enforce`" or "`report`".
+  Each policy has an associated <dfn for="policy" export>disposition</dfn>, which is either
+  "`enforce`" or "`report`".
 
-  A <dfn export>serialized CSP</dfn> is a string of <a>ASCII bytes</a>,
-  consisting of a semicolon-delimited series of <a>serialized directives</a>,
-  adhering to the following ABNF grammar [[!RFC5234]]:
+  A <dfn export>serialized CSP</dfn> is an <a>ASCII string</a> consisting of a semicolon-delimited
+  series of <a>serialized directives</a>, adhering to the following ABNF grammar [[!RFC5234]]:
 
   <pre dfn-type="grammar" link-type="grammar">
     <dfn>serialized-policy</dfn> = <a>serialized-directive</a> *( <a>OWS</a> ";" [ <a>OWS</a> <a>serialized-directive</a> ] )
@@ -398,7 +402,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
       4.  If |policy|'s <a>directive set</a> contains a
           <a>directive</a> whose <a for="directive">name</a> is |directive
-          name|, skip the remaining substeps and continue to the next item.
+          name|, <a for="iteration">continue</a>.
 
           The user agent SHOULD notify developers that a directive was ignored.
           A console warning might be appropriate, for example.
@@ -411,7 +415,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           <a for="directive">name</a> is |directive name|, and
           <a for="directive">value</a> is |directive value|.
 
-      7.  Add |directive| to |policy|'s <a>directive set</a>.
+      7.  <a for="set">Append</a> |directive| to |policy|'s <a>directive set</a>.
 
   3.  Return |policy|.
 
@@ -419,11 +423,11 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     Parse a serialized CSP |list| as |disposition|
   </h4>
 
-  Given a string (|list|) and a <a for="policy">disposition</a> (|disposition|)
-  which contains a comma-delimited series of <a>serialized CSP</a> strings, the
-  following algorithm will return a list of <a for="/">policy</a> objects:
+  Given a <a>string</a> which contains a comma-delimited series of <a>serialized CSP</a> strings
+  (|list|) and a <a for="policy">disposition</a> (|disposition|), the following algorithm will
+  return a <a>list</a> of <a for="/">policy</a> objects:
 
-  1.  Let |policies| be an empty list.
+  1.  Let |policies| be an empty <a>list</a>.
 
   2.  For each |token| returned by
       <a lt="split a string on commas">splitting |list| on commas</a>:
@@ -434,24 +438,23 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       2.  If |policy|'s <a>directive set</a> is empty, skip the
           remaining substeps, and continue to the next item.
 
-      3.  Add |policy| to |policies|.
+      3.  <a for="list">Append</a> |policy| to |policies|.
 
   3.  Return |policies|.
 
   <h3 id="framework-directives">Directives</h3>
 
-  Each <a for="/">policy</a> contain a set of <dfn export>directives</dfn>, each
-  of which controls a specific behavior. The directives defined in this document
-  are described in detail in [[#csp-directives]].
+  Each <a for="/">policy</a> contains an <a>ordered set</a> of <dfn export>directives</dfn> (its
+  <a for="policy">directive set</a>), each of which controls a specific behavior. The directives
+  defined in this document are described in detail in [[#csp-directives]].
 
   Each <a>directive</a> is a <dfn for="directive" export>name</dfn> /
   <dfn for="directive" export>value</dfn> pair. The <a for="directive">name</a> is a
-  non-empty string, and the <a>value</a> is a set of non-empty strings. The
-  <a>value</a> set MAY be empty.
+  non-empty <a>string</a>, and the <a>value</a> is a <a>set</a> of non-empty <a>strings</a>. The
+  <a>value</a> MAY be <a for="list" lt="is empty">empty</a>.
 
-  A <dfn export>serialized directive</dfn> is a string of <a>ASCII bytes</a>,
-  consisting of one or more whitespace-delimited tokens, and adhering to the
-  following ABNF [[!RFC5234]]:
+  A <dfn export>serialized directive</dfn> is an <a>ASCII string</a>, consisting of one or more
+  whitespace-delimited tokens, and adhering to the following ABNF [[!RFC5234]]:
 
   <pre dfn-type="grammar" link-type="grammar">
     <dfn>serialized-directive</dfn> = <a>directive-name</a> [ <a>RWS</a> <a>directive-value</a> ]
@@ -503,9 +506,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   <h4 id="framework-directive-source-list">Source Lists</h4>
 
-  Many <a>directives</a>' <a>values</a> consist of <dfn export>source lists</dfn>: sets
-  of tokens which identify content that can be fetched and potentially embedded
-  or executed. These tokens represent one of the following types of <dfn export>source
+  Many <a>directives</a>' <a>values</a> consist of <dfn export>source lists</dfn>: <a>sets</a>
+  of <a>strings</a> which identify content that can be fetched and potentially embedded or
+  executed. Each <a>string</a> represents one of the following types of <dfn export>source
   expression</dfn>:
 
   1.  Keywords such as <a grammar>`'none'`</a> and
@@ -530,9 +533,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   6.  Digests such as `'sha256-abcd...'` (which can match specific
       elements on a page)
 
-  A <dfn export>serialized source list</dfn> is a string of <a>ASCII bytes</a>,
-  consisting of a space-delimited series of <a>source expressions</a>, adhering
-  to the following ABNF grammar [[!RFC5234]]:
+  A <dfn export>serialized source list</dfn> is an <a>ASCII string</a>, consisting of a
+  whitespace-delimited series of <a>source expressions</a>, adhering to the following ABNF grammar
+  [[!RFC5234]]:
 
   <pre dfn-type="grammar" link-type="grammar">
     <dfn>serialized-source-list</dfn> = ( <a>source-expression</a> *( <a>RWS</a> <a>source-expression</a> ) ) / "<dfn>'none'</dfn>"
@@ -637,7 +640,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   </h4>
 
   Given a <a for="/">global object</a> (|global|), a <a for="/">policy</a> (|policy|), and a
-  string (|directive|), the following algorithm creates a new <a>violation</a>
+  <a>string</a> (|directive|), the following algorithm creates a new <a>violation</a>
   object, and populates it with an initial set of data:
 
   1.  Let |violation| be a new <a>violation</a> whose <a for="violation">global
@@ -3433,8 +3436,8 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     Does `scheme-part` |A| match `scheme-part` |B|?
   </h5>
 
-  Given two strings of <a>ASCII bytes</a> |A| and |B|, this algorithm returns
-  "`Matches`" if |A| matches |B|, and returns "`Does Not Match`" otherwise.
+  Given two <a>ASCII strings</a> (|A| and |B|), this algorithm returns "`Matches`" if |A| matches
+  |B|, and returns "`Does Not Match`" otherwise.
 
   Note: The matching relation is assymetric. That is, |A| matching |B| does not
   mean that |B| will match |A|.
@@ -3466,8 +3469,8 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     Does `host-part` |A| match `host-part` |B|?
   </h5>
 
-  Given two strings of <a>ASCII bytes</a> (|A| and |B|), this algorithm returns
-  "`Matches`" if |A| matches |B|, and returns "`Does Not Match`" otherwise.
+  Given two <a>ASCII strings</a> (|A| and |B|), this algorithm returns "`Matches`" if |A| matches
+  |B|, and returns "`Does Not Match`" otherwise.
 
   Note: The matching relation is assymetric. That is, |A| matching |B| does not 
   mean that |B| will match |A|.
@@ -3497,15 +3500,14 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   4.  Return "`Matches`".
 
   <h5 id="match-ports" algorithm>
-    Does `port-part` |A| match `port-part` |B| for |scheme B|?
+    Does |port A| match |port B| for |scheme B|?
   </h5>
 
-  Given three strings of <a>ASCII bytes</a> |port A|, |port B|, and |scheme B|,
-  this algorithm returns "`Matches`" if |A| matches |B|, and returns 
-  "`Does Not Match`" otherwise.
+  Given three <a>ASCII strings</a> (|port A|, |port B|, and |scheme B|), this algorithm returns
+  "`Matches`" if |port A| matches |port B|, and returns "`Does Not Match`" otherwise.
 
-  Note: The matching relation is assymetric. That is, |port A| matching |port B|
-  does not mean that |port B| will match |port A|.
+  Note: The matching relation is assymetric. That is, |port A| matching |port B| does not mean that
+  |port B| will match |port A|.
 
   1.  If |port A| is empty:
 
@@ -3525,22 +3527,22 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   5. Return "`Does Not Match`".
 
   <h5 id="match-paths" algorithm>
-    Does `path-part` |A| match `path-part` |B|?
+    Does |path A| match |path B|?
   </h5>
 
-  Given two strings of <a>ASCII bytes</a> (|A| and |B|), this algorithm returns 
-  "`Matches`" if |A| matches |B|, and returns "`Does Not Match`" otherwise.
+  Given two <a>ASCII strings</a> (|path A| and |path B|), this algorithm returns "`Matches`" if
+  |path A| matches |path B|, and returns "`Does Not Match`" otherwise.
 
-  Note: The matching relation is assymetric. That is, |A| matching |B| does not
-  mean that |B| will match |A|.
+  Note: The matching relation is assymetric. That is, |path A| matching |path B| does not mean that
+  |path B| will match |path A|.
 
-  1.  If |A| is empty, return "`Matches`".
+  1.  If |path A| is empty, return "`Matches`".
 
-  2.  Let |exact match| be `false` if the final character of |A| is the U+002F 
+  2.  Let |exact match| be `false` if the final character of |path A| is the U+002F 
       SOLIDUS character (`/`), and `true` otherwise.
 
   3.  Let |path list A| and |path list B| be the result of 
-      <a lt="strictly split a string">strictly splitting</a> |A| and |B| 
+      <a lt="strictly split a string">strictly splitting</a> |path A| and |path B| 
       respestively on the U+002F SOLIDUS character (`/`).
 
   4.  If |path list A| has more items than |path list B|, return 
