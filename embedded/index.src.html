@@ -691,6 +691,42 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   an appropriate `child-src` directive.
 </section>
 
+<!-- Big text: Authoring -->
+<section>
+  <h2 id="authoring-considerations">Authoring Considerations</h2>
+
+  <h3 id="multiple-policies">
+    The effect of `self` specified in <a>required CSP</a>.
+  </h3>
+
+  If <a>required CSP</a> includes `self` in any of the <a>source lists</a>,
+  `self` refers to the embedee's <a for="/">origin</a>.
+
+  <div class="example">
+    MegaCorp Inc. specifies the following <a>required CSP</a> on their page
+    "https://mage-corp.com/page.html":
+
+    <pre>
+      &lt;iframe src="https://advertisements-r-us.example.com/ad1.cfm"
+              <a for="iframe" element-attr>csp</a>="script-src 'self'"&gt;
+      &lt;/iframe&gt;
+    </pre>
+
+    If the returned CSP is:
+    <pre>
+     Content-Security-Policy: script-src 'self'
+    </pre>
+
+    Then this <{iframe}> element will be loaded. 
+
+    If however the returned CSP is:
+    <pre>
+     Content-Security-Policy: script-src "https://mage-corp.com/"
+    </pre>
+
+    Then this <{iframe}> element will not be loaded. 
+</section>
+
 <section>
   IANA Considerations {#iana}
   ===================
