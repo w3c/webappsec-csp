@@ -754,17 +754,19 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   5.  Return "`Does Not Subsume`".
 
   <h4 id="subsume-source-list" algorithm>
-    Does <a grammar>serialized-source-list</a> |A| subsume 
-    <a grammar>serialized-source-list</a> |B| given their respective 
-    <a for="request">origins</a> and directive names?
+    Does <a>source list</a> |A| subsume <a>source list</a>|B| given their
+    respective <a for="request">origins</a> and directive names?
   </h4>
 
-  Given a <a grammar>serialized-source-list</a> |A| with 
-  <a for="request">origin</a> (|origin A|) and a string (|directive A|), 
-  <a grammar>serialized-source-list</a> |B| with <a for="request">origin</a> 
-  (|origin B|) and a string (|directive B|), this algorithm
-  returns "`Subsumes`" if |A| <a>subsumes</a> |B|, and returns 
+  Given a <a>source list</a> |A| with an <a for="request">origin</a>
+  (|origin A|) and a string (|directive A|), <a>source list</a> |B| with an
+  <a for="request">origin</a> (|origin B|) and a string (|directive B|), this
+  algorithm returns "`Subsumes`" if |A| <a>subsumes</a> |B|, and returns 
   "`Does Not Subsume`" otherwise.
+
+  A <a>directive</a> <dfn for="directive">contains</dfn> a given
+  <a>source expression</a> if the expression is <a for="list">contained</a> by
+  its <a for="directive">value</a>.
 
   1.  If |directive A| is not an <a>ASCII case-insensitive</a> match to 
       |directive B|, return "`Does Not Subsume`".
@@ -773,18 +775,19 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
 
   3.  If |B| is empty or |A| is `none`, return "`Does Not Subsume`".
 
-  4.  If |directive B| is "`script-src`" and |B| contains a 
-      <a grammar>`keyword-source`</a> expression "`strict-dynamic`" but |A| does
-      not contain it, return "`Does Not Subsume`".
+  4.  If |directive B| is "`script-src`" and |B| <a for="directive">contains</a>
+      a <a grammar>`keyword-source`</a> expression "`strict-dynamic`" but |A|
+      does not contain it, return "`Does Not Subsume`".
 
   5.  If |directive B| is "`script-src`" or "`style-src`":
 
-      1.  If |B| contains a <a grammar>`keyword-source`</a> expression 
-          "`unsafe-eval`" but |A| does not contain it, return 
-          "`Does Not Subsume`".
+      1.  If |B| <a for="directive">contains</a> a
+          <a grammar>`keyword-source`</a> expression "`unsafe-eval`" but |A|
+          does not contain it, return "`Does Not Subsume`".
 
-      2.  If |B| contains a <a grammar>`keyword-source`</a> expression 
-          "`unsafe-hashed-attributes`" but |A| does not contain it, return 
+      2.  If |B| <a for="directive">contains</a> a
+          <a grammar>`keyword-source`</a> expression
+          "`unsafe-hashed-attributes`" but |A| does not contain it, return
           "`Does Not Subsume`".
 
       3.  Let |type B| be "`script`" if |directive B| is "`script-src`" and 
@@ -797,7 +800,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
 
   6.  Let |list A| and |list B| be empty lists.
 
-  7.  For each |expression A| in the result of splitting |A| on spaces:
+  7.  For each |expression A| in |A|:
 
       1.  If |expression A| is "`self`", append a <a grammar>`host-source`</a>,
           returned by [[#rewrite-self]] given |origin A| to |list A|.
@@ -818,7 +821,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
        3.  If |expression A| does not match <a grammar>`keyword-source`</a>
            grammar, append |expression A| to |list A|.
 
-  8.  For each |expression B| in the result of splitting |B| on spaces:
+  8.  For each |expression B| in |B|:
 
       1.  If |expression B| is "`self`", append a <a grammar>`host-source`</a>,
           returned by [[#rewrite-self]] given |origin B| to |list B|.
