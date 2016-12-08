@@ -896,6 +896,61 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
     In this case, |A| <a>subsumes</a> |B|.
   </div>
 
+  <h4 id="subsume-directive" algorithm>
+    Does <a>policy</a> |A| subsume <a>policy</a> |B| given their respective
+    <a for="request">origins</a>?
+  </h4>
+
+  Given a <a>policy</a> |A| with an <a for="request">origin</a>
+  (|origin A|) and a <a>policy</a> |B| with an
+  <a for="request">origin</a>  (|origin B|), this algorithm returns "`Subsumes`"
+  if |A| <a>subsumes</a> |B|, and returns "`Does Not Subsume`" otherwise.
+
+  1.  If |A|'s <a for="policy">directive set</a> <a for="list">is empty</a>,
+      return "`Subsumes`".
+
+  2.  For each |directive A| in |A|'s <a for="policy">directive set</a>:
+
+      1.  Let |directive name| be |directive A|'s <a for="directive">name</a>.
+
+      2.  If |directive name| is "`default-src`", "`report-uri`", "`report-to`",
+          <a for="iteration">continue</a> to the next |directive A|.
+
+      3.  Let |effective directive A| be the result of executing
+          [[#operative-directive]] given |directive name| and |A|.
+
+      4.  Let |effective directive B| be the result of executing
+          [[#operative-directive]] given |directive name| and |B|.
+
+      5.  If |effective directive A| is `null`, <a for="iteration">continue</a>
+          to the next |directive A|.
+
+      6.  If |effective directive B| is `null`, return "`Does Not Subsume`".
+
+      7.  If |directive A|'s <a for="directive">name</a> is "`frame-ancestors`":
+
+          1.  ISSUE: TODO.
+
+      8.  If |directive A|'s <a for="directive">name</a> is "`plugin-types`":
+
+          1.  ISSUE: TODO.
+
+      9.  If |directive A|'s <a for="directive">name</a> is "`sandbox`":
+
+          1.  ISSUE: TODO.
+
+      10.  If |directive A|'s <a for="directive">name</a> is "`disown-opener`",
+           <a for="iteration">continue</a> to the next |directive A|.
+
+      11.  Otherwise:
+
+            1.  If the result of executing [[#subsume-source-list]] is 
+                "`Does Not Subsume`" given |effective directive A|, |origin A|, 
+                |directive name|, |effective directive B|, |origin B|, and 
+                |directive name|, return "`Does Not Subsume`".
+
+    3.  Return "`Subsumes`".
+
   <h3 id="required-csp-for-context" algorithm>
     Obtain the required CSP for |context|.
   </h3>
