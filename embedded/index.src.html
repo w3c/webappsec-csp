@@ -681,6 +681,119 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
 
   21.  Return |source|.
 
+  <h4 id="effective-source-list" algorithm>
+    Get the effective <a>source list</a> for a <a>source list</a>,
+    <a for="/">origin</a>, and <a for="directive">name</a>.
+  </h4>
+
+  An <dfn>effective source list</dfn> is a <a>list</a> which simplifies a given
+  <a>source list</a> by removing any ineffective, obviated, or invalid
+  <a>source expressions</a>, and expanding complex tokens like 
+  <a grammar>'self'</a> or <a grammar>*</a> into a more easily comparable, 
+  if more verbose, <a>list</a>.
+
+  <div class="example">
+
+    For any directive with origin `https://example.test/`:
+    <pre>
+      https: wss: 'none' 'self'
+    </pre>
+    The effective source list is "http: wss: https://example.test/". Note that
+    "'none'" is not part of the effective source list because it has no effect
+    when it is not the only source.
+
+    For "`style-src`":
+    <pre>
+      http://example.com 'strict-dynamic' 'nonce-abc'
+    </pre>
+    The effective source list is "http://example.com 'nonce-abc'" since
+    "'strict-dynamic'" is ignored in non-"`script-src`" directives.
+
+    For "`script-src`":
+    <pre>
+      http://example.com 'strict-dynamic' 'nonce-abc'
+    </pre>
+    The effective source list is "'strict-dynamic' 'nonce-abc'" since
+    "'strict-dynamic'" in "`script-src`" case does not honor host and scheme
+    source expressions.
+  </div>
+
+  Given a <a>source list</a> (|source list|), <a for="request">origin</a>
+  (|origin|), and string (|directive|), the following algorithm returns a
+  an <a for="source list">effective</a> <a>source list</a> for |source list|.
+
+  1.  If |source list| <a for="set">is empty</a> or « 'none' »,
+      return « 'none' ».
+
+  2.  If |source list| <a for="set">contains</a> a token that is an
+      <a>ASCII case-insensitive</a> match to the <a grammar>`keyword-source`</a>
+      "<a grammar>`'self'`</a>":
+
+      1.  Remove that token from |source list|.
+
+      2.  <a for="set">Append</a> the result of executing [[#rewrite-self]]
+          given |origin| to |source list|.
+
+  3.  Let |effective| be an empty <a>source list</a>.
+
+  4.  If |directive| is "`plugin-types`":
+
+      1.  For each |expression| in |source list|:
+
+          1.  If |expression| does not match <a grammar>`media-type`</a>,
+              <a for="iteration">continue</a>.
+
+          2.  <a for="set">Append</a> |expression| to |effective|.
+
+      2.  If |effective| <a for="set">is empty</a>, return « 'none' ». 
+
+      3.  Return |effective|.
+
+  5.  For each |expression| in |source list|:
+
+      1.  If |expression| matches <a grammar>`keyword-source`</a> grammar
+          and |directive| is not "`script-src`" or "`style-src`",
+          <a for="iteration">continue</a>.
+
+      2.  If |directive| is "`script-src`" and |source list|
+          <a for="set">contains</a> a token that is an
+          <a>ASCII case-insensitive</a> match to the
+          <a grammar>`keyword-source`</a> "<a grammar>`'strict-dynamic'`</a>":
+
+          1.  If |expression| matches <a grammar>`host-source`</a>, 
+              <a grammar>`scheme-source`</a> grammar or
+              <a grammar>`keyword-source`</a>
+              "<a grammar>`'unsafe-inline'`</a>",
+              <a for="iteration">continue</a>.
+
+      3.  If |expression| is an <a>ASCII case-insensitive</a> match to the
+          <a grammar>`keyword-source`</a> "<a grammar>`'strict-dynamic'`</a>"
+          and |directive| is not "`script-src`",
+          <a for="iteration">continue</a>.
+
+      4.  If |directive| is "`frame-ancestors`" and |expression| matches 
+          <a grammar>`nonce-source`</a> or <a grammar>`hash-source`</a> grammar, 
+          <a for="iteration">continue</a>.
+
+      5.  If |expression| is an <a>ASCII case-insensitive</a> match to 
+          "<a grammar>`'none'`</a>", <a for="iteration">continue</a>.
+
+      6.  If |expression| matches the U+002A ASTERISK character (`*`):
+
+          1.  Append to |effective| the following <a grammar>`scheme-source`</a>
+              expressions: "`ftp:`", "`http:`", "`https:`", "`ws:`", "`wss:`",
+              and |origin|'s <a for="origin">scheme</a>.
+
+          2.  <a for="iteration">Continue</a>. 
+
+      7.  <a for="set">Append</a> |expression| to |effective|.
+
+  6.  If |effective| <a for="set">is empty</a>, return « 'none' ». 
+
+  7.  If |effective| is « 'strict-dynamic' », return « 'none' ». 
+
+  8.  Return |effective|.
+
   <h4 id="intersection-source-lists" algorithm>
     What is an intersection of two <a>source lists</a>  
     |A| and |B| given their respective <a for="/">origins</a>
