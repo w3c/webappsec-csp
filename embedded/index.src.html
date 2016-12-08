@@ -408,7 +408,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
     3.  Return "`Not Subsumed`".
   </ol>
 
-  <h4 id="source-expression-similarity" algorithm>
+  <h4 id="similarity-source-expressions" algorithm>
     Is an expression matching <a grammar>`scheme-source`</a> or 
     <a grammar>`host-source`</a> grammar |A| similar to an expression matching 
     <a grammar>`scheme-source`</a> or <a grammar>`host-source`</a> grammar |B|?
@@ -589,7 +589,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   <a for="source expression">intersection</a> if |A| is 
   <a for="source expression">similar</a> to |B|. Otherwise, return `null`.
 
-  1.  If the result of executing [[#source-expression-similarity]] on |A| and 
+  1.  If the result of executing [[#similarity-source-expressions]] on |A| and 
       |B| is "`Not Similar`", return `null`.
 
   2.  Let |source| be an empty string.
@@ -685,7 +685,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   2.  Return the  <a lt="ascii serialization of an origin">ASCII 
       serialization</a> of |origin|.
 
-  <h4 id="subsume-se" algorithm>
+  <h4 id="subsume-source-expressions" algorithm>
     Does `source expression` |A| subsume `source expression` |B|?
   </h4>
 
@@ -813,7 +813,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
            2.  If |directive A| is "`media-src", append a 
                <a grammar>`scheme-source`</a> expression "`blob:`" to |list A|.
 
-           3.  Continue to the next |expression A|. 
+           3.  <a for="iteration">Continue</a> to the next |expression A|. 
 
        3.  If |expression A| does not match <a grammar>`keyword-source`</a>
            grammar, append |expression A| to |list A|.
@@ -834,7 +834,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
           2.  If |directive B| is "`media-src", append a 
               <a grammar>`scheme-source`</a> expression "`blob:`" to |list B|.
 
-          3.  Continue to the next |expression B|. 
+          3.  <a for="iteration">Continue</a> to the next |expression B|. 
 
       3.  If |expression B| does not match <a grammar>`keyword-source`</a>
           grammar, append |expression B| to |list B|.
@@ -846,15 +846,16 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   11.  For each |expression B| in |list B|:
 
       1.  If |expression B| matches the <a grammar>`hash-source`</a> gramar, or
-          <a grammar>`nonce-source`</a> grammar, continue to the next expression
-          unless |directive A| is "`script-src`" or "`style-src`".
+          <a grammar>`nonce-source`</a> grammar, <a for="iteration">continue</a>
+          to the next expression unless |directive A| is "`script-src`" or
+          "`style-src`".
 
       2.  Let |found match| be `false`.
 
       3.  For each |expression A| in |list A|:
 
-          1.  If [[#subsume-se]] returns "`Subsumes`" given |expression A| and
-              |expression B|, set |found match| to `true`.
+          1.  If [[#subsume-source-expressions]] returns "`Subsumes`" given
+              |expression A| and |expression B|, set |found match| to `true`.
               Break out of this inner loop.
 
       4.  If |found match| is `false`, return "`Does Not Subsume`".
@@ -954,7 +955,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
 <section>
   <h2 id="authoring-considerations">Authoring Considerations</h2>
 
-  <h3 id="multiple-policies">
+  <h3 id="effect-self">
     The effect of `self` specified in <a>required CSP</a>.
   </h3>
 
@@ -978,7 +979,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
 
     Then this <{iframe}> element will be loaded. 
 
-    If however the returned CSP is:
+    If, however, the returned CSP is:
     <pre>
      Content-Security-Policy: script-src "https://example.com/"
     </pre>
