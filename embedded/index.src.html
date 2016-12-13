@@ -280,7 +280,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   <dfn>subsumes</dfn> the <a>policy</a> delivered by the embedee.
 
   Given the complexity of CSP's syntax, subsumption is not trivial to calculate.
-  The details are spelled out in [[#subsume-policy].
+  The details are spelled out in [[#subsume-policy-list].
 
 </section>
 
@@ -317,9 +317,10 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
     4.  Assert: |context| is a <a>nested browsing context</a>, and |response| is
         a cross-origin, <a>network schemed</a> resource.
 
-    5.  If the [[#subsume-policy]] algorithm returns "`Subsumed`" when executed
-        upon |response|'s <a for="response">CSP list</a> and |embedding policy|,
-        return "`Allowed`".
+    5.  If the [[#subsume-policy-list]] algorithm returns "`Subsumes`" when
+        executed upon |embedding policy|, |request|'s <a for="request">origin</a>,
+        |response|'s <a for="response">CSP list</a>, and |response|'s
+        <a for="response">url</a>'s <a for="url">origin</a>, return "`Allowed`".
 
     6.  Return "`Blocked`".
   </ol>
@@ -356,66 +357,6 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
           encoded</a> is |header|'s value, return "`Allowed`".
 
   4.  Return "`Not Allowed`".
-
-  <h3 id="subsume-policy" algorithm>
-    Is |policy list| subsumed under |subsuming policy|?
-  </h3>
-
-  Given a list of <a>policy</a> objects (|policy list|), this algorithm returns
-  "`Subsumed`" if that list enforces a <a>policy</a> which is an exact match for
-  a given <a>policy</a> object (|subsuming policy|). It returns "`Not Subsumed`"
-  otherwise.
-
-  Note: Ideally, we'll someday define a real subsumption algorithm
-  which would verify that the policy `default-src 'none'; script-src
-  https://example.com` is subsumbed under `default-src example.com` (as
-  there is no case in which the latter will block a request that the former
-  would allow). That calculation turns out to be hard, so the current algorithm
-  takes the significantly simpler approach of requiring an exact match.
-
-  Note: This is not an efficient algorithm. Implementers are encouraged to
-  implement something a little smarter and faster, with the same behavior.
-
-  <ol class="algorithm">
-    1.  If |subsuming policy| is `null`, return "`Subsumed`".
-
-    2.  For each |policy| in |policy list|:
-
-        1.  If |policy|'s <a for="policy">disposition</a> is not
-            "`enforce`", set skip to the next |policy|.
-
-        2.  If |policy|'s <a for="policy">directive set</a> is not the
-            same size as |subsuming policy|'s <a for="policy">directive
-            set</a>, skip to the next |policy|.
-
-        3.  For each |directive| in |policy|'s
-            <a for="policy">directive set</a>:
-
-            1.  Let |subsuming directive| be the <a>directive</a> in
-                |subsuming policy|'s <a for="policy">directive
-                set</a> whose <a for="directive">name</a> matches
-                |directive|'s <a for="directive">name</a>, or `null`
-                if no such <a>directive</a> is present.
-
-            2.  If |subsuming directive| is `null`, skip to the next
-                |policy|.
-
-            3.  If |subsuming directive|'s <a for="directive">value</a>
-                list is not the same size as |directive|'s
-                <a for="directive">value</a> list, skip to the next
-                |policy|.
-
-            4.  For each |token| in |directive|'s
-                <a for="directive">value</a>:
-
-                1.  If |token| is not present in |subsuming
-                    directive|'s <a for="directive">value</a>, skip to the
-                    next |policy|.
-
-        4.  Return "`Subsumed`".
-
-    3.  Return "`Not Subsumed`".
-  </ol>
 
   <h4 id="similarity-source-expressions" algorithm>
     Is an expression matching <a grammar>`scheme-source`</a> or 
@@ -1434,7 +1375,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
 
   2.  Return `null`.
 
-  <h4 id="subsume-policies" algorithm>
+  <h4 id="subsume-policy" algorithm>
     Does <a>policy</a> |A| subsume <a>policy</a> |B| given their respective
     <a for="request">origins</a>?
   </h4>
@@ -1487,6 +1428,37 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
                 |directive name|, return "`Does Not Subsume`".
 
     3.  Return "`Subsumes`".
+
+  <h3 id="subsume-policy-list" algorithm>
+    Does |subsuming policy| subsume |policy list| given their respective
+    <a for="/">origins</a>?
+  </h3>
+
+  Given a <a>policy</a> |subsuming policy| with an <a for="/">origin</a>
+  (|subsuming origin|) and a <a>list</a> of <a>policy</a> objects |policy list|
+  with an <a for="/">origin</a>  (|origin|), this algorithm returns "`Subsumes`"
+  if |subsuming policy| <a>subsumes</a> |policy list|, and returns
+  "`Does Not Subsume`" otherwise.
+
+  <ol class="algorithm">
+    1.  If |subsuming policy| is `null`, return "`Subsumes`".
+
+    2.  If |subsuming policy|'s <a for="policy">disposition</a> is "`report`",
+        return "`Subsumes`".
+
+    3.  If |subsuming policy|'s <a for="policy">directive set</a>
+        <a for="list">is empty</a>, return "`Subsumes`".
+
+    4.  If |policy list| is <a for="list">is empty</a> or `null`, return
+        "`Does Not Subsume`".
+
+    5.  Let |effective policy| the result of executing
+        [[#intersection-policy-list]] given |policy list| and |origin|.
+
+    6.  Return the result of executing [[#subsume-policy]] given
+        |subsuming policy|, |subsuming origin|, |effective policy|, and
+        |origin|. 
+  </ol>
 
   <h3 id="required-csp-for-context" algorithm>
     Obtain the required CSP for |context|.
