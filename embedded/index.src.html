@@ -927,6 +927,90 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
 
   5.  Return "`Does Not Subsume`".
 
+  <h4 id="intersection-policies" algorithm>
+    What is an intersection of two <a>policy</a> objects |A| and |B|
+    given their respective <a for="request">origins</a>?
+  </h4>
+
+  <a>Policy</a> (|Intersection|) is said to be an 
+  <dfn for="policy">intersection</dfn> of two <a>policy</a> objects |A| and |B|
+  if both |A| and |B| <a>subsume</a> |Intersection|.
+
+  <div class="example">
+    In these cases, `Intersection` is an 
+    <a for="source expression">intersection</a> for |A| and |B|.
+      
+    <pre>
+      A = default-src 'self' http://example.com http://example.net;
+         connect-src 'none';
+      B = connect-src http://example.com/; script-src http://example.com/
+
+      Intersection = default-src 'self' http://example.com http://example.net;
+                     connect-src 'none'; script-src http://example.com/;
+    </pre>
+    Both |A| and |B| <a>subsume</a> |Intersection|.
+    For example, |Intersection|'s "script-src http://example.com/" is
+    <a>subsumed</a> by the first policy's
+    "default-src 'self' http://example.com http://example.net" and second policy's
+    "script-src http://example.com/".
+  </div>
+
+  Given a <a>policy</a> object |A|, an <a for="request">origin</a> (|origin A|),
+  a <a>policy</a> object |B|, and an <a for="request">origin</a> (|origin B|),
+  this algorithm returns a <a>policy</a> that is an
+  <a for="policy">intersection</a> of |A| and |B|.
+
+  1.  If |A|'s <a>directive set</a> <a for="list">is empty</a> or its
+      <a for="policy">disposition</a> is "`report`", return |B|.
+
+  2.  If |B|'s <a>directive set</a> <a for="list">is empty</a> or its
+      <a for="policy">disposition</a> is "`report`", return |A|.
+
+  3.  Let |policy| be a new <a for="/">policy</a> with an empty
+      <a for="policy">directive set</a>, and a <a for="policy">disposition</a>
+      "`enforce`".
+
+  4.  Let |names| be a <a>list</a> containing the <a for="directive">name</a> of
+      each <a>directive</a> contained in either |A| or |B|.
+
+  5.  For each |directive name| in |names|:
+
+      1.  If |directive name| is "`report-uri`", "`report-to`",
+          <a for="iteration">continue</a> to the next |directive name|.
+
+      2.  Let |directive A| be the result of executing
+          [[#operative-directive]] given |directive name| and |A|.
+
+      3.  Let |directive B| be the result of executing
+          [[#operative-directive]] given |directive name| and |B|.
+
+      4.  If both |directive A| and |directive B| are `null`, 
+          <a for="iteration">continue</a> to the next |directive name|.
+
+      5.  If |directive A| is `null`, <a for="set">append</a> a new
+          <a>directive</a> with |directive name| and |directive B|'s
+          <a for="directive">value</a>, to |policy|'s <a>directive set</a>.
+          <a for="iteration">Continue</a> to the next |directive name|.
+
+      6.  If |directive B| is `null`, <a for="set">append</a> a new
+          <a>directive</a> with |directive name| and |directive A|'s
+          <a for="directive">value</a>, to |policy|'s <a>directive set</a>.
+          <a for="iteration">Continue</a> to the next |directive name|.
+
+      7.  Let |directive value| be the result of executing
+          [[#"intersection-source-lists"]] given |directive A|'s
+          <a for="directive">value</a>, |origin A|, |directive name|,
+          |directive B|'s <a for="directive">value</a>, |origin B|, and
+          |directive name|.
+
+      8.  Let |directive| be a new <a>directive</a> with |directive name|
+          and |directive value|.
+
+      9.  <a for="set">Append</a> |directive| to |policy|'s
+          <a>directive set</a>.
+
+  6.  Return |policy|.
+
   <h4 id="subsume-source-list" algorithm>
     Does <a>source list</a> |A| subsume <a>source list</a>|B| given their
     respective <a for="request">origins</a> and directive names?
