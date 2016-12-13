@@ -1011,6 +1011,65 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
 
   6.  Return |policy|.
 
+  <h4 id="intersection-policy-list" algorithm>
+    What is an intersection of a |policy list| for an
+    <a for="/">origin</a>?
+  </h4>
+
+  The <dfn for="policy">intersection</dfn> of a <a>list</a> of <a>policy</a> 
+  objects is a single <a>policy</a> which is <a>subsumed</a> by each item in
+  the list. In other words, the <a for="policy">intersection</a> of multiple
+  <a>policy</a> objects represents the effective policy created when each of
+  those policy object is applied to a single context (see 
+  [[csp3#multiple-policies]] for more detail).
+
+  <div class="example">
+    In these cases, `Intersection` is an 
+    <a for="source expression">intersection</a> for |A| and |B|.
+      
+    <pre>
+      Content-Security-Policy: default-src 'self' http://example.com http://example.net;
+                               connect-src 'none';
+      Content-Security-Policy: connect-src http://example.com/;
+                               script-src http://example.com/
+      Content-Security-Policy: style-src 'self';
+                               script-src http://example.com/ http://example.net
+
+      Intersection: default-src 'self' http://example.com http://example.net;
+                    connect-src 'none';
+                    script-src http://example.com/;
+                    style-src 'self'
+    </pre>
+    Each |policy| specified in |policy list| <a>subsumes</a> |intersection|.
+  </div>
+
+  Given a list of <a>policy</a> objects (|policy list|) and an
+  <a for="/">origin</a> (|origin|), this algorithm returns a <a>policy</a>
+  that is an <a for="policy">intersection</a> for the given list.
+
+  1.  If |policy list| <a for="list">is empty</a>, return a 
+      <a for="/">policy</a> object with an empty <a>directive set</a> and 
+      disposition "`enforce`".
+
+  2.  Let |intersection| be the first element in |policy list| with disposition
+      "`enforce`". If there is no such element, return a 
+      <a for="/">policy</a> object with an empty <a>directive set</a> and 
+      disposition "`enforce`".
+
+  3.  If |policy list|'s size is one, return |current|.
+
+  4.  For each |policy| in |policy list|:
+
+      1.  If |policy|'s <a for="policy">disposition</a> is "`report`",
+          <a for="iteration">continue</a> to the next |policy|.
+
+      2.  Let |result| be the result of executing [[#intersect-policies]]
+          given |intersection|, |origin|, |policy| and |origin|.
+
+      3.  Set |intersection| to |result|.
+
+  5.  Return |intersection|.
+
   <h4 id="subsume-source-list" algorithm>
     Does <a>source list</a> |A| subsume <a>source list</a>|B| given their
     respective <a for="request">origins</a> and directive names?
