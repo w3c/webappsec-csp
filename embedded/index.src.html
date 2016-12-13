@@ -376,6 +376,44 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   Note: This is not an efficient algorithm. Implementers are encouraged to
   implement something a little smarter and faster, with the same behavior.
 
+  <h4 id="subsume-cspsource" algorithm> 
+    Is <a>scheme-source</a> / <a>host-source</a> expression subsumed under 
+    another <a>scheme-source</a> / <a>host-source</a>? 
+  </h4>
+
+    Given <a>scheme-source</a> / <a>host-source</a> expressions A and B, 
+    A is subsumed under B if:
+
+  <ol class="algorithm">
+    1.  A is similar to B, i.e. according to URL Matching Algorithm if A 
+        matches B or B matches A. (We separately check if both A and B have 
+        port wildcards or both have host wildcards.) If A is not similar to B, 
+        return "`Not Subsumed`".
+
+    2.   A is at least as restrictive as B, i.e. A provides no more 
+         infromation and has no more wildcards. The following has to hold for 
+         A to be subumed under B: 
+
+        1.  If A has wildcards, it must be that B has corresponding wildcards (
+            i.e. if A has a port wildcard then B must have a port wildcard. 
+            Similar for host wildcards). Otherwise, return "`Not Subsumed`".
+
+        2.  If B is <a for="url">scheme</a> only then we just need to check if 
+            it is no more strict than the <a for="url">scheme</a> of A. If B 
+            has secure versions (“https://” or “wss://”) then A must have a 
+            corresponding secure <a for="url">scheme</a> too. Otherwise, 
+            return "`Not Subsumed`". If A is a <a for="url">scheme</a> only 
+            but B is not, return "`Not Subsumed`".
+
+        3.  If B does not have a port wildcard and provides a specified port (
+            for example, 443) but A’s port is 0, return "`Not Subsumed`".
+
+        4.  If A pathis empty or “/” but B path is not empty (or just single 
+            “/”)” or if B gives a resource path but A does not, then B is more restrictive, therefore return "`Not Subsumed`". 
+
+    3.   Return "`Subsumed`".
+  </ol>
+
   <ol class="algorithm">
     1.  If |subsuming policy| is `null`, return "`Subsumed`".
 
@@ -407,8 +445,11 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
 
             4.  For each |token| in |directive|'s
                 <a for="directive">value</a>:
+                
+                1.  If |token| is a <a>scheme-source</a> / <a>host-source</a>, 
+                    return result of [[#subsume-cspsource]].
 
-                1.  If |token| is not present in |subsuming
+                2.  If |token| is not present in |subsuming
                     directive|'s <a for="directive">value</a>, skip to the
                     next |policy|.
 
