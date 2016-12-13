@@ -3532,28 +3532,32 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     Does |path A| match |path B|?
   </h5>
 
-  Given two <a>ASCII strings</a> (|path A| and |path B|), this algorithm returns "`Matches`" if
-  |path A| matches |path B|, and returns "`Does Not Match`" otherwise.
+  Given two <a>ASCII strings</a> (|path A| and |path B|), this algorithm returns
+  "`Matches`" if |path A| matches |path B|, and returns "`Does Not Match`"
+  otherwise.
 
-  Note: The matching relation is assymetric. That is, |path A| matching |path B| does not mean that
-  |path B| will match |path A|.
+  Note: The matching relation is assymetric. That is, |path A| matching |path B|
+  does not mean that |path B| will match |path A|.
 
   1.  If |path A| is empty, return "`Matches`".
 
-  2.  Let |exact match| be `false` if the final character of |path A| is the U+002F 
+  2.  If |path A| consists of one character that is equal to the U+002F SOLIDUS
+      character (`/`) and |path B| is empty, return "`Matches`".
+
+  3.  Let |exact match| be `false` if the final character of |path A| is the U+002F 
       SOLIDUS character (`/`), and `true` otherwise.
 
-  3.  Let |path list A| and |path list B| be the result of 
+  4.  Let |path list A| and |path list B| be the result of 
       <a lt="strictly split a string">strictly splitting</a> |path A| and |path B| 
       respestively on the U+002F SOLIDUS character (`/`).
 
-  4.  If |path list A| has more items than |path list B|, return 
+  5.  If |path list A| has more items than |path list B|, return 
       "`Does Not Match`".
 
-  5.  If |exact match| is `true`, and |path list A| does not have the same
+  6.  If |exact match| is `true`, and |path list A| does not have the same
       number of items as |path list B|, return "`Does Not Match`".
 
-  6.  For each |piece A| in |path list A|:
+  7.  For each |piece A| in |path list A|:
 
       1.  Let |piece B| be the next item in |path list B|.
 
@@ -3564,7 +3568,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       4.  If |piece A| is not a <a>case-sensitive</a> match
           for |piece B|, return "`Does Not Match`".
 
-  7.  Return "`Matches`".
+  8.  Return "`Matches`".
 
   <h5 id="effective-directive-for-a-request" algorithm>
     Get the effective directive for |request|
