@@ -22,9 +22,18 @@ Markup Shorthands: css off, markdown on
 spec:html; type:dfn; for:/; text:browsing context  
 spec:html; type:dfn; text:case-sensitive
 spec:html; type:dfn; text:ascii case-insensitive
-spec:fetch; type:dfn; for:/; text:request
 spec:dom; type:interface; text:Document
-spec:encoding; type: dfn; text: ascii case-insensitive
+spec:fetch
+  type: dfn
+    text:request; for: /
+    text: response; for: /
+spec:infra;
+  type:dfn;
+    text:string; for: /
+    text:list; for: / 
+    text:set; for: / 
+    text:append; for: set
+    text:empty; for: set
 </pre>
 <pre class="anchors">
 spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
@@ -672,6 +681,171 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
 
   21.  Return |source|.
 
+  <h4 id="intersection-source-lists" algorithm>
+    What is an intersection of two <a>source lists</a>  
+    |A| and |B| given their respective <a for="/">origins</a>
+    and directive names?
+  </h4>
+
+  The <dfn for="source list">intersection</dfn> of two <a>source lists</a>
+  is a <a>source list</a> which <a for="list">contains</a> every
+  <a>source expression</a> <a>subsumed</a> by both. If no such 
+  <a>source expressions</a> exist (because, for example, one of the lists
+  contains only <a grammar>'none'</a>), then the 
+  <a for="source list">intersection</a> will be the list 
+  « <a grammar>'none'</a> ».
+
+  <div class="example">
+    In these cases, `intersection` is an 
+    <a for="source expression">intersection</a> for |A| and |B|.
+      
+    <pre>
+      A = wss: http://example.com
+      B = https: wss: 'none'
+      intersection = wss: https://example.com
+    </pre>
+    The expression "wss:" is present in both policies, so it is present in
+    their intersection. Similarly, "http://example.com" is present in the
+    intersection because it is the only expression subsumed by both
+    "http://example.com" and "https:". Note that "'none'"" is ignored, as it is
+    not the only token in |B|.
+
+    <pre>
+      A = http://*.a.com http://*.b.com
+      B = https://a.com:* http://*.c.com
+      intersection = https://a.com
+    </pre>
+    Only two sources are similar: "http://*.a.com" in |A| is similar to 
+    "https://a.com:*" in |B| so the intersection of the two source lists is
+    "https://a.com".
+
+    <pre>
+      A = 'unsafe-inline' http://example.com:443/page1/html 'nonce-abc'
+      B = 'unsafe-inline' https://example.com:443/ 'strict-dynamic' 'nonce-abc'
+      intersection = 'nonce-abc'
+    </pre>
+    Since "`strict-dynamic`" honors only <a grammar>`nonce-source`</a> and
+    <a grammar>`hash-source`</a> expressions, |B| is effectively 
+    "'strict-dynamic' 'nonce-abc'". That is why the |intersection| is 
+    "'nonce-abc'".
+  </div>
+
+  Given a <a>source list</a> |A|, <a for="/">origin</a> (|origin A|)
+  <a>string</a> (|directive A|), <a>source list</a> |B|,
+  <a for="/">origin</a> (|origin B|) and <a>string</a> (|directive B|),
+  this algorithm returns a <a>source list</a> that is an 
+  <a for="source list">intersection</a> of |A| and |B|.
+
+  1.  If |directive A| is not an <a>ASCII case-insensitive</a> match to 
+      |directive B|, return « 'none' ».
+
+  2.  Let |effective A| be the result of executing [[#effective-source-list]]
+      given |A|, |origin A|, and |directive A|.
+
+  3.  Let |effective B| be the result of executing [[#effective-source-list]]
+      given |B|, |origin B|, and |directive B|.
+
+  4.  If either |effective A| or |effective B| is  « 'none' », 
+      return « 'none' ».
+
+  5.  If |effective A| is empty, return |effective B|.
+
+  6.  If |effective B| is empty, return |effective A|.
+
+  7.  Let |schemes A| and |schemes| be empty <a>lists</a>.
+
+  8.  For each |expression A| in |effective A|:
+
+      1.  If |expression A| matches <a grammar>`scheme-source`</a> grammar:
+
+          1.  <a for="list">Append</a> |expression A| to |schemes A|.
+
+          2.  If |expression A| matches "`http:`", <a for="list">append</a>
+              "`https:`" to |schemes A|.
+
+          3.  If |expression A| matches "`ws:`", <a for="list">append</a>
+              "`wss:`" to |schemes A|.
+
+  9.  For each |expression B| in |effective B|:
+
+      1.  If |expression B| matches <a grammar>`scheme-source`</a> grammar
+          and |expression B| matches one of the elements in |schemes A|:
+
+          1.  <a for="list">Append</a> |expression B| to |schemes|.
+
+          2.  If |expression B| matches "`http:`" and |schemes A|
+              <a for="list">contains</a> "`https:`", <a for="list">append</a>
+              "`https:`" to |schemes|.
+
+          3.  If |expression B| matches "`ws:`" and |schemes A|
+              <a for="list">contains</a> "`wss:`", <a for="list">append</a>
+              "`wss:`" to |schemes|.
+
+  10.  Let |intersection| be an empty <a>source list</a>.
+
+  11.  For each |expression| in |schemes|:
+
+       1.  If |expression| does not match "`https:`" or |schemes| does not
+           <a for="list">contain</a> "`http:`":
+
+           1.  If |expression| does not match "`wss:`" or |schemes| does not
+               <a for="list">contain</a> "`ws:`", <a for="set">append</a>
+               |expression| to |intersection|.
+
+  12.  For each |expression A| in |effective A|:
+
+      1.  If |expression A| matches <a grammar>`scheme-source`</a> grammar
+          and |schemes| <a for="list">contains</a> |expression A|,
+          <a for="iteration">continue</a>.
+
+      2.  Let |match| be `null`.
+
+      3.  For each |expression B| in |effective B|:
+
+          1.  If at least one of |expression A| and |expression B| does not
+              match <a grammar>`scheme-source`</a> or
+              <a grammar>`host-source`</a> grammar:
+
+              1.  If |expression A| matches <a grammar>`keyword-source`</a>
+                  grammar and is an <a>ASCII case-insensitive</a> match for
+                  |expression B|, <a for="set">append</a> |expression A| to
+                  |intersection|.
+
+              2.  If |expression A| matches <a grammar>`nonce-source`</a> or
+                  <a grammar>`hash-source`</a> grammar and is a
+                  <a>case-sensitive</a> match for |expression B|, 
+                  <a for="set">append</a> |expression A| to |intersection|.
+
+              3.  <a for="iteration">Continue</a> to the next |expression B|.
+
+          2.  If |expression B|'s <a grammar>`scheme-part`</a> matches one of
+              the elements in |schemes|, <a for="iteration">continue</a> to the
+              next |expression B|.
+
+          3.  If |expression A| matches <a grammar>`scheme-source`</a> grammar:
+
+              1.  If |expression B| matches <a grammar>`host-source`</a> grammar
+                  and the result of executing
+                  [[#intersection-source-expressions]] is not `null` given
+                  |expression A| and |expression B|, <a for="set">append</a> the
+                  result to |intersection|. 
+
+              2.  <a for="iteration">Continue</a> to the next |expression B|.
+
+          4.  If the result of executing [[#subsume-source-list]] is
+              "`Subsumes`" given |expression B| and |expression A|,
+              <a for="set">append</a> |expression A| to |intersection|.
+              <a for="iteration">Continue</a> to the next |expression A|.
+
+          5.  If the result of executing [[#intersection-source-expressions]] is
+              not `null` given |expression A| and |expression B|, set |match| to
+              the result.
+
+      4.  If |match| is not `null`, <a for="set">append</a> |match| to
+          |intersection|.
+
+  13.  Return |intersection|.
+ 
   <h4 id="rewrite-self" algorithm>
     Rewrite `'self'` into a host-source expression for |origin|.
   </h4>
@@ -1025,10 +1199,10 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
           <a for="iteration">continue</a>.
 
       3.  Let |effective directive A| be the result of executing
-          [[#operative-directive]] given |directive name| and |A|.
+          [[#effective-directive]] given |directive name| and |A|.
 
       4.  Let |effective directive B| be the result of executing
-          [[#operative-directive]] given |directive name| and |B|.
+          [[#effective-directive]] given |directive name| and |B|.
 
       5.  If |effective directive A| is `null`, <a for="iteration">continue</a>.
 
