@@ -277,10 +277,11 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   `object-src 'none'`. Because every possible <a>request</a> blocked by 
   `object-src https://cdn.example.com/` would also be blocked by 
   `object-src 'none'`, it is said that the embedder's required <a>policy</a> 
-  <dfn>subsumes</dfn> the <a>policy</a> delivered by the embedee.
+  <dfn for="policy" lt="subsume">subsumes</dfn> the <a>policy</a> delivered by
+  the embedee.
 
   Given the complexity of CSP's syntax, subsumption is not trivial to calculate.
-  The details are spelled out in [[#subsume-policy-list].
+  The details are spelled out in [[#subsume-policy-list]].
 
 </section>
 
@@ -622,14 +623,14 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
 
   21.  Return |source|.
 
-  <h4 id="effective-source-list" algorithm>
+  <h4 id="get-effective-source-list" algorithm>
     Get the effective <a>source list</a> for a <a>source list</a>,
     <a for="/">origin</a>, and <a for="directive">name</a>.
   </h4>
 
-  An <dfn>effective source list</dfn> is a <a>list</a> which simplifies a given
-  <a>source list</a> by removing any ineffective, obviated, or invalid
-  <a>source expressions</a>, and expanding complex tokens like 
+  An <dfn>effective source list</dfn> is a <a>list</a> which
+  simplifies a given <a>source list</a> by removing any ineffective, obviated,
+  or invalid <a>source expressions</a>, and expanding complex tokens like 
   <a grammar>'self'</a> or <a grammar>*</a> into a more easily comparable, 
   if more verbose, <a>list</a>.
 
@@ -661,7 +662,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
 
   Given a <a>source list</a> (|source list|), <a for="request">origin</a>
   (|origin|), and string (|directive|), the following algorithm returns a
-  an <a for="source list">effective</a> <a>source list</a> for |source list|.
+  an <a>effective source list</a> <a>source list</a> for |source list|.
 
   1.  If |source list| <a for="set">is empty</a> or « 'none' »,
       return « 'none' ».
@@ -743,7 +744,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
 
   The <dfn for="source list">intersection</dfn> of two <a>source lists</a>
   is a <a>source list</a> which <a for="list">contains</a> every
-  <a>source expression</a> <a>subsumed</a> by both. If no such 
+  <a>source expression</a> <a for="policy">subsumed</a> by both. If no such 
   <a>source expressions</a> exist (because, for example, one of the lists
   contains only <a grammar>'none'</a>), then the 
   <a for="source list">intersection</a> will be the list 
@@ -793,11 +794,11 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   1.  If |directive A| is not an <a>ASCII case-insensitive</a> match to 
       |directive B|, return « 'none' ».
 
-  2.  Let |effective A| be the result of executing [[#effective-source-list]]
-      given |A|, |origin A|, and |directive A|.
+  2.  Let |effective A| be the result of executing
+      [[#get-effective-source-list]] given |A|, |origin A|, and |directive A|.
 
-  3.  Let |effective B| be the result of executing [[#effective-source-list]]
-      given |B|, |origin B|, and |directive B|.
+  3.  Let |effective B| be the result of executing
+      [[#get-effective-source-list]] given |B|, |origin B|, and |directive B|.
 
   4.  If either |effective A| or |effective B| is  « 'none' », 
       return « 'none' ».
@@ -918,8 +919,8 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   </h4>
 
   Given two <a>source expressions</a> |A| and |B|, this algorithm returns 
-  "`Subsumes`" if |A| <a>subsumes</a> |B|, and returns "`Does Not Subsume`"
-  otherwise.
+  "`Subsumes`" if |A| <a for="policy">subsumes</a> |B|, and returns
+  "`Does Not Subsume`" otherwise.
 
   1.  Assert: Neither |A| nor |B| match the <a grammar>`keyword-source`</a>
       grammar.
@@ -1004,9 +1005,9 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
     </pre>
     Both |A| and |B| <a>subsume</a> |Intersection|.
     For example, |Intersection|'s "script-src http://example.com/" is
-    <a>subsumed</a> by the first policy's
-    "default-src 'self' http://example.com http://example.net" and second policy's
-    "script-src http://example.com/".
+    <a for="policy">subsumed</a> by the first policy's
+    "default-src 'self' http://example.com http://example.net" and
+    second policy's "script-src http://example.com/".
   </div>
 
   Given a <a>policy</a> object |A|, an <a for="request">origin</a> (|origin A|),
@@ -1033,10 +1034,10 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
           <a for="iteration">continue</a> to the next |directive name|.
 
       2.  Let |directive A| be the result of executing
-          [[#operative-directive]] given |directive name| and |A|.
+          [[#effective-directive]] given |directive name| and |A|.
 
       3.  Let |directive B| be the result of executing
-          [[#operative-directive]] given |directive name| and |B|.
+          [[#effective-directive]] given |directive name| and |B|.
 
       4.  If both |directive A| and |directive B| are `null`, 
           <a for="iteration">continue</a> to the next |directive name|.
@@ -1070,16 +1071,16 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
     <a for="/">origin</a>?
   </h4>
 
-  The <dfn for="policy">intersection</dfn> of a <a>list</a> of <a>policy</a> 
-  objects is a single <a>policy</a> which is <a>subsumed</a> by each item in
+  The <a for="policy">intersection</a> of a <a>list</a> of <a>policy</a> 
+  objects is a single <a>policy</a> which is <a for="policy">subsumed</a> by each item in
   the list. In other words, the <a for="policy">intersection</a> of multiple
   <a>policy</a> objects represents the effective policy created when each of
   those policy object is applied to a single context (see 
   [[csp3#multiple-policies]] for more detail).
 
   <div class="example">
-    In these cases, `Intersection` is an 
-    <a for="source expression">intersection</a> for |A| and |B|.
+    Here `Intersection` is an <a for="source expression">intersection</a> for
+    the given policy list.
       
     <pre>
       Content-Security-Policy: default-src 'self' http://example.com http://example.net;
@@ -1094,7 +1095,8 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
                     script-src http://example.com/;
                     style-src 'self'
     </pre>
-    Each |policy| specified in |policy list| <a>subsumes</a> |intersection|.
+    Each |policy| specified in |policy list| <a for="policy">subsumes</a>
+    |intersection|.
   </div>
 
   Given a list of <a>policy</a> objects (|policy list|) and an
@@ -1110,14 +1112,14 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
       <a for="/">policy</a> object with an empty <a>directive set</a> and 
       disposition "`enforce`".
 
-  3.  If |policy list|'s size is one, return |current|.
+  3.  If |policy list|'s size is one, return |intersection|.
 
   4.  For each |policy| in |policy list|:
 
       1.  If |policy|'s <a for="policy">disposition</a> is "`report`",
           <a for="iteration">continue</a> to the next |policy|.
 
-      2.  Let |result| be the result of executing [[#intersect-policies]]
+      2.  Let |result| be the result of executing [[#intersection-policies]]
           given |intersection|, |origin|, |policy| and |origin|.
 
       3.  Set |intersection| to |result|.
@@ -1132,8 +1134,8 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   Given a <a>source list</a> |A| with an <a for="request">origin</a>
   (|origin A|) and a string (|directive A|), <a>source list</a> |B| with an
   <a for="request">origin</a> (|origin B|) and a string (|directive B|), this
-  algorithm returns "`Subsumes`" if |A| <a>subsumes</a> |B|, and returns 
-  "`Does Not Subsume`" otherwise.
+  algorithm returns "`Subsumes`" if |A| <a for="policy">subsumes</a> |B|, and
+  returns "`Does Not Subsume`" otherwise.
 
   A <a>directive</a> <dfn for="directive">contains</dfn> a given
   <a>source expression</a> if the expression is <a for="list">contained</a> by
@@ -1246,7 +1248,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
     </pre>
     Since |B| does not allow <a grammar>`hash-source`</a> expressions, but its
     value is found in |A|, |A| subsumes |B|. It is, however, not true that |A|
-    <a>subsumes</a> |B|.
+    <a for="policy">subsumes</a> |B|.
 
     <pre>
       A = "https://example.com 'sha256-xzi4zkCjuC8'"
@@ -1259,7 +1261,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
       A = "http://example.com 'sha256-xzi4zkCjuC8'"
       B = "http://example.com 'unsafe-inline'"
     </pre>
-    Since |B| <a lt="allow all inline behavior" for="source list">allows all inline behavior</a>, 
+    Since |B| <a for="source list">allows all inline behavior</a>, 
     but |A| does not, |A| doesn't <a>subsume</a> |B|. 
 
     <pre>
@@ -1267,7 +1269,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
       B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
     </pre>
     Neither |A| nor |B| <a for="source list">allow all inline behavior</a>.
-    In this case, |A| <a>subsumes</a> |B|.
+    In this case, |A| <a for="policy">subsumes</a> |B|.
   </div>
 
   <h4 id="effective-directive" algorithm>
@@ -1383,7 +1385,8 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   Given a <a>policy</a> |A| with an <a for="request">origin</a>
   (|origin A|) and a <a>policy</a> |B| with an
   <a for="request">origin</a>  (|origin B|), this algorithm returns "`Subsumes`"
-  if |A| <a>subsumes</a> |B|, and returns "`Does Not Subsume`" otherwise.
+  if |A| <a for="policy">subsumes</a> |B|, and returns "`Does Not Subsume`"
+  otherwise.
 
   1.  If |A|'s <a for="policy">directive set</a> <a for="list">is empty</a>,
       return "`Subsumes`".
@@ -1437,7 +1440,7 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   Given a <a>policy</a> |subsuming policy| with an <a for="/">origin</a>
   (|subsuming origin|) and a <a>list</a> of <a>policy</a> objects |policy list|
   with an <a for="/">origin</a>  (|origin|), this algorithm returns "`Subsumes`"
-  if |subsuming policy| <a>subsumes</a> |policy list|, and returns
+  if |subsuming policy| <a for="policy">subsumes</a> |policy list|, and returns
   "`Does Not Subsume`" otherwise.
 
   <ol class="algorithm">
