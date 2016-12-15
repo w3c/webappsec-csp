@@ -1176,7 +1176,7 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed 1.0.0" name="generator">
+  <meta content="Bikeshed version 190a4fcba8ed9462253188b3415e5074949e11bd" name="generator">
 <style>/* style-md-lists */
 
             /* This is a weird hack for me not yet following the commonmark spec
@@ -1423,7 +1423,7 @@ pre.idl.highlight { color: #708090; }
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1>Content Security Policy: Embedded Enforcement</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-11-28">28 November 2016</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-12-15">15 December 2016</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1496,16 +1496,23 @@ restrictions upon itself.</p>
      <a href="#algorithms"><span class="secno">3</span> <span class="content">Algorithms</span></a>
      <ol class="toc">
       <li><a href="#process-response"><span class="secno">3.1</span> <span class="content"> Is <var>response</var> to <var>request</var> blocked by <var>context</var>’s required CSP? </span></a>
-      <li><a href="#origin-allowed"><span class="secno">3.2</span> <span class="content"> Does <var>response</var> allow blanket enforcment of policy from <var>request</var>? </span></a>
       <li>
-       <a href="#subsume-policy"><span class="secno">3.3</span> <span class="content"> Is <var>policy list</var> subsumed under <var>subsuming policy</var>? </span></a>
+       <a href="#origin-allowed"><span class="secno">3.2</span> <span class="content"> Does <var>response</var> allow blanket enforcment of policy from <var>request</var>? </span></a>
        <ol class="toc">
-        <li><a href="#source-expression-similarity"><span class="secno">3.3.1</span> <span class="content"> Is an expression matching <span><code>scheme-source</code></span> or <span><code>host-source</code></span> grammar <var>A</var> similar to an expression matching <span><code>scheme-source</code></span> or <span><code>host-source</code></span> grammar <var>B</var>? </span></a>
-        <li><a href="#intersection-source-expressions"><span class="secno">3.3.2</span> <span class="content"> What is an intersection of two expressions matching <span><code>scheme-source</code></span> or <span><code>host-source</code></span> grammar <var>A</var> and <var>B</var>? </span></a>
-        <li><a href="#rewrite-self"><span class="secno">3.3.3</span> <span class="content"> Rewrite <code>'self'</code> into a host-source expression for <var>origin</var>. </span></a>
-        <li><a href="#subsume-se"><span class="secno">3.3.4</span> <span class="content"> Does <code>source expression</code> <var>A</var> subsume <code>source expression</code> <var>B</var>? </span></a>
-        <li><a href="#subsume-source-list"><span class="secno">3.3.5</span> <span class="content"> Does <span>serialized-source-list</span> <var>A</var> subsume <span>serialized-source-list</span> <var>B</var> given their respective <span>origins</span>? </span></a>
+        <li><a href="#similarity-source-expressions"><span class="secno">3.2.1</span> <span class="content"> Is an expression matching <span><code>scheme-source</code></span> or <span><code>host-source</code></span> grammar <var>A</var> similar to an expression matching <span><code>scheme-source</code></span> or <span><code>host-source</code></span> grammar <var>B</var>? </span></a>
+        <li><a href="#intersection-source-expressions"><span class="secno">3.2.2</span> <span class="content"> What is an intersection of two expressions matching <span><code>scheme-source</code></span> or <span><code>host-source</code></span> grammar <var>A</var> and <var>B</var>? </span></a>
+        <li><a href="#get-effective-source-list"><span class="secno">3.2.3</span> <span class="content"> Get the effective <span>source list</span> for a <span>source list</span>, <span>origin</span>, and <span>name</span>. </span></a>
+        <li><a href="#intersection-source-lists"><span class="secno">3.2.4</span> <span class="content"> What is an intersection of two <span>source lists</span> <var>A</var> and <var>B</var> given their respective <span>origins</span> and directive names? </span></a>
+        <li><a href="#rewrite-self"><span class="secno">3.2.5</span> <span class="content"> Rewrite <code>'self'</code> into a host-source expression for <var>origin</var>. </span></a>
+        <li><a href="#subsume-source-expressions"><span class="secno">3.2.6</span> <span class="content"> Does <code>source expression</code> <var>A</var> subsume <code>source expression</code> <var>B</var>? </span></a>
+        <li><a href="#intersection-policies"><span class="secno">3.2.7</span> <span class="content"> What is an intersection of two <span>policy</span> objects <var>A</var> and <var>B</var> given their respective <span>origins</span>? </span></a>
+        <li><a href="#intersection-policy-list"><span class="secno">3.2.8</span> <span class="content"> What is an intersection of a <var>policy list</var> for an <span>origin</span>? </span></a>
+        <li><a href="#subsume-source-list"><span class="secno">3.2.9</span> <span class="content"> Does <span>source list</span> <var>A</var> subsume <span>source list</span><var>B</var> given their
+    respective <span>origins</span> and directive names? </span></a>
+        <li><a href="#effective-directive"><span class="secno">3.2.10</span> <span class="content"> Get the effective directive value for <var>name</var> and <var>policy</var>. </span></a>
+        <li><a href="#subsume-policy"><span class="secno">3.2.11</span> <span class="content"> Does <span>policy</span> <var>A</var> subsume <span>policy</span> <var>B</var> given their respective <span>origins</span>? </span></a>
        </ol>
+      <li><a href="#subsume-policy-list"><span class="secno">3.3</span> <span class="content"> Does <var>subsuming policy</var> subsume <var>policy list</var> given their respective <span>origins</span>? </span></a>
       <li><a href="#required-csp-for-context"><span class="secno">3.4</span> <span class="content"> Obtain the required CSP for <var>context</var>. </span></a>
      </ol>
     <li>
@@ -1515,7 +1522,12 @@ restrictions upon itself.</p>
       <li><a href="#policy-leakage"><span class="secno">4.2</span> <span class="content">Policy Leakage</span></a>
       <li><a href="#exfiltration"><span class="secno">4.3</span> <span class="content">Data Exfiltration</span></a>
      </ol>
-    <li><a href="#iana"><span class="secno">5</span> <span class="content">IANA Considerations</span></a>
+    <li>
+     <a href="#authoring-considerations"><span class="secno">5</span> <span class="content">Authoring Considerations</span></a>
+     <ol class="toc">
+      <li><a href="#effect-self"><span class="secno">5.1</span> <span class="content"> The effect of <code>self</code> specified in <span>required CSP</span>. </span></a>
+     </ol>
+    <li><a href="#iana"><span class="secno">6</span> <span class="content">IANA Considerations</span></a>
     <li>
      <a href="#conformance"><span class="secno"></span> <span class="content">Conformance</span></a>
      <ol class="toc">
@@ -1687,9 +1699,11 @@ Host: advertisements-r-us.example.com
 </pre>
     <h3 class="heading settled" data-level="2.4" id="policy-subsumption"><span class="secno">2.4. </span><span class="content">Policy Subsumption</span><a class="self-link" href="#policy-subsumption"></a></h3>
     <p>If an embedee does not wish to accept any <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> specified by its
-  embedder via the <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-4">Allow-CSP-From</a> header, it can deliver a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> that is as strict, or stricter than the policy requested in the <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-6">Embedding-CSP</a> header. That is, if the embedder requests <code>object-src https://cdn.example.com/</code>, the embedee can respond with <code>object-src 'none'</code>. Because every possible <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> blocked by <code>object-src https://cdn.example.com/</code> would also be blocked by <code>object-src 'none'</code>, it is said that the embedder’s required <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport="" id="subsumes">subsumes</dfn> the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> delivered by the embedee.</p>
+  embedder via the <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-4">Allow-CSP-From</a> header, it can deliver a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> that is as strict, or stricter than the policy requested in the <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-6">Embedding-CSP</a> header. That is, if the embedder requests <code>object-src https://cdn.example.com/</code>, the embedee can respond with <code>object-src 'none'</code>. Because every possible <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> blocked by <code>object-src https://cdn.example.com/</code> would also be blocked by <code>object-src 'none'</code>, it is said that the embedder’s required <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> <dfn class="dfn-paneled" data-dfn-for="policy" data-dfn-type="dfn" data-lt="subsume" data-noexport="" id="policy-subsume">subsumes</dfn> the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> delivered by
+  the embedee.</p>
     <p>Given the complexity of CSP’s syntax, subsumption is not trivial to calculate.
-  The details are spelled out in [[#subsume-policy].</p>
+  The details are spelled out in <a href="#subsume-policy-list">§3.3 Does subsuming policy subsume policy list given their respective
+    origins?</a>.</p>
    </section>
    <section>
     <h2 class="heading settled" data-level="3" id="algorithms"><span class="secno">3. </span><span class="content">Algorithms</span><a class="self-link" href="#algorithms"></a></h2>
@@ -1721,9 +1735,9 @@ Host: advertisements-r-us.example.com
       <p class="assertion">Assert: <var>context</var> is a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context">nested browsing context</a>, and <var>response</var> is
   a cross-origin, <a data-link-type="dfn" href="https://url.spec.whatwg.org/#network-scheme">network schemed</a> resource.</p>
      <li data-md="">
-      <p>If the <a href="#subsume-policy">§3.3 Is policy list subsumed under subsuming policy?</a> algorithm returns "<code>Subsumed</code>" when executed
-  upon <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">CSP list</a> and <var>embedding policy</var>,
-  return "<code>Allowed</code>".</p>
+      <p>If the <a href="#subsume-policy-list">§3.3 Does subsuming policy subsume policy list given their respective
+    origins?</a> algorithm returns "<code>Subsumes</code>" when
+  executed upon <var>embedding policy</var>, <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a>, <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list">CSP list</a>, and <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-origin">origin</a>, return "<code>Allowed</code>".</p>
      <li data-md="">
       <p>Return "<code>Blocked</code>".</p>
     </ol>
@@ -1755,85 +1769,42 @@ Host: advertisements-r-us.example.com
      <li data-md="">
       <p>Return "<code>Not Allowed</code>".</p>
     </ol>
-    <h3 class="heading settled algorithm" data-algorithm="Is policy list subsumed under subsuming policy?" data-level="3.3" id="subsume-policy"><span class="secno">3.3. </span><span class="content"> Is <var>policy list</var> subsumed under <var>subsuming policy</var>? </span><a class="self-link" href="#subsume-policy"></a></h3>
-    <p>Given a list of <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> objects (<var>policy list</var>), this algorithm returns
-  "<code>Subsumed</code>" if that list enforces a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> which is an exact match for
-  a given <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> object (<var>subsuming policy</var>). It returns "<code>Not Subsumed</code>"
-  otherwise.</p>
-    <p class="note" role="note">Note: Ideally, we’ll someday define a real subsumption algorithm
-  which would verify that the policy <code>default-src 'none'; script-src https://example.com</code> is subsumbed under <code>default-src example.com</code> (as
-  there is no case in which the latter will block a request that the former
-  would allow). That calculation turns out to be hard, so the current algorithm
-  takes the significantly simpler approach of requiring an exact match.</p>
-    <p class="note" role="note">Note: This is not an efficient algorithm. Implementers are encouraged to
-  implement something a little smarter and faster, with the same behavior.</p>
-    <ol class="algorithm">
-     <li data-md="">
-      <p>If <var>subsuming policy</var> is <code>null</code>, return "<code>Subsumed</code>".</p>
-     <li data-md="">
-      <p>For each <var>policy</var> in <var>policy list</var>:</p>
-      <ol>
-       <li data-md="">
-        <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-disposition">disposition</a> is not
-  "<code>enforce</code>", set skip to the next <var>policy</var>.</p>
-       <li data-md="">
-        <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a> is not the
-  same size as <var>subsuming policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive
-  set</a>, skip to the next <var>policy</var>.</p>
-       <li data-md="">
-        <p>For each <var>directive</var> in <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a>:</p>
-        <ol>
-         <li data-md="">
-          <p>Let <var>subsuming directive</var> be the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a> in <var>subsuming policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive
-  set</a> whose <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a> matches <var>directive</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a>, or <code>null</code> if no such <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a> is present.</p>
-         <li data-md="">
-          <p>If <var>subsuming directive</var> is <code>null</code>, skip to the next <var>policy</var>.</p>
-         <li data-md="">
-          <p>If <var>subsuming directive</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a> list is not the same size as <var>directive</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a> list, skip to the next <var>policy</var>.</p>
-         <li data-md="">
-          <p>For each <var>token</var> in <var>directive</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>:</p>
-          <ol>
-           <li data-md="">
-            <p>If <var>token</var> is not present in <var>subsuming
-  directive</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>, skip to the
-  next <var>policy</var>.</p>
-          </ol>
-        </ol>
-       <li data-md="">
-        <p>Return "<code>Subsumed</code>".</p>
-      </ol>
-     <li data-md="">
-      <p>Return "<code>Not Subsumed</code>".</p>
-    </ol>
     <h4 class="heading settled algorithm" data-algorithm="Is an expression matching scheme-source or 
     host-source grammar A similar to an expression matching 
-    scheme-source or host-source grammar B?" data-level="3.3.1" id="source-expression-similarity"><span class="secno">3.3.1. </span><span class="content"> Is an expression matching <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a> grammar <var>A</var> similar to an expression matching <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a> grammar <var>B</var>? </span><a class="self-link" href="#source-expression-similarity"></a></h4>
-    <p>Given two expressions matching the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a> grammar (<var>A</var> and <var>B</var>), return "<code>Similar</code>" if <var>A</var> is <a data-link-type="dfn" href="#similar-similar" id="ref-for-similar-similar-1">similar</a> to <var>B</var>. Otherwise, return "<code>Not Similar</code>".</p>
-    <p><var>A</var> and <var>B</var> are said to be <dfn class="dfn-paneled" data-dfn-for="similar" data-dfn-type="dfn" data-noexport="" id="similar-similar">similar</dfn> if their parts
-  individually match, that is <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-part"><code>scheme-part</code></a>, <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-part"><code>host-part</code></a>, <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-port-part"><code>port-part</code></a>, and <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-path-part"><code>path-part</code></a>.</p>
-    <p class="note" role="note">NOTE: This property is symmetric. That is if <var>A</var> is <a data-link-type="dfn" href="#similar-similar" id="ref-for-similar-similar-2">similar</a> to <var>B</var>, it must be that <var>B</var> is <a data-link-type="dfn" href="#similar-similar" id="ref-for-similar-similar-3">similar</a> to <var>A</var>.</p>
-    <div class="example" id="example-858029b1">
-     <a class="self-link" href="#example-858029b1"></a> Cases when <var>A</var> is <a data-link-type="dfn" href="#similar-similar" id="ref-for-similar-similar-4">similar</a> to <var>B</var>. 
-<pre>A = http://*.example.com
-B = https://example.com:*
-</pre>
+    scheme-source or host-source grammar B?" data-level="3.2.1" id="similarity-source-expressions"><span class="secno">3.2.1. </span><span class="content"> Is an expression matching <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a> grammar <var>A</var> similar to an expression matching <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a> grammar <var>B</var>? </span><a class="self-link" href="#similarity-source-expressions"></a></h4>
+    <p>Given two expressions matching the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a> grammar (<var>A</var> and <var>B</var>), return "<code>Similar</code>" if <var>A</var> is <a data-link-type="dfn" href="#source-expression-similar" id="ref-for-source-expression-similar-1">similar</a> to <var>B</var>. Otherwise, return 
+  "<code>Not Similar</code>".</p>
+    <p><var>A</var> and <var>B</var> are said to be <dfn class="dfn-paneled" data-dfn-for="source expression" data-dfn-type="dfn" data-noexport="" id="source-expression-similar">similar</dfn> if their
+  parts individually match, that is <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-part"><code>scheme-part</code></a>, <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-part"><code>host-part</code></a>, <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-port-part"><code>port-part</code></a>, and <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-path-part"><code>path-part</code></a>.</p>
+    <p class="note" role="note">NOTE: This property is symmetric. That is if <var>A</var> is <a data-link-type="dfn" href="#source-expression-similar" id="ref-for-source-expression-similar-2">similar</a> to <var>B</var>, it must be that <var>B</var> is <a data-link-type="dfn" href="#source-expression-similar" id="ref-for-source-expression-similar-3">similar</a> to <var>A</var>.</p>
+    <div class="example" id="example-21ec9461">
+     <a class="self-link" href="#example-21ec9461"></a> Cases when <var>A</var> is <a data-link-type="dfn" href="#source-expression-similar" id="ref-for-source-expression-similar-4">similar</a> to <var>B</var>. 
 <pre>A = https://inner.example.com/foo/
 B = http://*.example.com/foo/bar/
 </pre>
+     <p>Since <var>A</var> has a <a data-link-type="dfn" href="#source-expression-wildcard-host" id="ref-for-source-expression-wildcard-host-1">wildcard host</a>, it matches any
+    subdomain which in this case is "inner" so that <var>A</var> is similar to <var>B</var>.</p>
+<pre>A = http://*.example.com
+B = https://example.com:*
+</pre>
+     <p>Even though <var>A</var> and <var>B</var>’s ports are different, <var>A</var> and <var>B</var> are similar
+    because "http" matches both "http" and a more secure variant "https".</p>
 <pre>A = http://example.com:80/page1/html
 B = https://example.com:443/
 </pre>
-     <p>Cases when <var>A</var> is not <a data-link-type="dfn" href="#similar-similar" id="ref-for-similar-similar-5">similar</a> to <var>B</var>.</p>
+     <p>In both sources specified ports are defalt ports for the respective schemes
+    and <var>B</var>’s path would match any path, <var>A</var> is similar to <var>B</var>.</p>
+     <p>Cases when <var>A</var> is not <a data-link-type="dfn" href="#source-expression-similar" id="ref-for-source-expression-similar-5">similar</a> to <var>B</var>.</p>
 <pre>A = http://example.com:80
 B = http://example.com:334
 </pre>
      <p>In this case, ports of <var>A</var> and <var>B</var> do not match so that the two sources are
-    not <a data-link-type="dfn" href="#similar-similar" id="ref-for-similar-similar-6">similar</a> .</p>
+    not <a data-link-type="dfn" href="#source-expression-similar" id="ref-for-source-expression-similar-6">similar</a> .</p>
 <pre>A = http://example.com/page.html
 B = http://example.com/index.html
 </pre>
-     <p>The two sources are not <a data-link-type="dfn" href="#similar-similar" id="ref-for-similar-similar-7">similar</a> beucase their paths
-    do not match.</p>
+     <p>The two sources are not <a data-link-type="dfn" href="#source-expression-similar" id="ref-for-source-expression-similar-7">similar</a> beucase their
+    paths do not match.</p>
     </div>
     <p>A <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expression</a> has a <dfn class="dfn-paneled" data-dfn-for="source expression" data-dfn-type="dfn" data-noexport="" id="source-expression-wildcard-host">wildcard host</dfn> if the first character of the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expression</a>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-part"><code>host-part</code></a> is an U+002A ASTERISK 
   character (<code>*</code>).</p>
@@ -1860,10 +1831,10 @@ B = http://example.com/index.html
        <li data-md="">
         <p>Let <var>host B</var> be <var>B</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-part"><code>host-part</code></a>, if present, and <code>null</code> otherwise.</p>
        <li data-md="">
-        <p>Both <var>A</var> and <var>B</var> have a <a data-link-type="dfn" href="#source-expression-wildcard-host" id="ref-for-source-expression-wildcard-host-1">wildcard host</a>,
+        <p>Both <var>A</var> and <var>B</var> have a <a data-link-type="dfn" href="#source-expression-wildcard-host" id="ref-for-source-expression-wildcard-host-2">wildcard host</a>,
   but <var>host A</var> is not an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive</a> match to <var>host B</var>.</p>
        <li data-md="">
-        <p>At most one of <var>A</var> and <var>B</var> has a <a data-link-type="dfn" href="#source-expression-wildcard-host" id="ref-for-source-expression-wildcard-host-2">wildcard host</a>, the result of executing <a href="https://w3c.github.io/webappsec-csp/#match-hosts">Content Security Policy Level 3 §match-hosts</a> is "<code>Does Not Match</code>" given <var>host A</var> and <var>host B</var>, and the result of executing <a href="https://w3c.github.io/webappsec-csp/#match-hosts">Content Security Policy Level 3 §match-hosts</a> on <var>host B</var> and <var>host A</var> is also "<code>Does Not Match</code>".</p>
+        <p>At most one of <var>A</var> and <var>B</var> has a <a data-link-type="dfn" href="#source-expression-wildcard-host" id="ref-for-source-expression-wildcard-host-3">wildcard host</a>, the result of executing <a href="https://w3c.github.io/webappsec-csp/#match-hosts">Content Security Policy Level 3 §match-hosts</a> is "<code>Does Not Match</code>" given <var>host A</var> and <var>host B</var>, and the result of executing <a href="https://w3c.github.io/webappsec-csp/#match-hosts">Content Security Policy Level 3 §match-hosts</a> on <var>host B</var> and <var>host A</var> is also "<code>Does Not Match</code>".</p>
        <li data-md="">
         <p>Let <var>port A</var> be <var>A</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-port-part"><code>port-part</code></a>, if present, and <code>null</code> otherwise.</p>
        <li data-md="">
@@ -1887,7 +1858,7 @@ B = http://example.com/index.html
     </ol>
     <h4 class="heading settled algorithm" data-algorithm="What is an intersection of two expressions matching 
     scheme-source or host-source 
-    grammar A and B?" data-level="3.3.2" id="intersection-source-expressions"><span class="secno">3.3.2. </span><span class="content"> What is an intersection of two expressions matching <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a> grammar <var>A</var> and <var>B</var>? </span><a class="self-link" href="#intersection-source-expressions"></a></h4>
+    grammar A and B?" data-level="3.2.2" id="intersection-source-expressions"><span class="secno">3.2.2. </span><span class="content"> What is an intersection of two expressions matching <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a> grammar <var>A</var> and <var>B</var>? </span><a class="self-link" href="#intersection-source-expressions"></a></h4>
     <p><a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">Source expression</a> is said to be an <dfn class="dfn-paneled" data-dfn-for="source expression" data-dfn-type="dfn" data-noexport="" id="source-expression-intersection">intersection</dfn> of two other 
   expressions matching <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a> grammar <var>A</var> and <var>B</var> if it contains the more
   restrictive <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-part"><code>scheme-part</code></a>, <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-part"><code>host-part</code></a>, <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-port-part"><code>port-part</code></a>, and <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-path-part"><code>path-part</code></a> of the two.</p>
@@ -1914,10 +1885,10 @@ B = http://*.example.com/page.html
 Intersect = <code>https://example.com/page.html</code>
 </pre>
     </div>
-    <p>Given two expressions matching the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a> grammar (<var>A</var> and <var>B</var>), return their <a data-link-type="dfn" href="#source-expression-intersection" id="ref-for-source-expression-intersection-2">intersection</a> if <var>A</var> is <a data-link-type="dfn" href="#similar-similar" id="ref-for-similar-similar-8">similar</a> to <var>B</var>. Otherwise, return <code>null</code>.</p>
+    <p>Given two expressions matching the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a> grammar (<var>A</var> and <var>B</var>), return their <a data-link-type="dfn" href="#source-expression-intersection" id="ref-for-source-expression-intersection-2">intersection</a> if <var>A</var> is <a data-link-type="dfn" href="#source-expression-similar" id="ref-for-source-expression-similar-8">similar</a> to <var>B</var>. Otherwise, return <code>null</code>.</p>
     <ol>
      <li data-md="">
-      <p>If the result of executing <a href="#source-expression-similarity">§3.3.1 Is an expression matching scheme-source or 
+      <p>If the result of executing <a href="#similarity-source-expressions">§3.2.1 Is an expression matching scheme-source or 
     host-source grammar A similar to an expression matching 
     scheme-source or host-source grammar B?</a> on <var>A</var> and <var>B</var> is "<code>Not Similar</code>", return <code>null</code>.</p>
      <li data-md="">
@@ -1948,7 +1919,7 @@ Intersect = <code>https://example.com/page.html</code>
    Continue to the next step in the main algorithm.</p>
        <li data-md="">
         <p>If <var>A</var> doesn’t match the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> grammar and
-   doesn’t have a <a data-link-type="dfn" href="#source-expression-wildcard-host" id="ref-for-source-expression-wildcard-host-3">wildcard host</a>, append <var>host A</var> to <var>source</var>.</p>
+   doesn’t have a <a data-link-type="dfn" href="#source-expression-wildcard-host" id="ref-for-source-expression-wildcard-host-4">wildcard host</a>, append <var>host A</var> to <var>source</var>.</p>
        <li data-md="">
         <p>Otherwise, append <var>host B</var> to <var>source</var>.</p>
       </ol>
@@ -1992,7 +1963,252 @@ Intersect = <code>https://example.com/page.html</code>
      <li data-md="">
       <p>Return <var>source</var>.</p>
     </ol>
-    <h4 class="heading settled algorithm" data-algorithm="Rewrite &apos;self&apos; into a host-source expression for origin." data-level="3.3.3" id="rewrite-self"><span class="secno">3.3.3. </span><span class="content"> Rewrite <code>'self'</code> into a host-source expression for <var>origin</var>. </span><a class="self-link" href="#rewrite-self"></a></h4>
+    <h4 class="heading settled algorithm" data-algorithm="Get the effective source list for a source list,
+    origin, and name." data-level="3.2.3" id="get-effective-source-list"><span class="secno">3.2.3. </span><span class="content"> Get the effective <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source list</a> for a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source list</a>, <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a>, and <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a>. </span><a class="self-link" href="#get-effective-source-list"></a></h4>
+    <p>An <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport="" id="effective-source-list">effective source list</dfn> is a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list">list</a> which
+  simplifies a given <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source list</a> by removing any ineffective, obviated,
+  or invalid <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expressions</a>, and expanding complex tokens like <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-self">'self'</a> or <a data-link-type="grammar" href="https://drafts.csswg.org/css-values-4/#mult-zero-plus">*</a> into a more easily comparable, 
+  if more verbose, <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list">list</a>.</p>
+    <div class="example" id="example-6fcc3834">
+     <a class="self-link" href="#example-6fcc3834"></a> 
+     <p>For any directive with origin <code>https://example.test/</code>:</p>
+<pre>https: wss: 'none' 'self'
+</pre>
+     <p>The effective source list is "http: wss: https://example.test/". Note that
+    "'none'" is not part of the effective source list because it has no effect
+    when it is not the only source.</p>
+     <p>For "<code>style-src</code>":</p>
+<pre>http://example.com 'strict-dynamic' 'nonce-abc'
+</pre>
+     <p>The effective source list is "http://example.com 'nonce-abc'" since
+    "'strict-dynamic'" is ignored in non-"<code>script-src</code>" directives.</p>
+     <p>For "<code>script-src</code>":</p>
+<pre>http://example.com 'strict-dynamic' 'nonce-abc'
+</pre>
+     <p>The effective source list is "'strict-dynamic' 'nonce-abc'" since
+    "'strict-dynamic'" in "<code>script-src</code>" case does not honor host and scheme
+    source expressions.</p>
+    </div>
+    <p>Given a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source list</a> (<var>source list</var>), <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a> (<var>origin</var>), and string (<var>directive</var>), the following algorithm returns a
+  an <a data-link-type="dfn" href="#effective-source-list" id="ref-for-effective-source-list-1">effective source list</a> <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source list</a> for <var>source list</var>.</p>
+    <ol>
+     <li data-md="">
+      <p>If <var>source list</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-is-empty">is empty</a> or « 'none' »,
+  return « 'none' ».</p>
+     <li data-md="">
+      <p>If <var>source list</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-contains">contains</a> a token that is an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive</a> match to the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> "<a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-self"><code>'self'</code></a>":</p>
+      <ol>
+       <li data-md="">
+        <p>Remove that token from <var>source list</var>.</p>
+       <li data-md="">
+        <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append">Append</a> the result of executing <a href="#rewrite-self">§3.2.5 Rewrite 'self' into a host-source expression for origin.</a> given <var>origin</var> to <var>source list</var>.</p>
+      </ol>
+     <li data-md="">
+      <p>Let <var>effective</var> be an empty <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source list</a>.</p>
+     <li data-md="">
+      <p>If <var>directive</var> is "<code>plugin-types</code>":</p>
+      <ol>
+       <li data-md="">
+        <p>For each <var>expression</var> in <var>source list</var>:</p>
+        <ol>
+         <li data-md="">
+          <p>If <var>expression</var> does not match <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-media-type"><code>media-type</code></a>, <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">continue</a>.</p>
+         <li data-md="">
+          <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append">Append</a> <var>expression</var> to <var>effective</var>.</p>
+        </ol>
+       <li data-md="">
+        <p>If <var>effective</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-is-empty">is empty</a>, return « 'none' ».</p>
+       <li data-md="">
+        <p>Return <var>effective</var>.</p>
+      </ol>
+     <li data-md="">
+      <p>For each <var>expression</var> in <var>source list</var>:</p>
+      <ol>
+       <li data-md="">
+        <p>If <var>expression</var> matches <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> grammar
+  and <var>directive</var> is not "<code>script-src</code>" or "<code>style-src</code>", <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">continue</a>.</p>
+       <li data-md="">
+        <p>If <var>directive</var> is "<code>script-src</code>" and <var>source list</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-contains">contains</a> a token that is an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive</a> match to the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> "<a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-strict-dynamic"><code>'strict-dynamic'</code></a>":</p>
+        <ol>
+         <li data-md="">
+          <p>If <var>expression</var> matches <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a>, <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> grammar or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> "<a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-unsafe-inline"><code>'unsafe-inline'</code></a>", <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">continue</a>.</p>
+        </ol>
+       <li data-md="">
+        <p>If <var>expression</var> is an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive</a> match to the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> "<a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-strict-dynamic"><code>'strict-dynamic'</code></a>"
+  and <var>directive</var> is not "<code>script-src</code>", <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">continue</a>.</p>
+       <li data-md="">
+        <p>If <var>directive</var> is "<code>frame-ancestors</code>" and <var>expression</var> matches <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-nonce-source"><code>nonce-source</code></a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-hash-source"><code>hash-source</code></a> grammar, <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">continue</a>.</p>
+       <li data-md="">
+        <p>If <var>expression</var> is an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive</a> match to
+  "<a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-none"><code>'none'</code></a>", <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">continue</a>.</p>
+       <li data-md="">
+        <p>If <var>expression</var> matches the U+002A ASTERISK character (<code>*</code>):</p>
+        <ol>
+         <li data-md="">
+          <p>Append to <var>effective</var> the following <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> expressions: "<code>ftp:</code>", "<code>http:</code>", "<code>https:</code>", "<code>ws:</code>", "<code>wss:</code>",
+  and <var>origin</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin-scheme">scheme</a>.</p>
+         <li data-md="">
+          <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">Continue</a>.</p>
+        </ol>
+       <li data-md="">
+        <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append">Append</a> <var>expression</var> to <var>effective</var>.</p>
+      </ol>
+     <li data-md="">
+      <p>If <var>effective</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-is-empty">is empty</a>, return « 'none' ».</p>
+     <li data-md="">
+      <p>If <var>effective</var> is « 'strict-dynamic' », return « 'none' ».</p>
+     <li data-md="">
+      <p>Return <var>effective</var>.</p>
+    </ol>
+    <h4 class="heading settled algorithm" data-algorithm="What is an intersection of two source lists  
+    A and B given their respective origins
+    and directive names?" data-level="3.2.4" id="intersection-source-lists"><span class="secno">3.2.4. </span><span class="content"> What is an intersection of two <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source lists</a> <var>A</var> and <var>B</var> given their respective <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origins</a> and directive names? </span><a class="self-link" href="#intersection-source-lists"></a></h4>
+    <p>The <dfn class="dfn-paneled" data-dfn-for="source list" data-dfn-type="dfn" data-noexport="" id="source-list-intersection">intersection</dfn> of two <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source lists</a> is a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source list</a> which <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-contains">contains</a> every <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expression</a> <a data-link-type="dfn" href="#policy-subsume" id="ref-for-policy-subsume-1">subsumed</a> by both. If no such <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expressions</a> exist (because, for example, one of the lists
+  contains only <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-none">'none'</a>), then the <a data-link-type="dfn" href="#source-list-intersection" id="ref-for-source-list-intersection-1">intersection</a> will be the list 
+  « <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-none">'none'</a> ».</p>
+    <div class="example" id="example-fc0faaab">
+     <a class="self-link" href="#example-fc0faaab"></a> In these cases, <code>intersection</code> is an <a data-link-type="dfn" href="#source-expression-intersection" id="ref-for-source-expression-intersection-3">intersection</a> for <var>A</var> and <var>B</var>. 
+<pre>A = wss: http://example.com
+B = https: wss: 'none'
+intersection = wss: https://example.com
+</pre>
+     <p>The expression "wss:" is present in both policies, so it is present in
+    their intersection. Similarly, "http://example.com" is present in the
+    intersection because it is the only expression subsumed by both
+    "http://example.com" and "https:". Note that "'none'"" is ignored, as it is
+    not the only token in <var>B</var>.</p>
+<pre>A = http://*.a.com http://*.b.com
+B = https://a.com:* http://*.c.com
+intersection = https://a.com
+</pre>
+     <p>Only two sources are similar: "http://*.a.com" in <var>A</var> is similar to
+    "https://a.com:*" in <var>B</var> so the intersection of the two source lists is
+    "https://a.com".</p>
+<pre>A = 'unsafe-inline' http://example.com:443/page1/html 'nonce-abc'
+B = 'unsafe-inline' https://example.com:443/ 'strict-dynamic' 'nonce-abc'
+intersection = 'nonce-abc'
+</pre>
+     <p>Since "<code>strict-dynamic</code>" honors only <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-nonce-source"><code>nonce-source</code></a> and <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-hash-source"><code>hash-source</code></a> expressions, <var>B</var> is effectively 
+    "'strict-dynamic' 'nonce-abc'". That is why the <var>intersection</var> is 
+    "'nonce-abc'".</p>
+    </div>
+    <p>Given a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source list</a> <var>A</var>, <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a> (<var>origin A</var>) <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string">string</a> (<var>directive A</var>), <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source list</a> <var>B</var>, <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a> (<var>origin B</var>) and <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string">string</a> (<var>directive B</var>),
+  this algorithm returns a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source list</a> that is an <a data-link-type="dfn" href="#source-list-intersection" id="ref-for-source-list-intersection-2">intersection</a> of <var>A</var> and <var>B</var>.</p>
+    <ol>
+     <li data-md="">
+      <p>If <var>directive A</var> is not an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive</a> match to <var>directive B</var>, return « 'none' ».</p>
+     <li data-md="">
+      <p>Let <var>effective A</var> be the result of executing <a href="#get-effective-source-list">§3.2.3 Get the effective source list for a source list,
+    origin, and name.</a> given <var>A</var>, <var>origin A</var>, and <var>directive A</var>.</p>
+     <li data-md="">
+      <p>Let <var>effective B</var> be the result of executing <a href="#get-effective-source-list">§3.2.3 Get the effective source list for a source list,
+    origin, and name.</a> given <var>B</var>, <var>origin B</var>, and <var>directive B</var>.</p>
+     <li data-md="">
+      <p>If either <var>effective A</var> or <var>effective B</var> is  « 'none' »,
+  return « 'none' ».</p>
+     <li data-md="">
+      <p>If <var>effective A</var> is empty, return <var>effective B</var>.</p>
+     <li data-md="">
+      <p>If <var>effective B</var> is empty, return <var>effective A</var>.</p>
+     <li data-md="">
+      <p>Let <var>schemes A</var> and <var>schemes</var> be empty <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list">lists</a>.</p>
+     <li data-md="">
+      <p>For each <var>expression A</var> in <var>effective A</var>:</p>
+      <ol>
+       <li data-md="">
+        <p>If <var>expression A</var> matches <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> grammar:</p>
+        <ol>
+         <li data-md="">
+          <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-append">Append</a> <var>expression A</var> to <var>schemes A</var>.</p>
+         <li data-md="">
+          <p>If <var>expression A</var> matches "<code>http:</code>", <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-append">append</a> "<code>https:</code>" to <var>schemes A</var>.</p>
+         <li data-md="">
+          <p>If <var>expression A</var> matches "<code>ws:</code>", <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-append">append</a> "<code>wss:</code>" to <var>schemes A</var>.</p>
+        </ol>
+      </ol>
+     <li data-md="">
+      <p>For each <var>expression B</var> in <var>effective B</var>:</p>
+      <ol>
+       <li data-md="">
+        <p>If <var>expression B</var> matches <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> grammar
+  and <var>expression B</var> matches one of the elements in <var>schemes A</var>:</p>
+        <ol>
+         <li data-md="">
+          <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-append">Append</a> <var>expression B</var> to <var>schemes</var>.</p>
+         <li data-md="">
+          <p>If <var>expression B</var> matches "<code>http:</code>" and <var>schemes A</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-contains">contains</a> "<code>https:</code>", <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-append">append</a> "<code>https:</code>" to <var>schemes</var>.</p>
+         <li data-md="">
+          <p>If <var>expression B</var> matches "<code>ws:</code>" and <var>schemes A</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-contains">contains</a> "<code>wss:</code>", <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-append">append</a> "<code>wss:</code>" to <var>schemes</var>.</p>
+        </ol>
+      </ol>
+     <li data-md="">
+      <p>Let <var>intersection</var> be an empty <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source list</a>.</p>
+     <li data-md="">
+      <p>For each <var>expression</var> in <var>schemes</var>:</p>
+      <ol>
+       <li data-md="">
+        <p>If <var>expression</var> does not match "<code>https:</code>" or <var>schemes</var> does not <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-contains">contain</a> "<code>http:</code>":</p>
+        <ol>
+         <li data-md="">
+          <p>If <var>expression</var> does not match "<code>wss:</code>" or <var>schemes</var> does not <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-contains">contain</a> "<code>ws:</code>", <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append">append</a> <var>expression</var> to <var>intersection</var>.</p>
+        </ol>
+      </ol>
+     <li data-md="">
+      <p>For each <var>expression A</var> in <var>effective A</var>:</p>
+      <ol>
+       <li data-md="">
+        <p>If <var>expression A</var> matches <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> grammar
+  and <var>schemes</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-contains">contains</a> <var>expression A</var>, <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">continue</a>.</p>
+       <li data-md="">
+        <p>Let <var>match</var> be <code>null</code>.</p>
+       <li data-md="">
+        <p>For each <var>expression B</var> in <var>effective B</var>:</p>
+        <ol>
+         <li data-md="">
+          <p>If at least one of <var>expression A</var> and <var>expression B</var> does not
+  match <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a> grammar:</p>
+          <ol>
+           <li data-md="">
+            <p>If <var>expression A</var> matches <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> grammar and is an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive</a> match for <var>expression B</var>, <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append">append</a> <var>expression A</var> to <var>intersection</var>.</p>
+           <li data-md="">
+            <p>If <var>expression A</var> matches <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-nonce-source"><code>nonce-source</code></a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-hash-source"><code>hash-source</code></a> grammar and is a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#case-sensitive">case-sensitive</a> match for <var>expression B</var>, <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append">append</a> <var>expression A</var> to <var>intersection</var>.</p>
+           <li data-md="">
+            <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">Continue</a> to the next <var>expression B</var>.</p>
+          </ol>
+         <li data-md="">
+          <p>If <var>expression B</var>’s <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-part"><code>scheme-part</code></a> matches one of
+  the elements in <var>schemes</var>, <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">continue</a> to the
+  next <var>expression B</var>.</p>
+         <li data-md="">
+          <p>If <var>expression A</var> matches <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> grammar:</p>
+          <ol>
+           <li data-md="">
+            <p>If <var>expression B</var> matches <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a> grammar
+  and the result of executing <a href="#intersection-source-expressions">§3.2.2 What is an intersection of two expressions matching 
+    scheme-source or host-source 
+    grammar A and B?</a> is not <code>null</code> given <var>expression A</var> and <var>expression B</var>, <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append">append</a> the
+  result to <var>intersection</var>.</p>
+           <li data-md="">
+            <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">Continue</a> to the next <var>expression B</var>.</p>
+          </ol>
+         <li data-md="">
+          <p>If the result of executing <a href="#subsume-source-list">§3.2.9 Does source list A subsume source listB given their
+    respective origins and directive names?</a> is
+  "<code>Subsumes</code>" given <var>expression B</var> and <var>expression A</var>, <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append">append</a> <var>expression A</var> to <var>intersection</var>. <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">Continue</a> to the next <var>expression A</var>.</p>
+         <li data-md="">
+          <p>If the result of executing <a href="#intersection-source-expressions">§3.2.2 What is an intersection of two expressions matching 
+    scheme-source or host-source 
+    grammar A and B?</a> is
+  not <code>null</code> given <var>expression A</var> and <var>expression B</var>, set <var>match</var> to
+  the result.</p>
+        </ol>
+       <li data-md="">
+        <p>If <var>match</var> is not <code>null</code>, <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append">append</a> <var>match</var> to <var>intersection</var>.</p>
+      </ol>
+     <li data-md="">
+      <p>Return <var>intersection</var>.</p>
+    </ol>
+    <h4 class="heading settled algorithm" data-algorithm="Rewrite &apos;self&apos; into a host-source expression for origin." data-level="3.2.5" id="rewrite-self"><span class="secno">3.2.5. </span><span class="content"> Rewrite <code>'self'</code> into a host-source expression for <var>origin</var>. </span><a class="self-link" href="#rewrite-self"></a></h4>
     <p>Given an origin (<var>origin</var>), this algorithm returns a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a> expression that has the same effect
   as <code>'self'</code> for that origin:</p>
     <ol>
@@ -2002,10 +2218,10 @@ Intersect = <code>https://example.com/page.html</code>
       <p>Return the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#ascii-serialisation-of-an-origin">ASCII
   serialization</a> of <var>origin</var>.</p>
     </ol>
-    <h4 class="heading settled algorithm" data-algorithm="Does source expression A subsume source expression B?" data-level="3.3.4" id="subsume-se"><span class="secno">3.3.4. </span><span class="content"> Does <code>source expression</code> <var>A</var> subsume <code>source expression</code> <var>B</var>? </span><a class="self-link" href="#subsume-se"></a></h4>
+    <h4 class="heading settled algorithm" data-algorithm="Does source expression A subsume source expression B?" data-level="3.2.6" id="subsume-source-expressions"><span class="secno">3.2.6. </span><span class="content"> Does <code>source expression</code> <var>A</var> subsume <code>source expression</code> <var>B</var>? </span><a class="self-link" href="#subsume-source-expressions"></a></h4>
     <p>Given two <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expressions</a> <var>A</var> and <var>B</var>, this algorithm returns
-  "<code>Subsumes</code>" if <var>A</var> <a data-link-type="dfn" href="#subsumes" id="ref-for-subsumes-1">subsumes</a> <var>B</var>, and returns "<code>Does Not Subsume</code>"
-  otherwise.</p>
+  "<code>Subsumes</code>" if <var>A</var> <a data-link-type="dfn" href="#policy-subsume" id="ref-for-policy-subsume-2">subsumes</a> <var>B</var>, and returns
+  "<code>Does Not Subsume</code>" otherwise.</p>
     <ol>
      <li data-md="">
       <p class="assertion">Assert: Neither <var>A</var> nor <var>B</var> match the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> grammar.</p>
@@ -2067,66 +2283,180 @@ Intersect = <code>https://example.com/page.html</code>
      <li data-md="">
       <p>Return "<code>Does Not Subsume</code>".</p>
     </ol>
-    <h4 class="heading settled algorithm" data-algorithm="Does serialized-source-list A subsume 
-    serialized-source-list B given their respective 
-    origins?" data-level="3.3.5" id="subsume-source-list"><span class="secno">3.3.5. </span><span class="content"> Does <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-source-list">serialized-source-list</a> <var>A</var> subsume <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-source-list">serialized-source-list</a> <var>B</var> given their respective <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origins</a>? </span><a class="self-link" href="#subsume-source-list"></a></h4>
-    <p>Given a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-source-list">serialized-source-list</a> <var>A</var> with <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a> (<var>origin A</var>) and a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-source-list">serialized-source-list</a> <var>B</var> with <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a> (<var>origin B</var>), this algorithm returns "<code>Subsumes</code>"
-  if <var>A</var> <a data-link-type="dfn" href="#subsumes" id="ref-for-subsumes-2">subsumes</a> <var>B</var>, and returns "<code>Does Not Subsume</code>" otherwise.</p>
-    <p>A <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-source-list">serialized-source-list</a> is a <dfn data-dfn-type="dfn" data-noexport="" id="wildcard-list">wildcard list<a class="self-link" href="#wildcard-list"></a></dfn> if it
-  is a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#case-sensitive">case-sensitive</a> match to the U+002A ASTERISK character (<code>*</code>).</p>
-    <p>A <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-source-list">serialized-source-list</a> is <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport="" id="non-strict-inline">non-strict inline</dfn> if it
-  contains <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> expression "<code>unsafe-inline</code>" or
-  "<code>unsafe-eval</code>", but does not contain a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> expression "<code>strict-dynamic</code>" or any <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-nonce-source"><code>nonce-source</code></a> or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-hash-source"><code>hash-source</code></a> expressions.</p>
-    <p class="issue" id="issue-ec1f4448"><a class="self-link" href="#issue-ec1f4448"></a> Align with <code>allow unsafe-inline</code> definition in CSP3.</p>
+    <h4 class="heading settled algorithm" data-algorithm="What is an intersection of two policy objects A and B
+    given their respective origins?" data-level="3.2.7" id="intersection-policies"><span class="secno">3.2.7. </span><span class="content"> What is an intersection of two <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> objects <var>A</var> and <var>B</var> given their respective <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origins</a>? </span><a class="self-link" href="#intersection-policies"></a></h4>
+    <p><a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">Policy</a> (<var>Intersection</var>) is said to be an <dfn class="dfn-paneled" data-dfn-for="policy" data-dfn-type="dfn" data-noexport="" id="policy-intersection">intersection</dfn> of two <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> objects <var>A</var> and <var>B</var> if both <var>A</var> and <var>B</var> <a data-link-type="dfn" href="#policy-subsume" id="ref-for-policy-subsume-3">subsume</a> <var>Intersection</var>.</p>
+    <div class="example" id="example-9af13fbe">
+     <a class="self-link" href="#example-9af13fbe"></a> In these cases, <code>Intersection</code> is an <a data-link-type="dfn" href="#source-expression-intersection" id="ref-for-source-expression-intersection-4">intersection</a> for <var>A</var> and <var>B</var>. 
+<pre>A = default-src 'self' http://example.com http://example.net;
+   connect-src 'none';
+B = connect-src http://example.com/; script-src http://example.com/
+
+Intersection = default-src 'self' http://example.com http://example.net;
+               connect-src 'none'; script-src http://example.com/;
+</pre>
+     <p>Both <var>A</var> and <var>B</var> <a data-link-type="dfn" href="#policy-subsume" id="ref-for-policy-subsume-4">subsume</a> <var>Intersection</var>.
+    For example, <var>Intersection</var>’s "script-src http://example.com/" is <a data-link-type="dfn" href="#policy-subsume" id="ref-for-policy-subsume-5">subsumed</a> by the first policy’s
+    "default-src 'self' http://example.com http://example.net" and
+    second policy’s "script-src http://example.com/".</p>
+    </div>
+    <p>Given a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> object <var>A</var>, an <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a> (<var>origin A</var>),
+  a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> object <var>B</var>, and an <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a> (<var>origin B</var>),
+  this algorithm returns a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> that is an <a data-link-type="dfn" href="#policy-intersection" id="ref-for-policy-intersection-1">intersection</a> of <var>A</var> and <var>B</var>.</p>
     <ol>
      <li data-md="">
-      <p>If <var>A</var> is empty, return "<code>Subsumes</code>".</p>
+      <p>If <var>A</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-is-empty">is empty</a> or its <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-disposition">disposition</a> is "<code>report</code>", return <var>B</var>.</p>
      <li data-md="">
-      <p>If <var>B</var> is empty, return "<code>Does Not Subsume</code>".</p>
+      <p>If <var>B</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-is-empty">is empty</a> or its <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-disposition">disposition</a> is "<code>report</code>", return <var>A</var>.</p>
      <li data-md="">
-      <p>If <var>B</var> is <code>none</code>, return "<code>Subsumes</code>".</p>
+      <p>Let <var>policy</var> be a new <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy">policy</a> with an empty <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a>, and a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-disposition">disposition</a> "<code>enforce</code>".</p>
      <li data-md="">
-      <p>If <var>A</var> is <code>none</code>, return "<code>Does Not Subsume</code>".</p>
+      <p>Let <var>names</var> be a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list">list</a> containing the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a> of
+  each <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a> contained in either <var>A</var> or <var>B</var>.</p>
      <li data-md="">
-      <p>If <var>A</var> is a <code>wildcard list</code>:</p>
+      <p>For each <var>directive name</var> in <var>names</var>:</p>
       <ol>
        <li data-md="">
-        <p class="issue" id="issue-95f2d23a0"><a class="self-link" href="#issue-95f2d23a0"></a> TODO.</p>
+        <p>If <var>directive name</var> is "<code>report-uri</code>", "<code>report-to</code>", <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">continue</a> to the next <var>directive name</var>.</p>
+       <li data-md="">
+        <p>Let <var>directive A</var> be the result of executing <a href="#effective-directive">§3.2.10 Get the effective directive value for name and policy.</a> given <var>directive name</var> and <var>A</var>.</p>
+       <li data-md="">
+        <p>Let <var>directive B</var> be the result of executing <a href="#effective-directive">§3.2.10 Get the effective directive value for name and policy.</a> given <var>directive name</var> and <var>B</var>.</p>
+       <li data-md="">
+        <p>If both <var>directive A</var> and <var>directive B</var> are <code>null</code>, <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">continue</a> to the next <var>directive name</var>.</p>
+       <li data-md="">
+        <p>If <var>directive A</var> is <code>null</code>, <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append">append</a> a new <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a> with <var>directive name</var> and <var>directive B</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>, to <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a>. <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">Continue</a> to the next <var>directive name</var>.</p>
+       <li data-md="">
+        <p>If <var>directive B</var> is <code>null</code>, <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append">append</a> a new <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a> with <var>directive name</var> and <var>directive A</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>, to <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a>. <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">Continue</a> to the next <var>directive name</var>.</p>
+       <li data-md="">
+        <p>Let <var>directive value</var> be the result of executing
+  [[#"intersection-source-lists"]] given <var>directive A</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>, <var>origin A</var>, <var>directive name</var>, <var>directive B</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>, <var>origin B</var>, and <var>directive name</var>.</p>
+       <li data-md="">
+        <p>Let <var>directive</var> be a new <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a> with <var>directive name</var> and <var>directive value</var>.</p>
+       <li data-md="">
+        <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append">Append</a> <var>directive</var> to <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a>.</p>
       </ol>
      <li data-md="">
-      <p>If <var>B</var> is a <code>wildcard list</code>:</p>
+      <p>Return <var>policy</var>.</p>
+    </ol>
+    <h4 class="heading settled algorithm" data-algorithm="What is an intersection of a policy list for an
+    origin?" data-level="3.2.8" id="intersection-policy-list"><span class="secno">3.2.8. </span><span class="content"> What is an intersection of a <var>policy list</var> for an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a>? </span><a class="self-link" href="#intersection-policy-list"></a></h4>
+    <p>The <a data-link-type="dfn" href="#policy-intersection" id="ref-for-policy-intersection-2">intersection</a> of a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list">list</a> of <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> objects is a single <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> which is <a data-link-type="dfn" href="#policy-subsume" id="ref-for-policy-subsume-6">subsumed</a> by each item in
+  the list. In other words, the <a data-link-type="dfn" href="#policy-intersection" id="ref-for-policy-intersection-3">intersection</a> of multiple <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> objects represents the effective policy created when each of
+  those policy object is applied to a single context (see <a href="https://w3c.github.io/webappsec-csp/#multiple-policies">Content Security Policy Level 3 §multiple-policies</a> for more detail).</p>
+    <div class="example" id="example-0262497d">
+     <a class="self-link" href="#example-0262497d"></a> Here <code>Intersection</code> is an <a data-link-type="dfn" href="#source-expression-intersection" id="ref-for-source-expression-intersection-5">intersection</a> for
+    the given policy list. 
+<pre>Content-Security-Policy: default-src 'self' http://example.com http://example.net;
+                         connect-src 'none';
+Content-Security-Policy: connect-src http://example.com/;
+                         script-src http://example.com/
+Content-Security-Policy: style-src 'self';
+                         script-src http://example.com/ http://example.net
+
+Intersection: default-src 'self' http://example.com http://example.net;
+              connect-src 'none';
+              script-src http://example.com/;
+              style-src 'self'
+</pre>
+     <p>Each <var>policy</var> specified in <var>policy list</var> <a data-link-type="dfn" href="#policy-subsume" id="ref-for-policy-subsume-7">subsumes</a> <var>intersection</var>.</p>
+    </div>
+    <p>Given a list of <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> objects (<var>policy list</var>) and an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a> (<var>origin</var>), this algorithm returns a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> that is an <a data-link-type="dfn" href="#policy-intersection" id="ref-for-policy-intersection-4">intersection</a> for the given list.</p>
+    <ol>
+     <li data-md="">
+      <p>If <var>policy list</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-is-empty">is empty</a>, return a <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy">policy</a> object with an empty <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a> and 
+  disposition "<code>enforce</code>".</p>
+     <li data-md="">
+      <p>Let <var>intersection</var> be the first element in <var>policy list</var> with disposition
+  "<code>enforce</code>". If there is no such element, return a <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy">policy</a> object with an empty <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a> and 
+  disposition "<code>enforce</code>".</p>
+     <li data-md="">
+      <p>If <var>policy list</var>’s size is one, return <var>intersection</var>.</p>
+     <li data-md="">
+      <p>For each <var>policy</var> in <var>policy list</var>:</p>
       <ol>
        <li data-md="">
-        <p class="issue" id="issue-95f2d23a1"><a class="self-link" href="#issue-95f2d23a1"></a> TODO.</p>
+        <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-disposition">disposition</a> is "<code>report</code>", <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">continue</a> to the next <var>policy</var>.</p>
+       <li data-md="">
+        <p>Let <var>result</var> be the result of executing <a href="#intersection-policies">§3.2.7 What is an intersection of two policy objects A and B
+    given their respective origins?</a> given <var>intersection</var>, <var>origin</var>, <var>policy</var> and <var>origin</var>.</p>
+       <li data-md="">
+        <p>Set <var>intersection</var> to <var>result</var>.</p>
       </ol>
      <li data-md="">
-      <p>If <var>B</var> contains a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> expression
-  "<code>strict-dynamic</code>" but <var>A</var> does not contain it, return 
-  "<code>Does Not Subsume</code>".</p>
+      <p>Return <var>intersection</var>.</p>
+    </ol>
+    <h4 class="heading settled algorithm" data-algorithm="Does source list A subsume source listB given their
+    respective origins and directive names?" data-level="3.2.9" id="subsume-source-list"><span class="secno">3.2.9. </span><span class="content"> Does <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source list</a> <var>A</var> subsume <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source list</a><var>B</var> given their
+    respective <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origins</a> and directive names? </span><a class="self-link" href="#subsume-source-list"></a></h4>
+    <p>Given a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source list</a> <var>A</var> with an <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a> (<var>origin A</var>) and a string (<var>directive A</var>), <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source list</a> <var>B</var> with an <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a> (<var>origin B</var>) and a string (<var>directive B</var>), this
+  algorithm returns "<code>Subsumes</code>" if <var>A</var> <a data-link-type="dfn" href="#policy-subsume" id="ref-for-policy-subsume-8">subsumes</a> <var>B</var>, and
+  returns "<code>Does Not Subsume</code>" otherwise.</p>
+    <p>A <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a> <dfn class="dfn-paneled" data-dfn-for="directive" data-dfn-type="dfn" data-noexport="" id="directive-contains">contains</dfn> a given <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source expression</a> if the expression is <a data-link-type="dfn">contained</a> by
+  its <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>.</p>
+    <ol>
      <li data-md="">
-      <p>If <var>B</var> is <a data-link-type="dfn" href="#non-strict-inline" id="ref-for-non-strict-inline-1">non-strict inline</a> but <var>A</var> is not, return
+      <p>If <var>directive A</var> is not an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#ascii-case-insensitive">ASCII case-insensitive</a> match to <var>directive B</var>, return "<code>Does Not Subsume</code>".</p>
+     <li data-md="">
+      <p>If <var>A</var> is empty or <var>B</var> is <code>none</code>, return "<code>Subsumes</code>".</p>
+     <li data-md="">
+      <p>If <var>B</var> is empty or <var>A</var> is <code>none</code>, return "<code>Does Not Subsume</code>".</p>
+     <li data-md="">
+      <p>If <var>directive B</var> is "<code>script-src</code>" and <var>B</var> <a data-link-type="dfn" href="#directive-contains" id="ref-for-directive-contains-1">contains</a> a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> expression "<code>strict-dynamic</code>" but <var>A</var> does not contain it, return "<code>Does Not Subsume</code>".</p>
+     <li data-md="">
+      <p>If <var>directive B</var> is "<code>script-src</code>" or "<code>style-src</code>":</p>
+      <ol>
+       <li data-md="">
+        <p>If <var>B</var> <a data-link-type="dfn" href="#directive-contains" id="ref-for-directive-contains-2">contains</a> a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> expression "<code>unsafe-eval</code>" but <var>A</var> does not contain it, return "<code>Does Not Subsume</code>".</p>
+       <li data-md="">
+        <p>If <var>B</var> <a data-link-type="dfn" href="#directive-contains" id="ref-for-directive-contains-3">contains</a> a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> expression
+  "<code>unsafe-hashed-attributes</code>" but <var>A</var> does not contain it, return
   "<code>Does Not Subsume</code>".</p>
+       <li data-md="">
+        <p>Let <var>type B</var> be "<code>script</code>" if <var>directive B</var> is "<code>script-src</code>" and
+  "<code>style</code>" otherwise. Similarly, let <var>type A</var> be "<code>script</code>" if <var>directive A</var> is "<code>script-src</code>" and "<code>style</code>" otherwise.</p>
+       <li data-md="">
+        <p>If <a href="https://w3c.github.io/webappsec-csp/#allow-all-inline">Content Security Policy Level 3 §allow-all-inline</a> returns "<code>Allows</code>" given <var>B</var> with <var>type B</var>, but returns "<code>Does Not Allow</code>" given <var>A</var> with <var>type A</var>, return "<code>Does Not Subsume</code>".</p>
+      </ol>
      <li data-md="">
       <p>Let <var>list A</var> and <var>list B</var> be empty lists.</p>
      <li data-md="">
-      <p>For each <var>expression A</var> in the result of splitting <var>A</var> on spaces:</p>
+      <p>For each <var>expression A</var> in <var>A</var>:</p>
       <ol>
        <li data-md="">
         <p>If <var>expression A</var> is "<code>self</code>", append a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a>,
-   returned by <a href="#rewrite-self">§3.3.3 Rewrite 'self' into a host-source expression for origin.</a> given <var>origin A</var> to <var>list A</var>.</p>
+  returned by <a href="#rewrite-self">§3.2.5 Rewrite 'self' into a host-source expression for origin.</a> given <var>origin A</var> to <var>list A</var>.</p>
        <li data-md="">
-        <p>If <var>expression A</var> does not match <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> grammar,
-   append <var>expression A</var> to <var>list A</var>.</p>
+        <p>If <var>expression A</var> matches the U+002A ASTERISK character (<code>*</code>),
+   append to <var>list A</var> the following <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> expressions: "<code>ftp:</code>", "<code>http:</code>", "<code>https:</code>", "<code>ws:</code>", "<code>wss:</code>",
+   and <var>origin A</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin-scheme">scheme</a>.</p>
+        <ol>
+         <li data-md="">
+          <p>If <var>directive A</var> is either "<code>img-src</code>" or "<code>media-src", append a &lt;a grammar></code>scheme-source<code>&lt;/a> expression "</code>data:<code>" to |list A|.&lt;/p> &lt;/li>&lt;li data-md>&lt;p>If |directive A| is "</code>media-src", append a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> expression "<code>blob:</code>" to <var>list A</var>.</p>
+         <li data-md="">
+          <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">Continue</a> to the next <var>expression A</var>.</p>
+        </ol>
+       <li data-md="">
+        <p>If <var>expression A</var> does not match <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> grammar, append <var>expression A</var> to <var>list A</var>.</p>
       </ol>
      <li data-md="">
-      <p>For each <var>expression B</var> in the result of splitting <var>B</var> on spaces:</p>
+      <p>For each <var>expression B</var> in <var>B</var>:</p>
       <ol>
        <li data-md="">
         <p>If <var>expression B</var> is "<code>self</code>", append a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-host-source"><code>host-source</code></a>,
-   returned by <a href="#rewrite-self">§3.3.3 Rewrite 'self' into a host-source expression for origin.</a> given <var>origin B</var> to <var>list B</var>.</p>
+  returned by <a href="#rewrite-self">§3.2.5 Rewrite 'self' into a host-source expression for origin.</a> given <var>origin B</var> to <var>list B</var>.</p>
        <li data-md="">
-        <p>If <var>expression B</var> does not match <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> grammar,
-   append <var>expression B</var> to <var>list B</var>.</p>
+        <p>If <var>expression B</var> matches the U+002A ASTERISK character (<code>*</code>),
+  append to <var>list B</var> the following <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> expressions: "<code>ftp:</code>", "<code>http:</code>", "<code>https:</code>", "<code>ws:</code>", "<code>wss:</code>",
+  and <var>origin B</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin-scheme">scheme</a>.</p>
+        <ol>
+         <li data-md="">
+          <p>If <var>directive B</var> is either "<code>img-src</code>" or "<code>media-src", append a &lt;a grammar></code>scheme-source<code>&lt;/a> expression "</code>data:<code>" to |list B|.&lt;/p> &lt;/li>&lt;li data-md>&lt;p>If |directive B| is "</code>media-src", append a <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source"><code>scheme-source</code></a> expression "<code>blob:</code>" to <var>list B</var>.</p>
+         <li data-md="">
+          <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">Continue</a> to the next <var>expression B</var>.</p>
+        </ol>
+       <li data-md="">
+        <p>If <var>expression B</var> does not match <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source"><code>keyword-source</code></a> grammar, append <var>expression B</var> to <var>list B</var>.</p>
       </ol>
      <li data-md="">
       <p>If <var>list B</var> is empty, return "<code>Subsumes</code>".</p>
@@ -2136,14 +2466,15 @@ Intersect = <code>https://example.com/page.html</code>
       <p>For each <var>expression B</var> in <var>list B</var>:</p>
       <ol>
        <li data-md="">
+        <p>If <var>expression B</var> matches the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-hash-source"><code>hash-source</code></a> gramar, or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-nonce-source"><code>nonce-source</code></a> grammar, <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">continue</a> to the next expression unless <var>directive A</var> is "<code>script-src</code>" or
+  "<code>style-src</code>".</p>
+       <li data-md="">
         <p>Let <var>found match</var> be <code>false</code>.</p>
        <li data-md="">
         <p>For each <var>expression A</var> in <var>list A</var>:</p>
         <ol>
          <li data-md="">
-          <p>If <var>list A</var> is <a data-link-type="dfn" href="#non-strict-inline" id="ref-for-non-strict-inline-2">non-strict inline</a> and <var>expression B</var> matches <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-hash-source"><code>hash-source</code></a> grammar or <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-nonce-source"><code>nonce-source</code></a> grammar, continue to  the next expression.</p>
-         <li data-md="">
-          <p>If <a href="#subsume-se">§3.3.4 Does source expression A subsume source expression B?</a> returns "<code>Subsumes</code>" given <var>expression A</var> and <var>expression B</var>, set <var>found match</var> to <code>true</code>.
+          <p>If <a href="#subsume-source-expressions">§3.2.6 Does source expression A subsume source expression B?</a> returns "<code>Subsumes</code>" given <var>expression A</var> and <var>expression B</var>, set <var>found match</var> to <code>true</code>.
   Break out of this inner loop.</p>
         </ol>
        <li data-md="">
@@ -2152,37 +2483,216 @@ Intersect = <code>https://example.com/page.html</code>
      <li data-md="">
       <p>Return "<code>Subsumes</code>".</p>
     </ol>
-    <div class="example" id="example-2cdbcf37">
-     <a class="self-link" href="#example-2cdbcf37"></a> 
+    <div class="example" id="example-f9148fbb">
+     <a class="self-link" href="#example-f9148fbb"></a> Let <var>directive A</var> and <var>directive B</var> be "<code>script-src</code>". Consider
+    the following examples: 
 <pre>A = "http://example.com 'sha256-xzi4zkCjuC8'"
 B = "http://example.com"
 </pre>
      <p>Since <var>B</var> does not allow <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-hash-source"><code>hash-source</code></a> expressions, but its
-    value is found in <var>A</var>, <var>A</var> subsumes <var>B</var>. It is, however, not true that <var>A</var> <a data-link-type="dfn" href="#subsumes" id="ref-for-subsumes-3">subsumes</a> <var>B</var>.</p>
-    </div>
-    <div class="example" id="example-1023389f">
-     <a class="self-link" href="#example-1023389f"></a> 
+    value is found in <var>A</var>, <var>A</var> subsumes <var>B</var>. It is, however, not true that <var>A</var> <a data-link-type="dfn" href="#policy-subsume" id="ref-for-policy-subsume-9">subsumes</a> <var>B</var>.</p>
 <pre>A = "https://example.com 'sha256-xzi4zkCjuC8'"
 B = "http://example.com"
 </pre>
      <p>In this case, <var>A</var> does not subsume <var>B</var> since "https://example.com" does
-    not <a data-link-type="dfn" href="#subsumes" id="ref-for-subsumes-4">subsume</a> "http://example.com".</p>
-    </div>
-    <div class="example" id="example-aa98efdc">
-     <a class="self-link" href="#example-aa98efdc"></a> 
+    not <a data-link-type="dfn" href="#policy-subsume" id="ref-for-policy-subsume-10">subsume</a> "http://example.com".</p>
 <pre>A = "http://example.com 'sha256-xzi4zkCjuC8'"
-B = "http://example.com 'unsafe-eval'"
+B = "http://example.com 'unsafe-inline'"
 </pre>
-     <p>Since <var>B</var> is <a data-link-type="dfn" href="#non-strict-inline" id="ref-for-non-strict-inline-3">non-strict inline</a>, but <var>A</var> is not, <var>A</var> does not <a data-link-type="dfn" href="#subsumes" id="ref-for-subsumes-5">subsume</a> <var>B</var>. However, <var>B</var> does <a data-link-type="dfn" href="#subsumes" id="ref-for-subsumes-6">subsume</a> <var>A</var>.</p>
-    </div>
-    <div class="example" id="example-000f449a">
-     <a class="self-link" href="#example-000f449a"></a> 
+     <p>Since <var>B</var> <a data-link-type="dfn">allows all inline behavior</a>,
+    but <var>A</var> does not, <var>A</var> doesn’t <a data-link-type="dfn" href="#policy-subsume" id="ref-for-policy-subsume-11">subsume</a> <var>B</var>.</p>
 <pre>A = "http://example.com 'sha256-xzi4zkCjuC8' 'strict-dynamic'"
-B = "http://example.com 'unsafe-eval' 'strict-dynamic'"
+B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
 </pre>
-     <p>Neither <var>B</var> not <var>A</var> is <a data-link-type="dfn" href="#non-strict-inline" id="ref-for-non-strict-inline-4">non-strict inline</a>.
-    In this case, <var>A</var> <a data-link-type="dfn" href="#subsumes" id="ref-for-subsumes-7">subsumes</a> <var>B</var>.</p>
+     <p>Neither <var>A</var> nor <var>B</var> <a data-link-type="dfn">allow all inline behavior</a>.
+    In this case, <var>A</var> <a data-link-type="dfn" href="#policy-subsume" id="ref-for-policy-subsume-12">subsumes</a> <var>B</var>.</p>
     </div>
+    <h4 class="heading settled algorithm" data-algorithm="Get the effective directive value for name and policy." data-level="3.2.10" id="effective-directive"><span class="secno">3.2.10. </span><span class="content"> Get the effective directive value for <var>name</var> and <var>policy</var>. </span><a class="self-link" href="#effective-directive"></a></h4>
+    <p>Given a string (<var>name</var>) and <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> (<var>policy</var>), the following algorithm
+  returns either <code>null</code> or a set of non-empty strings.</p>
+    <ol>
+     <li data-md="">
+      <p>Switch on <var>name</var>’s and execute the associated steps:</p>
+      <dl>
+       <dt data-md="">
+        <p>"<code>child-src</code>"</p>
+       <dd data-md="">
+       <dt data-md="">
+        <p>"<code>connect-src</code>"</p>
+       <dd data-md="">
+       <dt data-md="">
+        <p>"<code>font-src</code>"</p>
+       <dd data-md="">
+       <dt data-md="">
+        <p>"<code>img-src</code>"</p>
+       <dd data-md="">
+       <dt data-md="">
+        <p>"<code>manifest-src</code>"</p>
+       <dd data-md="">
+       <dt data-md="">
+        <p>"<code>media-src</code>"</p>
+       <dd data-md="">
+       <dt data-md="">
+        <p>"<code>object-src</code>"</p>
+       <dd data-md="">
+       <dt data-md="">
+        <p>"<code>script-src</code>"</p>
+       <dd data-md="">
+       <dt data-md="">
+        <p>"<code>style-src</code>"</p>
+       <dd data-md="">
+        <ol>
+         <li data-md="">
+          <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a> contains at least one <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a> whose <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a> is <var>name</var>,
+  let <var>directive</var> be the first such <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a>.
+  Return <var>directive</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>.</p>
+         <li data-md="">
+          <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a> contains a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a> whose <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a> is 
+  "<code>default-src</code>", return that <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>.</p>
+         <li data-md="">
+          <p>Return <code>null</code>.</p>
+        </ol>
+       <dt data-md="">
+        <p>"<code>frame-src</code>"</p>
+       <dd data-md="">
+       <dt data-md="">
+        <p>"<code>worker-src</code>"</p>
+       <dd data-md="">
+        <ol>
+         <li data-md="">
+          <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a> contains at least one <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a> whose <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a> is <var>name</var>, 
+  let <var>directive</var> be the first such <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a>.
+  Return <var>directive</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>.</p>
+         <li data-md="">
+          <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a> contains a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a> whose <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a> is 
+  "<code>child-src</code>", return that <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>.</p>
+         <li data-md="">
+          <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a> contains a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a> whose <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a> is 
+  "<code>default-src</code>", return that <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>.</p>
+         <li data-md="">
+          <p>Return <code>null</code>.</p>
+        </ol>
+       <dt data-md="">
+        <p>"<code>base-uri</code>"</p>
+       <dd data-md="">
+       <dt data-md="">
+        <p>"<code>block-all-mixed-content</code>"</p>
+       <dd data-md="">
+       <dt data-md="">
+        <p>"<code>default-src</code>"</p>
+       <dd data-md="">
+       <dt data-md="">
+        <p>"<code>frame-ancestors</code>"</p>
+       <dd data-md="">
+       <dt data-md="">
+        <p>"<code>form-action</code>"</p>
+       <dd data-md="">
+       <dt data-md="">
+        <p>"<code>plugin-types</code>"</p>
+       <dd data-md="">
+       <dt data-md="">
+        <p>"<code>report-uri</code>"</p>
+       <dd data-md="">
+       <dt data-md="">
+        <p>"<code>require-sri-for</code>"</p>
+       <dd data-md="">
+       <dt data-md="">
+        <p>"<code>sandbox</code>"</p>
+       <dd data-md="">
+       <dt data-md="">
+        <p>"<code>upgrade-insecure-requests</code>"</p>
+       <dd data-md="">
+        <ol>
+         <li data-md="">
+          <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a> contains at least one <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a> whose <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a> is <var>name</var>, 
+  let <var>directive</var> be the first such <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a>.
+  Return <var>directive</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>.</p>
+        </ol>
+      </dl>
+     <li data-md="">
+      <p>Return <code>null</code>.</p>
+    </ol>
+    <h4 class="heading settled algorithm" data-algorithm="Does policy A subsume policy B given their respective
+    origins?" data-level="3.2.11" id="subsume-policy"><span class="secno">3.2.11. </span><span class="content"> Does <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> <var>A</var> subsume <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> <var>B</var> given their respective <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origins</a>? </span><a class="self-link" href="#subsume-policy"></a></h4>
+    <p>Given a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> <var>A</var> with an <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a> (<var>origin A</var>) and a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> <var>B</var> with an <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a> (<var>origin B</var>), this algorithm returns "<code>Subsumes</code>"
+  if <var>A</var> <a data-link-type="dfn" href="#policy-subsume" id="ref-for-policy-subsume-13">subsumes</a> <var>B</var>, and returns "<code>Does Not Subsume</code>"
+  otherwise.</p>
+    <ol>
+     <li data-md="">
+      <p>If <var>A</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-is-empty">is empty</a>,
+  return "<code>Subsumes</code>".</p>
+     <li data-md="">
+      <p>For each <var>directive A</var> in <var>A</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a>:</p>
+      <ol>
+       <li data-md="">
+        <p>Let <var>directive name</var> be <var>directive A</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a>.</p>
+       <li data-md="">
+        <p>If <var>directive name</var> is "<code>default-src</code>", "<code>report-uri</code>", "<code>report-to</code>", <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">continue</a>.</p>
+       <li data-md="">
+        <p>Let <var>effective directive A</var> be the result of executing <a href="#effective-directive">§3.2.10 Get the effective directive value for name and policy.</a> given <var>directive name</var> and <var>A</var>.</p>
+       <li data-md="">
+        <p>Let <var>effective directive B</var> be the result of executing <a href="#effective-directive">§3.2.10 Get the effective directive value for name and policy.</a> given <var>directive name</var> and <var>B</var>.</p>
+       <li data-md="">
+        <p>If <var>effective directive A</var> is <code>null</code>, <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">continue</a>.</p>
+       <li data-md="">
+        <p>If <var>effective directive B</var> is <code>null</code>, return "<code>Does Not Subsume</code>".</p>
+       <li data-md="">
+        <p>If <var>directive A</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a> is "<code>frame-ancestors</code>":</p>
+        <ol>
+         <li data-md="">
+          <p class="issue" id="issue-95f2d23a0"><a class="self-link" href="#issue-95f2d23a0"></a> TODO.</p>
+        </ol>
+       <li data-md="">
+        <p>If <var>directive A</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a> is "<code>plugin-types</code>":</p>
+        <ol>
+         <li data-md="">
+          <p class="issue" id="issue-95f2d23a1"><a class="self-link" href="#issue-95f2d23a1"></a> TODO.</p>
+        </ol>
+       <li data-md="">
+        <p>If <var>directive A</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a> is "<code>sandbox</code>":</p>
+        <ol>
+         <li data-md="">
+          <p class="issue" id="issue-95f2d23a2"><a class="self-link" href="#issue-95f2d23a2"></a> TODO.</p>
+        </ol>
+       <li data-md="">
+        <p>If <var>directive A</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a> is "<code>disown-opener</code>", <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">continue</a>.</p>
+       <li data-md="">
+        <p>Otherwise:</p>
+        <ol>
+         <li data-md="">
+          <p>If the result of executing <a href="#subsume-source-list">§3.2.9 Does source list A subsume source listB given their
+    respective origins and directive names?</a> is
+  "<code>Does Not Subsume</code>" given <var>effective directive A</var>, <var>origin A</var>, <var>directive name</var>, <var>effective directive B</var>, <var>origin B</var>, and <var>directive name</var>, return "<code>Does Not Subsume</code>".</p>
+        </ol>
+      </ol>
+      <ol start="3">
+       <li data-md="">
+        <p>Return "<code>Subsumes</code>".</p>
+      </ol>
+    </ol>
+    <h3 class="heading settled algorithm" data-algorithm="Does subsuming policy subsume policy list given their respective
+    origins?" data-level="3.3" id="subsume-policy-list"><span class="secno">3.3. </span><span class="content"> Does <var>subsuming policy</var> subsume <var>policy list</var> given their respective <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origins</a>? </span><a class="self-link" href="#subsume-policy-list"></a></h3>
+    <p>Given a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> <var>subsuming policy</var> with an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a> (<var>subsuming origin</var>) and a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list">list</a> of <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> objects <var>policy list</var> with an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a> (<var>origin</var>), this algorithm returns "<code>Subsumes</code>"
+  if <var>subsuming policy</var> <a data-link-type="dfn" href="#policy-subsume" id="ref-for-policy-subsume-14">subsumes</a> <var>policy list</var>, and returns
+  "<code>Does Not Subsume</code>" otherwise.</p>
+    <ol class="algorithm">
+     <li data-md="">
+      <p>If <var>subsuming policy</var> is <code>null</code>, return "<code>Subsumes</code>".</p>
+     <li data-md="">
+      <p>If <var>subsuming policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-disposition">disposition</a> is "<code>report</code>",
+  return "<code>Subsumes</code>".</p>
+     <li data-md="">
+      <p>If <var>subsuming policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-is-empty">is empty</a>, return "<code>Subsumes</code>".</p>
+     <li data-md="">
+      <p>If <var>policy list</var> is <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-is-empty">is empty</a> or <code>null</code>, return
+  "<code>Does Not Subsume</code>".</p>
+     <li data-md="">
+      <p>Let <var>effective policy</var> the result of executing <a href="#intersection-policy-list">§3.2.8 What is an intersection of a policy list for an
+    origin?</a> given <var>policy list</var> and <var>origin</var>.</p>
+     <li data-md="">
+      <p>Return the result of executing <a href="#subsume-policy">§3.2.11 Does policy A subsume policy B given their respective
+    origins?</a> given <var>subsuming policy</var>, <var>subsuming origin</var>, <var>effective policy</var>, and <var>origin</var>.</p>
+    </ol>
     <h3 class="heading settled algorithm" data-algorithm="Obtain the required CSP for context." data-level="3.4" id="required-csp-for-context"><span class="secno">3.4. </span><span class="content"> Obtain the required CSP for <var>context</var>. </span><a class="self-link" href="#required-csp-for-context"></a></h3>
     <p>Given a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a> (<var>context</var>), the following algorithm returns
   its <a data-link-type="dfn" href="#required-csp" id="ref-for-required-csp-5">required CSP</a>:</p>
@@ -2223,7 +2733,28 @@ B = "http://example.com 'unsafe-eval' 'strict-dynamic'"
   an appropriate <code>child-src</code> directive.</p>
    </section>
    <section>
-    <h2 class="heading settled" data-level="5" id="iana"><span class="secno">5. </span><span class="content">IANA Considerations</span><a class="self-link" href="#iana"></a></h2>
+    <h2 class="heading settled" data-level="5" id="authoring-considerations"><span class="secno">5. </span><span class="content">Authoring Considerations</span><a class="self-link" href="#authoring-considerations"></a></h2>
+    <h3 class="heading settled" data-level="5.1" id="effect-self"><span class="secno">5.1. </span><span class="content"> The effect of <code>self</code> specified in <a data-link-type="dfn" href="#required-csp" id="ref-for-required-csp-6">required CSP</a>. </span><a class="self-link" href="#effect-self"></a></h3>
+    <p>If <a data-link-type="dfn" href="#required-csp" id="ref-for-required-csp-7">required CSP</a> includes <code>self</code> in any of the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source lists</a>, <code>self</code> refers to the embedee’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a>.</p>
+    <div class="example" id="example-733732b7">
+     <a class="self-link" href="#example-733732b7"></a> MegaCorp Inc. specifies the following <a data-link-type="dfn" href="#required-csp" id="ref-for-required-csp-8">required CSP</a> on their page
+    "https://example.com/page.html": 
+<pre>&lt;iframe src="https://advertisements-r-us.example.com/ad1.cfm"
+        <a data-link-type="element-attr" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-6">csp</a>="script-src 'self'">
+&lt;/iframe>
+</pre>
+     <p>If the returned CSP is:</p>
+<pre>Content-Security-Policy: script-src 'self'
+</pre>
+     <p>Then this <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a></code> element will be loaded.</p>
+     <p>If, however, the returned CSP is:</p>
+<pre>Content-Security-Policy: script-src "https://example.com/"
+</pre>
+     <p>Then this <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a></code> element will not be loaded.</p>
+    </div>
+   </section>
+   <section>
+    <h2 class="heading settled" data-level="6" id="iana"><span class="secno">6. </span><span class="content">IANA Considerations</span><a class="self-link" href="#iana"></a></h2>
     <p>The permanent message header field registry should be updated
   with the following registration for the <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-8"><code>Embedding-CSP</code></a> header: <a data-link-type="biblio" href="#biblio-rfc3864">[RFC3864]</a></p>
     <dl>
@@ -2310,27 +2841,37 @@ B = "http://example.com 'unsafe-eval' 'strict-dynamic'"
   <h3 class="no-num no-ref heading settled" id="index-defined-here"><span class="content">Terms defined by this specification</span><a class="self-link" href="#index-defined-here"></a></h3>
   <ul class="index">
    <li><a href="#http-headerdef-allow-csp-from">Allow-CSP-From</a><span>, in §2.3</span>
+   <li><a href="#directive-contains">contains</a><span>, in §3.2.9</span>
    <li>
     csp
     <ul>
      <li><a href="#element-attrdef-iframe-csp">element-attr for iframe</a><span>, in §2.1</span>
      <li><a href="#dom-htmliframeelement-csp">attribute for HTMLIFrameElement</a><span>, in §2.1</span>
     </ul>
+   <li><a href="#effective-source-list">effective source list</a><span>, in §3.2.3</span>
    <li><a href="#http-headerdef-embedding-csp">Embedding-CSP</a><span>, in §2.2</span>
-   <li><a href="#source-expression-intersection">intersection</a><span>, in §3.3.2</span>
-   <li><a href="#non-strict-inline">non-strict inline</a><span>, in §3.3.5</span>
+   <li>
+    intersection
+    <ul>
+     <li><a href="#source-expression-intersection">dfn for source expression</a><span>, in §3.2.2</span>
+     <li><a href="#source-list-intersection">dfn for source list</a><span>, in §3.2.4</span>
+     <li><a href="#policy-intersection">dfn for policy</a><span>, in §3.2.7</span>
+    </ul>
    <li><a href="#required-csp">required CSP</a><span>, in §2.1</span>
-   <li><a href="#similar-similar">similar</a><span>, in §3.3.1</span>
-   <li><a href="#subsumes">subsumes</a><span>, in §2.4</span>
-   <li><a href="#source-expression-wildcard-host">wildcard host</a><span>, in §3.3.1</span>
-   <li><a href="#wildcard-list">wildcard list</a><span>, in §3.3.5</span>
-   <li><a href="#source-expression-wildcard-port">wildcard port</a><span>, in §3.3.1</span>
+   <li><a href="#source-expression-similar">similar</a><span>, in §3.2.1</span>
+   <li><a href="#policy-subsume">subsume</a><span>, in §2.4</span>
+   <li><a href="#source-expression-wildcard-host">wildcard host</a><span>, in §3.2.1</span>
+   <li><a href="#source-expression-wildcard-port">wildcard port</a><span>, in §3.2.1</span>
   </ul>
   <h3 class="no-num no-ref heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
   <ul class="index">
    <li>
     <a data-link-type="biblio">[CSP3]</a> defines the following terms:
     <ul>
+     <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-none">'none'</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-self">'self'</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-strict-dynamic">'strict-dynamic'</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-unsafe-inline">'unsafe-inline'</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#header-content-security-policy">content-security-policy</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#directives">directives</a>
@@ -2340,18 +2881,25 @@ B = "http://example.com 'unsafe-eval' 'strict-dynamic'"
      <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-host-part">host-part</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-host-source">host-source</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-keyword-source">keyword-source</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-media-type">media-type</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#directive-name">name</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-nonce-source">nonce-source</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-path-part">path-part</a>
-     <li><a href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a>
+     <li><a href="https://www.w3.org/TR/CSP3/#policy">policy</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#violation-policy">policy <small>(for violation)</small></a>
      <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-port-part">port-part</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-part">scheme-part</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-scheme-source">scheme-source</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#serialized-csp">serialized csp</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-policy">serialized-policy</a>
-     <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-source-list">serialized-source-list</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#source-expression">source expression</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#source-lists">source lists</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>
+    </ul>
+   <li>
+    <a data-link-type="biblio">[css-values-3]</a> defines the following terms:
+    <ul>
+     <li><a href="https://drafts.csswg.org/css-values-4/#mult-zero-plus">*</a>
     </ul>
    <li>
     <a data-link-type="biblio">[WHATWG-DOM]</a> defines the following terms:
@@ -2390,8 +2938,21 @@ B = "http://example.com 'unsafe-eval' 'strict-dynamic'"
      <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context">nested browsing context</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin-opaque">opaque origin</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-fetch">process a navigate fetch</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-response">process a navigate response</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin-scheme">scheme</a>
+    </ul>
+   <li>
+    <a data-link-type="biblio">[INFRA]</a> defines the following terms:
+    <ul>
+     <li><a href="https://infra.spec.whatwg.org/#list-append">append <small>(for list)</small></a>
+     <li><a href="https://infra.spec.whatwg.org/#set-append">append <small>(for set)</small></a>
+     <li><a href="https://infra.spec.whatwg.org/#list-contains">contains</a>
+     <li><a href="https://infra.spec.whatwg.org/#iteration-continue">continue</a>
+     <li><a href="https://infra.spec.whatwg.org/#list-is-empty">is empty</a>
+     <li><a href="https://infra.spec.whatwg.org/#list">list</a>
+     <li><a href="https://infra.spec.whatwg.org/#string">string</a>
     </ul>
    <li>
     <a data-link-type="biblio">[WHATWG-URL]</a> defines the following terms:
@@ -2407,10 +2968,14 @@ B = "http://example.com 'unsafe-eval' 'strict-dynamic'"
   <dl>
    <dt id="biblio-csp3">[CSP3]
    <dd>Mike West. <a href="https://w3c.github.io/webappsec-csp/">Content Security Policy Level 3</a>. URL: <a href="https://w3c.github.io/webappsec-csp/">https://w3c.github.io/webappsec-csp/</a>
+   <dt id="biblio-css-values-3">[CSS-VALUES-3]
+   <dd>Tab Atkins Jr.; Elika Etemad. <a href="https://www.w3.org/TR/css-values-3/">CSS Values and Units Module Level 3</a>. 29 September 2016. CR. URL: <a href="https://www.w3.org/TR/css-values-3/">https://www.w3.org/TR/css-values-3/</a>
    <dt id="biblio-fetch">[FETCH]
    <dd>Anne van Kesteren. <a href="https://fetch.spec.whatwg.org/">Fetch Standard</a>. Living Standard. URL: <a href="https://fetch.spec.whatwg.org/">https://fetch.spec.whatwg.org/</a>
    <dt id="biblio-html">[HTML]
-   <dd>Ian Hickson. <a href="https://html.spec.whatwg.org/multipage/">HTML Standard</a>. Living Standard. URL: <a href="https://html.spec.whatwg.org/multipage/">https://html.spec.whatwg.org/multipage/</a>
+   <dd>Anne van Kesteren; et al. <a href="https://html.spec.whatwg.org/multipage/">HTML Standard</a>. Living Standard. URL: <a href="https://html.spec.whatwg.org/multipage/">https://html.spec.whatwg.org/multipage/</a>
+   <dt id="biblio-infra">[INFRA]
+   <dd>Anne van Kesteren; Domenic Denicola. <a href="https://infra.spec.whatwg.org/">Infra Standard</a>. Living Standard. URL: <a href="https://infra.spec.whatwg.org/">https://infra.spec.whatwg.org/</a>
    <dt id="biblio-rfc2119">[RFC2119]
    <dd>S. Bradner. <a href="https://tools.ietf.org/html/rfc2119">Key words for use in RFCs to Indicate Requirement Levels</a>. March 1997. Best Current Practice. URL: <a href="https://tools.ietf.org/html/rfc2119">https://tools.ietf.org/html/rfc2119</a>
    <dt id="biblio-rfc3864">[RFC3864]
@@ -2441,9 +3006,9 @@ B = "http://example.com 'unsafe-eval' 'strict-dynamic'"
    <div class="issue"> W3C’s HTML is not based on Fetch, and does not have
   a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-fetch">process a navigate fetch</a> algorithm into which to hook. <a href="https://github.com/w3c/html/issues/584">&lt;https://github.com/w3c/html/issues/584></a><a href="#issue-7b3609ea"> ↵ </a></div>
    <div class="issue"> TODO.<a href="#issue-95f2d23a"> ↵ </a></div>
-   <div class="issue"> Align with <code>allow unsafe-inline</code> definition in CSP3.<a href="#issue-ec1f4448"> ↵ </a></div>
    <div class="issue"> TODO.<a href="#issue-95f2d23a0"> ↵ </a></div>
    <div class="issue"> TODO.<a href="#issue-95f2d23a1"> ↵ </a></div>
+   <div class="issue"> TODO.<a href="#issue-95f2d23a2"> ↵ </a></div>
   </div>
   <aside class="dfn-panel" data-for="element-attrdef-iframe-csp">
    <b><a href="#element-attrdef-iframe-csp">#element-attrdef-iframe-csp</a></b><b>Referenced in:</b>
@@ -2453,6 +3018,8 @@ B = "http://example.com 'unsafe-eval' 'strict-dynamic'"
     <li><a href="#ref-for-element-attrdef-iframe-csp-4">2.2. The Embedding-CSP HTTP Request Header</a>
     <li><a href="#ref-for-element-attrdef-iframe-csp-5">3.4. 
     Obtain the required CSP for context. </a>
+    <li><a href="#ref-for-element-attrdef-iframe-csp-6">5.1. 
+    The effect of self specified in required CSP. </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dom-htmliframeelement-csp">
@@ -2469,6 +3036,8 @@ B = "http://example.com 'unsafe-eval' 'strict-dynamic'"
     Is response to request blocked by context’s required CSP? </a> <a href="#ref-for-required-csp-4">(2)</a>
     <li><a href="#ref-for-required-csp-5">3.4. 
     Obtain the required CSP for context. </a>
+    <li><a href="#ref-for-required-csp-6">5.1. 
+    The effect of self specified in required CSP. </a> <a href="#ref-for-required-csp-7">(2)</a> <a href="#ref-for-required-csp-8">(3)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="http-headerdef-embedding-csp">
@@ -2478,7 +3047,7 @@ B = "http://example.com 'unsafe-eval' 'strict-dynamic'"
     <li><a href="#ref-for-http-headerdef-embedding-csp-5">2.1. Integration with HTML</a>
     <li><a href="#ref-for-http-headerdef-embedding-csp-6">2.4. Policy Subsumption</a>
     <li><a href="#ref-for-http-headerdef-embedding-csp-7">4.3. Data Exfiltration</a>
-    <li><a href="#ref-for-http-headerdef-embedding-csp-8">5. IANA Considerations</a>
+    <li><a href="#ref-for-http-headerdef-embedding-csp-8">6. IANA Considerations</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="http-headerdef-allow-csp-from">
@@ -2488,28 +3057,43 @@ B = "http://example.com 'unsafe-eval' 'strict-dynamic'"
     <li><a href="#ref-for-http-headerdef-allow-csp-from-4">2.4. Policy Subsumption</a>
     <li><a href="#ref-for-http-headerdef-allow-csp-from-5">3.2. 
     Does response allow blanket enforcment of policy from request? </a>
-    <li><a href="#ref-for-http-headerdef-allow-csp-from-6">5. IANA Considerations</a>
+    <li><a href="#ref-for-http-headerdef-allow-csp-from-6">6. IANA Considerations</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="subsumes">
-   <b><a href="#subsumes">#subsumes</a></b><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="policy-subsume">
+   <b><a href="#policy-subsume">#policy-subsume</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-subsumes-1">3.3.4. 
+    <li><a href="#ref-for-policy-subsume-1">3.2.4. 
+    What is an intersection of two source lists  
+    A and B given their respective origins
+    and directive names? </a>
+    <li><a href="#ref-for-policy-subsume-2">3.2.6. 
     Does source expression A subsume source expression B? </a>
-    <li><a href="#ref-for-subsumes-2">3.3.5. 
-    Does serialized-source-list A subsume 
-    serialized-source-list B given their respective 
-    origins? </a> <a href="#ref-for-subsumes-3">(2)</a> <a href="#ref-for-subsumes-4">(3)</a> <a href="#ref-for-subsumes-5">(4)</a> <a href="#ref-for-subsumes-6">(5)</a> <a href="#ref-for-subsumes-7">(6)</a>
+    <li><a href="#ref-for-policy-subsume-3">3.2.7. 
+    What is an intersection of two policy objects A and B
+    given their respective origins? </a> <a href="#ref-for-policy-subsume-4">(2)</a> <a href="#ref-for-policy-subsume-5">(3)</a>
+    <li><a href="#ref-for-policy-subsume-6">3.2.8. 
+    What is an intersection of a policy list for an
+    origin? </a> <a href="#ref-for-policy-subsume-7">(2)</a>
+    <li><a href="#ref-for-policy-subsume-8">3.2.9. 
+    Does source list A subsume source listB given their
+    respective origins and directive names? </a> <a href="#ref-for-policy-subsume-9">(2)</a> <a href="#ref-for-policy-subsume-10">(3)</a> <a href="#ref-for-policy-subsume-11">(4)</a> <a href="#ref-for-policy-subsume-12">(5)</a>
+    <li><a href="#ref-for-policy-subsume-13">3.2.11. 
+    Does policy A subsume policy B given their respective
+    origins? </a>
+    <li><a href="#ref-for-policy-subsume-14">3.3. 
+    Does subsuming policy subsume policy list given their respective
+    origins? </a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="similar-similar">
-   <b><a href="#similar-similar">#similar-similar</a></b><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="source-expression-similar">
+   <b><a href="#source-expression-similar">#source-expression-similar</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-similar-similar-1">3.3.1. 
+    <li><a href="#ref-for-source-expression-similar-1">3.2.1. 
     Is an expression matching scheme-source or 
     host-source grammar A similar to an expression matching 
-    scheme-source or host-source grammar B? </a> <a href="#ref-for-similar-similar-2">(2)</a> <a href="#ref-for-similar-similar-3">(3)</a> <a href="#ref-for-similar-similar-4">(4)</a> <a href="#ref-for-similar-similar-5">(5)</a> <a href="#ref-for-similar-similar-6">(6)</a> <a href="#ref-for-similar-similar-7">(7)</a>
-    <li><a href="#ref-for-similar-similar-8">3.3.2. 
+    scheme-source or host-source grammar B? </a> <a href="#ref-for-source-expression-similar-2">(2)</a> <a href="#ref-for-source-expression-similar-3">(3)</a> <a href="#ref-for-source-expression-similar-4">(4)</a> <a href="#ref-for-source-expression-similar-5">(5)</a> <a href="#ref-for-source-expression-similar-6">(6)</a> <a href="#ref-for-source-expression-similar-7">(7)</a>
+    <li><a href="#ref-for-source-expression-similar-8">3.2.2. 
     What is an intersection of two expressions matching 
     scheme-source or host-source 
     grammar A and B? </a>
@@ -2518,11 +3102,11 @@ B = "http://example.com 'unsafe-eval' 'strict-dynamic'"
   <aside class="dfn-panel" data-for="source-expression-wildcard-host">
    <b><a href="#source-expression-wildcard-host">#source-expression-wildcard-host</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-source-expression-wildcard-host-1">3.3.1. 
+    <li><a href="#ref-for-source-expression-wildcard-host-1">3.2.1. 
     Is an expression matching scheme-source or 
     host-source grammar A similar to an expression matching 
-    scheme-source or host-source grammar B? </a> <a href="#ref-for-source-expression-wildcard-host-2">(2)</a>
-    <li><a href="#ref-for-source-expression-wildcard-host-3">3.3.2. 
+    scheme-source or host-source grammar B? </a> <a href="#ref-for-source-expression-wildcard-host-2">(2)</a> <a href="#ref-for-source-expression-wildcard-host-3">(3)</a>
+    <li><a href="#ref-for-source-expression-wildcard-host-4">3.2.2. 
     What is an intersection of two expressions matching 
     scheme-source or host-source 
     grammar A and B? </a>
@@ -2531,11 +3115,11 @@ B = "http://example.com 'unsafe-eval' 'strict-dynamic'"
   <aside class="dfn-panel" data-for="source-expression-wildcard-port">
    <b><a href="#source-expression-wildcard-port">#source-expression-wildcard-port</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-source-expression-wildcard-port-1">3.3.1. 
+    <li><a href="#ref-for-source-expression-wildcard-port-1">3.2.1. 
     Is an expression matching scheme-source or 
     host-source grammar A similar to an expression matching 
     scheme-source or host-source grammar B? </a>
-    <li><a href="#ref-for-source-expression-wildcard-port-2">3.3.2. 
+    <li><a href="#ref-for-source-expression-wildcard-port-2">3.2.2. 
     What is an intersection of two expressions matching 
     scheme-source or host-source 
     grammar A and B? </a>
@@ -2544,19 +3128,56 @@ B = "http://example.com 'unsafe-eval' 'strict-dynamic'"
   <aside class="dfn-panel" data-for="source-expression-intersection">
    <b><a href="#source-expression-intersection">#source-expression-intersection</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-source-expression-intersection-1">3.3.2. 
+    <li><a href="#ref-for-source-expression-intersection-1">3.2.2. 
     What is an intersection of two expressions matching 
     scheme-source or host-source 
     grammar A and B? </a> <a href="#ref-for-source-expression-intersection-2">(2)</a>
+    <li><a href="#ref-for-source-expression-intersection-3">3.2.4. 
+    What is an intersection of two source lists  
+    A and B given their respective origins
+    and directive names? </a>
+    <li><a href="#ref-for-source-expression-intersection-4">3.2.7. 
+    What is an intersection of two policy objects A and B
+    given their respective origins? </a>
+    <li><a href="#ref-for-source-expression-intersection-5">3.2.8. 
+    What is an intersection of a policy list for an
+    origin? </a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="non-strict-inline">
-   <b><a href="#non-strict-inline">#non-strict-inline</a></b><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="effective-source-list">
+   <b><a href="#effective-source-list">#effective-source-list</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-non-strict-inline-1">3.3.5. 
-    Does serialized-source-list A subsume 
-    serialized-source-list B given their respective 
-    origins? </a> <a href="#ref-for-non-strict-inline-2">(2)</a> <a href="#ref-for-non-strict-inline-3">(3)</a> <a href="#ref-for-non-strict-inline-4">(4)</a>
+    <li><a href="#ref-for-effective-source-list-1">3.2.3. 
+    Get the effective source list for a source list,
+    origin, and name. </a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="source-list-intersection">
+   <b><a href="#source-list-intersection">#source-list-intersection</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-source-list-intersection-1">3.2.4. 
+    What is an intersection of two source lists  
+    A and B given their respective origins
+    and directive names? </a> <a href="#ref-for-source-list-intersection-2">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="policy-intersection">
+   <b><a href="#policy-intersection">#policy-intersection</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-policy-intersection-1">3.2.7. 
+    What is an intersection of two policy objects A and B
+    given their respective origins? </a>
+    <li><a href="#ref-for-policy-intersection-2">3.2.8. 
+    What is an intersection of a policy list for an
+    origin? </a> <a href="#ref-for-policy-intersection-3">(2)</a> <a href="#ref-for-policy-intersection-4">(3)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="directive-contains">
+   <b><a href="#directive-contains">#directive-contains</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-directive-contains-1">3.2.9. 
+    Does source list A subsume source listB given their
+    respective origins and directive names? </a> <a href="#ref-for-directive-contains-2">(2)</a> <a href="#ref-for-directive-contains-3">(3)</a>
    </ul>
   </aside>
 <script>/* script-dfn-panel */
