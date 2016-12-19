@@ -1487,15 +1487,15 @@ restrictions upon itself.</p>
     <li>
      <a href="#framework"><span class="secno">2</span> <span class="content">Framework</span></a>
      <ol class="toc">
+      <li><a href="#csp-attribute"><span class="secno">2.1</span> <span class="content"><code>&lt;iframe></code>'s <code>csp</code> attribute</span></a>
+      <li><a href="#embedding-csp-header"><span class="secno">2.2</span> <span class="content">The <code>Embedding-CSP</code> HTTP Request Header</span></a>
       <li>
-       <a href="#html-integration"><span class="secno">2.1</span> <span class="content">Integration with HTML</span></a>
+       <a href="#html-integration"><span class="secno">2.3</span> <span class="content">Integration with HTML</span></a>
        <ol class="toc">
-        <li><a href="#csp-attribute"><span class="secno">2.1.1</span> <span class="content"><code>&lt;iframe></code>'s <code>csp</code> attribute</span></a>
-        <li><a href="#required-csp"><span class="secno">2.1.2</span> <span class="content">Browsing Context’s Required CSP</span></a>
+        <li><a href="#required-csp"><span class="secno">2.3.1</span> <span class="content">Browsing Context’s Required CSP</span></a>
        </ol>
-      <li><a href="#embedding-csp-http-header"><span class="secno">2.2</span> <span class="content">The <code>Embedding-CSP</code> HTTP Request Header</span></a>
-      <li><a href="#allow-csp-from-http-header"><span class="secno">2.3</span> <span class="content">The <code>Allow-CSP-From</code> HTTP Response Header</span></a>
-      <li><a href="#policy-subsumption"><span class="secno">2.4</span> <span class="content">Policy Subsumption</span></a>
+      <li><a href="#allow-csp-from-header"><span class="secno">2.4</span> <span class="content">The <code>Allow-CSP-From</code> HTTP Response Header</span></a>
+      <li><a href="#policy-subsumption"><span class="secno">2.5</span> <span class="content">Policy Subsumption</span></a>
      </ol>
     <li>
      <a href="#algorithms"><span class="secno">3</span> <span class="content">Algorithms</span></a>
@@ -1525,6 +1525,8 @@ restrictions upon itself.</p>
       <li><a href="#policy-enforcement"><span class="secno">4.1</span> <span class="content">Policy Enforcement</span></a>
       <li><a href="#policy-leakage"><span class="secno">4.2</span> <span class="content">Policy Leakage</span></a>
       <li><a href="#exfiltration"><span class="secno">4.3</span> <span class="content">Data Exfiltration</span></a>
+      <li><a href="#header-injection"><span class="secno">4.4</span> <span class="content">Header Injection</span></a>
+      <li><a href="#header-reflection"><span class="secno">4.5</span> <span class="content">Header Reflection</span></a>
      </ol>
     <li>
      <a href="#authoring-considerations"><span class="secno">5</span> <span class="content">Authoring Considerations</span></a>
@@ -1554,10 +1556,9 @@ restrictions upon itself.</p>
    </ol>
   </nav>
   <main>
-   <section>
-    <h2 class="heading settled" data-level="1" id="intro"><span class="secno">1. </span><span class="content">Introduction</span><a class="self-link" href="#intro"></a></h2>
-    <p><em>This section is not normative.</em></p>
-    <p>Content Security Policy is a great defense against cross-site scripting
+   <h2 class="heading settled" data-level="1" id="intro"><span class="secno">1. </span><span class="content">Introduction</span><a class="self-link" href="#intro"></a></h2>
+   <p><em>This section is not normative.</em></p>
+   <p>Content Security Policy is a great defense against cross-site scripting
   attacks, allowing developers to harden their own sites against injection of
   malicious script, style, and other resource types. It does not, however,
   give developers the ability to apply restrictions to third-party content
@@ -1567,20 +1568,20 @@ restrictions upon itself.</p>
   secure page by denying it access to particular scripts. We’ve seen these kinds
   of issues in past features such as <code>X-XSS-Protection</code>, so we must be careful
   to avoid reintroducing them in a new form.</p>
-    <p>That said, it would be quite useful to be able to place restrictions upon
+   <p>That said, it would be quite useful to be able to place restrictions upon
   widgets, advertisements, and other kinds of third-party content. This document
   proposes a mechanism which relies on an explicit opt-in from the embedded
   content, which ought to make it possible for widgets to cooperate with their
   embedders to negotiate a reasonable set of restrictions.</p>
-    <p>In short, the embedder proposes a Content Security Policy by setting an attribute on an <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a></code> element. This policy is transmitted along with the HTTP request for the framed content in an
+   <p>In short, the embedder proposes a Content Security Policy by setting an attribute on an <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a></code> element. This policy is transmitted along with the HTTP request for the framed content in an
   HTTP request header (<a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-1"><code>Embedding-CSP</code></a>). If the embedded content can accept that
   policy, it can enforce it by returning a <a data-link-type="http-header"><code>Content-Security-Policy</code></a> or <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-1"><code>Allow-CSP-From</code></a> header along with the response.</p>
-    <p>If the response contains a policy at least as strict as the policy which the embedder requested,
+   <p>If the response contains a policy at least as strict as the policy which the embedder requested,
   or accepts the embedder-provided policy, then the user agent will render the embedded content. If
   no such assertion is present, the response will be blocked.</p>
-    <h3 class="heading settled" data-level="1.1" id="examples"><span class="secno">1.1. </span><span class="content">Examples</span><a class="self-link" href="#examples"></a></h3>
-    <div class="example" id="example1">
-     <a class="self-link" href="#example1"></a> MegaCorp Inc. wishes to ensure that the advertisements that run on its
+   <h3 class="heading settled" data-level="1.1" id="examples"><span class="secno">1.1. </span><span class="content">Examples</span><a class="self-link" href="#examples"></a></h3>
+   <div class="example" id="example1">
+    <a class="self-link" href="#example1"></a> MegaCorp Inc. wishes to ensure that the advertisements that run on its
     various publications are locked down to include script from trusted origins
     that have been audited for safety. They can do so by including the
     advertisement via an <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a></code> element with a <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-1">csp</a></code> attribute: 
@@ -1588,7 +1589,7 @@ restrictions upon itself.</p>
         <a data-link-type="element-attr" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-2">csp</a>="script-src https://trusted-cdn.example.com/">
 &lt;/iframe>
 </pre>
-     <p>This will generate a request to <code>advertisements-r-us.example.com</code> that has
+    <p>This will generate a request to <code>advertisements-r-us.example.com</code> that has
     an <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-2"><code>Embedding-CSP</code></a> header, as follows:</p>
 <pre>GET / HTTP/1.1
 Host: advertisements-r-us.example.com
@@ -1596,16 +1597,16 @@ Host: advertisements-r-us.example.com
 <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-3">Embedding-CSP</a>: script-src https://trusted-cdn.example.com/
 ...
 </pre>
-     <p>The advertisement server parses this request header, decides that it’s acceptable, and adds a
+    <p>The advertisement server parses this request header, decides that it’s acceptable, and adds a
     header to the response, informing the user agent that it will adhere to the restrictions imposed
     by its embedder (<code>https://example.com</code>):</p>
 <pre>HTTP/1.1 200 OK
 ...
 <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-2">Allow-CSP-From</a>: https://example.com
 </pre>
-    </div>
-    <div class="example" id="example2">
-     <a class="self-link" href="#example2"></a> The advertisement server in the example above could also accept the restrictions by emitting its
+   </div>
+   <div class="example" id="example2">
+    <a class="self-link" href="#example2"></a> The advertisement server in the example above could also accept the restrictions by emitting its
     own <a data-link-type="http-header"><code>Content-Security-Policy</code></a> header that’s at least as strong as the policy
     which the embedder requires. For example, it might wish to ensure that no plugins are loaded,
     regardless of what the embedder allows. It can do so by emitting a policy that includes the
@@ -1614,35 +1615,161 @@ Host: advertisements-r-us.example.com
 ...
 <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#header-content-security-policy">Content-Security-Policy</a>: script-src https://trusted-cdn.example.com/; object-src 'none'
 </pre>
-     <p>Since the policy asserted by the response allows strictly fewer requests than the policy
+    <p>Since the policy asserted by the response allows strictly fewer requests than the policy
     required by the request, the frame loads successfully.</p>
-     <p>Note that the server could also deliver two policies, one which mirrors the restrictions of the
+    <p>Note that the server could also deliver two policies, one which mirrors the restrictions of the
     embedder exactly, another which tightens them:</p>
 <pre>HTTP/1.1 200 OK
 ...
 <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#header-content-security-policy">Content-Security-Policy</a>: script-src https://trusted-cdn.example.com/,
                          object-src 'none'
 </pre>
-     <p>The "<code>,</code>" in the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#header-content-security-policy"><code>Content-Security-Policy</code></a> header’s value splits the
+    <p>The "<code>,</code>" in the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#header-content-security-policy"><code>Content-Security-Policy</code></a> header’s value splits the
     string into two serialized policies, each of which is enforced. The user
     agent verifies that one of the policies delivered with the response matches
     the requirement, and since additional policies can only make the <em>effective</em> policy for the page more restrictive, allows the frame
     to load successfully.</p>
-    </div>
-   </section>
+   </div>
    <section>
     <h2 class="heading settled" data-level="2" id="framework"><span class="secno">2. </span><span class="content">Framework</span><a class="self-link" href="#framework"></a></h2>
-    <h3 class="heading settled" data-level="2.1" id="html-integration"><span class="secno">2.1. </span><span class="content">Integration with HTML</span><a class="self-link" href="#html-integration"></a></h3>
+    <p>At a high level, this document describes a mechanism by which an embedee can opt-into a set of
+  restrictions specified by its embedder. The mechanism involves a few steps:</p>
     <ol>
      <li data-md="">
-      <p><code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a></code> elements have a <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-3">csp</a></code> attribute, defined in <a href="#csp-attribute">§2.1.1 &lt;iframe>'s csp attribute</a>.</p>
+      <p>The embedder specifies a required policy via a <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-3">csp</a></code> attribute on an <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a></code> element. This is described in more detail in <a href="#csp-attribute">§2.1 &lt;iframe>'s csp attribute</a>.</p>
      <li data-md="">
-      <p>Each <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a> has a <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-1">required CSP</a>, defined in <a href="#required-csp">§2.1.2 Browsing Context’s Required CSP</a>.</p>
+      <p>That attribute’s value will be sent along with any <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#navigation-request">navigation request</a> that targets
+  the <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a></code>'s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context">nested browsing context</a> in an <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-4"><code>Embedding-CSP</code></a> HTTP request header. This header is described in more detail in <a href="#embedding-csp-header">§2.2 The Embedding-CSP HTTP Request Header</a>.</p>
+      <p class="issue" id="issue-1f7455d5"><a class="self-link" href="#issue-1f7455d5"></a> Rename this? <code>Required-CSP</code>, perhaps, to match the rest of the spec?</p>
+     <li data-md="">
+      <p>The server can examine the <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-5"><code>Embedding-CSP</code></a> header to determine whether
+  it wishes to accept the required policy.If so, it can implicitly opt-in by sending a <a data-link-type="http-header"><code>Content-Security-Policy</code></a> header in the response that contains a policy
+  which is at least as strong as the required policy, or explicitly opt-in by sending an <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-3"><code>Allow-CSP-From</code></a> header in the response that enables the embedding origin
+  to set whatever policy it wishes. The explicit mechanism is straightforward, described in <a href="#allow-csp-from-header">§2.4 The Allow-CSP-From HTTP Response Header</a>. The implicit mechanism is quite complicated, and comprises the
+  entire <a href="#policy-subsumption">§2.5 Policy Subsumption</a> section.</p>
+      <p>If the server doesn’t wish to accept the required policy, it can return an explicit error,
+  or simply return the usual data without either a matching <a data-link-type="http-header"><code>Content-Security-Policy</code></a> header or an <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-4"><code>Allow-CSP-From</code></a> header. In this case, the user agent will block the response. This integration with HTML’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#navigate">navigate</a> algorithm is described in <a href="#html-integration">§2.3 Integration with HTML</a>, and the blocking mechanism
+  is spelled out in <a href="#process-response">§3.1 Is response to request blocked by context’s required CSP?</a>.</p>
+    </ol>
+    <h3 class="heading settled" data-level="2.1" id="csp-attribute"><span class="secno">2.1. </span><span class="content"><code>&lt;iframe></code>'s <code>csp</code> attribute</span><a class="self-link" href="#csp-attribute"></a></h3>
+    <p><code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a></code> elements have a <dfn class="dfn-paneled" data-dfn-for="iframe" data-dfn-type="element-attr" data-export="" id="element-attrdef-iframe-csp">csp</dfn> attribute, which specifies
+  the policy that an embedded document must agree to enforce upon itself. For example, the following
+  HTML would load <code>https://embedee.example.com/</code>, and ensure that <code>object-src 'none'</code> was enforced
+  upon it:</p>
+    <div class="example" id="example-cf99059b">
+     <a class="self-link" href="#example-cf99059b"></a> 
+<pre>&lt;iframe src="https://embedee.example.com/" <a data-link-type="element-attr" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-4">csp</a>="object-src 'none'">
+&lt;/iframe>
+</pre>
+    </div>
+    <p>A <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string">string</a> (<var>value</var>) is a <dfn class="dfn-paneled" data-dfn-for="iframe/csp" data-dfn-type="dfn" data-noexport="" id="iframe-csp-valid-attribute-value">valid attribute value</dfn> for a given <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-element">element</a> (<var>element</var>)'s <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-5">csp</a></code> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-element-attributes">content attribute</a> if all of the
+  following statements are true:</p>
+    <ol>
+     <li data-md="">
+      <p><var>value</var> is not the empty string.</p>
+     <li data-md="">
+      <p><var>value</var> matches the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-policy">serialized-policy</a> ABNF grammar defined in <a data-link-type="biblio" href="#biblio-csp3">[CSP3]</a>.</p>
+     <li data-md="">
+      <p><var>element</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document">node document</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-document-bc">browsing context</a>’s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-1">required CSP</a> is <code>null</code>, or the result of <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#parse-serialized-policy">parsing <var>value</var> as "<code>enforce</code>"</a> is <a data-link-type="dfn" href="#policy-subsume" id="ref-for-policy-subsume-1">subsumed</a> by <var>element</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document">node document</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-document-bc">browsing
+  context</a>’s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-2">required CSP</a>.</p>
+    </ol>
+    <div class="example" id="example-9fc58356">
+     <a class="self-link" href="#example-9fc58356"></a> The following strings are valid values for the <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-6">csp</a></code> attribute, as they’re valid CSP
+    grammar: 
+     <ul>
+      <li data-md="">
+       <p><code>script-src 'none'</code></p>
+      <li data-md="">
+       <p><code>script-src 'self'; object-src 'none'; sandbox</code></p>
+      <li data-md="">
+       <p><code>not-a-directive https://whatever.not-a-tld</code></p>
+     </ul>
+     <p class="note" role="note">Note: We consider the last item valid even though it doesn’t express a meaningful policy in
+    order to remain forward-compatible with future CSP syntax.</p>
+     <p>The following, on the other hand, do not match the CSP syntax, and would not be considered valid
+    attribute values:</p>
+     <ul>
+      <li data-md="">
+       <p><code>script-src *\nInjected-Header: XSS!</code></p>
+      <li data-md="">
+       <p><code>💩</code></p>
+     </ul>
+     <p class="note" role="note">Note: We need to be careful about the values we allow in the <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-7">csp</a></code> attribute, as its
+    contents will end up reflected as an HTTP request header. This concern is discussed in a little
+    more detail in <a href="#header-injection">§4.4 Header Injection</a>.</p>
+    </div>
+    <p><code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a></code>'s <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-8">csp</a></code> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-element-attributes">content attribute</a> has a corresponding IDL attribute, defined
+  by the following WebIDL grammar <a data-link-type="biblio" href="#biblio-webidl">[WEBIDL]</a>:</p>
+<pre class="idl highlight def"><span class="kt">partial</span> <span class="kt">interface</span> <a class="nv idl-code" data-link-type="interface" href="https://html.spec.whatwg.org/multipage/embedded-content.html#htmliframeelement">HTMLIFrameElement</a> {
+  [<a class="nv idl-code" data-link-type="extended-attribute" href="https://html.spec.whatwg.org/multipage/scripting.html#cereactions">CEReactions</a>] <span class="kt">attribute</span> <span class="kt">DOMString</span> <dfn class="nv dfn-paneled idl-code" data-dfn-for="HTMLIFrameElement" data-dfn-type="attribute" data-export="" data-type="DOMString" id="dom-htmliframeelement-csp">csp</dfn>;
+};
+</pre>
+    <div class="algorithm" data-algorithm="HTMLIframeElement’s csp IDL attribute’s getter">
+      The <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/embedded-content.html#htmliframeelement">HTMLIFrameElement</a></code> <code class="idl"><a data-link-type="idl" href="#dom-htmliframeelement-csp" id="ref-for-dom-htmliframeelement-csp-1">csp</a></code> IDL attribute’s <a data-link-type="dfn" href="https://heycam.github.io/webidl/#dfn-getter">getter</a> will run the
+    following steps on a given <var>element</var>: 
+     <ol>
+      <li data-md="">
+       <p>Let <var>value</var> be the value of <var>element</var>’s <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-9">csp</a></code> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-element-attributes">content attribute</a>.</p>
+      <li data-md="">
+       <p>If <var>value</var> is a <a data-link-type="dfn" href="#iframe-csp-valid-attribute-value" id="ref-for-iframe-csp-valid-attribute-value-1">valid attribute value</a> for <var>element</var>, return <var>value</var>.</p>
+      <li data-md="">
+       <p>Return the empty string.</p>
+     </ol>
+    </div>
+    <div class="algorithm" data-algorithm="HTMLIframeElement’s csp IDL attribute’s setter">
+      The <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/embedded-content.html#htmliframeelement">HTMLIFrameElement</a></code> <code class="idl"><a data-link-type="idl" href="#dom-htmliframeelement-csp" id="ref-for-dom-htmliframeelement-csp-2">csp</a></code> IDL attribute’s <a data-link-type="dfn" href="https://heycam.github.io/webidl/#dfn-setter">setter</a> will run the
+    following steps on a given <var>element</var> for a given <var>value</var>: 
+     <ol>
+      <li data-md="">
+       <p>If <var>value</var> is a <a data-link-type="dfn" href="#iframe-csp-valid-attribute-value" id="ref-for-iframe-csp-valid-attribute-value-2">valid attribute value</a> for <var>element</var>, set <var>element</var>’s <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-10">csp</a></code> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-element-attributes">content attribute</a> to the empty string and return.</p>
+      <li data-md="">
+       <p>Set <var>element</var>’s <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-11">csp</a></code> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-element-attributes">content attribute</a> to the empty string.</p>
+     </ol>
+    </div>
+    <p class="issue" id="issue-2a91d948"><a class="self-link" href="#issue-2a91d948"></a> Upstream this to all the HTMLs.</p>
+    <h3 class="heading settled" data-level="2.2" id="embedding-csp-header"><span class="secno">2.2. </span><span class="content">The <code>Embedding-CSP</code> HTTP Request Header</span><a class="self-link" href="#embedding-csp-header"></a></h3>
+    <p>In order to ensure that the embedded resource can decide whether or not it is willing to adhere to
+  the embedder’s requirements, the policy expressed in an <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a></code>'s <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-12">csp</a></code> attribute is
+  communicated along with affected <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#navigation-request">navigation requests</a> via an
+  "<dfn class="dfn-paneled" data-dfn-type="http-header" data-export="" id="http-headerdef-embedding-csp"><code>Embedding-CSP</code></dfn>" HTTP request header. The header’s value is
+  represented by the following ABNF <a data-link-type="biblio" href="#biblio-rfc5234">[RFC5234]</a>:</p>
+<pre>Embedding-CSP = <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-policy">serialized-policy</a>
+</pre>
+    <p>A user agent MUST NOT send more than one HTTP response header field named "<code>Embedding-CSP</code>", and
+  any such header MUST NOT contain more than one <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-policy">serialized-policy</a>.</p>
+    <p>Servers MUST process only the first policy in the first such header received. As discussed in <a href="#header-reflection">§4.5 Header Reflection</a>, servers SHOULD also carefully consider the implications of simply
+  reflecting a policy back to a client. If the server wishes to simply accept an embedder’s
+  requirements, the <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-5"><code>Allow-CSP-From</code></a> header is a safer choice.</p>
+    <p>This header is set as part of HTML’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#navigate">navigate</a> algorithm (see <a href="#html-integration">§2.3 Integration with HTML</a> for
+  details on the hook that calls the following algorithm):</p>
+    <div class="algorithm" data-algorithm="set a request’s embedding-csp header">
+      To <dfn class="dfn-paneled" data-dfn-type="abstract-op" data-export="" data-local-lt="set-embedding-csp" id="abstract-opdef-set-the-embedding-csp-header">set the <code>Embedding-CSP</code> header</dfn> for a
+    given <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> (<var>request</var>), run the following steps: 
+     <ol>
+      <li data-md="">
+       <p>If <var>request</var> is not a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#navigation-request">navigation request</a>, return.</p>
+      <li data-md="">
+       <p>Let <var>requirement</var> be <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#responsible-browsing-context">responsible browsing context</a>’s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-3">required CSP</a>.</p>
+      <li data-md="">
+       <p>If <var>requirement</var> is <code>null</code>, return.</p>
+      <li data-md="">
+       <p class="assertion">Assert: <var>requirement</var> is a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#serialized-csp">serialized CSP</a>, matching the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-policy">serialized-policy</a> grammar defined in <a data-link-type="biblio" href="#biblio-csp3">[CSP3]</a>.</p>
+      <li data-md="">
+       <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-header-list-append">Append</a> a header named "<a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-6"><code>Embedding-CSP</code></a>" with a
+  value of <var>requirement</var> to <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-header-list">header list</a>.</p>
+     </ol>
+    </div>
+    <h3 class="heading settled" data-level="2.3" id="html-integration"><span class="secno">2.3. </span><span class="content">Integration with HTML</span><a class="self-link" href="#html-integration"></a></h3>
+    <ol>
+     <li data-md="">
+      <p><code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a></code> elements have a <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-13">csp</a></code> attribute, defined in <a href="#csp-attribute">§2.1 &lt;iframe>'s csp attribute</a>.</p>
+     <li data-md="">
+      <p>Each <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a> has a <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-4">required CSP</a>, defined in <a href="#required-csp">§2.3.1 Browsing Context’s Required CSP</a>.</p>
      <li data-md="">
       <p>Add the following after step 10 of HTML’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#navigate">navigate</a> algorithm:</p>
       <ol start="11">
        <li data-md="">
-        <p><a data-link-type="abstract-op" href="#abstract-opdef-set-the-required-csp" id="ref-for-abstract-opdef-set-the-required-csp-1">Set</a> <code>browsingContext</code>'s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-2">required CSP</a>.</p>
+        <p><a data-link-type="abstract-op" href="#abstract-opdef-set-the-required-csp" id="ref-for-abstract-opdef-set-the-required-csp-1">Set</a> <code>browsingContext</code>'s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-5">required CSP</a>.</p>
       </ol>
       <p class="issue" id="issue-fdc1da1f"><a class="self-link" href="#issue-fdc1da1f"></a> Upstream this to WHATWG’s HTML.</p>
       <p class="issue" id="issue-9e9d2c02"><a class="self-link" href="#issue-9e9d2c02"></a> W3C’s HTML’s navigation algorithm is wildly divergent from WHATWG’s at
@@ -1661,58 +1788,16 @@ Host: advertisements-r-us.example.com
       <p>Add the following after step 5 of HTML’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-fetch">process a navigate fetch</a> algorithm:</p>
       <ol start="6">
        <li data-md="">
-        <p>If <code>browsingContext</code>'s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-3">required CSP</a> is not <code>null</code>, <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-header-list-append">append</a> a header whose name is
-  "<a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-4"><code>Embedding-CSP</code></a>" and whose value is <code>browsingContext</code>'s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-4">required CSP</a> to <code>request</code>'s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-header-list">header list</a>.</p>
+        <p><a data-link-type="abstract-op" href="#abstract-opdef-set-the-embedding-csp-header" id="ref-for-abstract-opdef-set-the-embedding-csp-header-1">Set</a> <code>request</code>'s
+  "<a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-7"><code>Embedding-CSP</code></a>" header.</p>
       </ol>
       <p class="issue" id="issue-fdc1da1f1"><a class="self-link" href="#issue-fdc1da1f1"></a> Upstream this to WHATWG’s HTML.</p>
       <p class="issue" id="issue-7b3609ea"><a class="self-link" href="#issue-7b3609ea"></a> W3C’s HTML is not based on Fetch, and does not have
   a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-fetch">process a navigate fetch</a> algorithm into which to hook. <a href="https://github.com/w3c/html/issues/584">&lt;https://github.com/w3c/html/issues/584></a></p>
     </ol>
-    <h4 class="heading settled" data-level="2.1.1" id="csp-attribute"><span class="secno">2.1.1. </span><span class="content"><code>&lt;iframe></code>'s <code>csp</code> attribute</span><a class="self-link" href="#csp-attribute"></a></h4>
-    <p><code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a></code> elements have a <dfn class="dfn-paneled" data-dfn-for="iframe" data-dfn-type="element-attr" data-export="" id="element-attrdef-iframe-csp">csp</dfn> attribute, which specifies
-  the policy that an embedded document must agree to enforce upon itself.</p>
-<pre class="idl highlight def"><span class="kt">partial</span> <span class="kt">interface</span> <a class="nv idl-code" data-link-type="interface" href="https://html.spec.whatwg.org/multipage/embedded-content.html#htmliframeelement">HTMLIFrameElement</a> {
-  [<a class="nv idl-code" data-link-type="extended-attribute" href="https://html.spec.whatwg.org/multipage/scripting.html#cereactions">CEReactions</a>] <span class="kt">attribute</span> <span class="kt">DOMString</span> <dfn class="nv dfn-paneled idl-code" data-dfn-for="HTMLIFrameElement" data-dfn-type="attribute" data-export="" data-type="DOMString" id="dom-htmliframeelement-csp">csp</dfn>;
-};
-</pre>
-    <p>A <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string">string</a> (<var>value</var>) is a <dfn class="dfn-paneled" data-dfn-for="iframe/csp" data-dfn-type="dfn" data-noexport="" id="iframe-csp-valid-attribute-value">valid attribute value</dfn> for a given <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-element">element</a> (<var>element</var>)'s <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-4">csp</a></code> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-element-attributes">content attribute</a> if all of the
-  following statements are true:</p>
-    <ol>
-     <li data-md="">
-      <p><var>value</var> is not the empty string.</p>
-     <li data-md="">
-      <p><var>value</var> matches the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-policy">serialized-policy</a> ABNF grammar defined in <a data-link-type="biblio" href="#biblio-csp3">[CSP3]</a>.</p>
-     <li data-md="">
-      <p><var>element</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document">node document</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-document-bc">browsing context</a>’s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-5">required
-  CSP</a> is <code>null</code>, or the result of <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#parse-serialized-policy">parsing <var>value</var> as "<code>enforce</code>"</a> is <a data-link-type="dfn" href="#policy-subsume" id="ref-for-policy-subsume-1">subsumed</a> by <var>element</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document">node
-  document</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-document-bc">browsing context</a>’s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-6">required CSP</a>.</p>
-    </ol>
-    <div class="algorithm" data-algorithm="HTMLIframeElement’s csp IDL attribute’s getter">
-      The <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/embedded-content.html#htmliframeelement">HTMLIFrameElement</a></code> <code class="idl"><a data-link-type="idl" href="#dom-htmliframeelement-csp" id="ref-for-dom-htmliframeelement-csp-1">csp</a></code> IDL attribute’s <a data-link-type="dfn" href="https://heycam.github.io/webidl/#dfn-getter">getter</a> will run the
-    following steps on a given <var>element</var>: 
-     <ol>
-      <li data-md="">
-       <p>Let <var>value</var> be the value of <var>element</var>’s <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-5">csp</a></code> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-element-attributes">content attribute</a>.</p>
-      <li data-md="">
-       <p>If <var>value</var> is a <a data-link-type="dfn" href="#iframe-csp-valid-attribute-value" id="ref-for-iframe-csp-valid-attribute-value-1">valid attribute value</a> for <var>element</var>, return <var>value</var>.</p>
-      <li data-md="">
-       <p>Return the empty string.</p>
-     </ol>
-    </div>
-    <div class="algorithm" data-algorithm="HTMLIframeElement’s csp IDL attribute’s setter">
-      The <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/embedded-content.html#htmliframeelement">HTMLIFrameElement</a></code> <code class="idl"><a data-link-type="idl" href="#dom-htmliframeelement-csp" id="ref-for-dom-htmliframeelement-csp-2">csp</a></code> IDL attribute’s <a data-link-type="dfn" href="https://heycam.github.io/webidl/#dfn-setter">setter</a> will run the
-    following steps on a given <var>element</var> for a given <var>value</var>: 
-     <ol>
-      <li data-md="">
-       <p>If <var>value</var> is a <a data-link-type="dfn" href="#iframe-csp-valid-attribute-value" id="ref-for-iframe-csp-valid-attribute-value-2">valid attribute value</a> for <var>element</var>, set <var>element</var>’s <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-6">csp</a></code> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-element-attributes">content attribute</a> to the empty string and return.</p>
-      <li data-md="">
-       <p>Set <var>element</var>’s <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-7">csp</a></code> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-element-attributes">content attribute</a> to the empty string.</p>
-     </ol>
-    </div>
-    <p class="issue" id="issue-2a91d948"><a class="self-link" href="#issue-2a91d948"></a> Upstream this to all the HTMLs.</p>
-    <h4 class="heading settled" data-level="2.1.2" id="required-csp"><span class="secno">2.1.2. </span><span class="content">Browsing Context’s Required CSP</span><a class="self-link" href="#required-csp"></a></h4>
-    <p>Each <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a> has a <dfn class="dfn-paneled" data-dfn-for="browsing context" data-dfn-type="dfn" data-noexport="" id="browsing-context-required-csp">required CSP</dfn>, which is either <code>null</code> or a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#serialized-csp">serialized CSP</a>. The value is set upon <a data-link-type="dfn">navigation</a>, and will not change
-  until the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active document</a> changes.</p>
+    <h4 class="heading settled" data-level="2.3.1" id="required-csp"><span class="secno">2.3.1. </span><span class="content">Browsing Context’s Required CSP</span><a class="self-link" href="#required-csp"></a></h4>
+    <p>Each <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a> has a <dfn class="dfn-paneled" data-dfn-for="browsing context" data-dfn-type="dfn" data-noexport="" id="browsing-context-required-csp">required CSP</dfn>, which is either <code>null</code> or a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#serialized-csp">serialized CSP</a>. The value is set during the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#navigate">navigate</a> algorithm, and will
+  not change until the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active document</a> changes.</p>
     <p>The following algorithm will execute at around step 10 of the current <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#navigate">navigate</a> algorithm:</p>
     <div class="algorithm" data-algorithm="browsing context’s required CSP">
       To <dfn class="dfn-paneled" data-dfn-type="abstract-op" data-export="" id="abstract-opdef-set-the-required-csp">set the required CSP</dfn> for a given <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a> (<var>context</var>),
@@ -1722,34 +1807,25 @@ Host: advertisements-r-us.example.com
        <p>If <var>context</var> is a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context">nested browsing context</a>:</p>
        <ol>
         <li data-md="">
-         <p>If <var>context</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context-container">browsing context container</a> has an <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-8">csp</a></code> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-element-attributes">content
-  attribute</a> with a <a data-link-type="dfn" href="#iframe-csp-valid-attribute-value" id="ref-for-iframe-csp-valid-attribute-value-3">valid attribute value</a> (<var>value</var>), set <var>context</var>’s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-7">required CSP</a> to <var>value</var> and return.</p>
+         <p>If <var>context</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context-container">browsing context container</a> has an <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-14">csp</a></code> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-element-attributes">content
+  attribute</a> with a <a data-link-type="dfn" href="#iframe-csp-valid-attribute-value" id="ref-for-iframe-csp-valid-attribute-value-3">valid attribute value</a> (<var>value</var>), set <var>context</var>’s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-6">required CSP</a> to <var>value</var> and return.</p>
         <li data-md="">
-         <p>Set <var>context</var>’s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-8">required CSP</a> to the value of <var>context</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#parent-browsing-context">parent browsing context</a>’s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-9">required CSP</a>.</p>
+         <p>Set <var>context</var>’s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-7">required CSP</a> to the value of <var>context</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#parent-browsing-context">parent browsing context</a>’s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-8">required CSP</a>.</p>
        </ol>
       <li data-md="">
-       <p>Set <var>context</var>’s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-10">required CSP</a> to <code>null</code>.</p>
+       <p>Set <var>context</var>’s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-9">required CSP</a> to <code>null</code>.</p>
      </ol>
     </div>
     <p class="issue" id="issue-b71d345b"><a class="self-link" href="#issue-b71d345b"></a> Upstream a hook to HTML.</p>
-    <h3 class="heading settled" data-level="2.2" id="embedding-csp-http-header"><span class="secno">2.2. </span><span class="content">The <code>Embedding-CSP</code> HTTP Request Header</span><a class="self-link" href="#embedding-csp-http-header"></a></h3>
-    <p>In order to ensure that the embedded resource can decide whether or not it is
-  willing to adhere to the embedder’s requirements, the policy expressed in an <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a></code>'s <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-9">csp</a></code> attribute is communicated along with some <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">requests</a> via an "<dfn class="dfn-paneled" data-dfn-type="http-header" data-export="" id="http-headerdef-embedding-csp"><code>Embedding-CSP</code></dfn>" HTTP
-  request header. The header’s value is represented by the following ABNF <a data-link-type="biblio" href="#biblio-rfc5234">[RFC5234]</a>:</p>
-<pre>Embedding-CSP = <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-policy">serialized-policy</a>
-</pre>
-    <p>A user agent MUST NOT send more than one HTTP response header field named
-  "<code>Embedding-CSP</code>", and any such header MUST NOT contain more than one <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-policy">serialized-policy</a>.</p>
-    <p>Servers MUST process only the first policy in the first such header received.</p>
-    <h3 class="heading settled" data-level="2.3" id="allow-csp-from-http-header"><span class="secno">2.3. </span><span class="content">The <code>Allow-CSP-From</code> HTTP Response Header</span><a class="self-link" href="#allow-csp-from-http-header"></a></h3>
+    <h3 class="heading settled" data-level="2.4" id="allow-csp-from-header"><span class="secno">2.4. </span><span class="content">The <code>Allow-CSP-From</code> HTTP Response Header</span><a class="self-link" href="#allow-csp-from-header"></a></h3>
     <p>An embedee can opt-into accepting a policy specified by an embedder by
   responding with a "<dfn class="dfn-paneled" data-dfn-type="http-header" data-export="" id="http-headerdef-allow-csp-from"><code>Allow-CSP-From</code></dfn>" HTTP
   response header. The header’s value is represented by the following ABNF <a data-link-type="biblio" href="#biblio-rfc5234">[RFC5234]</a>:</p>
 <pre>Allow-CSP-From = <a data-link-type="grammar" href="https://fetch.spec.whatwg.org/#http-origin">origin-or-null</a> / <a data-link-type="grammar" href="https://fetch.spec.whatwg.org/#http-new-header-syntax">wildcard</a>
 </pre>
-    <h3 class="heading settled" data-level="2.4" id="policy-subsumption"><span class="secno">2.4. </span><span class="content">Policy Subsumption</span><a class="self-link" href="#policy-subsumption"></a></h3>
+    <h3 class="heading settled" data-level="2.5" id="policy-subsumption"><span class="secno">2.5. </span><span class="content">Policy Subsumption</span><a class="self-link" href="#policy-subsumption"></a></h3>
     <p>If an embedee does not wish to accept any <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> specified by its
-  embedder via the <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-3">Allow-CSP-From</a> header, it can deliver a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> that is as strict, or stricter than the policy requested in the <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-5">Embedding-CSP</a> header. That is, if the embedder requests <code>object-src https://cdn.example.com/</code>, the embedee can respond with <code>object-src 'none'</code>. Because every possible <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> blocked by <code>object-src https://cdn.example.com/</code> would also be blocked by <code>object-src 'none'</code>, it is said that the embedder’s required <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> <dfn class="dfn-paneled" data-dfn-for="policy" data-dfn-type="dfn" data-lt="subsume" data-noexport="" id="policy-subsume">subsumes</dfn> the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> delivered by
+  embedder via the <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-6">Allow-CSP-From</a> header, it can deliver a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> that is as strict, or stricter than the policy requested in the <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-8">Embedding-CSP</a> header. That is, if the embedder requests <code>object-src https://cdn.example.com/</code>, the embedee can respond with <code>object-src 'none'</code>. Because every possible <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> blocked by <code>object-src https://cdn.example.com/</code> would also be blocked by <code>object-src 'none'</code>, it is said that the embedder’s required <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> <dfn class="dfn-paneled" data-dfn-for="policy" data-dfn-type="dfn" data-lt="subsume" data-noexport="" id="policy-subsume">subsumes</dfn> the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> delivered by
   the embedee.</p>
     <p>Given the complexity of CSP’s syntax, subsumption is not trivial to calculate.
   The details are spelled out in <a href="#subsume-policy-list">§3.3 Does subsuming policy subsume policy list given their respective
@@ -1767,10 +1843,10 @@ Host: advertisements-r-us.example.com
        <li data-md="">
         <p><var>context</var> is not a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context">nested browsing context</a>.</p>
        <li data-md="">
-        <p><var>context</var>’s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-11">required CSP</a> is <code>null</code>.</p>
+        <p><var>context</var>’s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-10">required CSP</a> is <code>null</code>.</p>
       </ol>
      <li data-md="">
-      <p>Let <var>embedding policy</var> be the result of executing <a href="https://w3c.github.io/webappsec-csp/#parse-serialized-policy">Content Security Policy Level 3 §parse-serialized-policy</a> on <var>context</var>’s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-12">required CSP</a> and
+      <p>Let <var>embedding policy</var> be the result of executing <a href="https://w3c.github.io/webappsec-csp/#parse-serialized-policy">Content Security Policy Level 3 §parse-serialized-policy</a> on <var>context</var>’s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-11">required CSP</a> and
   "<code>enforce</code>".</p>
      <li data-md="">
       <p>If the <a href="#origin-allowed">§3.2 Does response allow blanket enforcment of policy from request?</a> algorithm returns "<code>Allowed</code>" when executed upon <var>response</var> and <var>request</var>:</p>
@@ -1808,7 +1884,7 @@ Host: advertisements-r-us.example.com
   from the embedder, so we allow the embedder to tighten that policy via this
   embedding mechanism.</p>
      <li data-md="">
-      <p>If <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a> has a header named <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-4"><code>Allow-CSP-From</code></a> (<var>header</var>):</p>
+      <p>If <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a> has a header named <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-7"><code>Allow-CSP-From</code></a> (<var>header</var>):</p>
       <ol>
        <li data-md="">
         <p>If <var>header</var>’s value is "<code>*</code>", return "<code>Allowed</code>".</p>
@@ -2763,23 +2839,27 @@ B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
   given resource via an appropriate <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#frame-ancestors"><code>frame-ancestors</code></a> directive.</p>
     <h3 class="heading settled" data-level="4.3" id="exfiltration"><span class="secno">4.3. </span><span class="content">Data Exfiltration</span><a class="self-link" href="#exfiltration"></a></h3>
     <p>This feature allows an embedder to send information to a third-party endpoint
-  via the <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-6"><code>Embedding-CSP</code></a> HTTP header. This doesn’t seem to
+  via the <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-9"><code>Embedding-CSP</code></a> HTTP header. This doesn’t seem to
   expose any information that couldn’t be tunneled in the HTTP request itself
   (via GET parameters, etc), and embedders remain in control over the endpoints
   to which such requests may be made by enforcing a Content Security Policy with
   an appropriate <code>child-src</code> directive.</p>
+    <h3 class="heading settled" data-level="4.4" id="header-injection"><span class="secno">4.4. </span><span class="content">Header Injection</span><a class="self-link" href="#header-injection"></a></h3>
+    <p class="issue" id="issue-239dbe2c"><a class="self-link" href="#issue-239dbe2c"></a> Spell out the concerns Mario raised in the thread around <a href="https://twitter.com/0x6D6172696F/status/810066803653308416">https://twitter.com/0x6D6172696F/status/810066803653308416</a>.</p>
+    <h3 class="heading settled" data-level="4.5" id="header-reflection"><span class="secno">4.5. </span><span class="content">Header Reflection</span><a class="self-link" href="#header-reflection"></a></h3>
+    <p class="issue" id="issue-239dbe2c0"><a class="self-link" href="#issue-239dbe2c0"></a> Spell out the concerns Mario raised in the thread around <a href="https://twitter.com/0x6D6172696F/status/810066803653308416">https://twitter.com/0x6D6172696F/status/810066803653308416</a>.</p>
    </section>
    <section>
     <h2 class="heading settled" data-level="5" id="authoring-considerations"><span class="secno">5. </span><span class="content">Authoring Considerations</span><a class="self-link" href="#authoring-considerations"></a></h2>
     <h3 class="heading settled" data-level="5.1" id="effect-self"><span class="secno">5.1. </span><span class="content"> Requiring <code>'self'</code> </span><a class="self-link" href="#effect-self"></a></h3>
-    <p>When processing a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a>’s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-13">required CSP</a>, the
+    <p>When processing a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a>’s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-12">required CSP</a>, the
   keyword <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-self"><code>'self'</code></a> refers to the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a> of the URL being loaded
   into the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context">nested browsing context</a>, not to the origin of the document in the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#source-browsing-context">source
   browsing context</a>.</p>
     <div class="example" id="example-8771b2e9">
      <a class="self-link" href="#example-8771b2e9"></a> MegaCorp Inc. requires a policy containing <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-self"><code>'self'</code></a> on their page at <code>https://example.com/page.html</code>: 
 <pre>&lt;iframe src="https://advertisements-r-us.example.com/ad1.cfm"
-        <a data-link-type="element-attr" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-10">csp</a>="script-src 'self'">
+        <a data-link-type="element-attr" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-15">csp</a>="script-src 'self'">
 &lt;/iframe>
 </pre>
      <p>If the returned CSP is:</p>
@@ -2795,7 +2875,7 @@ B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
    <section>
     <h2 class="heading settled" data-level="6" id="iana"><span class="secno">6. </span><span class="content">IANA Considerations</span><a class="self-link" href="#iana"></a></h2>
     <p>The permanent message header field registry should be updated
-  with the following registration for the <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-7"><code>Embedding-CSP</code></a> header: <a data-link-type="biblio" href="#biblio-rfc3864">[RFC3864]</a></p>
+  with the following registration for the <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-10"><code>Embedding-CSP</code></a> header: <a data-link-type="biblio" href="#biblio-rfc3864">[RFC3864]</a></p>
     <dl>
      <dt data-md="">
       <p>Header field name</p>
@@ -2816,10 +2896,10 @@ B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
      <dt data-md="">
       <p>Specification document</p>
      <dd data-md="">
-      <p>This specification (See <a href="#embedding-csp-http-header">§2.2 The Embedding-CSP HTTP Request Header</a>)</p>
+      <p>This specification (See <a href="#embedding-csp-header">§2.2 The Embedding-CSP HTTP Request Header</a>)</p>
     </dl>
     <p>Likewise, the registry should be updated with the following registration
-  for the <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-5"><code>Allow-CSP-From</code></a> header: <a data-link-type="biblio" href="#biblio-rfc3864">[RFC3864]</a></p>
+  for the <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-8"><code>Allow-CSP-From</code></a> header: <a data-link-type="biblio" href="#biblio-rfc3864">[RFC3864]</a></p>
     <dl>
      <dt data-md="">
       <p>Header field name</p>
@@ -2840,7 +2920,7 @@ B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
      <dt data-md="">
       <p>Specification document</p>
      <dd data-md="">
-      <p>This specification (See <a href="#allow-csp-from-http-header">§2.3 The Allow-CSP-From HTTP Response Header</a>)</p>
+      <p>This specification (See <a href="#allow-csp-from-header">§2.4 The Allow-CSP-From HTTP Response Header</a>)</p>
     </dl>
    </section>
   </main>
@@ -2879,13 +2959,13 @@ B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
   <h2 class="no-num no-ref heading settled" id="index"><span class="content">Index</span><a class="self-link" href="#index"></a></h2>
   <h3 class="no-num no-ref heading settled" id="index-defined-here"><span class="content">Terms defined by this specification</span><a class="self-link" href="#index-defined-here"></a></h3>
   <ul class="index">
-   <li><a href="#http-headerdef-allow-csp-from">Allow-CSP-From</a><span>, in §2.3</span>
+   <li><a href="#http-headerdef-allow-csp-from">Allow-CSP-From</a><span>, in §2.4</span>
    <li><a href="#directive-contains">contains</a><span>, in §3.2.9</span>
    <li>
     csp
     <ul>
-     <li><a href="#element-attrdef-iframe-csp">element-attr for iframe</a><span>, in §2.1.1</span>
-     <li><a href="#dom-htmliframeelement-csp">attribute for HTMLIFrameElement</a><span>, in §2.1.1</span>
+     <li><a href="#element-attrdef-iframe-csp">element-attr for iframe</a><span>, in §2.1</span>
+     <li><a href="#dom-htmliframeelement-csp">attribute for HTMLIFrameElement</a><span>, in §2.1</span>
     </ul>
    <li><a href="#effective-source-list">effective source list</a><span>, in §3.2.3</span>
    <li><a href="#http-headerdef-embedding-csp">Embedding-CSP</a><span>, in §2.2</span>
@@ -2896,11 +2976,13 @@ B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
      <li><a href="#source-list-intersection">dfn for source list</a><span>, in §3.2.4</span>
      <li><a href="#policy-intersection">dfn for policy</a><span>, in §3.2.7</span>
     </ul>
-   <li><a href="#browsing-context-required-csp">required CSP</a><span>, in §2.1.2</span>
-   <li><a href="#abstract-opdef-set-the-required-csp">set the required CSP</a><span>, in §2.1.2</span>
+   <li><a href="#browsing-context-required-csp">required CSP</a><span>, in §2.3.1</span>
+   <li><a href="#abstract-opdef-set-the-embedding-csp-header">set-embedding-csp</a><span>, in §2.2</span>
+   <li><a href="#abstract-opdef-set-the-embedding-csp-header">set the Embedding-CSP header</a><span>, in §2.2</span>
+   <li><a href="#abstract-opdef-set-the-required-csp">set the required CSP</a><span>, in §2.3.1</span>
    <li><a href="#source-expression-similar">similar</a><span>, in §3.2.1</span>
-   <li><a href="#policy-subsume">subsume</a><span>, in §2.4</span>
-   <li><a href="#iframe-csp-valid-attribute-value">valid attribute value</a><span>, in §2.1.1</span>
+   <li><a href="#policy-subsume">subsume</a><span>, in §2.5</span>
+   <li><a href="#iframe-csp-valid-attribute-value">valid attribute value</a><span>, in §2.1</span>
    <li><a href="#source-expression-wildcard-host">wildcard host</a><span>, in §3.2.1</span>
    <li><a href="#source-expression-wildcard-port">wildcard port</a><span>, in §3.2.1</span>
   </ul>
@@ -2963,9 +3045,11 @@ B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
     <a data-link-type="biblio">[FETCH]</a> defines the following terms:
     <ul>
      <li><a href="https://fetch.spec.whatwg.org/#concept-header-list-append">append</a>
+     <li><a href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-response-csp-list">csp list</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-header-list">header list <small>(for request)</small></a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list <small>(for response)</small></a>
+     <li><a href="https://fetch.spec.whatwg.org/#navigation-request">navigation request</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-origin">origin</a>
      <li><a href="https://fetch.spec.whatwg.org/#http-origin">origin-or-null</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request">request</a>
@@ -2993,6 +3077,7 @@ B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#parent-browsing-context">parent browsing context</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-fetch">process a navigate fetch</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-response">process a navigate response</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/webappapis.html#responsible-browsing-context">responsible browsing context</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin-scheme">scheme</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#source-browsing-context">source browsing context</a>
     </ul>
@@ -3017,7 +3102,7 @@ B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
      <li><a href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a>
     </ul>
    <li>
-    <a data-link-type="biblio">[WebIDL]</a> defines the following terms:
+    <a data-link-type="biblio">[WEBIDL]</a> defines the following terms:
     <ul>
      <li><a href="https://heycam.github.io/webidl/#dfn-getter">getter</a>
      <li><a href="https://heycam.github.io/webidl/#dfn-setter">setter</a>
@@ -3042,7 +3127,7 @@ B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
    <dd>G. Klyne; M. Nottingham; J. Mogul. <a href="https://tools.ietf.org/html/rfc3864">Registration Procedures for Message Header Fields</a>. September 2004. Best Current Practice. URL: <a href="https://tools.ietf.org/html/rfc3864">https://tools.ietf.org/html/rfc3864</a>
    <dt id="biblio-rfc5234">[RFC5234]
    <dd>D. Crocker, Ed.; P. Overell. <a href="https://tools.ietf.org/html/rfc5234">Augmented BNF for Syntax Specifications: ABNF</a>. January 2008. Internet Standard. URL: <a href="https://tools.ietf.org/html/rfc5234">https://tools.ietf.org/html/rfc5234</a>
-   <dt id="biblio-webidl">[WebIDL]
+   <dt id="biblio-webidl">[WEBIDL]
    <dd>Cameron McCormack; Boris Zbarsky; Tobie Langel. <a href="https://heycam.github.io/webidl/">Web IDL</a>. URL: <a href="https://heycam.github.io/webidl/">https://heycam.github.io/webidl/</a>
    <dt id="biblio-whatwg-dom">[WHATWG-DOM]
    <dd>Anne van Kesteren. <a href="https://dom.spec.whatwg.org/">DOM Standard</a>. Living Standard. URL: <a href="https://dom.spec.whatwg.org/">https://dom.spec.whatwg.org/</a>
@@ -3059,6 +3144,8 @@ B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
 </pre>
   <h2 class="no-num no-ref heading settled" id="issues-index"><span class="content">Issues Index</span><a class="self-link" href="#issues-index"></a></h2>
   <div style="counter-reset:issue">
+   <div class="issue"> Rename this? <code>Required-CSP</code>, perhaps, to match the rest of the spec?<a href="#issue-1f7455d5"> ↵ </a></div>
+   <div class="issue"> Upstream this to all the HTMLs.<a href="#issue-2a91d948"> ↵ </a></div>
    <div class="issue"> Upstream this to WHATWG’s HTML.<a href="#issue-fdc1da1f"> ↵ </a></div>
    <div class="issue"> W3C’s HTML’s navigation algorithm is wildly divergent from WHATWG’s at
   this point. Upstream something to that document once things are reconciled. <a href="https://github.com/w3c/html/issues/584">&lt;https://github.com/w3c/html/issues/584></a><a href="#issue-9e9d2c02"> ↵ </a></div>
@@ -3068,54 +3155,38 @@ B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
    <div class="issue"> Upstream this to WHATWG’s HTML.<a href="#issue-fdc1da1f1"> ↵ </a></div>
    <div class="issue"> W3C’s HTML is not based on Fetch, and does not have
   a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-fetch">process a navigate fetch</a> algorithm into which to hook. <a href="https://github.com/w3c/html/issues/584">&lt;https://github.com/w3c/html/issues/584></a><a href="#issue-7b3609ea"> ↵ </a></div>
-   <div class="issue"> Upstream this to all the HTMLs.<a href="#issue-2a91d948"> ↵ </a></div>
    <div class="issue"> Upstream a hook to HTML.<a href="#issue-b71d345b"> ↵ </a></div>
    <div class="issue"> TODO.<a href="#issue-95f2d23a"> ↵ </a></div>
    <div class="issue"> TODO.<a href="#issue-95f2d23a0"> ↵ </a></div>
    <div class="issue"> TODO.<a href="#issue-95f2d23a1"> ↵ </a></div>
    <div class="issue"> TODO.<a href="#issue-95f2d23a2"> ↵ </a></div>
+   <div class="issue"> Spell out the concerns Mario raised in the thread around <a href="https://twitter.com/0x6D6172696F/status/810066803653308416">https://twitter.com/0x6D6172696F/status/810066803653308416</a>.<a href="#issue-239dbe2c"> ↵ </a></div>
+   <div class="issue"> Spell out the concerns Mario raised in the thread around <a href="https://twitter.com/0x6D6172696F/status/810066803653308416">https://twitter.com/0x6D6172696F/status/810066803653308416</a>.<a href="#issue-239dbe2c0"> ↵ </a></div>
   </div>
   <aside class="dfn-panel" data-for="element-attrdef-iframe-csp">
    <b><a href="#element-attrdef-iframe-csp">#element-attrdef-iframe-csp</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-element-attrdef-iframe-csp-1">1.1. Examples</a> <a href="#ref-for-element-attrdef-iframe-csp-2">(2)</a>
-    <li><a href="#ref-for-element-attrdef-iframe-csp-3">2.1. Integration with HTML</a>
-    <li><a href="#ref-for-element-attrdef-iframe-csp-4">2.1.1. &lt;iframe>'s csp attribute</a> <a href="#ref-for-element-attrdef-iframe-csp-5">(2)</a> <a href="#ref-for-element-attrdef-iframe-csp-6">(3)</a> <a href="#ref-for-element-attrdef-iframe-csp-7">(4)</a>
-    <li><a href="#ref-for-element-attrdef-iframe-csp-8">2.1.2. Browsing Context’s Required CSP</a>
-    <li><a href="#ref-for-element-attrdef-iframe-csp-9">2.2. The Embedding-CSP HTTP Request Header</a>
-    <li><a href="#ref-for-element-attrdef-iframe-csp-10">5.1. 
+    <li><a href="#ref-for-element-attrdef-iframe-csp-3">2. Framework</a>
+    <li><a href="#ref-for-element-attrdef-iframe-csp-4">2.1. &lt;iframe>'s csp attribute</a> <a href="#ref-for-element-attrdef-iframe-csp-5">(2)</a> <a href="#ref-for-element-attrdef-iframe-csp-6">(3)</a> <a href="#ref-for-element-attrdef-iframe-csp-7">(4)</a> <a href="#ref-for-element-attrdef-iframe-csp-8">(5)</a> <a href="#ref-for-element-attrdef-iframe-csp-9">(6)</a> <a href="#ref-for-element-attrdef-iframe-csp-10">(7)</a> <a href="#ref-for-element-attrdef-iframe-csp-11">(8)</a>
+    <li><a href="#ref-for-element-attrdef-iframe-csp-12">2.2. The Embedding-CSP HTTP Request Header</a>
+    <li><a href="#ref-for-element-attrdef-iframe-csp-13">2.3. Integration with HTML</a>
+    <li><a href="#ref-for-element-attrdef-iframe-csp-14">2.3.1. Browsing Context’s Required CSP</a>
+    <li><a href="#ref-for-element-attrdef-iframe-csp-15">5.1. 
     Requiring 'self' </a>
-   </ul>
-  </aside>
-  <aside class="dfn-panel" data-for="dom-htmliframeelement-csp">
-   <b><a href="#dom-htmliframeelement-csp">#dom-htmliframeelement-csp</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-dom-htmliframeelement-csp-1">2.1.1. &lt;iframe>'s csp attribute</a> <a href="#ref-for-dom-htmliframeelement-csp-2">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="iframe-csp-valid-attribute-value">
    <b><a href="#iframe-csp-valid-attribute-value">#iframe-csp-valid-attribute-value</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-iframe-csp-valid-attribute-value-1">2.1.1. &lt;iframe>'s csp attribute</a> <a href="#ref-for-iframe-csp-valid-attribute-value-2">(2)</a>
-    <li><a href="#ref-for-iframe-csp-valid-attribute-value-3">2.1.2. Browsing Context’s Required CSP</a>
+    <li><a href="#ref-for-iframe-csp-valid-attribute-value-1">2.1. &lt;iframe>'s csp attribute</a> <a href="#ref-for-iframe-csp-valid-attribute-value-2">(2)</a>
+    <li><a href="#ref-for-iframe-csp-valid-attribute-value-3">2.3.1. Browsing Context’s Required CSP</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="browsing-context-required-csp">
-   <b><a href="#browsing-context-required-csp">#browsing-context-required-csp</a></b><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="dom-htmliframeelement-csp">
+   <b><a href="#dom-htmliframeelement-csp">#dom-htmliframeelement-csp</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-browsing-context-required-csp-1">2.1. Integration with HTML</a> <a href="#ref-for-browsing-context-required-csp-2">(2)</a> <a href="#ref-for-browsing-context-required-csp-3">(3)</a> <a href="#ref-for-browsing-context-required-csp-4">(4)</a>
-    <li><a href="#ref-for-browsing-context-required-csp-5">2.1.1. &lt;iframe>'s csp attribute</a> <a href="#ref-for-browsing-context-required-csp-6">(2)</a>
-    <li><a href="#ref-for-browsing-context-required-csp-7">2.1.2. Browsing Context’s Required CSP</a> <a href="#ref-for-browsing-context-required-csp-8">(2)</a> <a href="#ref-for-browsing-context-required-csp-9">(3)</a> <a href="#ref-for-browsing-context-required-csp-10">(4)</a>
-    <li><a href="#ref-for-browsing-context-required-csp-11">3.1. 
-    Is response to request blocked by context’s required CSP? </a> <a href="#ref-for-browsing-context-required-csp-12">(2)</a>
-    <li><a href="#ref-for-browsing-context-required-csp-13">5.1. 
-    Requiring 'self' </a>
-   </ul>
-  </aside>
-  <aside class="dfn-panel" data-for="abstract-opdef-set-the-required-csp">
-   <b><a href="#abstract-opdef-set-the-required-csp">#abstract-opdef-set-the-required-csp</a></b><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-abstract-opdef-set-the-required-csp-1">2.1. Integration with HTML</a>
+    <li><a href="#ref-for-dom-htmliframeelement-csp-1">2.1. &lt;iframe>'s csp attribute</a> <a href="#ref-for-dom-htmliframeelement-csp-2">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="http-headerdef-embedding-csp">
@@ -3123,10 +3194,37 @@ B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
    <ul>
     <li><a href="#ref-for-http-headerdef-embedding-csp-1">1. Introduction</a>
     <li><a href="#ref-for-http-headerdef-embedding-csp-2">1.1. Examples</a> <a href="#ref-for-http-headerdef-embedding-csp-3">(2)</a>
-    <li><a href="#ref-for-http-headerdef-embedding-csp-4">2.1. Integration with HTML</a>
-    <li><a href="#ref-for-http-headerdef-embedding-csp-5">2.4. Policy Subsumption</a>
-    <li><a href="#ref-for-http-headerdef-embedding-csp-6">4.3. Data Exfiltration</a>
-    <li><a href="#ref-for-http-headerdef-embedding-csp-7">6. IANA Considerations</a>
+    <li><a href="#ref-for-http-headerdef-embedding-csp-4">2. Framework</a> <a href="#ref-for-http-headerdef-embedding-csp-5">(2)</a>
+    <li><a href="#ref-for-http-headerdef-embedding-csp-6">2.2. The Embedding-CSP HTTP Request Header</a>
+    <li><a href="#ref-for-http-headerdef-embedding-csp-7">2.3. Integration with HTML</a>
+    <li><a href="#ref-for-http-headerdef-embedding-csp-8">2.5. Policy Subsumption</a>
+    <li><a href="#ref-for-http-headerdef-embedding-csp-9">4.3. Data Exfiltration</a>
+    <li><a href="#ref-for-http-headerdef-embedding-csp-10">6. IANA Considerations</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="abstract-opdef-set-the-embedding-csp-header">
+   <b><a href="#abstract-opdef-set-the-embedding-csp-header">#abstract-opdef-set-the-embedding-csp-header</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-abstract-opdef-set-the-embedding-csp-header-1">2.3. Integration with HTML</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="browsing-context-required-csp">
+   <b><a href="#browsing-context-required-csp">#browsing-context-required-csp</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-browsing-context-required-csp-1">2.1. &lt;iframe>'s csp attribute</a> <a href="#ref-for-browsing-context-required-csp-2">(2)</a>
+    <li><a href="#ref-for-browsing-context-required-csp-3">2.2. The Embedding-CSP HTTP Request Header</a>
+    <li><a href="#ref-for-browsing-context-required-csp-4">2.3. Integration with HTML</a> <a href="#ref-for-browsing-context-required-csp-5">(2)</a>
+    <li><a href="#ref-for-browsing-context-required-csp-6">2.3.1. Browsing Context’s Required CSP</a> <a href="#ref-for-browsing-context-required-csp-7">(2)</a> <a href="#ref-for-browsing-context-required-csp-8">(3)</a> <a href="#ref-for-browsing-context-required-csp-9">(4)</a>
+    <li><a href="#ref-for-browsing-context-required-csp-10">3.1. 
+    Is response to request blocked by context’s required CSP? </a> <a href="#ref-for-browsing-context-required-csp-11">(2)</a>
+    <li><a href="#ref-for-browsing-context-required-csp-12">5.1. 
+    Requiring 'self' </a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="abstract-opdef-set-the-required-csp">
+   <b><a href="#abstract-opdef-set-the-required-csp">#abstract-opdef-set-the-required-csp</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-abstract-opdef-set-the-required-csp-1">2.3. Integration with HTML</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="http-headerdef-allow-csp-from">
@@ -3134,16 +3232,18 @@ B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
    <ul>
     <li><a href="#ref-for-http-headerdef-allow-csp-from-1">1. Introduction</a>
     <li><a href="#ref-for-http-headerdef-allow-csp-from-2">1.1. Examples</a>
-    <li><a href="#ref-for-http-headerdef-allow-csp-from-3">2.4. Policy Subsumption</a>
-    <li><a href="#ref-for-http-headerdef-allow-csp-from-4">3.2. 
+    <li><a href="#ref-for-http-headerdef-allow-csp-from-3">2. Framework</a> <a href="#ref-for-http-headerdef-allow-csp-from-4">(2)</a>
+    <li><a href="#ref-for-http-headerdef-allow-csp-from-5">2.2. The Embedding-CSP HTTP Request Header</a>
+    <li><a href="#ref-for-http-headerdef-allow-csp-from-6">2.5. Policy Subsumption</a>
+    <li><a href="#ref-for-http-headerdef-allow-csp-from-7">3.2. 
     Does response allow blanket enforcment of policy from request? </a>
-    <li><a href="#ref-for-http-headerdef-allow-csp-from-5">6. IANA Considerations</a>
+    <li><a href="#ref-for-http-headerdef-allow-csp-from-8">6. IANA Considerations</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="policy-subsume">
    <b><a href="#policy-subsume">#policy-subsume</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-policy-subsume-1">2.1.1. &lt;iframe>'s csp attribute</a>
+    <li><a href="#ref-for-policy-subsume-1">2.1. &lt;iframe>'s csp attribute</a>
     <li><a href="#ref-for-policy-subsume-2">3.2.4. 
     What is an intersection of two source lists  
     A and B given their respective origins

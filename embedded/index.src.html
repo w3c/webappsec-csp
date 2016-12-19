@@ -58,7 +58,6 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
  ██  ██   ███    ██    ██    ██  ██     ██
 ████ ██    ██    ██    ██     ██  ███████
 -->
-<section>
   Introduction {#intro}
   ============
 
@@ -167,6 +166,160 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
   Framework {#framework}
   =========
 
+  At a high level, this document describes a mechanism by which an embedee can opt-into a set of
+  restrictions specified by its embedder. The mechanism involves a few steps:
+
+  1.  The embedder specifies a required policy via a <{iframe/csp}> attribute on an <{iframe}>
+      element. This is described in more detail in [[#csp-attribute]].
+      
+  2.  That attribute's value will be sent along with any <a>navigation request</a> that targets
+      the <{iframe}>'s <a>nested browsing context</a> in an <a http-header>`Embedding-CSP`</a>
+      HTTP request header. This header is described in more detail in [[#embedding-csp-header]].
+
+      ISSUE: Rename this? `Required-CSP`, perhaps, to match the rest of the spec?
+
+  3.  The server can examine the <a http-header>`Embedding-CSP`</a> header to determine whether
+      it wishes to accept the required policy.If so, it can implicitly opt-in by sending a
+      <a http-header>`Content-Security-Policy`</a> header in the response that contains a policy
+      which is at least as strong as the required policy, or explicitly opt-in by sending an
+      <a http-header>`Allow-CSP-From`</a> header in the response that enables the embedding origin
+      to set whatever policy it wishes. The explicit mechanism is straightforward, described in
+      [[#allow-csp-from-header]]. The implicit mechanism is quite complicated, and comprises the
+      entire [[#policy-subsumption]] section.
+
+      If the server doesn't wish to accept the required policy, it can return an explicit error,
+      or simply return the usual data without either a matching
+      <a http-header>`Content-Security-Policy`</a> header or an <a http-header>`Allow-CSP-From`</a>
+      header. In this case, the user agent will block the response. This integration with HTML's
+      <a>navigate</a> algorithm is described in [[#html-integration]], and the blocking mechanism
+      is spelled out in [[#process-response]].
+
+  `<iframe>`'s `csp` attribute {#csp-attribute}
+  ----------------------------
+  
+  <{iframe}> elements have a <dfn element-attr for="iframe">csp</dfn> attribute, which specifies
+  the policy that an embedded document must agree to enforce upon itself. For example, the following
+  HTML would load `https://embedee.example.com/`, and ensure that `object-src 'none'` was enforced
+  upon it:
+
+  <div class="example">
+    <pre>
+      &lt;iframe src="https://embedee.example.com/" <a for="iframe" element-attr>csp</a>="object-src 'none'"&gt;
+      &lt;/iframe&gt;
+    </pre>
+  </div>
+
+  A <a>string</a> (|value|) is a <dfn for="iframe/csp">valid attribute value</dfn> for a given
+  <a>element</a> (|element|)'s <{iframe/csp}> <a>content attribute</a> if all of the
+  following statements are true:
+
+  1.  |value| is not the empty string.
+
+  2.  |value| matches the <a grammar>serialized-policy</a> ABNF grammar defined in [[!CSP3]].
+
+  3.  |element|'s <a>node document</a>'s <a for="Document">browsing context</a>'s
+      <a for="browsing context">required CSP</a> is `null`, or the result of
+      <a lt="parse a serialized csp as disposition">parsing |value| as "`enforce`"</a> is
+      <a for="policy">subsumed</a> by |element|'s <a>node document</a>'s <a for="Document">browsing
+      context</a>'s <a for="browsing context">required CSP</a>.
+
+  <div class="example">
+    The following strings are valid values for the <{iframe/csp}> attribute, as they're valid CSP
+    grammar:
+
+    *   `script-src 'none'`
+    *   `script-src 'self'; object-src 'none'; sandbox`
+    *   `not-a-directive https://whatever.not-a-tld`
+
+    Note: We consider the last item valid even though it doesn't express a meaningful policy in
+    order to remain forward-compatible with future CSP syntax.
+
+    The following, on the other hand, do not match the CSP syntax, and would not be considered valid
+    attribute values:
+
+    *  `script-src *\nInjected-Header: XSS!`
+    *  `💩`
+
+    Note: We need to be careful about the values we allow in the <{iframe/csp}> attribute, as its
+    contents will end up reflected as an HTTP request header. This concern is discussed in a little
+    more detail in [[#header-injection]].
+  </div>
+
+  <{iframe}>'s <{iframe/csp}> <a>content attribute</a> has a corresponding IDL attribute, defined
+  by the following WebIDL grammar [[!WEBIDL]]:
+
+  <pre class="idl">
+    partial interface HTMLIFrameElement {
+      [CEReactions] attribute DOMString csp;
+    };
+  </pre>
+
+  <div algorithm="HTMLIframeElement's csp IDL attribute's getter">
+    The {{HTMLIFrameElement}} {{HTMLIFrameElement/csp}} IDL attribute's <a>getter</a> will run the
+    following steps on a given |element|:
+
+    1.  Let |value| be the value of |element|'s <{iframe/csp}> <a>content attribute</a>.
+
+    2.  If |value| is a <a for="iframe/csp">valid attribute value</a> for |element|, return |value|.
+        
+    3.  Return the empty string.
+  </div>
+
+  <div algorithm="HTMLIframeElement's csp IDL attribute's setter">
+    The {{HTMLIFrameElement}} {{HTMLIFrameElement/csp}} IDL attribute's <a>setter</a> will run the
+    following steps on a given |element| for a given |value|:
+ 
+    1.  If |value| is a <a for="iframe/csp">valid attribute value</a> for |element|, set |element|'s
+        <{iframe/csp}> <a>content attribute</a> to the empty string and return.
+
+    2.  Set |element|'s <{iframe/csp}> <a>content attribute</a> to the empty string.
+  </div>
+
+  ISSUE: Upstream this to all the HTMLs.
+ 
+  The `Embedding-CSP` HTTP Request Header {#embedding-csp-header}
+  ---------------------------------------
+
+  In order to ensure that the embedded resource can decide whether or not it is willing to adhere to
+  the embedder's requirements, the policy expressed in an <{iframe}>'s <{iframe/csp}> attribute is
+  communicated along with affected <a>navigation requests</a> via an
+  "<dfn export http-header>`Embedding-CSP`</dfn>" HTTP request header. The header's value is
+  represented by the following ABNF [[!RFC5234]]:
+
+  <pre>
+    Embedding-CSP = <a grammar>serialized-policy</a>
+  </pre>
+
+  A user agent MUST NOT send more than one HTTP response header field named "`Embedding-CSP`", and
+  any such header MUST NOT contain more than one <a grammar>serialized-policy</a>.
+  
+  Servers MUST process only the first policy in the first such header received. As discussed in
+  [[#header-reflection]], servers SHOULD also carefully consider the implications of simply
+  reflecting a policy back to a client. If the server wishes to simply accept an embedder's
+  requirements, the <a http-header>`Allow-CSP-From`</a> header is a safer choice.
+
+  This header is set as part of HTML's <a>navigate</a> algorithm (see [[#html-integration]] for
+  details on the hook that calls the following algorithm):
+
+  <div algorithm="set a request's embedding-csp header">
+    To <dfn abstract-op local-lt="set-embedding-csp">set the `Embedding-CSP` header</dfn> for a
+    given <a>request</a> (|request|), run the following steps:
+
+    1.  If |request| is not a <a>navigation request</a>, return.
+
+    2.  Let |requirement| be |request|'s <a for="request">client</a>'s
+        <a for="environment settings object">responsible browsing context</a>'s
+        <a for="browsing context">required CSP</a>.
+
+    3.  If |requirement| is `null`, return.
+
+    4.  Assert: |requirement| is a <a>serialized CSP</a>, matching the
+        <a grammar>serialized-policy</a> grammar defined in [[!CSP3]].
+
+    5.  <a for="header list">Append</a> a header named "<a http-header>`Embedding-CSP`</a>" with a
+        value of |requirement| to |request|'s <a for="request">header list</a>.
+  </div>
+
   Integration with HTML {#html-integration}
   ---------------------
 
@@ -199,64 +352,14 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
   5.  Add the following after step 5 of HTML's <a>process a navigate fetch</a>
       algorithm:
 
-      6.  If `browsingContext`'s <a for="browsing context">required CSP</a> is not `null`,
-          <a for="header list">append</a> a header whose name is
-          "<a http-header>`Embedding-CSP`</a>" and whose value is
-          `browsingContext`'s <a for="browsing context">required CSP</a> to `request`'s
-          <a for="request">header list</a>.
+      6.  <a lt="set-embedding-csp" abstract-op>Set</a> `request`'s
+          "<a http-header>`Embedding-CSP`</a>" header.
 
       ISSUE: Upstream this to WHATWG's HTML.
 
       ISSUE(w3c/html#584): W3C's HTML is not based on Fetch, and does not have
       a <a>process a navigate fetch</a> algorithm into which to hook.
 
-  ### `<iframe>`'s `csp` attribute ### {#csp-attribute}
-  
-  <{iframe}> elements have a <dfn element-attr for="iframe">csp</dfn> attribute, which specifies
-  the policy that an embedded document must agree to enforce upon itself. 
-
-  <pre class="idl">
-    partial interface HTMLIFrameElement {
-      [CEReactions] attribute DOMString csp;
-    };
-  </pre>
-
-  A <a>string</a> (|value|) is a <dfn for="iframe/csp">valid attribute value</dfn> for a given
-  <a>element</a> (|element|)'s <{iframe/csp}> <a>content attribute</a> if all of the
-  following statements are true:
-
-  1.  |value| is not the empty string.
-
-  2.  |value| matches the <a grammar>serialized-policy</a> ABNF grammar defined in [[!CSP3]].
-
-  3.  |element|'s <a>node document</a>'s <a for="Document">browsing context</a>'s <a for="browsing context">required
-      CSP</a> is `null`, or the result of <a lt="parse a serialized csp as disposition">parsing
-      |value| as "`enforce`"</a> is <a for="policy">subsumed</a> by |element|'s <a>node
-      document</a>'s <a for="Document">browsing context</a>'s <a for="browsing context">required CSP</a>.
-
-  <div algorithm="HTMLIframeElement's csp IDL attribute's getter">
-    The {{HTMLIFrameElement}} {{HTMLIFrameElement/csp}} IDL attribute's <a>getter</a> will run the
-    following steps on a given |element|:
-
-    1.  Let |value| be the value of |element|'s <{iframe/csp}> <a>content attribute</a>.
-
-    2.  If |value| is a <a for="iframe/csp">valid attribute value</a> for |element|, return |value|.
-        
-    3.  Return the empty string.
-  </div>
-
-  <div algorithm="HTMLIframeElement's csp IDL attribute's setter">
-    The {{HTMLIFrameElement}} {{HTMLIFrameElement/csp}} IDL attribute's <a>setter</a> will run the
-    following steps on a given |element| for a given |value|:
- 
-    1.  If |value| is a <a for="iframe/csp">valid attribute value</a> for |element|, set |element|'s
-        <{iframe/csp}> <a>content attribute</a> to the empty string and return.
-
-    2.  Set |element|'s <{iframe/csp}> <a>content attribute</a> to the empty string.
-  </div>
-
-  ISSUE: Upstream this to all the HTMLs.
- 
   ### Browsing Context's Required CSP ### {#required-csp}
 
   Each <a>browsing context</a> has a <dfn for="browsing context">required CSP</dfn>, which is either
@@ -283,27 +386,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
   ISSUE: Upstream a hook to HTML.
 
-  The `Embedding-CSP` HTTP Request Header {#embedding-csp-http-header}
-  ---------------------------------------
-
-  In order to ensure that the embedded resource can decide whether or not it is
-  willing to adhere to the embedder's requirements, the policy expressed in an
-  <{iframe}>'s <{iframe/csp}> attribute is communicated along with some
-  <a>requests</a> via an "<dfn export http-header>`Embedding-CSP`</dfn>" HTTP
-  request header. The header's value is represented by the following ABNF
-  [[!RFC5234]]:
-
-  <pre>
-    Embedding-CSP = <a grammar>serialized-policy</a>
-  </pre>
-
-  A user agent MUST NOT send more than one HTTP response header field named
-  "`Embedding-CSP`", and any such header MUST NOT contain more than one
-  <a grammar>serialized-policy</a>.
-  
-  Servers MUST process only the first policy in the first such header received.
-
-  The `Allow-CSP-From` HTTP Response Header {#allow-csp-from-http-header}
+  The `Allow-CSP-From` HTTP Response Header {#allow-csp-from-header}
   -------------------------------------------
 
   An embedee can opt-into accepting a policy specified by an embedder by
@@ -1549,6 +1632,18 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
   (via GET parameters, etc), and embedders remain in control over the endpoints
   to which such requests may be made by enforcing a Content Security Policy with
   an appropriate `child-src` directive.
+
+  Header Injection {#header-injection}
+  ----------------
+
+  ISSUE: Spell out the concerns Mario raised in the thread around
+  <a href="https://twitter.com/0x6D6172696F/status/810066803653308416">https://twitter.com/0x6D6172696F/status/810066803653308416</a>.
+
+  Header Reflection {#header-reflection}
+  -----------------
+
+  ISSUE: Spell out the concerns Mario raised in the thread around
+  <a href="https://twitter.com/0x6D6172696F/status/810066803653308416">https://twitter.com/0x6D6172696F/status/810066803653308416</a>.
 </section>
 
 <!-- Big text: Authoring -->
@@ -1606,7 +1701,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
   :   Author/Change controller
   ::  W3C
   :   Specification document
-  ::  This specification (See [[#embedding-csp-http-header]])
+  ::  This specification (See [[#embedding-csp-header]])
 
   Likewise, the registry should be updated with the following registration
   for the <a http-header>`Allow-CSP-From`</a> header: [[!RFC3864]]
@@ -1620,5 +1715,5 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
   :   Author/Change controller
   ::  W3C
   :   Specification document
-  ::  This specification (See [[#allow-csp-from-http-header]])
+  ::  This specification (See [[#allow-csp-from-header]])
 </section>
