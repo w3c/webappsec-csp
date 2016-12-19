@@ -1423,7 +1423,7 @@ pre.idl.highlight { color: #708090; }
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1>Content Security Policy: Embedded Enforcement</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-12-17">17 December 2016</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2016-12-19">19 December 2016</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1568,13 +1568,12 @@ restrictions upon itself.</p>
   proposes a mechanism which relies on an explicit opt-in from the embedded
   content, which ought to make it possible for widgets to cooperate with their
   embedders to negotiate a reasonable set of restrictions.</p>
-    <p>In short, the embedder proposes a Content Security Policy as an attribute on
-  the <code>&lt;iframe></code> element. This policy is transmitted along with the HTTP request
-  for the framed content in an <code>Embedding-CSP</code> header. If the embedded content
-  can accept that policy, it may do so by returning the proposed policy in a <code>Content-Security-Policy</code> header along with the response.</p>
-    <p>If the response contains a policy identical to the policy which the embedder
-  requested, the user agent will render the embedded content. If no such policy
-  is present, the response will be blocked.</p>
+    <p>In short, the embedder proposes a Content Security Policy by setting an attribute on an <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a></code> element. This policy is transmitted along with the HTTP request for the framed content in an
+  HTTP request header (<a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-1"><code>Embedding-CSP</code></a>). If the embedded content can accept that
+  policy, it can enforce it by returning a <a data-link-type="http-header"><code>Content-Security-Policy</code></a> or <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-1"><code>Allow-CSP-From</code></a> header along with the response.</p>
+    <p>If the response contains a policy at least as strict as the policy which the embedder requested,
+  or accepts the embedder-provided policy, then the user agent will render the embedded content. If
+  no such assertion is present, the response will be blocked.</p>
     <h3 class="heading settled" data-level="1.1" id="examples"><span class="secno">1.1. </span><span class="content">Examples</span><a class="self-link" href="#examples"></a></h3>
     <div class="example" id="example1">
      <a class="self-link" href="#example1"></a> MegaCorp Inc. wishes to ensure that the advertisements that run on its
@@ -1586,11 +1585,11 @@ restrictions upon itself.</p>
 &lt;/iframe>
 </pre>
      <p>This will generate a request to <code>advertisements-r-us.example.com</code> that has
-    an <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-1"><code>Embedding-CSP</code></a> header, as follows:</p>
+    an <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-2"><code>Embedding-CSP</code></a> header, as follows:</p>
 <pre>GET / HTTP/1.1
 Host: advertisements-r-us.example.com
 ...
-<a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-2">Embedding-CSP</a>: script-src https://trusted-cdn.example.com/
+<a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-3">Embedding-CSP</a>: script-src https://trusted-cdn.example.com/
 ...
 </pre>
      <p>The advertisement server parses this request header, decides that it’s
@@ -1606,11 +1605,11 @@ Host: advertisements-r-us.example.com
      <a class="self-link" href="#example2"></a> The advertising server in the above example wishes to ensure that no plugins
     are loaded, regardless of what its embedder requires. It can do so by
     sending a restrictive policy in addition to any policy required by an
-    embedder. That is, given a request that has an <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-3"><code>Embedding-CSP</code></a> header: 
+    embedder. That is, given a request that has an <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-4"><code>Embedding-CSP</code></a> header: 
 <pre>GET / HTTP/1.1
 Host: advertisements-r-us.example.com
 ...
-<a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-4">Embedding-CSP</a>: script-src https://trusted-cdn.example.com/
+<a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-5">Embedding-CSP</a>: script-src https://trusted-cdn.example.com/
 ...
 </pre>
      <p>The advertisement server parses this request header, decides that it’s
@@ -1630,16 +1629,16 @@ Host: advertisements-r-us.example.com
     <div class="example" id="example3">
      <a class="self-link" href="#example3"></a> To ease the embedee-side implementation, Advertisements-R-Us decides it can
     trust policies sent by MegaCorp, Inc. to be applied safely to its
-    advertisements. It can express this assertion via the <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-1"><code>Allow-CSP-From</code></a> response header. Given the scenario in
+    advertisements. It can express this assertion via the <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-2"><code>Allow-CSP-From</code></a> response header. Given the scenario in
     the above examples, the following response wold be loaded successfully: 
 <pre>HTTP/1.1 200 OK
 ...
-<a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-2">Allow-CSP-From</a>: https://example.com/
+<a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-3">Allow-CSP-From</a>: https://example.com/
 </pre>
      <p>As would the wide-open response:</p>
 <pre>HTTP/1.1 200 OK
 ...
-<a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-3">Allow-CSP-From</a>: *
+<a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-4">Allow-CSP-From</a>: *
 </pre>
     </div>
    </section>
@@ -1678,7 +1677,7 @@ Host: advertisements-r-us.example.com
       <ol start="6">
        <li data-md="">
         <p>If <code>browsingContext</code>'s <a data-link-type="dfn" href="#required-csp" id="ref-for-required-csp-2">required CSP</a> is not <code>null</code>, <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-header-list-append">append</a> a header whose name is
-  "<a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-5"><code>Embedding-CSP</code></a>" and whose value is <code>browsingContext</code>'s <a data-link-type="dfn" href="#required-csp" id="ref-for-required-csp-3">required CSP</a> to <code>request</code>'s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-header-list">header list</a>.</p>
+  "<a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-6"><code>Embedding-CSP</code></a>" and whose value is <code>browsingContext</code>'s <a data-link-type="dfn" href="#required-csp" id="ref-for-required-csp-3">required CSP</a> to <code>request</code>'s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-header-list">header list</a>.</p>
       </ol>
       <p class="issue" id="issue-fdc1da1f0"><a class="self-link" href="#issue-fdc1da1f0"></a> Upstream this to WHATWG’s HTML.</p>
       <p class="issue" id="issue-7b3609ea"><a class="self-link" href="#issue-7b3609ea"></a> W3C’s HTML is not based on Fetch, and does not have
@@ -1701,7 +1700,7 @@ Host: advertisements-r-us.example.com
 </pre>
     <h3 class="heading settled" data-level="2.4" id="policy-subsumption"><span class="secno">2.4. </span><span class="content">Policy Subsumption</span><a class="self-link" href="#policy-subsumption"></a></h3>
     <p>If an embedee does not wish to accept any <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> specified by its
-  embedder via the <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-4">Allow-CSP-From</a> header, it can deliver a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> that is as strict, or stricter than the policy requested in the <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-6">Embedding-CSP</a> header. That is, if the embedder requests <code>object-src https://cdn.example.com/</code>, the embedee can respond with <code>object-src 'none'</code>. Because every possible <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> blocked by <code>object-src https://cdn.example.com/</code> would also be blocked by <code>object-src 'none'</code>, it is said that the embedder’s required <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> <dfn class="dfn-paneled" data-dfn-for="policy" data-dfn-type="dfn" data-lt="subsume" data-noexport="" id="policy-subsume">subsumes</dfn> the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> delivered by
+  embedder via the <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-5">Allow-CSP-From</a> header, it can deliver a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> that is as strict, or stricter than the policy requested in the <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-7">Embedding-CSP</a> header. That is, if the embedder requests <code>object-src https://cdn.example.com/</code>, the embedee can respond with <code>object-src 'none'</code>. Because every possible <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> blocked by <code>object-src https://cdn.example.com/</code> would also be blocked by <code>object-src 'none'</code>, it is said that the embedder’s required <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> <dfn class="dfn-paneled" data-dfn-for="policy" data-dfn-type="dfn" data-lt="subsume" data-noexport="" id="policy-subsume">subsumes</dfn> the <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> delivered by
   the embedee.</p>
     <p>Given the complexity of CSP’s syntax, subsumption is not trivial to calculate.
   The details are spelled out in <a href="#subsume-policy-list">§3.3 Does subsuming policy subsume policy list given their respective
@@ -1760,7 +1759,7 @@ Host: advertisements-r-us.example.com
   from the embedder, so we allow the embedder to tighten that policy via this
   embedding mechanism.</p>
      <li data-md="">
-      <p>If <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a> has a header named <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-5"><code>Allow-CSP-From</code></a> (<var>header</var>):</p>
+      <p>If <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list">header list</a> has a header named <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-6"><code>Allow-CSP-From</code></a> (<var>header</var>):</p>
       <ol>
        <li data-md="">
         <p>If <var>header</var>’s value is "<code>*</code>", return "<code>Allowed</code>".</p>
@@ -2728,7 +2727,7 @@ B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
   given resource via an appropriate <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#frame-ancestors"><code>frame-ancestors</code></a> directive.</p>
     <h3 class="heading settled" data-level="4.3" id="exfiltration"><span class="secno">4.3. </span><span class="content">Data Exfiltration</span><a class="self-link" href="#exfiltration"></a></h3>
     <p>This feature allows an embedder to send information to a third-party endpoint
-  via the <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-7"><code>Embedding-CSP</code></a> HTTP header. This doesn’t seem to
+  via the <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-8"><code>Embedding-CSP</code></a> HTTP header. This doesn’t seem to
   expose any information that couldn’t be tunneled in the HTTP request itself
   (via GET parameters, etc), and embedders remain in control over the endpoints
   to which such requests may be made by enforcing a Content Security Policy with
@@ -2758,7 +2757,7 @@ B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
    <section>
     <h2 class="heading settled" data-level="6" id="iana"><span class="secno">6. </span><span class="content">IANA Considerations</span><a class="self-link" href="#iana"></a></h2>
     <p>The permanent message header field registry should be updated
-  with the following registration for the <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-8"><code>Embedding-CSP</code></a> header: <a data-link-type="biblio" href="#biblio-rfc3864">[RFC3864]</a></p>
+  with the following registration for the <a data-link-type="http-header" href="#http-headerdef-embedding-csp" id="ref-for-http-headerdef-embedding-csp-9"><code>Embedding-CSP</code></a> header: <a data-link-type="biblio" href="#biblio-rfc3864">[RFC3864]</a></p>
     <dl>
      <dt data-md="">
       <p>Header field name</p>
@@ -2782,7 +2781,7 @@ B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
       <p>This specification (See <a href="#embedding-csp-http-header">§2.2 The Embedding-CSP HTTP Request Header</a>)</p>
     </dl>
     <p>Likewise, the registry should be updated with the following registration
-  for the <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-6"><code>Allow-CSP-From</code></a> header: <a data-link-type="biblio" href="#biblio-rfc3864">[RFC3864]</a></p>
+  for the <a data-link-type="http-header" href="#http-headerdef-allow-csp-from" id="ref-for-http-headerdef-allow-csp-from-7"><code>Allow-CSP-From</code></a> header: <a data-link-type="biblio" href="#biblio-rfc3864">[RFC3864]</a></p>
     <dl>
      <dt data-md="">
       <p>Header field name</p>
@@ -3048,21 +3047,23 @@ B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
   <aside class="dfn-panel" data-for="http-headerdef-embedding-csp">
    <b><a href="#http-headerdef-embedding-csp">#http-headerdef-embedding-csp</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-http-headerdef-embedding-csp-1">1.1. Examples</a> <a href="#ref-for-http-headerdef-embedding-csp-2">(2)</a> <a href="#ref-for-http-headerdef-embedding-csp-3">(3)</a> <a href="#ref-for-http-headerdef-embedding-csp-4">(4)</a>
-    <li><a href="#ref-for-http-headerdef-embedding-csp-5">2.1. Integration with HTML</a>
-    <li><a href="#ref-for-http-headerdef-embedding-csp-6">2.4. Policy Subsumption</a>
-    <li><a href="#ref-for-http-headerdef-embedding-csp-7">4.3. Data Exfiltration</a>
-    <li><a href="#ref-for-http-headerdef-embedding-csp-8">6. IANA Considerations</a>
+    <li><a href="#ref-for-http-headerdef-embedding-csp-1">1. Introduction</a>
+    <li><a href="#ref-for-http-headerdef-embedding-csp-2">1.1. Examples</a> <a href="#ref-for-http-headerdef-embedding-csp-3">(2)</a> <a href="#ref-for-http-headerdef-embedding-csp-4">(3)</a> <a href="#ref-for-http-headerdef-embedding-csp-5">(4)</a>
+    <li><a href="#ref-for-http-headerdef-embedding-csp-6">2.1. Integration with HTML</a>
+    <li><a href="#ref-for-http-headerdef-embedding-csp-7">2.4. Policy Subsumption</a>
+    <li><a href="#ref-for-http-headerdef-embedding-csp-8">4.3. Data Exfiltration</a>
+    <li><a href="#ref-for-http-headerdef-embedding-csp-9">6. IANA Considerations</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="http-headerdef-allow-csp-from">
    <b><a href="#http-headerdef-allow-csp-from">#http-headerdef-allow-csp-from</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-http-headerdef-allow-csp-from-1">1.1. Examples</a> <a href="#ref-for-http-headerdef-allow-csp-from-2">(2)</a> <a href="#ref-for-http-headerdef-allow-csp-from-3">(3)</a>
-    <li><a href="#ref-for-http-headerdef-allow-csp-from-4">2.4. Policy Subsumption</a>
-    <li><a href="#ref-for-http-headerdef-allow-csp-from-5">3.2. 
+    <li><a href="#ref-for-http-headerdef-allow-csp-from-1">1. Introduction</a>
+    <li><a href="#ref-for-http-headerdef-allow-csp-from-2">1.1. Examples</a> <a href="#ref-for-http-headerdef-allow-csp-from-3">(2)</a> <a href="#ref-for-http-headerdef-allow-csp-from-4">(3)</a>
+    <li><a href="#ref-for-http-headerdef-allow-csp-from-5">2.4. Policy Subsumption</a>
+    <li><a href="#ref-for-http-headerdef-allow-csp-from-6">3.2. 
     Does response allow blanket enforcment of policy from request? </a>
-    <li><a href="#ref-for-http-headerdef-allow-csp-from-6">6. IANA Considerations</a>
+    <li><a href="#ref-for-http-headerdef-allow-csp-from-7">6. IANA Considerations</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="policy-subsume">
