@@ -19,10 +19,14 @@ Boilerplate: omit conformance, omit feedback-header
 Markup Shorthands: css off, markdown on
 </pre>
 <pre class="link-defaults">
-spec:html; type:dfn; for:/; text:browsing context  
-spec:html; type:dfn; text:case-sensitive
-spec:html; type:dfn; text:ascii case-insensitive
+spec: html;
+  type: dfn; for: /;
+    text: browsing context  
+    text: case-sensitive
+    text: content attribute
+    text: navigate
 spec:dom; type:interface; text:Document
+spec:dom; type:dfn; for:/; text:element
 spec:fetch
   type: dfn
     text:request; for: /
@@ -41,6 +45,9 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   type: grammar
     text: origin-or-null; url: http-origin
     text: wildcard; url: http-new-header-syntax
+spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
+  type:dfn; 
+    text: parse a serialized csp as disposition; url: parse-serialized-policy
 </pre>
 <!--
 ████ ██    ██ ████████ ████████   ███████
@@ -110,37 +117,35 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
       ...
     </pre>
 
-    The advertisement server parses this request header, decides that it's
-    acceptable, and reflects it in the response:
+    The advertisement server parses this request header, decides that it's acceptable, and adds a
+    header to the response, informing the user agent that it will adhere to the restrictions imposed
+    by its embedder (`https://example.com`):
 
     <pre>
       HTTP/1.1 200 OK
       ...
-      <a>Content-Security-Policy</a>: script-src https://trusted-cdn.example.com/
+      <a http-header>Allow-CSP-From</a>: https://example.com
     </pre>
-
-    Since the policy asserted by the response matches the policy required by the
-    request, the frame loads successfully.
   </div>
 
   <div class="example" id="example2">
-    The advertising server in the above example wishes to ensure that no plugins
-    are loaded, regardless of what its embedder requires. It can do so by
-    sending a restrictive policy in addition to any policy required by an
-    embedder. That is, given a request that has an
-    <a http-header>`Embedding-CSP`</a> header:
+    The advertisement server in the example above could also accept the restrictions by emitting its
+    own  <a http-header>`Content-Security-Policy`</a> header that's at least as strong as the policy
+    which the embedder requires. For example, it might wish to ensure that no plugins are loaded,
+    regardless of what the embedder allows. It can do so by emitting a policy that includes the
+    embedder's restrictions, and adds more on top:
 
     <pre>
-      GET / HTTP/1.1
-      Host: advertisements-r-us.example.com
+      HTTP/1.1 200 OK
       ...
-      <a http-header>Embedding-CSP</a>: script-src https://trusted-cdn.example.com/
-      ...
+      <a>Content-Security-Policy</a>: script-src https://trusted-cdn.example.com/; object-src 'none'
     </pre>
 
-    The advertisement server parses this request header, decides that it's
-    acceptable, and reflects it in the response, along with a policy that
-    prevents plugin loading:
+    Since the policy asserted by the response allows strictly fewer requests than the policy
+    required by the request, the frame loads successfully.
+
+    Note that the server could also deliver two policies, one which mirrors the restrictions of the
+    embedder exactly, another which tightens them:
 
     <pre>
       HTTP/1.1 200 OK
@@ -156,28 +161,6 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
     <em>effective</em> policy for the page more restrictive, allows the frame
     to load successfully.
   </div>
-
-  <div class="example" id="example3">
-    To ease the embedee-side implementation, Advertisements-R-Us decides it can
-    trust policies sent by MegaCorp, Inc. to be applied safely to its
-    advertisements. It can express this assertion via the
-    <a http-header>`Allow-CSP-From`</a> response header. Given the scenario in
-    the above examples, the following response wold be loaded successfully:
-
-    <pre>
-      HTTP/1.1 200 OK
-      ...
-      <a http-header>Allow-CSP-From</a>: https://example.com/
-    </pre>
-
-    As would the wide-open response:
-
-    <pre>
-      HTTP/1.1 200 OK
-      ...
-      <a http-header>Allow-CSP-From</a>: *
-    </pre>
-  </div>
 </section>
 
 <section>
@@ -187,35 +170,22 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   Integration with HTML {#html-integration}
   ---------------------
 
-  1.  <{iframe}> elements have a <dfn element-attr for="iframe">csp</dfn>
-      attribute which specifies the policy that an embedded document must agree
-      to enforce upon itself. Valid attribute values match the
-      <a grammar>serialized-policy</a> grammar from [[!CSP3]].
+  1.  <{iframe}> elements have a <{iframe/csp}> attribute, defined in [[#csp-attribute]].
 
-      <pre class="idl">
-        partial interface HTMLIFrameElement {
-          [CEReactions] attribute DOMString csp;
-        };
-      </pre>
+  2.  Each <a>browsing context</a> has a <a for="browsing context">required CSP</a>, defined in
+      [[#required-csp]].
 
-      {{HTMLIFrameElement}}'s {{HTMLIFrameElement/csp}} IDL attribute
-      <a>reflects</a> the value of the element's <{iframe/csp}> content attribute.
+  3.  Add the following after step 10 of HTML's <a>navigate</a> algorithm:
+      
+      11. <a lt="set the required CSP" abstract-op>Set</a> `browsingContext`'s
+          <a for="browsing context">required CSP</a>.
 
-      ISSUE: Upstream this to all the HTMLs.
+      ISSUE: Upstream this to WHATWG's HTML.
 
-      ISSUE: Nested frames shouldn't be able to set a `csp` attribute that isn't
-      <a>subsumed</a> by their <a>required CSP</a>.
+      ISSUE(w3c/html#584): W3C's HTML's navigation algorithm is wildly divergent from WHATWG's at
+      this point. Upstream something to that document once things are reconciled.
 
-  2.  A <a>browsing context</a> has a <dfn export>required CSP</dfn>, which is
-      either `null` or a <a>serialized CSP</a>. For a given <a>browsing
-      context</a> (|context|), the value is the result of executing
-      [[#required-csp-for-context]] on |context|.
-
-      ISSUE: Does this need to be upstreamed? Probably not.
-
-      ISSUE: This should probably cascade down into subframes.
-
-  3.  Add the following to the list of error conditions in step 1 of HTML's
+  4.  Add the following to the list of error conditions in step 1 of HTML's
       <a>process a navigate response</a> algorithm:
 
       *   The [[#process-response]] algorithm returns "`Blocked`" when executed
@@ -226,20 +196,93 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
       ISSUE(w3c/html#584): W3C's HTML is not based on Fetch, and does not have
       a <a>process a navigate response</a> algorithm into which to hook.
 
-  4.  Add the following after step 5 of HTML's <a>process a navigate fetch</a>
+  5.  Add the following after step 5 of HTML's <a>process a navigate fetch</a>
       algorithm:
 
-      6.  If `browsingContext`'s <a>required CSP</a> is not `null`,
+      6.  If `browsingContext`'s <a for="browsing context">required CSP</a> is not `null`,
           <a for="header list">append</a> a header whose name is
           "<a http-header>`Embedding-CSP`</a>" and whose value is
-          `browsingContext`'s <a>required CSP</a> to `request`'s
+          `browsingContext`'s <a for="browsing context">required CSP</a> to `request`'s
           <a for="request">header list</a>.
 
       ISSUE: Upstream this to WHATWG's HTML.
 
       ISSUE(w3c/html#584): W3C's HTML is not based on Fetch, and does not have
       a <a>process a navigate fetch</a> algorithm into which to hook.
+
+  ### `<iframe>`'s `csp` attribute ### {#csp-attribute}
   
+  <{iframe}> elements have a <dfn element-attr for="iframe">csp</dfn> attribute, which specifies
+  the policy that an embedded document must agree to enforce upon itself. 
+
+  <pre class="idl">
+    partial interface HTMLIFrameElement {
+      [CEReactions] attribute DOMString csp;
+    };
+  </pre>
+
+  A <a>string</a> (|value|) is a <dfn for="iframe/csp">valid attribute value</dfn> for a given
+  <a>element</a> (|element|)'s <{iframe/csp}> <a>content attribute</a> if all of the
+  following statements are true:
+
+  1.  |value| is not the empty string.
+
+  2.  |value| matches the <a grammar>serialized-policy</a> ABNF grammar defined in [[!CSP3]].
+
+  3.  |element|'s <a>node document</a>'s <a for="Document">browsing context</a>'s <a for="browsing context">required
+      CSP</a> is `null`, or the result of <a lt="parse a serialized csp as disposition">parsing
+      |value| as "`enforce`"</a> is <a for="policy">subsumed</a> by |element|'s <a>node
+      document</a>'s <a for="Document">browsing context</a>'s <a for="browsing context">required CSP</a>.
+
+  <div algorithm="HTMLIframeElement's csp IDL attribute's getter">
+    The {{HTMLIFrameElement}} {{HTMLIFrameElement/csp}} IDL attribute's <a>getter</a> will run the
+    following steps on a given |element|:
+
+    1.  Let |value| be the value of |element|'s <{iframe/csp}> <a>content attribute</a>.
+
+    2.  If |value| is a <a for="iframe/csp">valid attribute value</a> for |element|, return |value|.
+        
+    3.  Return the empty string.
+  </div>
+
+  <div algorithm="HTMLIframeElement's csp IDL attribute's setter">
+    The {{HTMLIFrameElement}} {{HTMLIFrameElement/csp}} IDL attribute's <a>setter</a> will run the
+    following steps on a given |element| for a given |value|:
+ 
+    1.  If |value| is a <a for="iframe/csp">valid attribute value</a> for |element|, set |element|'s
+        <{iframe/csp}> <a>content attribute</a> to the empty string and return.
+
+    2.  Set |element|'s <{iframe/csp}> <a>content attribute</a> to the empty string.
+  </div>
+
+  ISSUE: Upstream this to all the HTMLs.
+ 
+  ### Browsing Context's Required CSP ### {#required-csp}
+
+  Each <a>browsing context</a> has a <dfn for="browsing context">required CSP</dfn>, which is either
+  `null` or a <a>serialized CSP</a>. The value is set during the <a>navigate</a> algorithm, and will
+  not change until the <a>browsing context</a>'s <a>active document</a> changes.
+
+  The following algorithm will execute at around step 10 of the current <a>navigate</a> algorithm:
+
+  <div algorithm="browsing context's required CSP">
+    To <dfn abstract-op>set the required CSP</dfn> for a given <a>browsing context</a> (|context|),
+    run the following steps:
+    
+    1.  If |context| is a <a>nested browsing context</a>:
+
+        1.  If |context|'s <a>browsing context container</a> has an <{iframe/csp}> <a>content
+            attribute</a> with a <a for="iframe/csp">valid attribute value</a> (|value|), set
+            |context|'s <a for="browsing context">required CSP</a> to |value| and return.
+
+        2.  Set |context|'s <a for="browsing context">required CSP</a> to the value of |context|'s
+            <a>parent browsing context</a>'s <a for="browsing context">required CSP</a>.
+
+    2.  Set |context|'s <a for="browsing context">required CSP</a> to `null`.
+  </div>
+
+  ISSUE: Upstream a hook to HTML.
+
   The `Embedding-CSP` HTTP Request Header {#embedding-csp-http-header}
   ---------------------------------------
 
@@ -307,10 +350,10 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
     
         1.  |context| is not a <a>nested browsing context</a>.
 
-        2.  |context|'s <a>required CSP</a> is `null`.
+        2.  |context|'s <a for="browsing context">required CSP</a> is `null`.
 
     2.  Let |embedding policy| be the result of executing
-        [[csp3#parse-serialized-policy]] on |context|'s <a>required CSP</a> and
+        [[csp3#parse-serialized-policy]] on |context|'s <a for="browsing context">required CSP</a> and
         "`enforce`".
 
     3.  If the [[#origin-allowed]] algorithm returns "`Allowed`" when executed upon
@@ -1468,22 +1511,6 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
         |subsuming policy|, |subsuming origin|, |effective policy|, and
         |origin|. 
   </ol>
-
-  <h3 id="required-csp-for-context" algorithm>
-    Obtain the required CSP for |context|.
-  </h3>
-
-  Given a <a>browsing context</a> (|context|), the following algorithm returns
-  its <a>required CSP</a>:
-
-  <ol class="algorithm">
-    1.  If |context| is a <a>nested browsing context</a>.
-
-        1.  If |context|'s <a>browsing context container</a> has an <{iframe/csp}>
-            content attribute, return its value.
-
-    2.  Return `null`.
-  </ol>
 </section>
 
 <section>
@@ -1529,15 +1556,17 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   <h2 id="authoring-considerations">Authoring Considerations</h2>
 
   <h3 id="effect-self">
-    The effect of `self` specified in <a>required CSP</a>.
+    Requiring `'self'`
   </h3>
 
-  If <a>required CSP</a> includes `self` in any of the <a>source lists</a>,
-  `self` refers to the embedee's <a for="/">origin</a>.
+  When processing a <a>browsing context</a>'s <a for="browsing context">required CSP</a>, the
+  keyword <a grammar>`'self'`</a> refers to the <a for="/">origin</a> of the URL being loaded
+  into the <a>nested browsing context</a>, not to the origin of the document in the <a>source
+  browsing context</a>.
 
   <div class="example">
-    MegaCorp Inc. specifies the following <a>required CSP</a> on their page
-    "https://example.com/page.html":
+    MegaCorp Inc. requires a policy containing <a grammar>`'self'`</a> on their page at
+    `https://example.com/page.html`:
 
     <pre>
       &lt;iframe src="https://advertisements-r-us.example.com/ad1.cfm"
