@@ -933,6 +933,151 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
     source expressions.
   </div>
 
+  #### Source Expression Similarity #### {#similarity-source-expressions}
+
+  <div algorithm="similarity of two source expressions">
+    Given two source expressions (|A| and |B|), the <dfn lt="similarity of two source expressions" abstract-op>
+    similaratiy</dfn> of |A| and |B| indicates whether the two expressions are <a>case-sensitive</a> 
+    matches or in the case of <a grammar>`scheme-source`</a>, <a grammar>`host-source`</a> expressions,
+    if their individual parts match (that is <a grammar>`scheme-part`</a>, 
+    <a grammar>`host-part`</a>, <a grammar>`port-part`</a>, and <a grammar>`path-part`</a>).
+
+    NOTE: This property is symmetric. That is if |A| is 
+    <a lt="similarity of two source expressions" abstract-op>similar</a> to |B|, 
+    it must be that |B| is 
+    <a lt="similarity of two source expressions" abstract-op>similar</a> to |A|.
+
+    A <a>source expression</a> has a 
+    <dfn for="source expression">wildcard host</dfn> if the first character of the
+    <a>source expression</a>'s <a grammar>`host-part`</a> is an U+002A ASTERISK 
+    character (`*`).
+
+    A <a>source expression</a> has a 
+    <dfn for="source expression">wildcard port</dfn> if the 
+    <a grammar>`port-part`</a> of the <a>source expression</a> is an U+002A 
+    ASTERISK character (`*`).
+
+    1.  If |A|'s grammar does not match |B|'s grammar, return "`Not Similar`".
+
+    2.  If |A| matches the <a grammar>`keyword-source`</a>, <a grammar>`nonce-source`</a>,
+        or <a grammar>`hash-source`</a> grammar:
+
+        1.  If |A| is a <a>case-sensitive</a> match to |B|, return "`Similar`".
+
+        2.  Return "`Not Similar`".
+
+    2.  Let |scheme A| be |A|'s <a grammar>`scheme-part`</a>, if present, and 
+        `null` otherwise.
+        
+    3.  Let |scheme B| be |B|'s <a grammar>`scheme-part`</a>, if present, and 
+        `null` otherwise.
+
+    4.  If the result of executing [[CSP3#match-schemes]] returns 
+        "`Does Not Match`" given |scheme A| and |scheme B|, and the result of 
+        executing [[CSP3#match-schemes]] on |scheme B| and |scheme A| is 
+        "`Does Not Match`", return "`Not Similar`".
+
+    5.  If |A| or |B| matches  <a grammar>`scheme-source`</a> grammar,
+        return "`Similar`".
+
+    6.  Return "`Not Similar`" if any of the following is true:
+
+        1.  Let |host A| be |A|'s <a grammar>`host-part`</a>, if present, and 
+            `null` otherwise.
+        
+        2.  Let |host B| be |B|'s <a grammar>`host-part`</a>, if present, and 
+            `null` otherwise.
+
+        3.  Both |A| and |B| have a <a for="source expression">wildcard host</a>,
+            but |host A| is not an <a>ASCII case-insensitive</a> match to |host B|.
+
+        4.  At most one of |A| and |B| has a 
+            <a for="source expression">wildcard host</a>, the result of executing 
+            [[CSP3#match-hosts]] is "`Does Not Match`" given |host A| and 
+            |host B|, and the result of executing [[CSP3#match-hosts]] on |host B|
+            and |host A| is also "`Does Not Match`".
+
+        5.  Let |port A| be |A|'s <a grammar>`port-part`</a>, if present, and 
+            `null` otherwise.
+        
+        6.  Let |port B| be |B|'s <a grammar>`port-part`</a>, if present, and 
+            `null` otherwise.
+
+        7.  Neither |A| nor |B| has a <a for="source expression">wildcard port</a>,
+            the result of executing [[CSP3#match-ports]] is "`Does Not Match`"
+            given |port A| and |port B|, and the result of executing 
+            [[CSP3#match-ports]] given |port B| and |port A| is also 
+            "`Does Not Match`".
+
+        8.  Let |path A| be |A|'s <a grammar>`path-part`</a>, if present, and 
+            `null` otherwise.
+        
+        9.  Let |path B| be |B|'s <a grammar>`path-part`</a>, if present, and 
+            `null` otherwise.
+
+        10.  The result of executing [[CSP3#match-paths]] is "`Does Not Match`"
+             given |path A| and |path B| and the result of executing 
+             [[CSP3#match-paths]] given |path B| and |path A| is also 
+             "`Does Not Match`".
+
+    7.  Return "`Similar`".
+</div>
+
+<div class="example">
+    Cases when |A| is <a lt="similarity of two source expressions" abstract-op>similar</a> to |B|.
+
+    <pre>
+      A = 'nonce-ch4hvvbHDpv7xCSvXCs3BrNggHdTzxUA'
+      B = 'nonce-ch4hvvbHDpv7xCSvXCs3BrNggHdTzxUA'
+    </pre>
+    Since both |A| and |B| match the <a grammar>`nonce-source`</a> grammar and |A|
+    is a <a>case-sensitive</a> match for |B|, |A| is similar to |B|.
+
+    <pre>
+      A = https://inner.example.com/foo/
+      B = http://*.example.com/foo/bar/
+    </pre>
+    Since |A| has a <a for="source expression">wildcard host</a>, it matches any
+    subdomain which in this case is "inner" so that |A| is similar to |B|.
+
+    <pre>
+      A = http://*.example.com
+      B = https://example.com:*
+    </pre>
+    Even though |A| and |B|'s ports are different, |A| and |B| are similar 
+    because "http" matches both "http" and a more secure variant "https".
+
+    <pre>
+      A = http://example.com:80/page1/html
+      B = https://example.com:443/
+    </pre>
+    In both sources specified ports are defalt ports for the respective schemes
+    and |B|'s path would match any path, |A| is similar to |B|.
+
+
+    Cases when |A| is not <a lt="similarity of two source expressions" abstract-op>similar</a> to |B|.
+
+    <pre>
+      A = 'sha256-abc123'
+      B = 'sha512-cde456'
+    </pre>
+    Even though both |A| and |B| match the <a grammar>`hash-source`</a> grammar, |A|
+    is not a <a>case-sensitive</a> match for |B|.
+
+    <pre>
+      A = http://example.com:80
+      B = http://example.com:334
+    </pre>
+    In this case, ports of |A| and |B| do not match so that the two sources are
+    not similar .
+
+    <pre>
+      A = http://example.com/page.html
+      B = http://example.com/index.html
+    </pre>
+    The two sources are not similar because their paths do not match.
+  </div>
+
   ISSUE: Move the remaining intersection algorithms into this section.
 
 
@@ -1016,134 +1161,6 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
   4.  Return "`Not Allowed`".
 
-  <h4 id="similarity-source-expressions" algorithm>
-    Is an expression matching <a grammar>`scheme-source`</a> or 
-    <a grammar>`host-source`</a> grammar |A| similar to an expression matching 
-    <a grammar>`scheme-source`</a> or <a grammar>`host-source`</a> grammar |B|?
-  </h4>
-
-  Given two expressions matching the <a grammar>`scheme-source`</a>  or 
-  <a grammar>`host-source`</a> grammar (|A| and |B|), return "`Similar`" if |A|
-  is <a for="source expression">similar</a> to |B|. Otherwise, return 
-  "`Not Similar`".
-
-  |A| and |B| are said to be <dfn for="source expression">similar</dfn> if their
-  parts individually match, that is <a grammar>`scheme-part`</a>, 
-  <a grammar>`host-part`</a>, <a grammar>`port-part`</a>, and 
-  <a grammar>`path-part`</a>. 
-
-  NOTE: This property is symmetric. That is if |A| is 
-  <a for="source expression">similar</a> to |B|, it must be that |B| is 
-  <a for="source expression">similar</a> to |A|.
-
-  <div class="example">
-    Cases when |A| is <a for="source expression">similar</a> to |B|.
-
-    <pre>
-      A = https://inner.example.com/foo/
-      B = http://*.example.com/foo/bar/
-    </pre>
-    Since |A| has a <a for="source expression">wildcard host</a>, it matches any
-    subdomain which in this case is "inner" so that |A| is similar to |B|.
-
-    <pre>
-      A = http://*.example.com
-      B = https://example.com:*
-    </pre>
-    Even though |A| and |B|'s ports are different, |A| and |B| are similar 
-    because "http" matches both "http" and a more secure variant "https".
-
-    <pre>
-      A = http://example.com:80/page1/html
-      B = https://example.com:443/
-    </pre>
-    In both sources specified ports are defalt ports for the respective schemes
-    and |B|'s path would match any path, |A| is similar to |B|.
-
-
-    Cases when |A| is not <a for="source expression">similar</a> to |B|.
-
-    <pre>
-      A = http://example.com:80
-      B = http://example.com:334
-    </pre>
-    In this case, ports of |A| and |B| do not match so that the two sources are
-    not <a for="source expression">similar</a> .
-
-    <pre>
-      A = http://example.com/page.html
-      B = http://example.com/index.html
-    </pre>
-    The two sources are not <a for="source expression">similar</a> beucase their
-    paths do not match.
-  </div>
-
-  A <a>source expression</a> has a 
-  <dfn for="source expression">wildcard host</dfn> if the first character of the
-  <a>source expression</a>'s <a grammar>`host-part`</a> is an U+002A ASTERISK 
-  character (`*`).
-
-  A <a>source expression</a> has a 
-  <dfn for="source expression">wildcard port</dfn> if the 
-  <a grammar>`port-part`</a> of the <a>source expression</a> is an U+002A 
-  ASTERISK character (`*`).
-
-  1.  Let |scheme A| be |A|'s <a grammar>`scheme-part`</a>, if present, and 
-      `null` otherwise.
-      
-  2.  Let |scheme B| be |B|'s <a grammar>`scheme-part`</a>, if present, and 
-      `null` otherwise.
-
-  3.  If the result of executing [[csp3#match-schemes]] returns 
-      "`Does Not Match`" given |scheme A| and |scheme B|, and the result of 
-      executing [[csp3#match-schemes]] on |scheme B| and |scheme A| is 
-      "`Does Not Match`", return "`Not Similar`".
-
-  4.  If |A| or |B| matches  <a grammar>`scheme-source`</a> grammar,
-      return "`Similar`".
-
-  5.  Return "`Not Similar`" if any of the following is true:
-
-      1.  Let |host A| be |A|'s <a grammar>`host-part`</a>, if present, and 
-          `null` otherwise.
-      
-      2.  Let |host B| be |B|'s <a grammar>`host-part`</a>, if present, and 
-          `null` otherwise.
-
-      3.  Both |A| and |B| have a <a for="source expression">wildcard host</a>,
-          but |host A| is not an <a>ASCII case-insensitive</a> match to |host B|.
-
-      4.  At most one of |A| and |B| has a 
-          <a for="source expression">wildcard host</a>, the result of executing 
-          [[csp3#match-hosts]] is "`Does Not Match`" given |host A| and 
-          |host B|, and the result of executing [[csp3#match-hosts]] on |host B|
-          and |host A| is also "`Does Not Match`".
-
-      5.  Let |port A| be |A|'s <a grammar>`port-part`</a>, if present, and 
-          `null` otherwise.
-      
-      6.  Let |port B| be |B|'s <a grammar>`port-part`</a>, if present, and 
-          `null` otherwise.
-
-      7.  Neither |A| nor |B| has a <a for="source expression">wildcard port</a>,
-          the result of executing [[csp3#match-ports]] is "`Does Not Match`"
-          given |port A| and |port B|, and the result of executing 
-          [[csp3#match-ports]] given |port B| and |port A| is also 
-          "`Does Not Match`".
-
-      8.  Let |path A| be |A|'s <a grammar>`path-part`</a>, if present, and 
-          `null` otherwise.
-      
-      9.  Let |path B| be |B|'s <a grammar>`path-part`</a>, if present, and 
-          `null` otherwise.
-
-      10.  The result of executing [[csp3#match-paths]] is "`Does Not Match`"
-           given |path A| and |path B| and the result of executing 
-           [[csp3#match-paths]] given |path B| and |path A| is also 
-           "`Does Not Match`".
-
-  6.  Return "`Similar`".
-
   <h4 id="intersection-source-expressions" algorithm>
     What is an intersection of two expressions matching 
     <a grammar>`scheme-source`</a> or <a grammar>`host-source`</a> 
@@ -1195,7 +1212,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
   Given two expressions matching the <a grammar>`scheme-source`</a> or 
   <a grammar>`host-source`</a> grammar (|A| and |B|), return their 
   <a for="source expression">intersection</a> if |A| is 
-  <a for="source expression">similar</a> to |B|. Otherwise, return `null`.
+  <a lt="similarity of two source expressions" abstract-op>similar</a> to |B|. Otherwise, return `null`.
 
   1.  If the result of executing [[#similarity-source-expressions]] on |A| and 
       |B| is "`Not Similar`", return `null`.
