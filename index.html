@@ -1453,7 +1453,7 @@ pre.idl.highlight { color: #708090; }
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1>Content Security Policy Level 3</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2017-02-13">13 February 2017</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2017-02-15">15 February 2017</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -3912,8 +3912,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
        <li data-md="">
         <p>If <var>source list</var> is <code>null</code>, skip to the next <var>policy</var>.</p>
        <li data-md="">
-        <p>If the result of executing <a href="#match-url-to-source-list">§6.6.1.5 Does url match source list in origin with redirect count?</a> on <var>base</var>, <var>source list</var>, <var>document</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object">relevant settings
-  object</a>’s origin, and <code>0</code> is "<code>Does Not Match</code>":</p>
+        <p>If the result of executing <a href="#match-url-to-source-list">§6.6.1.5 Does url match source list in origin with redirect count?</a> on <var>base</var>, <var>source list</var>, <var>document</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#fallback-base-url">fallback base URL</a>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-origin">origin</a>, and <code>0</code> is "<code>Does Not Match</code>":</p>
         <ol>
          <li data-md="">
           <p>Let <var>violation</var> be the result of executing <a href="#create-violation-for-global">§2.3.1 Create a violation object for global, policy, and directive</a> on <var>document</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object">global
@@ -3927,6 +3926,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
   return "<code>Blocked</code>".</p>
         </ol>
       </ol>
+      <p class="note" role="note">Note: We compare against the fallback base URL in order to deal correctly with things like <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/embedded-content.html#an-iframe-srcdoc-document">an iframe <code>srcdoc</code> <code>Document</code></a> which has been sandboxed into an opaque origin.</p>
      <li data-md="">
       <p>Return "<code>Allowed</code>".</p>
     </ol>
@@ -4175,7 +4175,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-ancestor-source-
   object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-origin">origin</a>.</p>
        <li data-md="">
         <p>If <a href="#match-url-to-source-list">§6.6.1.5 Does url match source list in origin with redirect count?</a> returns <code>Does Not Match</code> when
-  executed upon <var>origin</var>, this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-50">value</a>, <var>navigation response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-origin">origin</a></code>, and <code>0</code>, return
+  executed upon <var>origin</var>, this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-50">value</a>, <var>navigation response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-origin">origin</a>, and <code>0</code>, return
   "<code>Blocked</code>".</p>
       </ol>
      <li data-md="">
@@ -4390,7 +4390,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
   return "<code>Matches</code>" if one or more of the following conditions is met:</p>
       <ol>
        <li data-md="">
-        <p><var>origin</var> is the same as <var>url</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-origin">origin</a></code></p>
+        <p><var>origin</var> is the same as <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-origin">origin</a></p>
        <li data-md="">
         <p><var>origin</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-host">host</a></code> is the same as <var>url</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-host">host</a></code>, <var>origin</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-port">port</a></code> and <var>url</var>’s {{URL/port} are either the same
   or the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#default-port">default ports</a> for their respective <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme">scheme</a>s, and
@@ -5437,6 +5437,7 @@ rest of Google’s CSP Cabal.</p>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#dom-document-2">document</a>
      <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-embed-element">embed</a>
      <li><a href="https://html.spec.whatwg.org/multipage/webappapis.html#event-handler-idl-attributes">event handler idl attribute</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/infrastructure.html#fallback-base-url">fallback base url</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#forced-sandboxing-flag-set">forced sandboxing flag set</a>
      <li><a href="https://html.spec.whatwg.org/multipage/forms.html#the-form-element">form</a>
      <li><a href="https://html.spec.whatwg.org/multipage/obsolete.html#frame">frame</a>
@@ -5577,7 +5578,7 @@ rest of Google’s CSP Cabal.</p>
      <li><a href="https://url.spec.whatwg.org/#concept-ipv6">ipv6 address</a>
      <li><a href="https://url.spec.whatwg.org/#local-scheme">local scheme</a>
      <li><a href="https://url.spec.whatwg.org/#network-scheme">network scheme</a>
-     <li><a href="https://url.spec.whatwg.org/#dom-url-origin">origin</a>
+     <li><a href="https://url.spec.whatwg.org/#concept-url-origin">origin</a>
      <li><a href="https://url.spec.whatwg.org/#concept-url-path">path</a>
      <li><a href="https://url.spec.whatwg.org/#percent-decode">percent decode</a>
      <li><a href="https://url.spec.whatwg.org/#dom-url-port">port</a>
