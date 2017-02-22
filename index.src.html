@@ -559,7 +559,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
                   ; <a>path-abempty</a> is defined in section 3.3 of RFC 3986.
 
     ; Keywords:
-    <dfn>keyword-source</dfn> = "<dfn>'self'</dfn>" / "<dfn>'unsafe-inline'</dfn>" / "<dfn>'unsafe-eval'</dfn>" / "<dfn>'strict-dynamic'</dfn>" / "<dfn>'unsafe-hashed-attributes'</dfn>"
+    <dfn>keyword-source</dfn> = "<dfn>'self'</dfn>" / "<dfn>'unsafe-inline'</dfn>" / "<dfn>'unsafe-eval'</dfn>"
+                     / "<dfn>'strict-dynamic'</dfn>" / "<dfn>'unsafe-hashed-attributes'</dfn>" /
+                     / "<dfn>'report-sample'</dfn>"
 
     ; Nonces: 'nonce-[nonce goes here]'
     <dfn>nonce-source</dfn>  = "'nonce-" <a>base64-value</a> "'"
@@ -637,6 +639,13 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   Each <a>violation</a> has a
   <dfn for="violation" id="violation-element" export>element</dfn>, which is either
   `null` or an element.
+
+  Each <a>violation</a> has a <dfn for="violation" id="violation-sample" export>sample</dfn>,
+  which is a string. It is the empty string unless otherwise specified.
+
+  Note: A <a>violation</a>'s <a for="violation">sample</a> will be populated with the first 40
+  characters of an inline script, event handler, or style that caused an violation. Violations
+  which stem from an external file will not include a sample in the violation report.
 
   <h4 id="create-violation-for-global" algorithm>
     Create a violation object for |global|, |policy|, and |directive|
@@ -1171,35 +1180,42 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   Note: The valid values for |type| are "`script`", "`script attribute`",
   "`style`", and "`style attribute`".
 
-  1.  Assert: |element| is not `null`.
+  <ol class="algorithm">
+    1.  Assert: |element| is not `null`.
 
-  2.  Let |result| be "`Allowed`".
+    2.  Let |result| be "`Allowed`".
 
-  3.  For each |policy| in |element|'s {{Document}}'s <a for="/">global object</a>'s
-      <a for="global object">CSP list</a>:
+    3.  For each |policy| in |element|'s {{Document}}'s <a for="/">global object</a>'s
+        <a for="global object">CSP list</a>:
 
-      1.  For each |directive| in |policy|:
+        1.  For each |directive| in |policy|'s <a for="policy">directive set</a>:
 
-          1.  If |directive|'s <a for="directive">inline check</a> returns
-              "`Allowed`" when executed upon |element|, |type|, and |source|,
-              skip to the next |directive|.
+            1.  If |directive|'s <a for="directive">inline check</a> returns
+                "`Allowed`" when executed upon |element|, |type|, and |source|,
+                skip to the next |directive|.
 
-          2.  Otherwise, let |violation| be the result of executing
-              [[#create-violation-for-global]] on the <a>current settings
-              object</a>'s <a for="environment settings object">global object</a>, |policy|,
-              and "`style-src`" if |type| is "`style`" or "`style-attribute`",
-              or "`script-src`" otherwise.
+            2.  Otherwise, let |violation| be the result of executing
+                [[#create-violation-for-global]] on the <a>current settings
+                object</a>'s <a for="environment settings object">global object</a>, |policy|,
+                and "`style-src`" if |type| is "`style`" or "`style-attribute`",
+                or "`script-src`" otherwise.
 
-          3.  Set |violation|'s <a for="violation">resource</a> to "`inline`".
+            3.  Set |violation|'s <a for="violation">resource</a> to "`inline`".
 
-          4.  Set |violation|'s <a for="violation">element</a> to |element|.
+            4.  Set |violation|'s <a for="violation">element</a> to |element|.
 
-          5.  Execute [[#report-violation]] on |violation|.
+            5.  If |directive|'s <a for="directive">value</a> <a>contains</a> the expression
+                "<a grammar>`'report-sample'`</a>", then set |violation|'s
+                <a for="violation">sample</a> to the substring of |source| containing its first 40
+                characters.
 
-          6.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
-              set |result| to "`Blocked`".
+            6.  Execute [[#report-violation]] on |violation|.
 
-  4.  Return |result|.
+            7.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
+                set |result| to "`Blocked`".
+
+    4.  Return |result|.
+  </ol>
 
   <h4 id="should-block-navigation-request" algorithm>
     Should |navigation request| of |type| from |source| in |target| be blocked
@@ -1372,6 +1388,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
         readonly    attribute DOMString      effectiveDirective;
         readonly    attribute DOMString      originalPolicy;
         readonly    attribute DOMString      sourceFile;
+        readonly    attribute DOMString      sample;
         readonly    attribute SecurityPolicyViolationEventDisposition      disposition;
         readonly    attribute unsigned short statusCode;
         readonly    attribute long           lineNumber;
@@ -1386,6 +1403,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
         DOMString      effectiveDirective;
         DOMString      originalPolicy;
         DOMString      sourceFile;
+        DOMString      sample;
         SecurityPolicyViolationEventDisposition      disposition;
         unsigned short statusCode;
         long           lineNumber;
@@ -1425,6 +1443,8 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
          <a for="violation">policy</a>
       :  "`status-code`"
       :: |violation|'s <a for="violation">status</a>
+      :  "`sample`"
+      :: |violation|'s <a for="violation">sample</a>
 
   2.  If |violation|'s <a for="violation">source file</a> is not `null`:
 
@@ -1438,7 +1458,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       3.  Set |object|'s "`column-number`" property to |violation|'s
           <a for="violation">column number</a>.
 
-  3.  Return the result of executing {{JSON.stringify()}} on |object|.
+  3.  Assert: If |object|'s "`blocked-uri`" property is not "`inline`", then its "`sample`"
+      property is the empty string.
+
+  4.  Return the result of executing {{JSON.stringify()}} on |object|.
 
   <h3 id="report-violation" algorithm>
     Report a |violation|
@@ -1503,6 +1526,8 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           :: |violation|'s <a for="violation">line number</a>
           :  {{SecurityPolicyViolationEvent/columnNumber}}
           :: |violation|'s <a for="violation">column number</a>
+          :  {{SecurityPolicyViolationEvent/sample}}
+          :: |violation|'s <a for="violation">sample</a>
           :  {{Event/bubbles}}
           :: `true`
           :  {{Event/composed}}
