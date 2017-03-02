@@ -3183,6 +3183,25 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     5.  Return "`Allowed`".
   </ol>
 
+	<h5 id="frame-ancestors-and-frame-options">
+		Relation to <code>X-Frame-Options</code>
+	</h5>
+
+	This directive is similar to the `X-Frame-Options` header that several user agents have
+  implemented. The `'none'` source expression is roughly equivalent to that header's `DENY`,
+  `'self'` to `SAMEORIGIN`, and so on. The major difference is that many user agents implement
+  `SAMEORIGIN` such that it only matches against the top-level document's location, while
+  the <a>`frame-ancestors`</a> directive checks against each ancestor. If _any_ ancestor doesn't
+  match, the load is cancelled. [[!RFC7034]]
+
+	In order to allow backwards-compatible deployment, the <a>`frame-ancestors`</a> directive
+  _obsoletes_ the `X-Frame-Options` header. If a resource is delivered with an <a for="/">policy</a>
+  that includes a <a>directive</a> named <a>`frame-ancestors`</a> and whose
+  <a for="policy">disposition</a> is "`enforce`", then the `X-Frame-Options` header MUST be ignored.
+
+  ISSUE(whatwg/html#1230): Spell this out in more detail as part of defining `X-Frame-Options`
+  integration with the <a>process a navigate response</a> algorithm.
+
   <h4 id="directive-navigation-to">`navigation-to`</h4>
 
   The <dfn export>navigation-to</dfn> directive restricts the {{URL}}s to which

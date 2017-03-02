@@ -618,58 +618,38 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
   <div algorithm="intersection of two source lists">
     Given two <a>source lists</a> (|A| and |B|), their <a for="directive">name</a> (|name|), and
     their <a for="/">origin</a> (|origin|), the
-    <dfn lt="intersection of two source lists" abstract-op>intersection of |A| and |B| for |name| and
-    |origin|</dfn> is a <a>source list</a> representing their net effect. If no such <a>source
-    expressions</a> exist because the lists contain only divergent expressions (for example: `https://example.com/` in
-    |A|, and `https://not-example.com/` in |B|), then the intersection will be the list
-    « <a grammar>'none'</a> ».
+    <dfn lt="intersection of two source lists" abstract-op>intersection of |A| and |B| for |name|
+    and |origin|</dfn> is a <a>source list</a> representing their net effect. If no such <a>source
+    expressions</a> exist because the lists contain only divergent expressions (for example:
+    `https://example.com/` in |A|, and `https://not-example.com/` in |B|), then the intersection
+    will be the list « <a grammar>'none'</a> ».
 
-    1.  If |directive A| is not an <a>ASCII case-insensitive</a> match to 
-        |directive B|, return « 'none' ».
+    1.  Let |effective A| be the <a>effective source list</a> for |A|, |directive A|, and |origin|.
 
-    2.  Let |effective A| be the <a>effective source list</a> for |A|, |directive A|, and |origin|.
+    2.  Let |effective B| be the <a>effective source list</a> for |B|, |directive B|, and |origin|.
 
-    3.  Let |effective B| be the <a>effective source list</a> for |B|, |directive B|, and |origin|.
+    3.  If either |effective A| or |effective B| is « <a grammar>`'none'`</a> », 
+        return « <a grammar>`'none'`</a> ».
 
-    4.  If either |effective A| or |effective B| is  « 'none' », 
-        return « 'none' ».
+    4.  If |effective A| is empty, return |effective B|.
 
-    5.  If |effective A| is empty, return |effective B|.
+    5.  If |effective B| is empty, return |effective A|.
 
-    6.  If |effective B| is empty, return |effective A|.
+    6   Let |schemes| be an empty <a>set</a>.
 
-    7.  Let |schemes A| and |schemes| be empty <a>lists</a>.
+    7.  Let |intersection| be an empty <a>source list</a>.
 
-    8.  For each |expression A| in |effective A|:
+    8.  For each |expression B| in |effective B|:
 
-        1.  If |expression A| matches <a grammar>`scheme-source`</a> grammar:
+        1.  If |expression B| matches the <a grammar>`scheme-source`</a> grammar and |expression B|
+            is <a for="set">contained</a> in |effective A|, then <a for="set">append</a>
+            |expression B| to |schemes|.
 
-            1.  <a for="list">Append</a> |expression A| to |schemes A|.
+            Note: Getting the <a>effective source list</a> above means that tokens matching the
+            <a grammar>`scheme-source`</a> grammar have already been normalized such that
+            "`http:`"/"`ws:`" never appears without "`https:`"/"`ws:`" also appearing.
 
-            2.  If |expression A| matches "`http:`", <a for="list">append</a>
-                "`https:`" to |schemes A|.
-
-            3.  If |expression A| matches "`ws:`", <a for="list">append</a>
-                "`wss:`" to |schemes A|.
-
-    9.  For each |expression B| in |effective B|:
-
-        1.  If |expression B| matches <a grammar>`scheme-source`</a> grammar
-            and |expression B| matches one of the elements in |schemes A|:
-
-            1.  <a for="list">Append</a> |expression B| to |schemes|.
-
-            2.  If |expression B| matches "`http:`" and |schemes A|
-                <a for="list">contains</a> "`https:`", <a for="list">append</a>
-                "`https:`" to |schemes|.
-
-            3.  If |expression B| matches "`ws:`" and |schemes A|
-                <a for="list">contains</a> "`wss:`", <a for="list">append</a>
-                "`wss:`" to |schemes|.
-
-    10.  Let |intersection| be an empty <a>source list</a>.
-
-    11.  For each |expression| in |schemes|:
+    9.   For each |expression| in |schemes|:
 
          1.  If |expression| does not match "`https:`" or |schemes| does not
              <a for="list">contain</a> "`http:`":
@@ -678,7 +658,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
                  <a for="list">contain</a> "`ws:`", <a for="set">append</a>
                  |expression| to |intersection|.
 
-    12.  For each |expression A| in |effective A|:
+    10.  For each |expression A| in |effective A|:
 
         1.  If |expression A| matches <a grammar>`scheme-source`</a> grammar
             and |schemes| <a for="list">contains</a> |expression A|,
@@ -730,7 +710,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
         4.  If |match| is not `null`, <a for="set">append</a> |match| to
             |intersection|.
 
-    13.  Return |intersection|.
+    11.  Return |intersection|.
   </div>
 
   <div class="example">
@@ -770,7 +750,6 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
     "'strict-dynamic' 'nonce-abc'". That is why the intersection is 
     "'nonce-abc'".
   </div>
-
 
   ### Intersection Helpers ### {#intersection-helpers}
 
@@ -853,18 +832,18 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
     1.  If |list| <a for="set">is empty</a> or « 'none' », return « 'none' ».
 
-    2.  If |list| <a for="set">contains</a> the token "<a grammar>`'self'`</a>":
+    2.  Let |result| be an empty <a>source list</a>.
 
-        1.  Remove that token from |list|.
+    3.  For each |expression| in |list|:
 
-        2.  <a for="set">Append</a> the result of executing [[#rewrite-self]] given |origin| to
-            |list|.
+        1.  If |expression| is "<a grammar>`'self'`</a>":
+            
+            1.  <a for="set">Append</a> the result of executing [[#rewrite-self]] given |origin| to
+                |result|.
 
-    3.  Let |result| be an empty <a>source list</a>.
+            2.  <a for="iteration">Continue</a>.
 
-    4.  For each |expression| in |list|:
-
-        1.  If |expression| matches the <a grammar>`keyword-source`</a> grammar, and |name| is not
+        2.  If |expression| matches the <a grammar>`keyword-source`</a> grammar, and |name| is not
             "`script-src`" or "`style-src`", <a for="iteration">continue</a>.
 
         2.  <a for="iteration">Continue</a> if any of the following statements are true:
@@ -900,11 +879,28 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
             3.  <a for="iteration">Continue</a>. 
 
-        4.  <a for="set">Append</a> |expression| to |result|.
+        4.  If |expression| matches the <a grammar>scheme-source</a> grammar:
 
-    5.  If |result| <a for="set">is empty</a> or « 'strict-dynamic' », return « 'none' ». 
+            1.  If |expression| is "`http:`", <a for="set">append</a> "`https:`" to
+                |result|.
 
-    6.  Return |result|.
+            2.  If |expression| is "`ws:`", <a for="set">append</a> "`wss:`" to |result|.
+   
+        5.  If |expression| matches the <a grammar>host-source</a> grammar:
+
+            1.  If |expression|'s <a grammar>scheme-part</a> is "http", append the result of
+                concatenating "https://", |expression|'s <a grammar>host-part</a>, |expression|'s
+                <a grammar>port-part</a>, and |expression|'s <a grammar>path-part</a> to |result|.
+
+            2.  If |expression|'s <a grammar>scheme-part</a> is "ws", append the result of
+                concatenating "wss://", |expression|'s <a grammar>host-part</a>, |expression|'s
+                <a grammar>port-part</a>, and |expression|'s <a grammar>path-part</a> to |result|.
+
+        6.  <a for="set">Append</a> |expression| to |result|.
+
+    4.  If |result| <a for="set">is empty</a> or « 'strict-dynamic' », return « 'none' ». 
+
+    5.  Return |result|.
   </div>
 
   <div class="example">
