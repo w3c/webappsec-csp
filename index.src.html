@@ -401,15 +401,14 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       <a lt="strictly split a string">strictly splitting</a> |serialized
       CSP| on the U+003B SEMICOLON character (`;`):
 
-      1.  <a>Strip leading and trailing whitespace</a> from |token|.
+      1.  <a>Strip leading and trailing ASCII whitespace</a> from |token|.
 
       2.  If |token| is an empty string, skip the remaining substeps
           and continue to the next item.
 
       3.  Let |directive name| be the result of
-          <a lt="collect a sequence of characters">collecting a sequence of
-          characters</a> from |token| which are not <a>space
-          characters</a>.
+          <a lt="collect a sequence of code points">collecting a sequence of
+          code points</a> from |token| which are not <a>ASCII whitespace</a>.
 
       4.  If |policy|'s <a>directive set</a> contains a
           <a>directive</a> whose <a for="directive">name</a> is |directive
@@ -419,8 +418,8 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           A console warning might be appropriate, for example.
 
       5.  Let |directive value| be the result of
-          <a lt="split a string on spaces">splitting |token| on
-          spaces</a>.
+          <a lt="split a string on ASCII whitespace">splitting |token| on
+          ASCII whitespace</a>.
 
       6.  Let |directive| be a new <a>directive</a> whose
           <a for="directive">name</a> is |directive name|, and
@@ -902,23 +901,17 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   1.  Set |response|'s <a for="response">CSP list</a> to the
       empty list.
 
-  2.  Let |policies| be the result of executing
-      [[#parse-serialized-policy-list]] on the result of
-      <a lt="parse a header value">parsing</a> `Content-Security-Policy`
-      in |response|'s <a for="response">header list</a>, with a disposition
-      of "`enforce`".
+  2.  Let |policies| be the result of executing [[#parse-serialized-policy-list]] on the result of
+      <a>extracting header list values</a> given `Content-Security-Policy` and |response|'s
+      <a for="response">header list</a>, with a disposition of "`enforce`".
 
-  3.  Append to |policies| the result of executing
-      [[#parse-serialized-policy-list]] on the result of
-      <a lt="parse a header value">parsing</a>
-      `Content-Security-Policy-Report-Only` in |response|'s
-      <a for="response">header list</a>, with a disposition of "`report`".
-
+  3.  Append to |policies| the result of executing [[#parse-serialized-policy-list]] on the result
+      of <a>extracting header list values</a> given `Content-Security-Policy-Report-Only` and
+      |response|'s <a for="response">header list</a>, with a disposition of "`report`".
 
   4.  For each |policy| in |policies|:
 
-      1.  Insert |policy| into |response|'s
-          <a for="response">CSP list</a>.
+      1.  Insert |policy| into |response|'s <a for="response">CSP list</a>.
 
   <h4 id="report-for-request" algorithm>
     Report Content Security Policy violations for |request|
@@ -1212,8 +1205,8 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
             4.  Set |violation|'s <a for="violation">element</a> to |element|.
 
-            5.  If |directive|'s <a for="directive">value</a> <a>contains</a> the expression
-                "<a grammar>`'report-sample'`</a>", then set |violation|'s
+            5.  If |directive|'s <a for="directive">value</a> <a for="list">contains</a> the
+                expression "<a grammar>`'report-sample'`</a>", then set |violation|'s
                 <a for="violation">sample</a> to the substring of |source| containing its first 40
                 characters.
 
