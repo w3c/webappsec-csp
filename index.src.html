@@ -349,13 +349,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   12. The <a>`navigation-to`</a> directive gives a resource control over the endpoints
       to which it can initiate navigation.
 
-  13. <div class="wip">
-        Reports generated for inline violations will contain a <a for="violation">sample</a>
-        attribute if the relevant directive contains the <a grammar>`'report-sample'`</a>
-        expression.
-
-        ISSUE(w3c/webappsec-csp#119): `'report-sample'` is a work in progress.
-      </div>
+  13. Reports generated for inline violations will contain a <a for="violation">sample</a>
+      attribute if the relevant directive contains the <a grammar>`'report-sample'`</a>
+      expression.
 </section>
 
 <!-- Big Text: Framework -->
@@ -1430,29 +1426,36 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   1.  Let |object| be a new JavaScript object with properties initialized as
       follows:
 
-      :  "`document-uri`"
-      :: The result of executing the <a>URL serializer</a> on |violation|'s
-         <a for="violation">url</a>, with the `exclude fragment` flag set.
-      :  "`referrer`"
-      :: The result of executing the <a>URL serializer</a> on |violation|'s
-         <a for="violation">referrer</a>, with the `exclude fragment` flag set.
-      :  "`blocked-uri`"
-      :: The result of executing the <a>URL serializer</a> on |violation|'s
-         <a for="violation">resource</a>, with the `exclude fragment` flag set.
-      :  "`effective-directive`"
-      :: |violation|'s <a for="violation">effective directive</a>
-      :  "`violated-directive`"
-      :: |violation|'s <a for="violation">effective directive</a>
-      :  "`original-policy`"
-      :: The <a lt="serialized CSP">serialization</a> of |violation|'s
-         <a for="violation">policy</a>
-      :  "`disposition`"
-      :: The <a for="policy">disposition</a> of |violation|'s
-         <a for="violation">policy</a>
-      :  "`status-code`"
-      :: |violation|'s <a for="violation">status</a>
-      :  "`sample`"
-      :: |violation|'s <a for="violation">sample</a>
+      :   "`document-uri`"
+      ::  The result of executing the <a>URL serializer</a> on |violation|'s
+          <a for="violation">url</a>, with the `exclude fragment` flag set.
+      :   "`referrer`"
+      ::  The result of executing the <a>URL serializer</a> on |violation|'s
+          <a for="violation">referrer</a>, with the `exclude fragment` flag set.
+      :   "`blocked-uri`"
+      ::  The result of executing the <a>URL serializer</a> on |violation|'s
+          <a for="violation">resource</a>, with the `exclude fragment` flag set.
+      :   "`effective-directive`"
+      ::  |violation|'s <a for="violation">effective directive</a>
+      :   "`violated-directive`"
+      ::  |violation|'s <a for="violation">effective directive</a>
+      :   "`original-policy`"
+      ::  The <a lt="serialized CSP">serialization</a> of |violation|'s
+          <a for="violation">policy</a>
+      :   "`disposition`"
+      ::  The <a for="policy">disposition</a> of |violation|'s
+          <a for="violation">policy</a>
+      :   "`status-code`"
+      ::  |violation|'s <a for="violation">status</a>
+      :   "`script-sample`"
+      ::  |violation|'s <a for="violation">sample</a>
+
+          Note: The name `script-sample` was chosen for compatibility with an earlier iteration of
+          this feature which has shipped in Firefox since its initial implementation of CSP. Despite
+          the name, this field will contain samples for non-script violations, like stylesheets. The
+          data contained in a {{SecurityPolicyViolationEvent}} object, and in reports generated via
+          the new <a>`report-to`</a> directive, is named in a more encompassing fashion:
+          {{SecurityPolicyViolationEvent/sample}}. 
 
   2.  If |violation|'s <a for="violation">source file</a> is not `null`:
 
