@@ -28,6 +28,7 @@ spec:html
     text: browsing context; for: /
     text: plugin document
     text: fallback base url
+    text: associated document
   type: element
     text: a
     text: link
@@ -371,8 +372,8 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   <h3 id="framework-policy">Policies</h3>
 
   A <dfn export lt="content security policy object" local-lt="policy">policy</dfn> defines allowed
-  and restricted behaviors, and may be applied to a {{Window}} or {{WorkerGlobalScope}} as described
-  in [[#initialize-global-object-csp]].
+  and restricted behaviors, and may be applied to a {{Document}} via [[#initialize-document-csp]], or
+  a {{WorkerGlobalScope}} as described in [[#initialize-worker-csp]].
 
   Each policy has an associated <dfn for="policy" export>directive set</dfn>, which is an <a>ordered
   set</a> of <a>directives</a> that define the policy's implications when applied.
@@ -1036,7 +1037,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       <dfn for="global object" id="global-object-csp-list">CSP list</dfn>,
       which holds all the <a for="/">policy</a> objects which are active for a given
       context. This list is empty unless otherwise specified, and is populated
-      via the [[#initialize-global-object-csp]] algorithm.
+      via the [[#initialize-document-csp]] and [[#initialize-worker-csp]] algorithms.
 
       ISSUE(w3c/html#187): This concept is missing from W3C's Workers.
 
@@ -1044,7 +1045,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       <a for="/">global object</a> by inserting it into the <a for="/">global object</a>'s
       <a for="global object">CSP list</a>.
 
-  3.  [[#initialize-global-object-csp]] is called during the <a>initializing a
+  3.  [[#initialize-worker-csp]] is called during the <a>initializing a
       new `Document` object</a> and <a>run a worker</a> algorithms in order to
       bind a set of <a for="/">policy</a> objects associated with a <a>response</a> to a
       newly created <a for="/">global object</a>.
@@ -1099,79 +1100,69 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     Initialize a `Document`'s `CSP list`
   </h4>
 
-  Given a {{Document}} (|document|), and a <a>response</a> (|response|), the
-  user agent performs the following steps in order to initialize |document|'s
-  <a for="Document">CSP list</a>:
+  Given a {{Document}} (|document|), and a <a>response</a> (|response|), the user agent performs the
+  following steps in order to initialize |document|'s [=Document/CSP list=]
 
-  1.  If |response|'s <a for="response">url</a>'s <a for="url">scheme</a> is a
-      <a>local scheme</a>:
+  1.  If |response|'s [=response/url=]'s [=url/scheme=] is a [=local scheme=]:
 
-      1.  Let |documents| be an empty list.
+      1.  Let |ancestors| be an empty list.
 
-      2.  If |document| has an <a>embedding document</a> (|embedding|), then add
-          |embedding| to |documents|.
+      2.  If |document| has an [=embedding document=] (|embedding|), then add |embedding| to
+          |ancestors|.
 
-      3.  If |document| has an <a>opener browsing context</a>, then add its
-          <a>active document</a> to |documents|.
+      3.  If |document| has an [=opener browsing context=], then add its [=active document=] to
+          |ancestors|.
 
-      4.  For each |doc| in |documents|:
+      4.  For each |ancestor| in |ancestors|:
 
-          1.  For each |policy| in |doc|'s <a for="Document">CSP list</a>:
+          1.  For each |policy| in |ancestor|'s [=Document/CSP list=]:
 
-              1.  Insert an alias to |policy| in |document|'s
-                  <a for="Document">CSP list</a>.
+              1.  Insert a copy of |policy| into |document|'s [=Document/CSP list=].
 
-      Note: <a>local scheme</a> includes `about:`, and this algorithm will
-      therefore alias the <a>embedding document</a>'s policies for <a>an iframe
-      `srcdoc` `Document`</a>.
+      Note: [=local scheme=] includes `about:`, and this algorithm will therefore copy the
+      [=embedding document=]'s policies for [=an iframe srcdoc Document=].
 
-      Note: We do all this to ensure that a page cannot bypass its <a for="/">policy</a>
-      by embedding a frame or popping up a new window containing content it
-      controls (`blob:` resources, or `document.write()`).
+      Note: We do all this to ensure that a page cannot bypass its policy by embedding a frame or
+      popping up a new window containing content it controls (`blob:` resources, or
+      `document.write()`).
 
-  2.  For each |policy| in |response|'s <a for="response">CSP list</a>, insert
-      |policy| into |document|'s <a for="Document">CSP list</a>.
+  2.  For each |policy| in |response|'s [=response/CSP list=]:
+  
+      1.  Insert |policy| into |document|'s [=Document/CSP list=].
 
-  3.  For each |policy| in |document|'s <a for="Document">CSP list</a>:
+  3.  For each |policy| in |document|'s [=Document/CSP list=]:
 
       1.  For each |directive| in |policy|:
 
-          1.  Execute |directive|'s <a for="directive">initialization</a>
-              algorithm on |document| and |response|.
+          1.  Execute |directive|'s [=directive/initialization=] algorithm on |document| and
+              |response|.
 
-  <h4 id="initialize-global-object-csp" algorithm>
-    Initialize a global object's `CSP list`
+  <h4 id="initialize-worker-csp" algorithm>
+    Initialize a worker's `CSP list`
   </h4>
 
-  Given a <a for="/">global object</a> (|global|), and a <a>response</a>
-  (|response|), the user agent performs the following steps in order
-  to initialize |global|'s <a for="global object">CSP list</a>:
+  Given a {{WorkerGlobalScope}} (|global|), an [=environment settings object=] (|owner|), and a
+  [=response=] (|response|), the user agent performs the following steps in order to initialize
+  |global|'s [=WorkerGlobalScope/CSP list=]:
 
-  1.  If |response|'s <a for="response">url</a>'s <a for="url">scheme</a> is a
-      <a>local scheme</a>, or if |global| is a {{DedicatedWorkerGlobalScope}}:
+  1.  If |global| is a {{DedicatedWorkerGlobalScope}}:
 
-      1.  Let |documents| be an empty list.
+      1.  Let |policies| be an empty list.
 
-      2.  Add each of |global|'s
-          <a lt="the worker's documents">document</a>s to |documents|.
+      2.  If |owner| is a {{Window}}, set |policies| to |owner|'s [=associated Document=]'s
+          [=Document/CSP list=].
 
-      4.  For each |document| in |documents|:
+          Otherwise, |owner| is a {{WorkerGlobalScope}}: set |policies| to |owner|'s
+          [=WorkerGlobalScope/CSP list=].
 
-          1.  For each |policy| in |document|'s <a for="/">global
-              object</a>'s <a for="global object">CSP list</a>:
+      3.  For each |policy| in |policies|:
 
-              1.  Insert an alias to |policy| in |global|'s
-                  <a for="global object">CSP list</a>.
+          1.  Insert a copy of |policy| into |global|'s [=WorkerGlobalScope/CSP list=].
 
-      Note: <a>local scheme</a> includes `about:`, and this algorithm will
-      therefore alias the <a>embedding document</a>'s policies for <a>an iframe
-      `srcdoc` `Document`</a>.
+      Otherwise, |global| is a {{SharedWorkerGlobalScope}} or {{ServiceWorkerGlobalScope}}:
 
-  2.  If |global| is a {{SharedWorkerGlobalScope}} or {{ServiceWorkerGlobalScope}}:
-
-      1.  For each |policy| in |response|'s
-          <a for="response">CSP list</a>, insert |policy| into
-          |global|'s <a for="global object">CSP list</a>.
+      1.  For each |policy| in |response|'s [=response/CSP list=], insert |policy| into |global|'s
+          [=WorkerGlobalScope/CSP list=].
 
   <h4 id="should-block-inline" algorithm>
     Should |element|'s inline |type| behavior be blocked by Content Security Policy?
