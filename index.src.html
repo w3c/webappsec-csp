@@ -385,6 +385,15 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   Each policy has an associated <dfn for="policy" export>disposition</dfn>, which is either
   "`enforce`" or "`report`".
 
+  Each policy has an associated <dfn for="policy" export>source</dfn>, which is either "`header`"
+  or "`meta`".
+
+  Multiple [=/policies=] can be applied to a single resource, and are collected into a [=list=] of
+  [=/policies=] known as a <dfn>CSP list</dfn>.
+
+  A [=/CSP list=] <dfn>contains a header-delivered Content Security Policy</dfn> if it
+  [=list/contains=] a [=/policy=] whose [=policy/source=] is "`header`".
+
   A <dfn export>serialized CSP</dfn> is an <a>ASCII string</a> consisting of a semicolon-delimited
   series of <a>serialized directives</a>, adhering to the following ABNF grammar [[!RFC5234]]:
 
@@ -393,73 +402,83 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
                         ; <a>OWS</a> is defined in section 3.2.3 of RFC 7230
   </pre>
 
-  <h4 id="parse-serialized-policy" dfn lt="parse a serialized CSP" algorithm>
-    Parse a |serialized CSP| as |disposition|
+  A <dfn export>serialized CSP list</dfn> is an [=ASCII string=] consisting of a comma-delimited
+  series of [=serialized CSPs=], adhering to the following ABNF grammar [[!RFC5234]]:
+
+  <pre dfn-type="grammar" link-type="grammar">
+    <dfn>serialized-policy-list</dfn> = 1#<a>serialized-policy</a>
+                        ; The '#' rule is defined in section 7 of RFC 7230
+  </pre>
+
+  <h4 id="parse-serialized-policy" algorithm>
+    Parse a serialized CSP
   </h4>
 
-  Given a <a>serialized CSP</a> (|serialized CSP|), and a
-  <a for="policy">disposition</a> (|disposition|), this algorithm will return a
-  <a for="/">policy</a> object. If the string cannot be parsed, the resulting
-  <a for="/">policy</a>'s <a>directive set</a> will be empty.
+  To <dfn abstract-op>parse a serialized CSP</dfn>, given a [=serialized CSP=] (|serialized|), a
+  [=policy/source=] (|source|), and a [=policy/disposition=] (|disposition|), execute the
+  following steps.
 
-  1.  Let |policy| be a new <a for="/">policy</a> with an empty
-      <a for="policy">directive set</a>, and a <a for="policy">disposition</a>
-      of |disposition|.
+  This algorithm returns a [=Content Security Policy object=]. If |serialized| could not be
+  parsed, the object's [=policy/directive set=] will be empty.
 
-  2.  For each |token| returned by
-      <a lt="strictly split a string">strictly splitting</a> |serialized
-      CSP| on the U+003B SEMICOLON character (`;`):
+  <ol class="algorithm">
+    1.  Let |policy| be a new [=/policy=] with an empty [=policy/directive set=], a [=policy/source=]
+        of |source|, and a [=policy/disposition=] of |disposition|.
 
-      1.  <a>Strip leading and trailing ASCII whitespace</a> from |token|.
+    2.  For each |token| returned by [=strictly split a string|strictly splitting=] |serialized| on
+        the U+003B SEMICOLON character (`;`):
 
-      2.  If |token| is an empty string, skip the remaining substeps
-          and continue to the next item.
+        1.  [=Strip leading and trailing ASCII whitespace=] from |token|.
 
-      3.  Let |directive name| be the result of
-          <a lt="collect a sequence of code points">collecting a sequence of
-          code points</a> from |token| which are not <a>ASCII whitespace</a>.
+        2.  If |token| is an empty string, [=iteration/continue=].
 
-      4.  If |policy|'s <a>directive set</a> contains a
-          <a>directive</a> whose <a for="directive">name</a> is |directive
-          name|, <a for="iteration">continue</a>.
+        3.  Let |directive name| be the result of [=collecting a sequence of code points=] from
+            |token| which are not [=ASCII whitespace=].
 
-          The user agent SHOULD notify developers that a directive was ignored.
-          A console warning might be appropriate, for example.
+        4.  If |policy|'s [=policy/directive set=] contains a [=directive=] whose [=directive/name=]
+            is |directive name|, [=iteration/continue=].
 
-      5.  Let |directive value| be the result of
-          <a lt="split a string on ASCII whitespace">splitting |token| on
-          ASCII whitespace</a>.
+            In this case, the user agent SHOULD notify developers that a duplicate directive was
+            ignored. A console warning might be appropriate, for example.
 
-      6.  Let |directive| be a new <a>directive</a> whose
-          <a for="directive">name</a> is |directive name|, and
-          <a for="directive">value</a> is |directive value|.
+        5.  Let |directive value| be the result of
+            <a lt="split a string on ASCII whitespace">splitting |token| on
+            ASCII whitespace</a>.
 
-      7.  <a for="set">Append</a> |directive| to |policy|'s <a>directive set</a>.
+        6.  Let |directive| be a new [=directive=] whose [=directive/name=] is |directive name|, and
+            [=directive/value=] is |directive value|.
 
-  3.  Return |policy|.
+        7.  [=set/append|Append=] |directive| to |policy|'s [=policy/directive set=].
+
+    3.  Return |policy|.
+  </ol>
 
   <h4 id="parse-serialized-policy-list" algorithm>
-    Parse a serialized CSP |list| as |disposition|
+    Parse a serialized CSP list
   </h4>
 
-  Given a <a>string</a> which contains a comma-delimited series of <a>serialized CSP</a> strings
-  (|list|) and a <a for="policy">disposition</a> (|disposition|), the following algorithm will
-  return a <a>list</a> of <a for="/">policy</a> objects:
+  To <dfn abstract-op>parse a serialized CSP list</dfn>, given a [=serialized CSP list=] (|list|), a
+  [=policy/source=] (|source|), and a [=policy/disposition=] (|disposition|), execute the following
+  steps.
+ 
+  This algorithm returns a [=list=] of [=Content Security Policy objects=]. If |list| cannot be
+  parsed, the returned list will be empty.
 
-  1.  Let |policies| be an empty <a>list</a>.
+  <ol class="algorithm">
+    1.  Let |policies| be an empty [=list=].
 
-  2.  For each |token| returned by
-      <a lt="split a string on commas">splitting |list| on commas</a>:
+    2.  For each |token| returned by <a lt="split a string on commas">splitting |list| on commas</a>:
 
-      1.  Let |policy| be the result of executing
-          [[#parse-serialized-policy]] on |token| with |disposition|.
+        1.  Let |policy| be the result of <a abstract-op lt="parse a serialized CSP">parsing</a>
+            |token|, with a [=policy/source=] of |source|, and [=policy/disposition=] of
+            |disposition|.
 
-      2.  If |policy|'s <a>directive set</a> is empty, skip the
-          remaining substeps, and continue to the next item.
+        2.  If |policy|'s [=policy/directive set=] is empty, [=iteration/continue=].
 
-      3.  <a for="list">Append</a> |policy| to |policies|.
+        3.  [=list/append|Append=] |policy| to |policies|.
 
-  3.  Return |policies|.
+    3.  Return |policies|.
+  </ol>
 
   <h3 id="framework-directives">Directives</h3>
 
@@ -907,20 +926,24 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   <a for="response">header list</a> for <a>serialized CSP</a> values, and
   populates its <a for="response">CSP list</a> accordingly:
 
-  1.  Set |response|'s <a for="response">CSP list</a> to the
-      empty list.
+  <ol class="algorithm">
+    1.  Set |response|'s [=response/CSP list=] to the empty list.
 
-  2.  Let |policies| be the result of executing [[#parse-serialized-policy-list]] on the result of
-      <a>extracting header list values</a> given `Content-Security-Policy` and |response|'s
-      <a for="response">header list</a>, with a disposition of "`enforce`".
+    2.  Let |policies| be the result of <a abstract-op lt="parse a serialized CSP list">parsing</a>
+        the result of [=extracting header list values=] given `Content-Security-Policy` and
+        |response|'s [=response/header list=], with a [=policy/source=] of "`header`", and a
+        [=policy/disposition=] of "`enforce`".
 
-  3.  Append to |policies| the result of executing [[#parse-serialized-policy-list]] on the result
-      of <a>extracting header list values</a> given `Content-Security-Policy-Report-Only` and
-      |response|'s <a for="response">header list</a>, with a disposition of "`report`".
+    3.  Append to |policies| the result of
+        <a abstract-op lt="parse a serialized CSP list">parsing</a> the result of
+        [=extracting header list values=] given `Content-Security-Policy-Report-Only` and
+        |response|'s [=response/header list=], with a [=policy/source=] of "`header`", and a
+        [=policy/disposition=] of "`report`".
 
-  4.  For each |policy| in |policies|:
+    4.  For each |policy| in |policies|:
 
-      1.  Insert |policy| into |response|'s <a for="response">CSP list</a>.
+        1.  Insert |policy| into |response|'s <a for="response">CSP list</a>.
+  </ol>
 
   <h4 id="report-for-request" algorithm>
     Report Content Security Policy violations for |request|
