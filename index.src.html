@@ -3648,6 +3648,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   8.  Return "`Matches`".
 
+
   <h5 id="effective-directive-for-a-request" algorithm>
     Get the effective directive for |request|
   </h5>
@@ -3977,6 +3978,35 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   mitigate the risk of injection). This is especially true for the "`script-sample`" property of
   violation reports, and the {{SecurityPolicyViolationEvent/sample}} property of
   {{SecurityPolicyViolationEvent}}, which are both completely attacker-controlled strings.
+
+  <h3 id="source-list-paths-and-redirects">Paths and Redirects</h3>
+
+  To avoid leaking path information cross-origin (as discussed
+  in Egor Homakov's
+  <a href="http://homakov.blogspot.de/2014/01/using-content-security-policy-for-evil.html">Using Content-Security-Policy for Evil</a>),
+  the matching algorithm ignores the path component of a source
+  expression if the resource being loaded is the result of a
+  redirect. For example, given a page with an active policy of
+  <code><a>img-src</a> example.com not-example.com/path</code>:
+
+  *   Directly loading <code>https://not-example.com/not-path</code>
+      would fail, as it doesn't match the policy.
+
+  *   Directly loading <code>https://example.com/redirector</code>
+      would pass, as it matches <code>example.com</code>.
+
+  *   Assuming that <code>https://example.com/redirector</code>
+      delivered a redirect response pointing to <code>https://not-example.com/not-path</code>,
+      the load would succeed, as the initial URL matches <code>example.com</code>,
+      and the redirect target matches <code>not-example.com/path</code>
+      if we ignore its path component.
+
+  This restriction reduces the granularity of a document's policy when redirects are in play, a
+  necessary compromise to avoid brute-forced information leaks of this type.
+
+  The relatively long thread
+  <a href="http://lists.w3.org/Archives/Public/public-webappsec/2014Feb/0036.html">"Remove paths from CSP?"</a>
+  from public-webappsec@w3.org has more detailed discussion around alternate proposals.
 </section>
 
 <!-- Big text: Authoring -->
