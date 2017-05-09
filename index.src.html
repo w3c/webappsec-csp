@@ -97,6 +97,7 @@ spec: RFC3986; urlPrefix: https://tools.ietf.org/html/rfc3986
 spec: RFC4648; urlPrefix: https://tools.ietf.org/html/rfc4648
   type: dfn
     text: base64 encoding; url: section-4
+    text: base64url encoding; url: section-5
 spec: RFC5234; urlPrefix: https://tools.ietf.org/html/rfc5234
   type: grammar
     text: ALPHA; url: appendix-B.1
@@ -598,6 +599,14 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   expression (see [[#match-url-to-source-list]] for details). The security
   properties of IP addresses are suspect, and authors ought to prefer hostnames
   whenever possible.
+
+  Note: The <a grammar>base64-value</a> grammar allows both [=base64 encoding|base64=] and
+  [=base64url encoding|base64url=] encoding. These encodings are treated as equivalant when
+  processing <a grammar>hash-source</a> values. Nonces, however, are strict string matches:
+  we use the <a grammar>base64-value</a> grammar to limit the characters available, and
+  reduce the complexity for the server-side operator (encodings, etc), but the user agent
+  doesn't actually care about any underlying value, nor does it do any decoding of the
+  <a grammar>nonce-source</a> value.
 
   <h3 id="framework-violation">Violations</h3>
 
@@ -3881,8 +3890,14 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
                   1.  Let |actual| be the result of <a>base64 encoding</a> the
                       result of applying |algorithm| to |source|.
 
-                  2.  If |actual| is a <a>case-sensitive</a> match for
-                      |expression|'s <a grammar>`base64-value`</a> part, return
+                  2.  Let |expected| be |expression|'s <a grammar>`base64-value`</a> part,
+                      with all '`-`' characters replaced with '`+`', and all '`_`' characters
+                      replaced with '`/`'.
+
+                      Note: This replacement normalizes hashes expressed in [=base64url
+                      encoding=] into [=base64 encoding=] for matching.
+
+                  2.  If |actual| is a <a>case-sensitive</a> match for |expected|, return
                       "`Matches`".
 
       Note: Hashes apply to inline <{script}> and inline <{style}>. If the
