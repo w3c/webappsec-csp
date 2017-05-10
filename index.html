@@ -1760,9 +1760,10 @@ of security-relevant policy decisions.</p>
      <ol class="toc">
       <li><a href="#security-nonces"><span class="secno">7.1</span> <span class="content">Nonce Reuse</span></a>
       <li><a href="#security-nonce-stealing"><span class="secno">7.2</span> <span class="content">Nonce Stealing</span></a>
-      <li><a href="#security-css-parsing"><span class="secno">7.3</span> <span class="content">CSS Parsing</span></a>
-      <li><a href="#security-violation-reports"><span class="secno">7.4</span> <span class="content">Violation Reports</span></a>
-      <li><a href="#source-list-paths-and-redirects"><span class="secno">7.5</span> <span class="content">Paths and Redirects</span></a>
+      <li><a href="#security-nonce-retargeting"><span class="secno">7.3</span> <span class="content">Nonce Retargeting</span></a>
+      <li><a href="#security-css-parsing"><span class="secno">7.4</span> <span class="content">CSS Parsing</span></a>
+      <li><a href="#security-violation-reports"><span class="secno">7.5</span> <span class="content">Violation Reports</span></a>
+      <li><a href="#source-list-paths-and-redirects"><span class="secno">7.6</span> <span class="content">Paths and Redirects</span></a>
      </ol>
     <li>
      <a href="#authoring-considerations"><span class="secno">8</span> <span class="content">Authoring Considerations</span></a>
@@ -3136,7 +3137,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <p class="assertion">Assert: <var>policy</var> is unused.</p>
      <li data-md="">
       <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-initiator">initiator</a> is "<code>fetch</code>", or its <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-type">type</a> is "" and <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-destination">destination</a> is
-  "<code>subresource</code>":</p>
+  "":</p>
       <ol>
        <li data-md="">
         <p>If the result of executing <a href="#match-request-to-source-list">§6.6.1.3 Does request match source list?</a> on <var>request</var> and this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value-12">value</a> is
@@ -4532,6 +4533,14 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
       <p>If <var>exact match</var> is <code>true</code>, and <var>path list A</var> does not have the same
   number of items as <var>path list B</var>, return "<code>Does Not Match</code>".</p>
      <li data-md="">
+      <p>If <var>exact match</var> is <code>false</code>:</p>
+      <ol>
+       <li data-md="">
+        <p class="assertion">Assert: the final item in <var>path list A</var> is the empty string.</p>
+       <li data-md="">
+        <p>Remove the final item from <var>path list A</var>.</p>
+      </ol>
+     <li data-md="">
       <p>For each <var>piece A</var> in <var>path list A</var>:</p>
       <ol>
        <li data-md="">
@@ -4816,7 +4825,20 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
     <p>The <a href="#is-element-nonceable">§6.6.2.1 Is element nonceable?</a> algorithm attempts to mitigate this specific
   attack by walking through <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code> element attributes, looking for the
   string "<code>&lt;script</code>" or "<code>&lt;style</code>" in their names or values.</p>
-    <h3 class="heading settled" data-level="7.3" id="security-css-parsing"><span class="secno">7.3. </span><span class="content">CSS Parsing</span><a class="self-link" href="#security-css-parsing"></a></h3>
+    <h3 class="heading settled" data-level="7.3" id="security-nonce-retargeting"><span class="secno">7.3. </span><span class="content">Nonce Retargeting</span><a class="self-link" href="#security-nonce-retargeting"></a></h3>
+    <p>Nonces bypass <a data-link-type="grammar" href="#grammardef-host-source" id="ref-for-grammardef-host-source-6">host-source</a> expressions, enabling developers to load code from any
+  origin. This, generally, is fine, and desirable from the developer’s perspective. However, if an
+  attacker can inject a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-base-element">base</a></code> element, then an otherwise safe page can be subverted when relative
+  URLs are resolved. That is, on <code>https://example.com/</code> the following code will load <code>https://example.com/good.js</code>:</p>
+<pre class="highlight"><span class="nt">&lt;script </span><span class="na">nonce=</span><span class="s">abc</span> <span class="na">src=</span><span class="s">/good.js</span><span class="nt">></span><span class="nt">&lt;/script></span>
+</pre>
+    <p>However, the following will load <code>https://evil.com/good.js</code>:</p>
+<pre class="highlight"><span class="nt">&lt;base</span> <span class="na">href=</span><span class="s">"https://evil.com"</span><span class="nt">></span>
+<span class="nt">&lt;script </span><span class="na">nonce=</span><span class="s">abc</span> <span class="na">src=</span><span class="s">/good.js</span><span class="nt">></span><span class="nt">&lt;/script></span>
+</pre>
+    <p>To mitigate this risk, it is advisable to set an explicit <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-base-element">base</a></code> element on every page, or to
+  limit the ability of an attacker to inject their own <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-base-element">base</a></code> element by setting a <a data-link-type="dfn" href="#base-uri" id="ref-for-base-uri-2"><code>base-uri</code></a> directive in your page’s policy. For example, <code>base-uri 'none'</code>.</p>
+    <h3 class="heading settled" data-level="7.4" id="security-css-parsing"><span class="secno">7.4. </span><span class="content">CSS Parsing</span><a class="self-link" href="#security-css-parsing"></a></h3>
     <p>The <a data-link-type="dfn" href="#style-src" id="ref-for-style-src-3">style-src</a> directive restricts the locations from which the
   protected resource can load styles. However, if the user agent uses a lax CSS
   parsing algorithm, an attacker might be able to trick the user agent into
@@ -4825,7 +4847,7 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
   described by Chris Evans in 2009 <a data-link-type="biblio" href="#biblio-css-abuse">[CSS-ABUSE]</a>. User agents SHOULD defend
   against both attacks using the same mechanism: stricter CSS parsing rules for
   style sheets with improper MIME types.</p>
-    <h3 class="heading settled" data-level="7.4" id="security-violation-reports"><span class="secno">7.4. </span><span class="content">Violation Reports</span><a class="self-link" href="#security-violation-reports"></a></h3>
+    <h3 class="heading settled" data-level="7.5" id="security-violation-reports"><span class="secno">7.5. </span><span class="content">Violation Reports</span><a class="self-link" href="#security-violation-reports"></a></h3>
     <p>The violation reporting mechanism in this document has been designed to
   mitigate the risk that a malicious web site could use violation reports to
   probe the behavior of other servers. For example, consider a malicious web
@@ -4841,7 +4863,7 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
   escape their content before rendering it (and should probably themselves use CSP to further
   mitigate the risk of injection). This is especially true for the "<code>script-sample</code>" property of
   violation reports, and the <code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-sample" id="ref-for-dom-securitypolicyviolationevent-sample-3">sample</a></code> property of <code class="idl"><a data-link-type="idl" href="#securitypolicyviolationevent" id="ref-for-securitypolicyviolationevent-4">SecurityPolicyViolationEvent</a></code>, which are both completely attacker-controlled strings.</p>
-    <h3 class="heading settled" data-level="7.5" id="source-list-paths-and-redirects"><span class="secno">7.5. </span><span class="content">Paths and Redirects</span><a class="self-link" href="#source-list-paths-and-redirects"></a></h3>
+    <h3 class="heading settled" data-level="7.6" id="source-list-paths-and-redirects"><span class="secno">7.6. </span><span class="content">Paths and Redirects</span><a class="self-link" href="#source-list-paths-and-redirects"></a></h3>
     <p>To avoid leaking path information cross-origin (as discussed
   in Egor Homakov’s <a href="http://homakov.blogspot.de/2014/01/using-content-security-policy-for-evil.html">Using Content-Security-Policy for Evil</a>),
   the matching algorithm ignores the path component of a source
@@ -4903,7 +4925,7 @@ Content-Security-Policy: connect-src http://example.com/;
   two main effects:</p>
     <ol>
      <li data-md="">
-      <p><a data-link-type="grammar" href="#grammardef-host-source" id="ref-for-grammardef-host-source-6">host-source</a> and <a data-link-type="grammar" href="#grammardef-scheme-source" id="ref-for-grammardef-scheme-source-5">scheme-source</a> expressions, as well as the "<a data-link-type="grammar" href="#grammardef-unsafe-inline" id="ref-for-grammardef-unsafe-inline-8"><code>'unsafe-inline'</code></a>"
+      <p><a data-link-type="grammar" href="#grammardef-host-source" id="ref-for-grammardef-host-source-7">host-source</a> and <a data-link-type="grammar" href="#grammardef-scheme-source" id="ref-for-grammardef-scheme-source-5">scheme-source</a> expressions, as well as the "<a data-link-type="grammar" href="#grammardef-unsafe-inline" id="ref-for-grammardef-unsafe-inline-8"><code>'unsafe-inline'</code></a>"
   and "<a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self-24"><code>'self'</code></a> <a data-link-type="grammar" href="#grammardef-keyword-source" id="ref-for-grammardef-keyword-source-9">keyword-source</a>s will be
   ignored when loading script.</p>
       <p><a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source-10">hash-source</a> and <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source-11">nonce-source</a> expressions
@@ -5020,7 +5042,7 @@ document<span class="p">.</span>write<span class="p">(</span><span class="s1">'&
     <p>The Content Security Policy Directive registry should be updated with the
   following directives and references <a data-link-type="biblio" href="#biblio-rfc7762">[RFC7762]</a>:</p>
     <dl>
-     <dt data-md=""><a data-link-type="dfn" href="#base-uri" id="ref-for-base-uri-2"><code>base-uri</code></a>
+     <dt data-md=""><a data-link-type="dfn" href="#base-uri" id="ref-for-base-uri-3"><code>base-uri</code></a>
      <dd data-md="">
       <p>This document (see <a href="#directive-base-uri">§6.2.1 base-uri</a>)</p>
      <dt data-md=""><a data-link-type="dfn" href="#child-src" id="ref-for-child-src-3"><code>child-src</code></a>
@@ -6386,7 +6408,8 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-grammardef-host-source-2">6.3.2. frame-ancestors</a>
     <li><a href="#ref-for-grammardef-host-source-3">6.6.1.6. 
     Does url match expression in origin with redirect count? </a> <a href="#ref-for-grammardef-host-source-4">(2)</a> <a href="#ref-for-grammardef-host-source-5">(3)</a>
-    <li><a href="#ref-for-grammardef-host-source-6">8.2. 
+    <li><a href="#ref-for-grammardef-host-source-6">7.3. Nonce Retargeting</a>
+    <li><a href="#ref-for-grammardef-host-source-7">8.2. 
     Usage of "'strict-dynamic'" </a>
    </ul>
   </aside>
@@ -6820,7 +6843,7 @@ rest of Google’s CSP Cabal.</p>
     Obtain the deprecated serialization of violation </a>
     <li><a href="#ref-for-securitypolicyviolationevent-2">5.3. 
     Report a violation </a> <a href="#ref-for-securitypolicyviolationevent-3">(2)</a>
-    <li><a href="#ref-for-securitypolicyviolationevent-4">7.4. Violation Reports</a>
+    <li><a href="#ref-for-securitypolicyviolationevent-4">7.5. Violation Reports</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dom-securitypolicyviolationevent-documenturi">
@@ -6879,7 +6902,7 @@ rest of Google’s CSP Cabal.</p>
     Obtain the deprecated serialization of violation </a>
     <li><a href="#ref-for-dom-securitypolicyviolationevent-sample-2">5.3. 
     Report a violation </a>
-    <li><a href="#ref-for-dom-securitypolicyviolationevent-sample-3">7.4. Violation Reports</a>
+    <li><a href="#ref-for-dom-securitypolicyviolationevent-sample-3">7.5. Violation Reports</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dom-securitypolicyviolationevent-disposition">
@@ -6980,7 +7003,7 @@ rest of Google’s CSP Cabal.</p>
    <ul>
     <li><a href="#ref-for-img-src-1">6.1.3. default-src</a> <a href="#ref-for-img-src-2">(2)</a>
     <li><a href="#ref-for-img-src-3">6.1.6. img-src</a>
-    <li><a href="#ref-for-img-src-4">7.5. Paths and Redirects</a>
+    <li><a href="#ref-for-img-src-4">7.6. Paths and Redirects</a>
     <li><a href="#ref-for-img-src-5">10.1. 
     Directive Registry </a>
    </ul>
@@ -7034,7 +7057,7 @@ rest of Google’s CSP Cabal.</p>
    <b><a href="#style-src">#style-src</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-style-src-1">6.1.3. default-src</a> <a href="#ref-for-style-src-2">(2)</a>
-    <li><a href="#ref-for-style-src-3">7.3. CSS Parsing</a>
+    <li><a href="#ref-for-style-src-3">7.4. CSS Parsing</a>
     <li><a href="#ref-for-style-src-4">10.1. 
     Directive Registry </a>
    </ul>
@@ -7054,7 +7077,8 @@ rest of Google’s CSP Cabal.</p>
    <ul>
     <li><a href="#ref-for-base-uri-1">6.2.1.1. 
     Is base allowed for document? </a>
-    <li><a href="#ref-for-base-uri-2">10.1. 
+    <li><a href="#ref-for-base-uri-2">7.3. Nonce Retargeting</a>
+    <li><a href="#ref-for-base-uri-3">10.1. 
     Directive Registry </a>
    </ul>
   </aside>
