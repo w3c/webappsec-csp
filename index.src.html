@@ -63,6 +63,7 @@ spec:infra;
     text:set; for: /
     text:append; for: set
     text:empty; for: set
+    text:strictly split a string
 </pre>
 <pre class="anchors">
 spec: RFC6454; urlPrefix: https://tools.ietf.org/html/rfc6454
@@ -3644,7 +3645,13 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   6.  If |exact match| is `true`, and |path list A| does not have the same
       number of items as |path list B|, return "`Does Not Match`".
 
-  7.  For each |piece A| in |path list A|:
+  7.  If |exact match| is `false`:                                                                                                
+ 
+      1.  Assert: the final item in |path list A| is the empty string.
+     
+      2.  Remove the final item from |path list A|.
+
+  8.  For each |piece A| in |path list A|:
 
       1.  Let |piece B| be the next item in |path list B|.
 
@@ -3655,7 +3662,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       4.  If |piece A| is not a <a>case-sensitive</a> match
           for |piece B|, return "`Does Not Match`".
 
-  8.  Return "`Matches`".
+  9.  Return "`Matches`".
 
 
   <h5 id="effective-directive-for-a-request" algorithm>
