@@ -82,7 +82,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
   In short, the embedder proposes a Content Security Policy by setting an attribute on an <{iframe}>
   element. This policy is transmitted along with the HTTP request for the framed content in an
-  HTTP request header (<a http-header>`Embedding-CSP`</a>). If the embedded content can accept that
+  HTTP request header (<a http-header>`Required-CSP`</a>). If the embedded content can accept that
   policy, it can enforce it by returning a <a http-header>`Content-Security-Policy`</a> or
   <a http-header>`Allow-CSP-From`</a> header along with the response.
 
@@ -106,13 +106,13 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
     </pre>
 
     This will generate a request to `advertisements-r-us.example.com` that has
-    an <a http-header>`Embedding-CSP`</a> header, as follows:
+    a <a http-header>`Required-CSP`</a> header, as follows:
 
     <pre>
       GET / HTTP/1.1
       Host: advertisements-r-us.example.com
       ...
-      <a http-header>Embedding-CSP</a>: script-src https://trusted-cdn.example.com/
+      <a http-header>Required-CSP</a>: script-src https://trusted-cdn.example.com/
       ...
     </pre>
 
@@ -173,12 +173,10 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
       element. This is described in more detail in [[#csp-attribute]].
       
   2.  That attribute's value will be sent along with any <a>navigation request</a> that targets
-      the <{iframe}>'s <a>nested browsing context</a> in an <a http-header>`Embedding-CSP`</a>
-      HTTP request header. This header is described in more detail in [[#embedding-csp-header]].
+      the <{iframe}>'s <a>nested browsing context</a> in a <a http-header>`Required-CSP`</a>
+      HTTP request header. This header is described in more detail in [[#required-csp-header]].
 
-      ISSUE: Rename this? `Required-CSP`, perhaps, to match the rest of the spec?
-
-  3.  The server can examine the <a http-header>`Embedding-CSP`</a> header to determine whether
+  3.  The server can examine the <a http-header>`Required-CSP`</a> header to determine whether
       it wishes to accept the required policy.If so, it can implicitly opt-in by sending a
       <a http-header>`Content-Security-Policy`</a> header in the response that contains a policy
       which is at least as strong as the required policy, or explicitly opt-in by sending an
@@ -277,20 +275,20 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
   ISSUE: Upstream this to all the HTMLs.
  
-  The `Embedding-CSP` HTTP Request Header {#embedding-csp-header}
+  The `Required-CSP` HTTP Request Header {#required-csp-header}
   ---------------------------------------
 
   In order to ensure that the embedded resource can decide whether or not it is willing to adhere to
   the embedder's requirements, the policy expressed in an <{iframe}>'s <{iframe/csp}> attribute is
-  communicated along with affected <a>navigation requests</a> via an
-  "<dfn export http-header>`Embedding-CSP`</dfn>" HTTP request header. The header's value is
+  communicated along with affected <a>navigation requests</a> via a
+  "<dfn export http-header>`Required-CSP`</dfn>" HTTP request header. The header's value is
   represented by the following ABNF [[!RFC5234]]:
 
   <pre>
-    Embedding-CSP = <a grammar>serialized-policy</a>
+    Required-CSP = <a grammar>serialized-policy</a>
   </pre>
 
-  A user agent MUST NOT send more than one HTTP response header field named "`Embedding-CSP`", and
+  A user agent MUST NOT send more than one HTTP response header field named "`Required-CSP`", and
   any such header MUST NOT contain more than one <a grammar>serialized-policy</a>.
   
   Servers MUST process only the first policy in the first such header received. As discussed in
@@ -301,8 +299,8 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
   This header is set as part of HTML's <a>navigate</a> algorithm (see [[#html-integration]] for
   details on the hook that calls the following algorithm):
 
-  <div algorithm="set a request's embedding-csp header">
-    To <dfn abstract-op local-lt="set-embedding-csp">set the `Embedding-CSP` header</dfn> for a
+  <div algorithm="set a request's required-csp header">
+    To <dfn abstract-op local-lt="set-required-csp">set the `Required-CSP` header</dfn> for a
     given <a>request</a> (|request|), run the following steps:
 
     1.  If |request| is not a <a>navigation request</a>, return.
@@ -316,7 +314,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
     4.  Assert: |requirement| is a <a>serialized CSP</a>, matching the
         <a grammar>serialized-policy</a> grammar defined in [[!CSP3]].
 
-    5.  <a for="header list">Append</a> a header named "<a http-header>`Embedding-CSP`</a>" with a
+    5.  <a for="header list">Append</a> a header named "<a http-header>`Required-CSP`</a>" with a
         value of |requirement| to |request|'s <a for="request">header list</a>.
   </div>
 
@@ -363,8 +361,8 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
   5.  Add the following after step 5 of HTML's <a>process a navigate fetch</a>
       algorithm:
 
-      6.  <a lt="set-embedding-csp" abstract-op>Set</a> `request`'s
-          "<a http-header>`Embedding-CSP`</a>" header.
+      6.  <a lt="set-required-csp" abstract-op>Set</a> `request`'s
+          "<a http-header>`Required-CSP`</a>" header.
 
       ISSUE: Upstream this to WHATWG's HTML.
 
@@ -1101,14 +1099,14 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
         2.  |context|'s <a for="browsing context">required CSP</a> is `null`.
 
-    2.  Let |embedding policy| be the result of executing
+    2.  Let |required policy| be the result of executing
         [[csp3#parse-serialized-policy]] on |context|'s <a for="browsing context">required CSP</a> and
         "`enforce`".
 
     3.  If the [[#origin-allowed]] algorithm returns "`Allowed`" when executed upon
         |response| and |request|:
 
-        1.  Append |embedding policy| to |response|'s <a for="response">CSP
+        1.  Append |required policy| to |response|'s <a for="response">CSP
             list</a>.
 
         2.  Return "`Allowed`".
@@ -1117,7 +1115,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
         a cross-origin, <a>network schemed</a> resource.
 
     5.  If the [[#subsume-policy-list]] algorithm returns "`Subsumes`" when
-        executed upon |embedding policy|, |request|'s <a for="request">origin</a>,
+        executed upon |required policy|, |request|'s <a for="request">origin</a>,
         |response|'s <a for="response">CSP list</a>, and |response|'s
         <a for="response">url</a>'s <a for="url">origin</a>, return "`Allowed`".
 
@@ -1638,7 +1636,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
   -----------------
 
   This feature allows an embedder to send information to a third-party endpoint
-  via the <a http-header>`Embedding-CSP`</a> HTTP header. This doesn't seem to
+  via the <a http-header>`Required-CSP`</a> HTTP header. This doesn't seem to
   expose any information that couldn't be tunneled in the HTTP request itself
   (via GET parameters, etc), and embedders remain in control over the endpoints
   to which such requests may be made by enforcing a Content Security Policy with
@@ -1701,10 +1699,10 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
   The permanent message header field registry should be updated
   with the following registration for the
-  <a http-header>`Embedding-CSP`</a> header: [[!RFC3864]]
+  <a http-header>`Required-CSP`</a> header: [[!RFC3864]]
 
   :   Header field name
-  ::  Embedding-CSP
+  ::  Required-CSP
   :   Applicable protocol
   ::  http
   :   Status
@@ -1712,7 +1710,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
   :   Author/Change controller
   ::  W3C
   :   Specification document
-  ::  This specification (See [[#embedding-csp-header]])
+  ::  This specification (See [[#required-csp-header]])
 
   Likewise, the registry should be updated with the following registration
   for the <a http-header>`Allow-CSP-From`</a> header: [[!RFC3864]]
