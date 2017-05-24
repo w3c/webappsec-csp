@@ -63,6 +63,7 @@ spec:infra;
     text:set; for: /
     text:append; for: set
     text:empty; for: set
+    text:strictly split a string
 </pre>
 <pre class="anchors">
 spec: RFC6454; urlPrefix: https://tools.ietf.org/html/rfc6454
@@ -97,12 +98,12 @@ spec: RFC3986; urlPrefix: https://tools.ietf.org/html/rfc3986
 spec: RFC4648; urlPrefix: https://tools.ietf.org/html/rfc4648
   type: dfn
     text: base64 encoding; url: section-4
+    text: base64url encoding; url: section-5
 spec: RFC5234; urlPrefix: https://tools.ietf.org/html/rfc5234
   type: grammar
     text: ALPHA; url: appendix-B.1
     text: DIGIT; url: appendix-B.1
     text: VCHAR; url: appendix-B.1
-    text: WSP; url: appendix-B.1
 spec: RFC5890; urlPrefix: https://tools.ietf.org/html/rfc5890
   type: dfn
     text: label; url: section-2.2
@@ -619,6 +620,14 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   properties of IP addresses are suspect, and authors ought to prefer hostnames
   whenever possible.
 
+  Note: The <a grammar>base64-value</a> grammar allows both [=base64 encoding|base64=] and
+  [=base64url encoding|base64url=] encoding. These encodings are treated as equivalant when
+  processing <a grammar>hash-source</a> values. Nonces, however, are strict string matches:
+  we use the <a grammar>base64-value</a> grammar to limit the characters available, and
+  reduce the complexity for the server-side operator (encodings, etc), but the user agent
+  doesn't actually care about any underlying value, nor does it do any decoding of the
+  <a grammar>nonce-source</a> value.
+
   <h3 id="framework-violation">Violations</h3>
 
   A <dfn export>violation</dfn> represents an action or resource which goes against the
@@ -702,6 +711,10 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
       ISSUE: Is this kind of thing specified anywhere? I didn't see anything
       that looked useful in [[ECMA262]].
+
+      Note: User agents need to ensure that the [=violation/source file=] is the URL requested by
+      the page, pre-redirects. If that's not possible, user agents need to strip the URL down to an
+      origin to avoid unintentional leakage.
 
   3.  If |global| is a {{Window}} object, set |violation|'s
       <a for="violation">referrer</a> to |global|'s {{Window/document}}'s
@@ -1375,7 +1388,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
       1.  For each |policy| in |global|'s <a for="global object">CSP list</a>:
 
-          1.  Let |source-list| be null.
+          1.  Let |source-list| be `null`.
 
           2.  If |policy| contains a <a>directive</a> whose
               <a for="directive">name</a> is "`script-src`", then set |source-list|
@@ -1385,7 +1398,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
               <a for="directive">name</a> is "`default-src`", then set |source-list|
               to that directive's <a for="directive">value</a>.
 
-          3.  If |source-list| is non-null, and does not contain a <a>source
+          3.  If |source-list| is non-`null`, and does not contain a <a>source
               expression</a> which is an <a>ASCII case-insensitive</a> match for the
               string "<a grammar>`'unsafe-eval'`</a>", then throw an `EvalError`
               exception.
@@ -1861,7 +1874,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   2.  If |request|'s <a for="request">initiator</a> is "`fetch`", or its
       <a for="request">type</a> is "" and <a for="request">destination</a> is
-      "`subresource`":
+      "":
 
       1.  If the result of executing [[#match-request-to-source-list]] on
           |request| and this directive's <a for="directive">value</a> is
@@ -3482,9 +3495,9 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
       1.  If |url|'s {{URL/host}} is `null`, return "`Does Not Match`".
 
-      2.  If |expression| does not have a <a grammar>`scheme-part`</a> and
-          and [[#match-schemes]] returns "`Does Not Match`" given `null` and
-          |url|'s <a for="url">scheme</a>, return "`Does Not Match`".
+      2.  If |expression| does not have a <a grammar>`scheme-part`</a> and [[#match-schemes]]
+          returns "`Does Not Match`" given |origin|'s [=origin/scheme=] and |url|'s
+          <a for="url">scheme</a>, return "`Does Not Match`".
 
           Note: As with <a grammar>`scheme-part`</a> above, we allow schemeless
           <a grammar>`host-source`</a> expressions to be upgraded from insecure
@@ -3655,7 +3668,13 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   6.  If |exact match| is `true`, and |path list A| does not have the same
       number of items as |path list B|, return "`Does Not Match`".
 
-  7.  For each |piece A| in |path list A|:
+  7.  If |exact match| is `false`:                                                                                                
+ 
+      1.  Assert: the final item in |path list A| is the empty string.
+     
+      2.  Remove the final item from |path list A|.
+
+  8.  For each |piece A| in |path list A|:
 
       1.  Let |piece B| be the next item in |path list B|.
 
@@ -3666,7 +3685,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       4.  If |piece A| is not a <a>case-sensitive</a> match
           for |piece B|, return "`Does Not Match`".
 
-  8.  Return "`Matches`".
+  9.  Return "`Matches`".
+
 
   <h5 id="effective-directive-for-a-request" algorithm>
     Get the effective directive for |request|
@@ -3900,8 +3920,14 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
                   1.  Let |actual| be the result of <a>base64 encoding</a> the
                       result of applying |algorithm| to |source|.
 
-                  2.  If |actual| is a <a>case-sensitive</a> match for
-                      |expression|'s <a grammar>`base64-value`</a> part, return
+                  2.  Let |expected| be |expression|'s <a grammar>`base64-value`</a> part,
+                      with all '`-`' characters replaced with '`+`', and all '`_`' characters
+                      replaced with '`/`'.
+
+                      Note: This replacement normalizes hashes expressed in [=base64url
+                      encoding=] into [=base64 encoding=] for matching.
+
+                  2.  If |actual| is a <a>case-sensitive</a> match for |expected|, return
                       "`Matches`".
 
       Note: Hashes apply to inline <{script}> and inline <{style}>. If the
@@ -3965,6 +3991,29 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   attack by walking through <{script}> element attributes, looking for the
   string "<code>&lt;script</code>" or "<code>&lt;style</code>" in their names or values.
 
+  <h3 id="security-nonce-retargeting">Nonce Retargeting</h3>
+
+  Nonces bypass <a grammar>host-source</a> expressions, enabling developers to load code from any
+  origin. This, generally, is fine, and desirable from the developer's perspective. However, if an
+  attacker can inject a <{base}> element, then an otherwise safe page can be subverted when relative
+  URLs are resolved. That is, on `https://example.com/` the following code will load
+  `https://example.com/good.js`:
+
+  <pre highlight="html">
+    &lt;script nonce=abc src=/good.js&gt;&lt;/script&gt;
+  </pre>
+
+  However, the following will load `https://evil.com/good.js`:
+
+  <pre highlight="html">
+    &lt;base href="https://evil.com"&gt;
+    &lt;script nonce=abc src=/good.js&gt;&lt;/script&gt;
+  </pre>
+
+  To mitigate this risk, it is advisable to set an explicit <{base}> element on every page, or to
+  limit the ability of an attacker to inject their own <{base}> element by setting a
+  <a>`base-uri`</a> directive in your page's policy. For example, `base-uri 'none'`.
+
   <h3 id="security-css-parsing">CSS Parsing</h3>
 
   The <a>style-src</a> directive restricts the locations from which the
@@ -3997,6 +4046,35 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   mitigate the risk of injection). This is especially true for the "`script-sample`" property of
   violation reports, and the {{SecurityPolicyViolationEvent/sample}} property of
   {{SecurityPolicyViolationEvent}}, which are both completely attacker-controlled strings.
+
+  <h3 id="source-list-paths-and-redirects">Paths and Redirects</h3>
+
+  To avoid leaking path information cross-origin (as discussed
+  in Egor Homakov's
+  <a href="http://homakov.blogspot.de/2014/01/using-content-security-policy-for-evil.html">Using Content-Security-Policy for Evil</a>),
+  the matching algorithm ignores the path component of a source
+  expression if the resource being loaded is the result of a
+  redirect. For example, given a page with an active policy of
+  <code><a>img-src</a> example.com not-example.com/path</code>:
+
+  *   Directly loading <code>https://not-example.com/not-path</code>
+      would fail, as it doesn't match the policy.
+
+  *   Directly loading <code>https://example.com/redirector</code>
+      would pass, as it matches <code>example.com</code>.
+
+  *   Assuming that <code>https://example.com/redirector</code>
+      delivered a redirect response pointing to <code>https://not-example.com/not-path</code>,
+      the load would succeed, as the initial URL matches <code>example.com</code>,
+      and the redirect target matches <code>not-example.com/path</code>
+      if we ignore its path component.
+
+  This restriction reduces the granularity of a document's policy when redirects are in play, a
+  necessary compromise to avoid brute-forced information leaks of this type.
+
+  The relatively long thread
+  <a href="http://lists.w3.org/Archives/Public/public-webappsec/2014Feb/0036.html">"Remove paths from CSP?"</a>
+  from public-webappsec@w3.org has more detailed discussion around alternate proposals.
 </section>
 
 <!-- Big text: Authoring -->
@@ -4149,6 +4227,15 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
         <a>Content-Security-Policy</a>:  <a>script-src</a> <a grammar>'unsafe-hashed-attributes'</a> 'sha256-jzgBGA4UWFFmpOBq0JpdsySukE1FrEN5bUpoK8Z29fY='
       </pre>
     </div>
+
+    The capabilities `'unsafe-hashed-attributes'` provides is useful for legacy sites, but should be
+    avoided for modern sites. In particular, note that hashes allow a particular script to execute,
+    but do not ensure that it executes in the way a developer intends. If an interesting capability
+    is exposed as an inline event handler (say `<a onclick="transferAllMyMoney()">Transfer</a>`),
+    then that script becomes available for an attacker to inject as
+    `<script>transferAllMyMoney()</script>`. Developers should be careful to balance the risk of
+    allowing specific scripts to execute against the deployment advantages that allowing inline
+    event handlers might provide.
   </section>
 
   <section>
