@@ -82,7 +82,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
   In short, the embedder proposes a Content Security Policy by setting an attribute on an <{iframe}>
   element. This policy is transmitted along with the HTTP request for the framed content in an
-  HTTP request header (<a http-header>`Required-CSP`</a>). If the embedded content can accept that
+  HTTP request header (<a http-header>`Sec-Required-CSP`</a>). If the embedded content can accept that
   policy, it can enforce it by returning a <a http-header>`Content-Security-Policy`</a> or
   <a http-header>`Allow-CSP-From`</a> header along with the response.
 
@@ -106,13 +106,13 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
     </pre>
 
     This will generate a request to `advertisements-r-us.example.com` that has
-    a <a http-header>`Required-CSP`</a> header, as follows:
+    a <a http-header>`Sec-Required-CSP`</a> header, as follows:
 
     <pre>
       GET / HTTP/1.1
       Host: advertisements-r-us.example.com
       ...
-      <a http-header>Required-CSP</a>: script-src https://trusted-cdn.example.com/
+      <a http-header>Sec-Required-CSP</a>: script-src https://trusted-cdn.example.com/
       ...
     </pre>
 
@@ -173,10 +173,10 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
       element. This is described in more detail in [[#csp-attribute]].
       
   2.  That attribute's value will be sent along with any <a>navigation request</a> that targets
-      the <{iframe}>'s <a>nested browsing context</a> in a <a http-header>`Required-CSP`</a>
+      the <{iframe}>'s <a>nested browsing context</a> in a <a http-header>`Sec-Required-CSP`</a>
       HTTP request header. This header is described in more detail in [[#required-csp-header]].
 
-  3.  The server can examine the <a http-header>`Required-CSP`</a> header to determine whether
+  3.  The server can examine the <a http-header>`Sec-Required-CSP`</a> header to determine whether
       it wishes to accept the required policy.If so, it can implicitly opt-in by sending a
       <a http-header>`Content-Security-Policy`</a> header in the response that contains a policy
       which is at least as strong as the required policy, or explicitly opt-in by sending an
@@ -275,20 +275,20 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
   ISSUE: Upstream this to all the HTMLs.
  
-  The `Required-CSP` HTTP Request Header {#required-csp-header}
+  The `Sec-Required-CSP` HTTP Request Header {#required-csp-header}
   ---------------------------------------
 
   In order to ensure that the embedded resource can decide whether or not it is willing to adhere to
   the embedder's requirements, the policy expressed in an <{iframe}>'s <{iframe/csp}> attribute is
   communicated along with affected <a>navigation requests</a> via a
-  "<dfn export http-header>`Required-CSP`</dfn>" HTTP request header. The header's value is
+  "<dfn export http-header>`Sec-Required-CSP`</dfn>" HTTP request header. The header's value is
   represented by the following ABNF [[!RFC5234]]:
 
   <pre>
-    Required-CSP = <a grammar>serialized-policy</a>
+    Sec-Required-CSP = <a grammar>serialized-policy</a>
   </pre>
 
-  A user agent MUST NOT send more than one HTTP response header field named "`Required-CSP`", and
+  A user agent MUST NOT send more than one HTTP response header field named "`Sec-Required-CSP`", and
   any such header MUST NOT contain more than one <a grammar>serialized-policy</a>.
   
   Servers MUST process only the first policy in the first such header received. As discussed in
@@ -300,7 +300,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
   details on the hook that calls the following algorithm):
 
   <div algorithm="set a request's required-csp header">
-    To <dfn abstract-op local-lt="set-required-csp">set the `Required-CSP` header</dfn> for a
+    To <dfn abstract-op local-lt="set-required-csp">set the `Sec-Required-CSP` header</dfn> for a
     given <a>request</a> (|request|), run the following steps:
 
     1.  If |request| is not a <a>navigation request</a>, return.
@@ -314,7 +314,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
     4.  Assert: |requirement| is a <a>serialized CSP</a>, matching the
         <a grammar>serialized-policy</a> grammar defined in [[!CSP3]].
 
-    5.  <a for="header list">Append</a> a header named "<a http-header>`Required-CSP`</a>" with a
+    5.  <a for="header list">Append</a> a header named "<a http-header>`Sec-Required-CSP`</a>" with a
         value of |requirement| to |request|'s <a for="request">header list</a>.
   </div>
 
@@ -362,7 +362,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
       algorithm:
 
       6.  <a lt="set-required-csp" abstract-op>Set</a> `request`'s
-          "<a http-header>`Required-CSP`</a>" header.
+          "<a http-header>`Sec-Required-CSP`</a>" header.
 
       ISSUE: Upstream this to WHATWG's HTML.
 
@@ -1636,7 +1636,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
   -----------------
 
   This feature allows an embedder to send information to a third-party endpoint
-  via the <a http-header>`Required-CSP`</a> HTTP header. This doesn't seem to
+  via the <a http-header>`Sec-Required-CSP`</a> HTTP header. This doesn't seem to
   expose any information that couldn't be tunneled in the HTTP request itself
   (via GET parameters, etc), and embedders remain in control over the endpoints
   to which such requests may be made by enforcing a Content Security Policy with
@@ -1699,10 +1699,10 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
   The permanent message header field registry should be updated
   with the following registration for the
-  <a http-header>`Required-CSP`</a> header: [[!RFC3864]]
+  <a http-header>`Sec-Required-CSP`</a> header: [[!RFC3864]]
 
   :   Header field name
-  ::  Required-CSP
+  ::  Sec-Required-CSP
   :   Applicable protocol
   ::  http
   :   Status
