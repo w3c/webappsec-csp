@@ -19,8 +19,8 @@ Boilerplate: omit conformance, omit feedback-header
 Markup Shorthands: css off, markdown on
 </pre>
 <pre class="link-defaults">
-spec: html;
-  type: dfn; for: /;
+spec: html
+  type: dfn; for: /
     text: browsing context  
     text: case-sensitive
     text: content attribute
@@ -31,14 +31,16 @@ spec:fetch
   type: dfn
     text:request; for: /
     text: response; for: /
-spec:infra;
-  type:dfn;
+spec:infra
+  type:dfn
     text:string; for: /
     text:list; for: / 
     text:set; for: / 
     text:append; for: set
     text:empty; for: set
-spec:csp; type:dfn; text:allows all inline behavior; for:source list
+spec: csp
+  type: dfn
+    text: allows all inline behavior; for:source list
 </pre>
 <pre class="anchors">
 spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
@@ -52,6 +54,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
     text: host-part match
     text: port-part match
     text: path-part match
+    text: CSP list
 </pre>
 <!--
 ████ ██    ██ ████████ ████████   ███████
@@ -71,7 +74,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
   attacks, allowing developers to harden their own sites against injection of
   malicious script, style, and other resource types. It does not, however,
   give developers the ability to apply restrictions to third-party content
-  loaded in via `<iframe>`. Allowing CSP to apply directly to these third-party
+  loaded in via <{iframe}>. Allowing CSP to apply directly to these third-party
   contexts would be dangerous; CSP gives quite granular control over resource
   loading, and it's very possible to introduce vulnerabilities into an otherwise
   secure page by denying it access to particular scripts. We've seen these kinds
@@ -141,7 +144,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
     <pre>
       HTTP/1.1 200 OK
       ...
-      <a>Content-Security-Policy</a>: script-src https://trusted-cdn.example.com/; object-src 'none'
+      <a http-header>Content-Security-Policy</a>: script-src https://trusted-cdn.example.com/; object-src 'none'
     </pre>
 
     Since the policy asserted by the response allows strictly fewer requests than the policy
@@ -153,11 +156,10 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
     <pre>
       HTTP/1.1 200 OK
       ...
-      <a>Content-Security-Policy</a>: script-src https://trusted-cdn.example.com/,
-                               object-src 'none'
+      <a http-header>Content-Security-Policy</a>: script-src https://trusted-cdn.example.com/, object-src 'none'
     </pre>
     
-    The "`,`" in the <a>`Content-Security-Policy`</a> header's value splits the
+    The "`,`" in the <a http-header>`Content-Security-Policy`</a> header's value splits the
     string into two serialized policies, each of which is enforced. The user
     agent verifies that one of the policies delivered with the response matches
     the requirement, and since additional policies can only make the
@@ -217,7 +219,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
   1.  |value| is not the empty string.
 
-  2.  |value| matches the <a grammar>serialized-policy</a> ABNF grammar defined in [[!CSP3]].
+  2.  |value| matches the <a grammar>serialized-policy</a> ABNF grammar defined in [[!CSP]].
 
   3.  |element|'s <a>node document</a>'s <a for="Document">browsing context</a>'s
       <a for="browsing context">required CSP</a> is `null`, or the result of
@@ -272,7 +274,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
     following steps on a given |element| for a given |value|:
  
     1.  If |value| is a <a for="iframe/csp">valid attribute value</a> for |element|, set |element|'s
-        <{iframe/csp}> <a>content attribute</a> to the empty string and return.
+        <{iframe/csp}> <a>content attribute</a> to |value| and return.
 
     2.  Set |element|'s <{iframe/csp}> <a>content attribute</a> to the empty string.
   </div>
@@ -316,7 +318,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
     3.  If |requirement| is `null`, return.
 
     4.  Assert: |requirement| is a <a>serialized CSP</a>, matching the
-        <a grammar>serialized-policy</a> grammar defined in [[!CSP3]].
+        <a grammar>serialized-policy</a> grammar defined in [[!CSP]].
 
     5.  <a for="header list">Append</a> a header named "<a http-header>`Sec-Required-CSP`</a>" with a
         value of |requirement| to |request|'s <a for="request">header list</a>.
@@ -430,47 +432,44 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
   *   When multiple policies are present, they have a combined effect which is described in
       [[CSP3#multiple-policies|"The effect of multiple policies"]]. Here, we'll talk about the
-      combined effect of a <a>list</a> of <a>policy</a> objects as their
-      <dfn for="policy" export>intersection</dfn>. The details of determining that are spelled out
-      in [[#intersection]].
+      combined effect of a [=/CSP list=] as their [=CSP list/intersection=]. The details of
+      determining that are spelled out in [[#intersection]].
 
-  *   A <a>policy</a> (|A|) is said to <a>subsume</a> a <a>list</a> of <a>policy</a> objects if
-      |A| <a>subsumes</a> their <a for="policy">intersection</a>.
+  *   A <a>policy</a> (|A|) is said to <a>subsume</a> a [=/CSP list=] if |A| <a>subsumes</a> their
+      [=CSP list/intersection=].
 
   Intersection {#intersection}
   ------------
 
-  ### Policy List intersection ### {#intersection-policy-list}
+  <h4 algorithm id="intersection-policy-list">CSP List intersection</h4>
 
-  <div algorithm="intersection of policy list">
-    Given a <a>list</a> of <a>policies</a> (|policy list|) and an <a for="/">origin</a> (|origin|),
-    the <dfn abstract-op>intersection of |policy list| for |origin|</dfn> is a single <a>policy</a>
-    object representing their net effect, produced by the following algorithm:
+  The <dfn export for="CSP list">intersection</dfn> of a [=/CSP list=] (|list|) for an [=/origin=]
+  (|origin|) is a single [=Content Security Policy object=] representing their net effect,
+  produced by the following algorithm:
 
-    Note: It isn't always possible to represent the <a for="policy">intersection</a> of multiple
-    policies as a single policy. Consider `script-src 'unsafe-inline'` and `script-src 'nonce-abc'`,
-    for instance: the former allows only inline script, the latter allows only inline or
-    externalized script with a particular token. The net effect (only inline script with a
-    particular token) cannot be created with a single policy. Dealing with such policies is, for the
-    moment, left as an exercise for the reader.
+  Note: It isn't always possible to represent the [=CSP list/intersection=] of multiple policies as
+  a single policy. Consider `script-src 'unsafe-inline'` and `script-src 'nonce-abc'`, for instance:
+  the former allows only inline script, the latter allows only inline or externalized script with a
+  particular token. The net effect (only inline script with a particular token) cannot be created
+  with a single policy. Dealing with such policies is, for the moment, left as an exercise for the
+  reader.
 
-    ISSUE: We shouldn't make the reader do this exercise.
+  ISSUE: We shouldn't make the reader do this exercise.
 
-    1.  Let |intersection| be a <a for="/">policy</a> object with an empty <a>directive set</a>
+  <ol class="algorithm">
+    1.  Let |result| be a <a for="/">policy</a> object with an empty <a>directive set</a>
         and a disposition of "`enforce`".
 
-    2.  For each |policy| in |policy list|:
+    2.  For each |policy| in |list|:
 
         1.  If |policy|'s <a for="policy">disposition</a> is "`report`",
             <a for="iteration">continue</a>.
 
-        2.  Let |result| be the <a lt="intersection of two policies" abstract-op>intersection
-            of  |intersection| and |policy| for |origin|</a>
+        2.  Set |result| to the [=content security policy object/intersection=] of |result|
+            and |policy| for |origin|.
 
-        3.  Set |intersection| to |result|.
-
-    3.  Return |intersection|.
-  </div>
+    3.  Return |result|.
+  </ol>
 
   <div class="example">
     The intersection of the policies created by parsing each item in the following list of
@@ -501,12 +500,11 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
   ### Policy Intersection ### {#intersection-policy}
 
-  <div algorithm="intersection of two policies">
-    Given two <a>policies</a> (|A| and |B|), and an <a for="/">origin</a> (|origin|), the
-    <dfn abstract-op lt="intersection of two policies">intersection of |A| and |B| for
-    |origin|</dfn> is a single <a>policy</a> representing their net effect, produced by the
-    following algorithm:
+  The <dfn for="content security policy object">intersection</dfn> of two [=Content Security Policy
+  objects=] (|A| and |B|) for an [=/origin=] (|origin|) is a single [=Content Security Policy
+  object=] representing their combined effect, produced by the following algorithm:
 
+  <ol class="algorithm">
     1.  Assert: |A| and |B| both have a <a for="policy">disposition</a> of "`enforce`".
 
     2.  If |A|'s <a>directive set</a> <a for="list">is empty</a>, return |B|.
@@ -572,8 +570,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
             3.  <a for="iteration">Continue</a>.
 
-        8.  Let |directive value| be the
-            <a lt="intersection of two source lists" abstract-op>intersection of |directive A|'s
+        8.  Let |directive value| be the [=source list/intersection=] of |directive A|'s
             <a for="directive">value</a>, |directive B|'s <a for="directive">value</a>, |directive
             name|, and |origin|.
 
@@ -587,7 +584,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
         10. <a for="set">Append</a> |directive| to |policy|'s <a>directive set</a>.
 
     9.  Return |policy|.
-  </div>
+  </ol>
 
   <div class="example">
     The intersection of the policies obtained by parsing the following <a>serialized CSPs</a>:
@@ -610,23 +607,21 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
        script-src http://example.com/;
     </pre>
 
-    Both of the given policies <a>subsume</a> the <a for="policy">intersection</a>. For example,
-    the <a for="policy">intersection</a>'s "`script-src http://example.com/`" is
+    Both of the given policies <a>subsume</a> the <a for="CSP list">intersection</a>. For example,
+    the <a for="CSP list">intersection</a>'s "`script-src http://example.com/`" is
     <a for="policy">subsumed by</a> the first policy's "`default-src 'self' http://example.com
     http://example.net`" and the second policy's "`script-src http://example.com/`".
   </div>
 
   ### Source List Intersection ### {#intersection-source-list}
 
-  <div algorithm="intersection of two source lists">
-    Given two <a>source lists</a> (|A| and |B|), their <a for="directive">name</a> (|name|), and
-    their <a for="/">origin</a> (|origin|), the
-    <dfn lt="intersection of two source lists" abstract-op>intersection of |A| and |B| for |name|
-    and |origin|</dfn> is a <a>source list</a> representing their net effect. If no such <a>source
-    expressions</a> exist because the lists contain only divergent expressions (for example:
-    `https://example.com/` in |A|, and `https://not-example.com/` in |B|), then the intersection
-    will be the list « <a grammar>'none'</a> ».
+  The <dfn for="source list">intersection</dfn> of two [=source lists=] for a
+  [=directive/name|directive name=] (|name|) and an [=/origin=] (|origin|) is a [=source list=]
+  representing their net effect. If no such [=source list=] exists (for example,
+  `https://example.com/` in |A| and `https://not-example.com` in |B|), then the intersection will
+  be the list « <a grammar>'none'</a> ».
 
+  <ol class="algorithm">
     1.  Let |effective A| be the <a>effective source list</a> for |A|, |name|, and |origin|.
 
     2.  Let |effective B| be the <a>effective source list</a> for |B|, |name|, and |origin|.
@@ -714,7 +709,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
             |intersection|.
 
     11.  Return |intersection|.
-  </div>
+  </ol>
 
   <div class="example">
     In these cases, `intersection` is an 

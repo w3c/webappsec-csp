@@ -1503,7 +1503,7 @@ restrictions upon itself.</p>
       <li>
        <a href="#intersection"><span class="secno">3.1</span> <span class="content">Intersection</span></a>
        <ol class="toc">
-        <li><a href="#intersection-policy-list"><span class="secno">3.1.1</span> <span class="content">Policy List intersection</span></a>
+        <li><a href="#intersection-policy-list"><span class="secno">3.1.1</span> <span class="content">CSP List intersection</span></a>
         <li><a href="#intersection-policy"><span class="secno">3.1.2</span> <span class="content">Policy Intersection</span></a>
         <li><a href="#intersection-source-list"><span class="secno">3.1.3</span> <span class="content">Source List Intersection</span></a>
         <li>
@@ -1575,7 +1575,7 @@ restrictions upon itself.</p>
   attacks, allowing developers to harden their own sites against injection of
   malicious script, style, and other resource types. It does not, however,
   give developers the ability to apply restrictions to third-party content
-  loaded in via <code>&lt;iframe></code>. Allowing CSP to apply directly to these third-party
+  loaded in via <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a></code>. Allowing CSP to apply directly to these third-party
   contexts would be dangerous; CSP gives quite granular control over resource
   loading, and it’s very possible to introduce vulnerabilities into an otherwise
   secure page by denying it access to particular scripts. We’ve seen these kinds
@@ -1626,7 +1626,7 @@ Host: advertisements-r-us.example.com
     embedder’s restrictions, and adds more on top: 
 <pre>HTTP/1.1 200 OK
 ...
-<a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#header-content-security-policy">Content-Security-Policy</a>: script-src https://trusted-cdn.example.com/; object-src 'none'
+<a data-link-type="http-header" href="https://w3c.github.io/webappsec-csp/#header-content-security-policy">Content-Security-Policy</a>: script-src https://trusted-cdn.example.com/; object-src 'none'
 </pre>
     <p>Since the policy asserted by the response allows strictly fewer requests than the policy
     required by the request, the frame loads successfully.</p>
@@ -1634,10 +1634,9 @@ Host: advertisements-r-us.example.com
     embedder exactly, another which tightens them:</p>
 <pre>HTTP/1.1 200 OK
 ...
-<a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#header-content-security-policy">Content-Security-Policy</a>: script-src https://trusted-cdn.example.com/,
-                         object-src 'none'
+<a data-link-type="http-header" href="https://w3c.github.io/webappsec-csp/#header-content-security-policy">Content-Security-Policy</a>: script-src https://trusted-cdn.example.com/, object-src 'none'
 </pre>
-    <p>The "<code>,</code>" in the <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#header-content-security-policy"><code>Content-Security-Policy</code></a> header’s value splits the
+    <p>The "<code>,</code>" in the <a data-link-type="http-header" href="https://w3c.github.io/webappsec-csp/#header-content-security-policy"><code>Content-Security-Policy</code></a> header’s value splits the
     string into two serialized policies, each of which is enforced. The user
     agent verifies that one of the policies delivered with the response matches
     the requirement, and since additional policies can only make the <em>effective</em> policy for the page more restrictive, allows the frame
@@ -1680,7 +1679,7 @@ Host: advertisements-r-us.example.com
      <li data-md="">
       <p><var>value</var> is not the empty string.</p>
      <li data-md="">
-      <p><var>value</var> matches the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-policy">serialized-policy</a> ABNF grammar defined in <a data-link-type="biblio" href="#biblio-csp3">[CSP3]</a>.</p>
+      <p><var>value</var> matches the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-policy">serialized-policy</a> ABNF grammar defined in <a data-link-type="biblio" href="#biblio-csp">[CSP]</a>.</p>
      <li data-md="">
       <p><var>element</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document">node document</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-document-bc">browsing context</a>’s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-1">required CSP</a> is <code>null</code>, or the result of <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#parse-serialized-policy">parsing <var>value</var> as "<code>enforce</code>"</a> is <a data-link-type="dfn" href="#policy-subsumed-by" id="ref-for-policy-subsumed-by-1">subsumed by</a> <var>element</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document">node document</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-document-bc">browsing
   context</a>’s <a data-link-type="dfn" href="#browsing-context-required-csp" id="ref-for-browsing-context-required-csp-2">required CSP</a>.</p>
@@ -1733,7 +1732,7 @@ Host: advertisements-r-us.example.com
     following steps on a given <var>element</var> for a given <var>value</var>: 
      <ol>
       <li data-md="">
-       <p>If <var>value</var> is a <a data-link-type="dfn" href="#iframe-csp-valid-attribute-value" id="ref-for-iframe-csp-valid-attribute-value-2">valid attribute value</a> for <var>element</var>, set <var>element</var>’s <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-10">csp</a></code> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-element-attributes">content attribute</a> to the empty string and return.</p>
+       <p>If <var>value</var> is a <a data-link-type="dfn" href="#iframe-csp-valid-attribute-value" id="ref-for-iframe-csp-valid-attribute-value-2">valid attribute value</a> for <var>element</var>, set <var>element</var>’s <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-10">csp</a></code> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-element-attributes">content attribute</a> to <var>value</var> and return.</p>
       <li data-md="">
        <p>Set <var>element</var>’s <code><a data-link-type="element-sub" href="#element-attrdef-iframe-csp" id="ref-for-element-attrdef-iframe-csp-11">csp</a></code> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-element-attributes">content attribute</a> to the empty string.</p>
      </ol>
@@ -1765,7 +1764,7 @@ Host: advertisements-r-us.example.com
       <li data-md="">
        <p>If <var>requirement</var> is <code>null</code>, return.</p>
       <li data-md="">
-       <p class="assertion">Assert: <var>requirement</var> is a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#serialized-csp">serialized CSP</a>, matching the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-policy">serialized-policy</a> grammar defined in <a data-link-type="biblio" href="#biblio-csp3">[CSP3]</a>.</p>
+       <p class="assertion">Assert: <var>requirement</var> is a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#serialized-csp">serialized CSP</a>, matching the <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-serialized-policy">serialized-policy</a> grammar defined in <a data-link-type="biblio" href="#biblio-csp">[CSP]</a>.</p>
       <li data-md="">
        <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-header-list-append">Append</a> a header named "<a data-link-type="http-header" href="#http-headerdef-sec-required-csp" id="ref-for-http-headerdef-sec-required-csp-6"><code>Sec-Required-CSP</code></a>" with a
   value of <var>requirement</var> to <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-header-list">header list</a>.</p>
@@ -1857,41 +1856,36 @@ Host: advertisements-r-us.example.com
   strict"ness are spelled out in <a href="#subsumption">§3.2 Subsumption</a>.</p>
      <li data-md="">
       <p>When multiple policies are present, they have a combined effect which is described in <a href="https://www.w3.org/TR/CSP3/#multiple-policies">"The effect of multiple policies"</a>. Here, we’ll talk about the
-  combined effect of a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list">list</a> of <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> objects as their <dfn class="dfn-paneled" data-dfn-for="policy" data-dfn-type="dfn" data-export="" id="policy-intersection">intersection</dfn>. The details of determining that are spelled out
-  in <a href="#intersection">§3.1 Intersection</a>.</p>
+  combined effect of a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#csp-list">CSP list</a> as their <a data-link-type="dfn" href="#csp-list-intersection" id="ref-for-csp-list-intersection-1">intersection</a>. The details of
+  determining that are spelled out in <a href="#intersection">§3.1 Intersection</a>.</p>
      <li data-md="">
-      <p>A <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> (<var>A</var>) is said to <a data-link-type="dfn" href="#policy-subsume" id="ref-for-policy-subsume-1">subsume</a> a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list">list</a> of <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> objects if <var>A</var> <a data-link-type="dfn" href="#policy-subsume" id="ref-for-policy-subsume-2">subsumes</a> their <a data-link-type="dfn" href="#policy-intersection" id="ref-for-policy-intersection-1">intersection</a>.</p>
+      <p>A <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> (<var>A</var>) is said to <a data-link-type="dfn" href="#policy-subsume" id="ref-for-policy-subsume-1">subsume</a> a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#csp-list">CSP list</a> if <var>A</var> <a data-link-type="dfn" href="#policy-subsume" id="ref-for-policy-subsume-2">subsumes</a> their <a data-link-type="dfn" href="#csp-list-intersection" id="ref-for-csp-list-intersection-2">intersection</a>.</p>
     </ul>
     <h3 class="heading settled" data-level="3.1" id="intersection"><span class="secno">3.1. </span><span class="content">Intersection</span><a class="self-link" href="#intersection"></a></h3>
-    <h4 class="heading settled" data-level="3.1.1" id="intersection-policy-list"><span class="secno">3.1.1. </span><span class="content">Policy List intersection</span><a class="self-link" href="#intersection-policy-list"></a></h4>
-    <div class="algorithm" data-algorithm="intersection of policy list">
-      Given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list">list</a> of <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policies</a> (<var>policy list</var>) and an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a> (<var>origin</var>),
-    the <dfn data-dfn-type="abstract-op" data-export="" id="abstract-opdef-intersection-of-policy-list-for-origin">intersection of <var>policy list</var> for <var>origin</var><a class="self-link" href="#abstract-opdef-intersection-of-policy-list-for-origin"></a></dfn> is a single <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> object representing their net effect, produced by the following algorithm: 
-     <p class="note" role="note"><span>Note:</span> It isn’t always possible to represent the <a data-link-type="dfn" href="#policy-intersection" id="ref-for-policy-intersection-2">intersection</a> of multiple
-    policies as a single policy. Consider <code>script-src 'unsafe-inline'</code> and <code>script-src 'nonce-abc'</code>,
-    for instance: the former allows only inline script, the latter allows only inline or
-    externalized script with a particular token. The net effect (only inline script with a
-    particular token) cannot be created with a single policy. Dealing with such policies is, for the
-    moment, left as an exercise for the reader.</p>
-     <p class="issue" id="issue-f2ff64e0"><a class="self-link" href="#issue-f2ff64e0"></a> We shouldn’t make the reader do this exercise.</p>
-     <ol>
-      <li data-md="">
-       <p>Let <var>intersection</var> be a <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy">policy</a> object with an empty <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a> and a disposition of "<code>enforce</code>".</p>
-      <li data-md="">
-       <p>For each <var>policy</var> in <var>policy list</var>:</p>
-       <ol>
-        <li data-md="">
-         <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-disposition">disposition</a> is "<code>report</code>", <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">continue</a>.</p>
-        <li data-md="">
-         <p>Let <var>result</var> be the <a data-link-type="abstract-op" href="#abstract-opdef-intersection-of-two-policies" id="ref-for-abstract-opdef-intersection-of-two-policies-1">intersection
-  of <var>intersection</var> and <var>policy</var> for <var>origin</var></a></p>
-        <li data-md="">
-         <p>Set <var>intersection</var> to <var>result</var>.</p>
-       </ol>
-      <li data-md="">
-       <p>Return <var>intersection</var>.</p>
-     </ol>
-    </div>
+    <h4 class="heading settled algorithm" data-algorithm="CSP List intersection" data-level="3.1.1" id="intersection-policy-list"><span class="secno">3.1.1. </span><span class="content">CSP List intersection</span><a class="self-link" href="#intersection-policy-list"></a></h4>
+    <p>The <dfn class="dfn-paneled" data-dfn-for="CSP list" data-dfn-type="dfn" data-export="" id="csp-list-intersection">intersection</dfn> of a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#csp-list">CSP list</a> (<var>list</var>) for an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a> (<var>origin</var>) is a single <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#content-security-policy-object">Content Security Policy object</a> representing their net effect,
+  produced by the following algorithm:</p>
+    <p class="note" role="note"><span>Note:</span> It isn’t always possible to represent the <a data-link-type="dfn" href="#csp-list-intersection" id="ref-for-csp-list-intersection-3">intersection</a> of multiple policies as
+  a single policy. Consider <code>script-src 'unsafe-inline'</code> and <code>script-src 'nonce-abc'</code>, for instance:
+  the former allows only inline script, the latter allows only inline or externalized script with a
+  particular token. The net effect (only inline script with a particular token) cannot be created
+  with a single policy. Dealing with such policies is, for the moment, left as an exercise for the
+  reader.</p>
+    <p class="issue" id="issue-f2ff64e0"><a class="self-link" href="#issue-f2ff64e0"></a> We shouldn’t make the reader do this exercise.</p>
+    <ol class="algorithm">
+     <li data-md="">
+      <p>Let <var>result</var> be a <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy">policy</a> object with an empty <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a> and a disposition of "<code>enforce</code>".</p>
+     <li data-md="">
+      <p>For each <var>policy</var> in <var>list</var>:</p>
+      <ol>
+       <li data-md="">
+        <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-disposition">disposition</a> is "<code>report</code>", <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">continue</a>.</p>
+       <li data-md="">
+        <p>Set <var>result</var> to the <a data-link-type="dfn" href="#content-security-policy-object-intersection" id="ref-for-content-security-policy-object-intersection-1">intersection</a> of <var>result</var> and <var>policy</var> for <var>origin</var>.</p>
+      </ol>
+     <li data-md="">
+      <p>Return <var>result</var>.</p>
+    </ol>
     <div class="example" id="example-b4991076">
      <a class="self-link" href="#example-b4991076"></a> The intersection of the policies created by parsing each item in the following list of <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#serialized-csp">serialized CSPs</a>: 
 <pre>«
@@ -1912,107 +1906,106 @@ Host: advertisements-r-us.example.com
      <p>Each policy specified in the initial list <a data-link-type="dfn" href="#policy-subsume" id="ref-for-policy-subsume-3">subsumes</a> the intersection.</p>
     </div>
     <h4 class="heading settled" data-level="3.1.2" id="intersection-policy"><span class="secno">3.1.2. </span><span class="content">Policy Intersection</span><a class="self-link" href="#intersection-policy"></a></h4>
-    <div class="algorithm" data-algorithm="intersection of two policies">
-      Given two <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policies</a> (<var>A</var> and <var>B</var>), and an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a> (<var>origin</var>), the <dfn class="dfn-paneled" data-dfn-type="abstract-op" data-export="" data-lt="intersection of two policies" id="abstract-opdef-intersection-of-two-policies">intersection of <var>A</var> and <var>B</var> for <var>origin</var></dfn> is a single <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#violation-policy">policy</a> representing their net effect, produced by the
-    following algorithm: 
-     <ol>
-      <li data-md="">
-       <p class="assertion">Assert: <var>A</var> and <var>B</var> both have a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-disposition">disposition</a> of "<code>enforce</code>".</p>
-      <li data-md="">
-       <p>If <var>A</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-is-empty">is empty</a>, return <var>B</var>.</p>
-      <li data-md="">
-       <p>If <var>B</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-is-empty">is empty</a>, return <var>A</var>.</p>
-      <li data-md="">
-       <p>Let <var>policy</var> be a new <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy">policy</a> with an empty <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a>, and a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-disposition">disposition</a> "<code>enforce</code>".</p>
-      <li data-md="">
-       <p>Let <var>directive names</var> be an empty <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-set">set</a>.</p>
-      <li data-md="">
-       <p>For each <var>directive</var> in <var>A</var>:</p>
-       <ol>
-        <li data-md="">
-         <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append">Append</a> <var>directive</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a> to <var>directive names</var>.</p>
-       </ol>
-      <li data-md="">
-       <p>For each <var>directive</var> in <var>B</var>:</p>
-       <ol>
-        <li data-md="">
-         <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append">Append</a> <var>directive</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a> to <var>directive names</var>.</p>
-       </ol>
-      <li data-md="">
-       <p>For each <var>directive name</var> in <var>directive names</var>:</p>
-       <ol>
-        <li data-md="">
-         <p>If <var>directive name</var> is "<code>report-uri</code>", "<code>report-to</code>", <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">continue</a>.</p>
-        <li data-md="">
-         <p>Let <var>directive A</var> be the <a data-link-type="dfn" href="#effective-directive-value" id="ref-for-effective-directive-value-1">effective directive value</a> for <var>directive name</var> and <var>A</var>.</p>
-        <li data-md="">
-         <p>Let <var>directive B</var> be the <a data-link-type="dfn" href="#effective-directive-value" id="ref-for-effective-directive-value-2">effective directive value</a> for <var>directive name</var> and <var>B</var>.</p>
-        <li data-md="">
-         <p class="assertion">Assert: <var>directive A</var> and <var>directive B</var> are not both <code>null</code>, and either both of their <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">values</a> are <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source lists</a>, or neither of their <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">values</a> are <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source lists</a>.</p>
-        <li data-md="">
-         <p>If either <var>directive A</var> or <var>directive B</var> has a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a> which is
+    <p>The <dfn class="dfn-paneled" data-dfn-for="content security policy object" data-dfn-type="dfn" data-noexport="" id="content-security-policy-object-intersection">intersection</dfn> of two <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#content-security-policy-object">Content Security Policy
+  objects</a> (<var>A</var> and <var>B</var>) for an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a> (<var>origin</var>) is a single <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#content-security-policy-object">Content Security Policy
+  object</a> representing their combined effect, produced by the following algorithm:</p>
+    <ol class="algorithm">
+     <li data-md="">
+      <p class="assertion">Assert: <var>A</var> and <var>B</var> both have a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-disposition">disposition</a> of "<code>enforce</code>".</p>
+     <li data-md="">
+      <p>If <var>A</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-is-empty">is empty</a>, return <var>B</var>.</p>
+     <li data-md="">
+      <p>If <var>B</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-is-empty">is empty</a>, return <var>A</var>.</p>
+     <li data-md="">
+      <p>Let <var>policy</var> be a new <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy">policy</a> with an empty <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a>, and a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-disposition">disposition</a> "<code>enforce</code>".</p>
+     <li data-md="">
+      <p>Let <var>directive names</var> be an empty <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-set">set</a>.</p>
+     <li data-md="">
+      <p>For each <var>directive</var> in <var>A</var>:</p>
+      <ol>
+       <li data-md="">
+        <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append">Append</a> <var>directive</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a> to <var>directive names</var>.</p>
+      </ol>
+     <li data-md="">
+      <p>For each <var>directive</var> in <var>B</var>:</p>
+      <ol>
+       <li data-md="">
+        <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append">Append</a> <var>directive</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a> to <var>directive names</var>.</p>
+      </ol>
+     <li data-md="">
+      <p>For each <var>directive name</var> in <var>directive names</var>:</p>
+      <ol>
+       <li data-md="">
+        <p>If <var>directive name</var> is "<code>report-uri</code>", "<code>report-to</code>", <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">continue</a>.</p>
+       <li data-md="">
+        <p>Let <var>directive A</var> be the <a data-link-type="dfn" href="#effective-directive-value" id="ref-for-effective-directive-value-1">effective directive value</a> for <var>directive name</var> and <var>A</var>.</p>
+       <li data-md="">
+        <p>Let <var>directive B</var> be the <a data-link-type="dfn" href="#effective-directive-value" id="ref-for-effective-directive-value-2">effective directive value</a> for <var>directive name</var> and <var>B</var>.</p>
+       <li data-md="">
+        <p class="assertion">Assert: <var>directive A</var> and <var>directive B</var> are not both <code>null</code>, and either both of their <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">values</a> are <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source lists</a>, or neither of their <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">values</a> are <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source lists</a>.</p>
+       <li data-md="">
+        <p>If either <var>directive A</var> or <var>directive B</var> has a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a> which is
   not a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source list</a>, <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">continue</a>.</p>
-         <p class="issue" id="issue-1552fb5c"><a class="self-link" href="#issue-1552fb5c"></a> We need to extend this definition to handle things that are not source lists.
+        <p class="issue" id="issue-1552fb5c"><a class="self-link" href="#issue-1552fb5c"></a> We need to extend this definition to handle things that are not source lists.
   Also, we should be more precise about this, perhaps by defining a term like "source list
   directive" that we could check against <var>directive name</var>.</p>
-        <li data-md="">
-         <p>If <var>directive A</var> is <code>null</code>:</p>
-         <ol>
-          <li data-md="">
-           <p>Let <var>directive</var> be a new <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a> with the following properties:</p>
-           <dl>
-            <dt data-md=""><a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a>
-            <dd data-md="">
-             <p><var>directive name</var></p>
-            <dt data-md=""><a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>
-            <dd data-md="">
-             <p><var>directive B</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a></p>
-           </dl>
-          <li data-md="">
-           <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append">append</a> a <var>directive</var> to <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a>.</p>
-          <li data-md="">
-           <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">Continue</a>.</p>
-         </ol>
-        <li data-md="">
-         <p>If <var>directive B</var> is <code>null</code>:</p>
-         <ol>
-          <li data-md="">
-           <p>Let <var>directive</var> be a new <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a> with the following properties:</p>
-           <dl>
-            <dt data-md=""><a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a>
-            <dd data-md="">
-             <p><var>directive name</var></p>
-            <dt data-md=""><a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>
-            <dd data-md="">
-             <p><var>directive A</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a></p>
-           </dl>
-          <li data-md="">
-           <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append">append</a> a <var>directive</var> to <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a>.</p>
-          <li data-md="">
-           <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">Continue</a>.</p>
-         </ol>
-        <li data-md="">
-         <p>Let <var>directive value</var> be the <a data-link-type="abstract-op" href="#abstract-opdef-intersection-of-two-source-lists" id="ref-for-abstract-opdef-intersection-of-two-source-lists-1">intersection of <var>directive A</var>’s </a><a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>, <var>directive B</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>, <var>directive
+       <li data-md="">
+        <p>If <var>directive A</var> is <code>null</code>:</p>
+        <ol>
+         <li data-md="">
+          <p>Let <var>directive</var> be a new <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a> with the following properties:</p>
+          <dl>
+           <dt data-md=""><a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a>
+           <dd data-md="">
+            <p><var>directive name</var></p>
+           <dt data-md=""><a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>
+           <dd data-md="">
+            <p><var>directive B</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a></p>
+          </dl>
+         <li data-md="">
+          <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append">append</a> a <var>directive</var> to <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a>.</p>
+         <li data-md="">
+          <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">Continue</a>.</p>
+        </ol>
+       <li data-md="">
+        <p>If <var>directive B</var> is <code>null</code>:</p>
+        <ol>
+         <li data-md="">
+          <p>Let <var>directive</var> be a new <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a> with the following properties:</p>
+          <dl>
+           <dt data-md=""><a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a>
+           <dd data-md="">
+            <p><var>directive name</var></p>
+           <dt data-md=""><a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>
+           <dd data-md="">
+            <p><var>directive A</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a></p>
+          </dl>
+         <li data-md="">
+          <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append">append</a> a <var>directive</var> to <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a>.</p>
+         <li data-md="">
+          <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue">Continue</a>.</p>
+        </ol>
+       <li data-md="">
+        <p>Let <var>directive value</var> be the <a data-link-type="dfn" href="#source-list-intersection" id="ref-for-source-list-intersection-1">intersection</a> of <var>directive A</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>, <var>directive B</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>, <var>directive
   name</var>, and <var>origin</var>.</p>
-        <li data-md="">
-         <p>Let <var>directive</var> be a new <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a> with he following properties:</p>
-         <dl>
-          <dt data-md=""><a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a>
-          <dd data-md="">
-           <p><var>directive name</var></p>
-          <dt data-md=""><a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>
-          <dd data-md="">
-           <p><var>directive value</var></p>
-         </dl>
-        <li data-md="">
-         <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append">Append</a> <var>directive</var> to <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a>.</p>
-       </ol>
-      <li data-md="">
-       <p>Return <var>policy</var>.</p>
-     </ol>
-    </div>
-    <div class="example" id="example-1339171b">
-     <a class="self-link" href="#example-1339171b"></a> The intersection of the policies obtained by parsing the following <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#serialized-csp">serialized CSPs</a>: 
+       <li data-md="">
+        <p>Let <var>directive</var> be a new <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directives">directive</a> with he following properties:</p>
+        <dl>
+         <dt data-md=""><a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a>
+         <dd data-md="">
+          <p><var>directive name</var></p>
+         <dt data-md=""><a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-value">value</a>
+         <dd data-md="">
+          <p><var>directive value</var></p>
+        </dl>
+       <li data-md="">
+        <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append">Append</a> <var>directive</var> to <var>policy</var>’s <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a>.</p>
+      </ol>
+     <li data-md="">
+      <p>Return <var>policy</var>.</p>
+    </ol>
+    <div class="example" id="example-82f95485">
+     <a class="self-link" href="#example-82f95485"></a> The intersection of the policies obtained by parsing the following <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#serialized-csp">serialized CSPs</a>: 
 <pre>"default-src 'self' http://example.com http://example.net;
  connect-src 'none';"
 
@@ -2026,15 +2019,13 @@ and
  connect-src 'none';
  script-src http://example.com/;
 </pre>
-     <p>Both of the given policies <a data-link-type="dfn" href="#policy-subsume" id="ref-for-policy-subsume-4">subsume</a> the <a data-link-type="dfn" href="#policy-intersection" id="ref-for-policy-intersection-3">intersection</a>. For example,
-    the <a data-link-type="dfn" href="#policy-intersection" id="ref-for-policy-intersection-4">intersection</a>’s "<code>script-src http://example.com/</code>" is <a data-link-type="dfn" href="#policy-subsumed-by" id="ref-for-policy-subsumed-by-2">subsumed by</a> the first policy’s "<code>default-src 'self' http://example.com http://example.net</code>" and the second policy’s "<code>script-src http://example.com/</code>".</p>
+     <p>Both of the given policies <a data-link-type="dfn" href="#policy-subsume" id="ref-for-policy-subsume-4">subsume</a> the <a data-link-type="dfn" href="#csp-list-intersection" id="ref-for-csp-list-intersection-4">intersection</a>. For example,
+    the <a data-link-type="dfn" href="#csp-list-intersection" id="ref-for-csp-list-intersection-5">intersection</a>’s "<code>script-src http://example.com/</code>" is <a data-link-type="dfn" href="#policy-subsumed-by" id="ref-for-policy-subsumed-by-2">subsumed by</a> the first policy’s "<code>default-src 'self' http://example.com http://example.net</code>" and the second policy’s "<code>script-src http://example.com/</code>".</p>
     </div>
     <h4 class="heading settled" data-level="3.1.3" id="intersection-source-list"><span class="secno">3.1.3. </span><span class="content">Source List Intersection</span><a class="self-link" href="#intersection-source-list"></a></h4>
-    <div class="algorithm" data-algorithm="intersection of two source lists">
-      Given two <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source lists</a> (<var>A</var> and <var>B</var>), their <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">name</a> (<var>name</var>), and
-    their <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a> (<var>origin</var>), the <dfn class="dfn-paneled" data-dfn-type="abstract-op" data-export="" data-lt="intersection of two source lists" id="abstract-opdef-intersection-of-two-source-lists">intersection of <var>A</var> and <var>B</var> for <var>name</var> and <var>origin</var></dfn> is a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source list</a> representing their net effect. If no such <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-expression">source
-    expressions</a> exist because the lists contain only divergent expressions (for example: <code>https://example.com/</code> in <var>A</var>, and <code>https://not-example.com/</code> in <var>B</var>), then the intersection
-    will be the list « <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-none">'none'</a> ». 
+    <p>The <dfn class="dfn-paneled" data-dfn-for="source list" data-dfn-type="dfn" data-noexport="" id="source-list-intersection">intersection</dfn> of two <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source lists</a> for a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#directive-name">directive name</a> (<var>name</var>) and an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a> (<var>origin</var>) is a <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source list</a> representing their net effect. If no such <a data-link-type="dfn" href="https://w3c.github.io/webappsec-csp/#source-lists">source list</a> exists (for example, <code>https://example.com/</code> in <var>A</var> and <code>https://not-example.com</code> in <var>B</var>), then the intersection will
+  be the list « <a data-link-type="grammar" href="https://w3c.github.io/webappsec-csp/#grammardef-none">'none'</a> ».</p>
+    <ol class="algorithm">
      <ol>
       <li data-md="">
        <p>Let <var>effective A</var> be the <a data-link-type="dfn" href="#effective-source-list" id="ref-for-effective-source-list-1">effective source list</a> for <var>A</var>, <var>name</var>, and <var>origin</var>.</p>
@@ -2125,7 +2116,7 @@ and
       <li data-md="">
        <p>Return <var>intersection</var>.</p>
      </ol>
-    </div>
+    </ol>
     <div class="example" id="example-316ff315">
      <a class="self-link" href="#example-316ff315"></a> In these cases, <code>intersection</code> is an <a data-link-type="dfn" href="#source-expression-intersection" id="ref-for-source-expression-intersection-1">intersection</a> for <var>A</var> and <var>B</var>. 
 <pre>A = wss: http://example.com
@@ -2857,7 +2848,7 @@ B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
       <p>If <var>policy list</var> is <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-is-empty">is empty</a> or <code>null</code>, return
   "<code>Does Not Subsume</code>".</p>
      <li data-md="">
-      <p>Let <var>effective policy</var> the result of executing <a href="#intersection-policy-list">§3.1.1 Policy List intersection</a> given <var>policy list</var> and <var>origin</var>.</p>
+      <p>Let <var>effective policy</var> the result of executing <a href="#intersection-policy-list">§3.1.1 CSP List intersection</a> given <var>policy list</var> and <var>origin</var>.</p>
      <li data-md="">
       <p>Return the result of executing <a href="#subsume-policy">§4.2.5 Does policy A subsume policy B given their respective
     origins?</a> given <var>subsuming policy</var>, <var>subsuming origin</var>, <var>effective policy</var>, and <var>origin</var>.</p>
@@ -3005,12 +2996,11 @@ B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
    <li>
     intersection
     <ul>
-     <li><a href="#policy-intersection">dfn for policy</a><span>, in §3</span>
+     <li><a href="#csp-list-intersection">dfn for CSP list</a><span>, in §3.1.1</span>
+     <li><a href="#content-security-policy-object-intersection">dfn for content security policy object</a><span>, in §3.1.2</span>
+     <li><a href="#source-list-intersection">dfn for source list</a><span>, in §3.1.3</span>
      <li><a href="#source-expression-intersection">dfn for source expression</a><span>, in §4.2.1</span>
     </ul>
-   <li><a href="#abstract-opdef-intersection-of-policy-list-for-origin">intersection of policy list for origin</a><span>, in §3.1.1</span>
-   <li><a href="#abstract-opdef-intersection-of-two-policies">intersection of two policies</a><span>, in §3.1.2</span>
-   <li><a href="#abstract-opdef-intersection-of-two-source-lists">intersection of two source lists</a><span>, in §3.1.3</span>
    <li><a href="#browsing-context-required-csp">required CSP</a><span>, in §2.4.1</span>
    <li><a href="#http-headerdef-sec-required-csp">Sec-Required-CSP</a><span>, in §2.2</span>
    <li><a href="#abstract-opdef-set-the-sec-required-csp-header">set-required-csp</a><span>, in §2.2</span>
@@ -3026,14 +3016,16 @@ B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
   <h3 class="no-num no-ref heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
   <ul class="index">
    <li>
-    <a data-link-type="biblio">[CSP3]</a> defines the following terms:
+    <a data-link-type="biblio">[CSP]</a> defines the following terms:
     <ul>
      <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-none">'none'</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-self">'self'</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-strict-dynamic">'strict-dynamic'</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#grammardef-unsafe-inline">'unsafe-inline'</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#source-list-allows-all-inline-behavior">allows all inline behavior</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#content-security-policy-object">content security policy object</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#header-content-security-policy">content-security-policy</a>
+     <li><a href="https://w3c.github.io/webappsec-csp/#csp-list">csp list</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#policy-directive-set">directive set</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#directives">directives</a>
      <li><a href="https://w3c.github.io/webappsec-csp/#policy-disposition">disposition</a>
@@ -3149,7 +3141,7 @@ B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
   <h2 class="no-num no-ref heading settled" id="references"><span class="content">References</span><a class="self-link" href="#references"></a></h2>
   <h3 class="no-num no-ref heading settled" id="normative"><span class="content">Normative References</span><a class="self-link" href="#normative"></a></h3>
   <dl>
-   <dt id="biblio-csp3">[CSP3]
+   <dt id="biblio-csp">[CSP]
    <dd>Mike West. <a href="https://www.w3.org/TR/CSP3/">Content Security Policy Level 3</a>. URL: <a href="https://www.w3.org/TR/CSP3/">https://www.w3.org/TR/CSP3/</a>
    <dt id="biblio-css-values-3">[CSS-VALUES-3]
    <dd>Tab Atkins Jr.; Elika Etemad. <a href="https://www.w3.org/TR/css-values-3/">CSS Values and Units Module Level 3</a>. URL: <a href="https://www.w3.org/TR/css-values-3/">https://www.w3.org/TR/css-values-3/</a>
@@ -3285,7 +3277,7 @@ B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
    <b><a href="#policy-subsume">#policy-subsume</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-policy-subsume-1">3. Implicit Policy Acceptance</a> <a href="#ref-for-policy-subsume-2">(2)</a>
-    <li><a href="#ref-for-policy-subsume-3">3.1.1. Policy List intersection</a>
+    <li><a href="#ref-for-policy-subsume-3">3.1.1. CSP List intersection</a>
     <li><a href="#ref-for-policy-subsume-4">3.1.2. Policy Intersection</a>
     <li><a href="#ref-for-policy-subsume-5">4.2.3. 
     Does source expression A subsume source expression B? </a>
@@ -3307,24 +3299,24 @@ B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
     <li><a href="#ref-for-policy-subsumed-by-2">3.1.2. Policy Intersection</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="policy-intersection">
-   <b><a href="#policy-intersection">#policy-intersection</a></b><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="csp-list-intersection">
+   <b><a href="#csp-list-intersection">#csp-list-intersection</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-policy-intersection-1">3. Implicit Policy Acceptance</a>
-    <li><a href="#ref-for-policy-intersection-2">3.1.1. Policy List intersection</a>
-    <li><a href="#ref-for-policy-intersection-3">3.1.2. Policy Intersection</a> <a href="#ref-for-policy-intersection-4">(2)</a>
+    <li><a href="#ref-for-csp-list-intersection-1">3. Implicit Policy Acceptance</a> <a href="#ref-for-csp-list-intersection-2">(2)</a>
+    <li><a href="#ref-for-csp-list-intersection-3">3.1.1. CSP List intersection</a>
+    <li><a href="#ref-for-csp-list-intersection-4">3.1.2. Policy Intersection</a> <a href="#ref-for-csp-list-intersection-5">(2)</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="abstract-opdef-intersection-of-two-policies">
-   <b><a href="#abstract-opdef-intersection-of-two-policies">#abstract-opdef-intersection-of-two-policies</a></b><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="content-security-policy-object-intersection">
+   <b><a href="#content-security-policy-object-intersection">#content-security-policy-object-intersection</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-abstract-opdef-intersection-of-two-policies-1">3.1.1. Policy List intersection</a>
+    <li><a href="#ref-for-content-security-policy-object-intersection-1">3.1.1. CSP List intersection</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="abstract-opdef-intersection-of-two-source-lists">
-   <b><a href="#abstract-opdef-intersection-of-two-source-lists">#abstract-opdef-intersection-of-two-source-lists</a></b><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="source-list-intersection">
+   <b><a href="#source-list-intersection">#source-list-intersection</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-abstract-opdef-intersection-of-two-source-lists-1">3.1.2. Policy Intersection</a>
+    <li><a href="#ref-for-source-list-intersection-1">3.1.2. Policy Intersection</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="effective-directive-value">
