@@ -48,6 +48,10 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
 spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
   type:dfn; 
     text: parse a serialized csp as disposition; url: parse-serialized-policy
+    text: scheme-part match
+    text: host-part match
+    text: port-part match
+    text: path-part match
 </pre>
 <!--
 ████ ██    ██ ████████ ████████   ███████
@@ -425,9 +429,10 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
       strict"ness are spelled out in [[#subsumption]].
 
   *   When multiple policies are present, they have a combined effect which is described in
-      [[CSP3#multiple-policies]]. Here, we'll talk about the combined effect of a <a>list</a> of
-      <a>policy</a> objects as their <dfn for="policy" export>intersection</dfn>. The details of
-      determining that are spelled out in [[#intersection]].
+      [[CSP3#multiple-policies|"The effect of multiple policies"]]. Here, we'll talk about the
+      combined effect of a <a>list</a> of <a>policy</a> objects as their
+      <dfn for="policy" export>intersection</dfn>. The details of determining that are spelled out
+      in [[#intersection]].
 
   *   A <a>policy</a> (|A|) is said to <a>subsume</a> a <a>list</a> of <a>policy</a> objects if
       |A| <a>subsumes</a> their <a for="policy">intersection</a>.
@@ -622,9 +627,9 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
     `https://example.com/` in |A|, and `https://not-example.com/` in |B|), then the intersection
     will be the list « <a grammar>'none'</a> ».
 
-    1.  Let |effective A| be the <a>effective source list</a> for |A|, |directive A|, and |origin|.
+    1.  Let |effective A| be the <a>effective source list</a> for |A|, |name|, and |origin|.
 
-    2.  Let |effective B| be the <a>effective source list</a> for |B|, |directive B|, and |origin|.
+    2.  Let |effective B| be the <a>effective source list</a> for |B|, |name|, and |origin|.
 
     3.  If either |effective A| or |effective B| is « <a grammar>`'none'`</a> », 
         return « <a grammar>`'none'`</a> ».
@@ -929,28 +934,26 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
   #### Source Expression Similarity #### {#similarity-source-expressions}
 
-  <div algorithm="similarity of two source expressions">
-    Given two source expressions (|A| and |B|), the <dfn lt="similarity of two source expressions" abstract-op>
-    similaratiy</dfn> of |A| and |B| indicates whether the two expressions are <a>case-sensitive</a> 
-    matches or in the case of <a grammar>`scheme-source`</a>, <a grammar>`host-source`</a> expressions,
-    if their individual parts match (that is <a grammar>`scheme-part`</a>, 
-    <a grammar>`host-part`</a>, <a grammar>`port-part`</a>, and <a grammar>`path-part`</a>).
+  A [=source expression=] (|A|) is said to be <dfn export>source-expression similar</dfn> to
+  another [=source expression=] (|B|) if the two expressions are <a>case-sensitive</a> 
+  matches, or if the relevant parts of their grammar match (for example, in the case of
+  <a grammar>`scheme-source`</a> expressions, the respective <a grammar>`scheme-part`</a>s
+  must <a>`scheme-part` match</a> in one direction or the other.
 
-    NOTE: This property is symmetric. That is if |A| is 
-    <a lt="similarity of two source expressions" abstract-op>similar</a> to |B|, 
-    it must be that |B| is 
-    <a lt="similarity of two source expressions" abstract-op>similar</a> to |A|.
+  Note: This property is symmetric. That is if |A| is <a>source-expression similar</a> to |B|,
+  then |B| will be <a>source-expression similar</a> to |A|.
 
-    A <a>source expression</a> has a 
-    <dfn for="source expression">wildcard host</dfn> if the first character of the
-    <a>source expression</a>'s <a grammar>`host-part`</a> is an U+002A ASTERISK 
-    character (`*`).
+  A <a>source expression</a> has a 
+  <dfn for="source expression">wildcard host</dfn> if the first character of the
+  <a>source expression</a>'s <a grammar>`host-part`</a> is an U+002A ASTERISK 
+  character (`*`).
 
-    A <a>source expression</a> has a 
-    <dfn for="source expression">wildcard port</dfn> if the 
-    <a grammar>`port-part`</a> of the <a>source expression</a> is an U+002A 
-    ASTERISK character (`*`).
+  A <a>source expression</a> has a 
+  <dfn for="source expression">wildcard port</dfn> if the 
+  <a grammar>`port-part`</a> of the <a>source expression</a> is an U+002A 
+  ASTERISK character (`*`).
 
+  <ol class="algorithm">
     1.  If |A|'s grammar does not match |B|'s grammar, return "`Not Similar`".
 
     2.  If |A| matches the <a grammar>`keyword-source`</a>, <a grammar>`nonce-source`</a>,
@@ -966,64 +969,48 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
     3.  Let |scheme B| be |B|'s <a grammar>`scheme-part`</a>, if present, and 
         `null` otherwise.
 
-    4.  If the result of executing [[CSP3#match-schemes]] returns 
-        "`Does Not Match`" given |scheme A| and |scheme B|, and the result of 
-        executing [[CSP3#match-schemes]] on |scheme B| and |scheme A| is 
-        "`Does Not Match`", return "`Not Similar`".
+    4.  If the |scheme A| does not <a>scheme-part match</a> |scheme B|, and |scheme B| does not
+        <a>scheme-part match</a> |scheme A|, return "`Not Similar`".
 
-    5.  If |A| or |B| matches  <a grammar>`scheme-source`</a> grammar,
-        return "`Similar`".
+    5.  If |A| or |B| matches  <a grammar>`scheme-source`</a> grammar, return "`Similar`".
 
-    6.  Return "`Not Similar`" if any of the following is true:
+    6.  Let |host A| be |A|'s <a grammar>`host-part`</a>, if present, and `null` otherwise.
+    
+    7.  Let |host B| be |B|'s <a grammar>`host-part`</a>, if present, and `null` otherwise.
 
-        1.  Let |host A| be |A|'s <a grammar>`host-part`</a>, if present, and 
-            `null` otherwise.
+    8.  Let |port A| be |A|'s <a grammar>`port-part`</a>, if present, and `null` otherwise.
         
-        2.  Let |host B| be |B|'s <a grammar>`host-part`</a>, if present, and 
-            `null` otherwise.
+    9.  Let |port B| be |B|'s <a grammar>`port-part`</a>, if present, and `null` otherwise.
 
-        3.  Both |A| and |B| have a <a for="source expression">wildcard host</a>,
-            but |host A| is not an <a>ASCII case-insensitive</a> match to |host B|.
+    10. Let |path A| be |A|'s <a grammar>`path-part`</a>, if present, and `null` otherwise.
+    
+    11. Let |path B| be |B|'s <a grammar>`path-part`</a>, if present, and `null` otherwise.
 
-        4.  At most one of |A| and |B| has a 
-            <a for="source expression">wildcard host</a>, the result of executing 
-            [[CSP3#match-hosts]] is "`Does Not Match`" given |host A| and 
-            |host B|, and the result of executing [[CSP3#match-hosts]] on |host B|
-            and |host A| is also "`Does Not Match`".
+    12. Return "`Not Similar`" if any of the following is true:
 
-        5.  Let |port A| be |A|'s <a grammar>`port-part`</a>, if present, and 
-            `null` otherwise.
-        
-        6.  Let |port B| be |B|'s <a grammar>`port-part`</a>, if present, and 
-            `null` otherwise.
+        1.  Both |A| and |B| have a <a for="source expression">wildcard host</a>, but |host A| is
+            not an <a>ASCII case-insensitive</a> match to |host B|.
 
-        7.  Neither |A| nor |B| has a <a for="source expression">wildcard port</a>,
-            the result of executing [[CSP3#match-ports]] is "`Does Not Match`"
-            given |port A| and |port B|, and the result of executing 
-            [[CSP3#match-ports]] given |port B| and |port A| is also 
-            "`Does Not Match`".
+        2.  At most one of |A| and |B| has a <a for="source expression">wildcard host</a>, |host A|
+            does not <a>`host-part` match</a> |host B|, and |host B| does not <a>`host-part`
+            match</a> |host A|.
 
-        8.  Let |path A| be |A|'s <a grammar>`path-part`</a>, if present, and 
-            `null` otherwise.
-        
-        9.  Let |path B| be |B|'s <a grammar>`path-part`</a>, if present, and 
-            `null` otherwise.
+        3.  Neither |A| nor |B| has a <a for="source expression">wildcard port</a>, |port A|
+            does not <a>`port-part` match</a> |port B|, and |port B| does not <a>`port-part`
+            match</a> |port A|.
 
-        10.  The result of executing [[CSP3#match-paths]] is "`Does Not Match`"
-             given |path A| and |path B| and the result of executing 
-             [[CSP3#match-paths]] given |path B| and |path A| is also 
-             "`Does Not Match`".
+        4.  |path A| does not <a>`path-part` match</a> |path B|, and |path B| does not
+            <a>`path-part` match</a> |path A|.
 
-    7.  Return "`Similar`".
-</div>
+    13. Return "`Similar`".
+  </ol>
 
-<div class="example">
-    Cases when |A| is <a lt="similarity of two source expressions" abstract-op>similar</a> to |B|.
-
+  <div class="example">
     <pre>
       A = 'nonce-ch4hvvbHDpv7xCSvXCs3BrNggHdTzxUA'
       B = 'nonce-ch4hvvbHDpv7xCSvXCs3BrNggHdTzxUA'
     </pre>
+
     Since both |A| and |B| match the <a grammar>`nonce-source`</a> grammar and |A|
     is a <a>case-sensitive</a> match for |B|, |A| is similar to |B|.
 
@@ -1031,6 +1018,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
       A = https://inner.example.com/foo/
       B = http://*.example.com/foo/bar/
     </pre>
+
     Since |A| has a <a for="source expression">wildcard host</a>, it matches any
     subdomain which in this case is "inner" so that |A| is similar to |B|.
 
@@ -1038,6 +1026,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
       A = http://*.example.com
       B = https://example.com:*
     </pre>
+
     Even though |A| and |B|'s ports are different, |A| and |B| are similar 
     because "http" matches both "http" and a more secure variant "https".
 
@@ -1045,23 +1034,23 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
       A = http://example.com:80/page1/html
       B = https://example.com:443/
     </pre>
+
     In both sources specified ports are defalt ports for the respective schemes
     and |B|'s path would match any path, |A| is similar to |B|.
-
-
-    Cases when |A| is not <a lt="similarity of two source expressions" abstract-op>similar</a> to |B|.
 
     <pre>
       A = 'sha256-abc123'
       B = 'sha512-cde456'
     </pre>
+
     Even though both |A| and |B| match the <a grammar>`hash-source`</a> grammar, |A|
-    is not a <a>case-sensitive</a> match for |B|.
+    is not a <a>case-sensitive</a> match for |B| because the hashes don't match.
 
     <pre>
       A = http://example.com:80
       B = http://example.com:334
     </pre>
+
     In this case, ports of |A| and |B| do not match so that the two sources are
     not similar .
 
@@ -1069,6 +1058,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
       A = http://example.com/page.html
       B = http://example.com/index.html
     </pre>
+
     The two sources are not similar because their paths do not match.
   </div>
 
@@ -1205,11 +1195,10 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
   Given two expressions matching the <a grammar>`scheme-source`</a> or 
   <a grammar>`host-source`</a> grammar (|A| and |B|), return their 
-  <a for="source expression">intersection</a> if |A| is 
-  <a lt="similarity of two source expressions" abstract-op>similar</a> to |B|. Otherwise, return `null`.
+  <a for="source expression">intersection</a> if |A| is <a>source-expression similar</a> to |B|.
+  Otherwise, return `null`.
 
-  1.  If the result of executing [[#similarity-source-expressions]] on |A| and 
-      |B| is "`Not Similar`", return `null`.
+  1.  If |A| is not <a>source-expression similar</a> to |B|, return `null`.
 
   2.  Let |source| be an empty string.
 
@@ -1219,8 +1208,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
   4.  Let |scheme B| be |B|'s <a grammar>`scheme-part`</a>, if present, and 
       `null` otherwise.
 
-  5.  Let |more secure scheme B| be `true` if the result of executing 
-      [[csp3#match-schemes]] is "`Does Not match`" given |scheme A| and 
+  5.  Let |more secure scheme B| be `true` if |scheme A| does not <a>`scheme-part` match</a>
       |scheme B|, and `false` otherwise.
 
   6.  Append |scheme A| and ":" to |source| if |scheme A| is not `null` and 
@@ -1281,11 +1269,9 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
   20.  If |path A| is not `null`:
 
-       1.  If |path B| is `null`, append |path A| to |source|.
-           Continue to the next step in the main algorithm.
+       1.  If |path B| is `null`, return the result of appending |path A| to |source|.
 
-       2.  If the result of executing [[csp3#match-paths]] on |path A| and 
-           |path B| is "`Does Not Match`", append |path A| to |source|.
+       2.  If |path A| <a>`path-part` matches</a> |path B|, append |path A| to |source|.
        
        3.  Otherwise, append |path B| to |source|.
 
@@ -1496,6 +1482,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
       A = "http://example.com 'sha256-xzi4zkCjuC8'"
       B = "http://example.com"
     </pre>
+
     Since |B| does not allow <a grammar>`hash-source`</a> expressions, but its
     value is found in |A|, |A| subsumes |B|. It is, however, not true that |A|
     <a for="policy">subsumes</a> |B|.
@@ -1504,6 +1491,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
       A = "https://example.com 'sha256-xzi4zkCjuC8'"
       B = "http://example.com"
     </pre>
+
     In this case, |A| does not subsume |B| since "https://example.com" does
     not <a>subsume</a> "http://example.com".
 
@@ -1511,6 +1499,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
       A = "http://example.com 'sha256-xzi4zkCjuC8'"
       B = "http://example.com 'unsafe-inline'"
     </pre>
+
     Since |B| <a for="source list">allows all inline behavior</a>, 
     but |A| does not, |A| doesn't <a>subsume</a> |B|. 
 
@@ -1518,6 +1507,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
       A = "http://example.com 'sha256-xzi4zkCjuC8' 'strict-dynamic'"
       B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
     </pre>
+
     Neither |A| nor |B| <a for="source list">allows all inline behavior</a>.
     In this case, |A| <a for="policy">subsumes</a> |B|.
   </div>
