@@ -977,10 +977,11 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       2.  Let |violates| be the result of executing
           [[#does-request-violate-policy]] on |request| and |policy|.
 
-      3.  If |violates| is not "`Does Not Violate`", then execute
-          [[#report-violation]] on the result of executing
+      3.  If |violates| is not "`Does Not Violate`", then for each |token|
+	  returned by <a lt="split a string on commas">splitting |violates| on commas</a>:
+	  execute [[#report-violation]] on the result of executing
           [[#create-violation-for-request]] on |request|, |policy|, and
-          |violates|.
+          |token|.
 
   <h4 id="should-block-request" algorithm>
     Should |request| be blocked by Content Security Policy?
@@ -1006,9 +1007,11 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
       3.  If |violates| is not "`Does Not Violate`", then:
 
-          1.  Execute [[#report-violation]] on the result of executing
+          1.  For each |token| returned by
+	      <a lt="split a string on commas">splitting |violates| on commas</a>:
+	      execute [[#report-violation]] on the result of executing
               [[#create-violation-for-request]] on |request|, |policy|, and
-              |violates|.
+              |token|.
 
           2.  Set |result| to "`Blocked`".
 
@@ -3368,16 +3371,20 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   algorithm returns the violated <a>directive</a> if the request violates the
   policy, and "`Does Not Violate`" otherwise.
 
-  1.  Let |violates| be "`Does Not Violate`".
+  1.  Let |violates| be "`none`".
 
   2.  For each |directive| in |policy|:
 
       1.  Let |result| be the result of executing |directive|'s
           <a for="directive">pre-request check</a> on |request| and |policy|.
 
-      2.  If |result| is "`Blocked`", then let |violates| be |directive|.
+      2.  If |result| is "`Blocked`", then if |violates| is "`none`"
+	  then set |violates| to |directive|, otherwise append "`, `" and |directive|
+	  to |violates|.
+	  
+  3.  If |violates| is "`none`", the set |violates| to "`Does Not Violate`"
 
-  3.  Return |violates|.
+  4.  Return |violates|.
 
   <h5 id="match-nonce-to-source-list" algorithm>
     Does |nonce| match |source list|?
