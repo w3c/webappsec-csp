@@ -222,11 +222,20 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
   2.  |value| matches the <a grammar>serialized-policy</a> ABNF grammar defined in [[!CSP]].
 
-  3.  |element|'s <a>node document</a>'s <a for="Document">browsing context</a>'s
-      <a for="browsing context">required CSP</a> is `null`, or the result of
-      <a lt="parse a serialized csp as disposition">parsing |value| as "`enforce`"</a> is
-      <a for="policy">subsumed by</a> |element|'s <a>node document</a>'s <a for="Document">browsing
-      context</a>'s <a for="browsing context">required CSP</a>.
+  3.  One of the following statements is true:
+
+      1.  |element|'s [=node document=]'s [=Document/browsing context=]'s
+          [=browsing context/required CSP=] is `null`.
+
+      2.  The result of [=parse a serialized csp as disposition|parsing=] |value| as "`enforce`" is
+          [=policy/subsumed by=] |element|'s [=node document=]'s [=Document/browsing context=]'s
+          [=browsing context/required CSP=].
+
+  4.  The result of [=parse a serialized csp as disposition|parsing=] |value| as "`enforce`" has a
+      [=policy/directive set=] that does not [=list/contain=] any of the following directives:
+
+      *   [=report-uri=]
+      *   [=report-to=]
 
   <div class="example">
     The following strings are valid values for the <{iframe/csp}> attribute, as they're valid CSP
@@ -378,6 +387,8 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
         2.  Set |context|'s <a for="browsing context">required CSP</a> to the value of |context|'s
             <a>parent browsing context</a>'s <a for="browsing context">required CSP</a>.
+
+        3.  Return.
 
     2.  Set |context|'s <a for="browsing context">required CSP</a> to `null`.
   </div>
