@@ -213,6 +213,9 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     display: block;
     color: #827017;
   }
+  section.wip {
+    padding-left: 2em;
+  }
 
 </style>
 <!--
@@ -350,11 +353,19 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       metadata which is listed in the current policy. Details in
       [[#external-hash]].
 
-  11. The <a>`disown-opener`</a> directive ensures that a resource can't be opened
-      in such a way as to give another browsing context control over its contents.
+  11. <div class="wip">
+        The <a>`disown-opener`</a> directive ensures that a resource can't be opened
+        in such a way as to give another browsing context control over its contents.
 
-  12. The <a>`navigation-to`</a> directive gives a resource control over the endpoints
-      to which it can initiate navigation.
+        ISSUE(w3c/webappsec-csp#194): `disown-opener` is a work in progress.
+      </div>
+
+  12. <div class="wip">
+        The <a>`navigation-to`</a> directive gives a resource control over the endpoints
+        to which it can initiate navigation.
+
+        ISSUE(w3c/webappsec-csp#125): `navigation-to` is a work in progress.
+      </div>
 
   13. Reports generated for inline violations will contain a <a for="violation">sample</a>
       attribute if the relevant directive contains the <a grammar>`'report-sample'`</a>
@@ -3103,26 +3114,28 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       <a for="directive">value</a> as the input, and |context|'s <a>forced
       sandboxing flag set</a> as the output.
 
-  <h4 id="directive-disown-opener">`disown-opener`</h4>
+  <section class="wip">
+    <h4 id="directive-disown-opener">`disown-opener`</h4>
 
-  The <dfn export>`disown-opener`</dfn> directive ensures that a resource
-  will <a>disown its opener</a> when navigated to. The directive's syntax is
-  described by the following ABNF grammar:
+    The <dfn export>`disown-opener`</dfn> directive ensures that a resource
+    will <a>disown its opener</a> when navigated to. The directive's syntax is
+    described by the following ABNF grammar:
 
-  <pre dfn-type="grammar" link-type="grammar">
-    directive-name  = "disown-opener"
-    directive-value = ""
-  </pre>
+    <pre dfn-type="grammar" link-type="grammar">
+      directive-name  = "disown-opener"
+      directive-value = ""
+    </pre>
 
-  This directive has no reporting requirements; it will be ignored entirely when
-  delivered in a <a http-header>`Content-Security-Policy-Report-Only`</a> header, or within
-  a <{meta}> element.
+    This directive has no reporting requirements; it will be ignored entirely when
+    delivered in a <a http-header>`Content-Security-Policy-Report-Only`</a> header, or within
+    a <{meta}> element.
 
-  ISSUE: Not sure this is the right model. We need to ensure that we take care
-  of <a href="https://github.com/w3c/webappsec/issues/139">the inverse</a> as
-  well, and there might be a cleverer syntax that could encompass both a
-  document's opener, and a document's openees. `disown-openee` is weird.
-  Maybe `disown 'opener' 'openee'`? Do we need origin restrictions on either/both?
+    ISSUE: Not sure this is the right model. We need to ensure that we take care
+    of <a href="https://github.com/w3c/webappsec/issues/139">the inverse</a> as
+    well, and there might be a cleverer syntax that could encompass both a
+    document's opener, and a document's openees. `disown-openee` is weird.
+    Maybe `disown 'opener' 'openee'`? Do we need origin restrictions on either/both?
+  </section>
 
   <h5 algorithm id="disown-opener-init">
     `disown-opener` Initialization
@@ -3263,45 +3276,47 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   ISSUE(whatwg/html#1230): Spell this out in more detail as part of defining `X-Frame-Options`
   integration with the <a>process a navigate response</a> algorithm.
 
-  <h4 id="directive-navigation-to">`navigation-to`</h4>
+  <section class="wip">
+    <h4 id="directive-navigation-to">`navigation-to`</h4>
 
-  The <dfn export>navigation-to</dfn> directive restricts the {{URL}}s to which
-  a document can navigate by any means (<{a}>, <{form}>, `window.location`,
-  `window.open`, etc.). The directive's syntax is described by the following ABNF grammar:
+    The <dfn export>navigation-to</dfn> directive restricts the {{URL}}s to which
+    a document can navigate by any means (<{a}>, <{form}>, `window.location`,
+    `window.open`, etc.). The directive's syntax is described by the following ABNF grammar:
 
-  <pre dfn-type="grammar" link-type="grammar" class="abnf">
-    directive-name  = "navigation-to"
-    directive-value = <a>serialized-source-list</a>
-  </pre>
+    <pre dfn-type="grammar" link-type="grammar" class="abnf">
+      directive-name  = "navigation-to"
+      directive-value = <a>serialized-source-list</a>
+    </pre>
 
-  ISSUE: Should we use `ancestor-source-list` (basically, origins as opposed to
-  paths?) It doesn't appear that blocking navigation targets is any worse than
-  blocking any other request type with regard to leakage. Given the redirect
-  behavior, this devolves to an origin check in the presence of a malicious
-  party anyway...
+    ISSUE: Should we use `ancestor-source-list` (basically, origins as opposed to
+    paths?) It doesn't appear that blocking navigation targets is any worse than
+    blocking any other request type with regard to leakage. Given the redirect
+    behavior, this devolves to an origin check in the presence of a malicious
+    party anyway...
 
-  <h5 algorithm id="navigation-to-pre-navigate">
-    `navigation-to` Pre-Navigation Check
-  </h5>
+    <h5 algorithm id="navigation-to-pre-navigate">
+      `navigation-to` Pre-Navigation Check
+    </h5>
 
-  Given a <a for="/">request</a> (|request|), a string (|type|, "`form-submission` or
-  "`other`") and two <a>browsing contexts</a> (|source| and |target|), this
-  algorithm returns "`Blocked`" if the navigation violates the `navigation-to`
-  directive's constraints, and "`Allowed`" otherwise. This constitutes the
-  `navigation-to`' directive's <a>pre-navigation check</a>:
+    Given a <a for="/">request</a> (|request|), a string (|type|, "`form-submission` or
+    "`other`") and two <a>browsing contexts</a> (|source| and |target|), this
+    algorithm returns "`Blocked`" if the navigation violates the `navigation-to`
+    directive's constraints, and "`Allowed`" otherwise. This constitutes the
+    `navigation-to`' directive's <a>pre-navigation check</a>:
 
-  <ol class="algorithm">
-    1.  Assert: |source| and |target| are unused in this algorithm, as
-        `navigation-to` is concerned only with details of the outgoing request.
-        Likewise, |type| is unused, as all navigation requests are treated
-        identically.
+    <ol class="algorithm">
+      1.  Assert: |source| and |target| are unused in this algorithm, as
+          `navigation-to` is concerned only with details of the outgoing request.
+          Likewise, |type| is unused, as all navigation requests are treated
+          identically.
 
-    2.  If the result of executing [[#match-request-to-source-list]] on
-        |request| and this directive's <a for="directive">value</a> is
-        "`Does Not Match`", return "`Blocked`".
+      2.  If the result of executing [[#match-request-to-source-list]] on
+          |request| and this directive's <a for="directive">value</a> is
+          "`Does Not Match`", return "`Blocked`".
 
-    3.  Return "`Allowed`".
-  </ol>
+      3.  Return "`Allowed`".
+    </ol>
+  </section>
 
   <h3 id="directives-reporting">
     Reporting Directives
