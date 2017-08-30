@@ -1217,12 +1217,19 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       therefore alias the <a>embedding document</a>'s policies for <a>an iframe
       `srcdoc` `Document`</a>.
 
-    2.  If |global| is a {{SharedWorkerGlobalScope}}, {{ServiceWorkerGlobalScope}}, or
-        {{WorkletGlobalScope}}:
+  2.  If |global| is a {{SharedWorkerGlobalScope}} or {{ServiceWorkerGlobalScope}}:
 
       1.  For each |policy| in |response|'s
           <a for="response">CSP list</a>, insert |policy| into
           |global|'s <a for="global object">CSP list</a>.
+
+  3. If |global| is a {{WorkletGlobalScope}}:
+
+      1. Let |owner| be |global|'s [=WorkletGlobalScope/owner document=].
+
+      2. For each |policy| in |owner|'s <a for="global object">CSP list</a>:
+
+          1.  Insert an alias to |policy| in |global|'s <a for="global object">CSP list</a>.
 
   <h4 id="should-block-inline" algorithm>
     Should |element|'s inline |type| behavior be blocked by Content Security Policy?
