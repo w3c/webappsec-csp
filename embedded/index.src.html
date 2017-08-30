@@ -16,12 +16,13 @@ Indent: 2
 Version History: https://github.com/w3c/webappsec-csp/commits/master/embedded/index.src.html
 Boilerplate: omit conformance, omit feedback-header
 !Participate: <a href="https://github.com/w3c/webappsec-csp/issues/new">File an issue</a> (<a href="https://github.com/w3c/webappsec-csp/issues">open issues</a>)
+!Tests: <a href=https://github.com/w3c/web-platform-tests/tree/master/content-security-policy/embedded-enforcement>web-platform-tests content-security-policy/embedded-enforcement/</a> (<a href=https://github.com/w3c/web-platform-tests/labels/content-security-policy>ongoing work</a>)
 Markup Shorthands: css off, markdown on
 </pre>
 <pre class="link-defaults">
-spec: html;
-  type: dfn; for: /;
-    text: browsing context  
+spec: html
+  type: dfn; for: /
+    text: browsing context
     text: case-sensitive
     text: content attribute
     text: navigate
@@ -31,14 +32,16 @@ spec:fetch
   type: dfn
     text:request; for: /
     text: response; for: /
-spec:infra;
-  type:dfn;
+spec:infra
+  type:dfn
     text:string; for: /
-    text:list; for: / 
-    text:set; for: / 
+    text:list; for: /
+    text:set; for: /
     text:append; for: set
     text:empty; for: set
-spec:csp; type:dfn; text:allows all inline behavior; for:source list
+spec: csp
+  type: dfn
+    text: allows all inline behavior; for:source list
 </pre>
 <pre class="anchors">
 spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
@@ -46,8 +49,13 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
     text: origin-or-null; url: http-origin
     text: wildcard; url: http-new-header-syntax
 spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
-  type:dfn; 
+  type:dfn;
     text: parse a serialized csp as disposition; url: parse-serialized-policy
+    text: scheme-part match
+    text: host-part match
+    text: port-part match
+    text: path-part match
+    text: CSP list
 </pre>
 <!--
 ████ ██    ██ ████████ ████████   ███████
@@ -67,7 +75,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
   attacks, allowing developers to harden their own sites against injection of
   malicious script, style, and other resource types. It does not, however,
   give developers the ability to apply restrictions to third-party content
-  loaded in via `<iframe>`. Allowing CSP to apply directly to these third-party
+  loaded in via <{iframe}>. Allowing CSP to apply directly to these third-party
   contexts would be dangerous; CSP gives quite granular control over resource
   loading, and it's very possible to introduce vulnerabilities into an otherwise
   secure page by denying it access to particular scripts. We've seen these kinds
@@ -82,7 +90,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
   In short, the embedder proposes a Content Security Policy by setting an attribute on an <{iframe}>
   element. This policy is transmitted along with the HTTP request for the framed content in an
-  HTTP request header (<a http-header>`Embedding-CSP`</a>). If the embedded content can accept that
+  HTTP request header (<a http-header>`Sec-Required-CSP`</a>). If the embedded content can accept that
   policy, it can enforce it by returning a <a http-header>`Content-Security-Policy`</a> or
   <a http-header>`Allow-CSP-From`</a> header along with the response.
 
@@ -106,13 +114,13 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
     </pre>
 
     This will generate a request to `advertisements-r-us.example.com` that has
-    an <a http-header>`Embedding-CSP`</a> header, as follows:
+    a <a http-header>`Sec-Required-CSP`</a> header, as follows:
 
     <pre>
       GET / HTTP/1.1
       Host: advertisements-r-us.example.com
       ...
-      <a http-header>Embedding-CSP</a>: script-src https://trusted-cdn.example.com/
+      <a http-header>Sec-Required-CSP</a>: script-src https://trusted-cdn.example.com/
       ...
     </pre>
 
@@ -137,7 +145,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
     <pre>
       HTTP/1.1 200 OK
       ...
-      <a>Content-Security-Policy</a>: script-src https://trusted-cdn.example.com/; object-src 'none'
+      <a http-header>Content-Security-Policy</a>: script-src https://trusted-cdn.example.com/; object-src 'none'
     </pre>
 
     Since the policy asserted by the response allows strictly fewer requests than the policy
@@ -149,11 +157,10 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
     <pre>
       HTTP/1.1 200 OK
       ...
-      <a>Content-Security-Policy</a>: script-src https://trusted-cdn.example.com/,
-                               object-src 'none'
+      <a http-header>Content-Security-Policy</a>: script-src https://trusted-cdn.example.com/, object-src 'none'
     </pre>
-    
-    The "`,`" in the <a>`Content-Security-Policy`</a> header's value splits the
+
+    The "`,`" in the <a http-header>`Content-Security-Policy`</a> header's value splits the
     string into two serialized policies, each of which is enforced. The user
     agent verifies that one of the policies delivered with the response matches
     the requirement, and since additional policies can only make the
@@ -171,14 +178,12 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
   1.  The embedder specifies a required policy via a <{iframe/csp}> attribute on an <{iframe}>
       element. This is described in more detail in [[#csp-attribute]].
-      
+
   2.  That attribute's value will be sent along with any <a>navigation request</a> that targets
-      the <{iframe}>'s <a>nested browsing context</a> in an <a http-header>`Embedding-CSP`</a>
-      HTTP request header. This header is described in more detail in [[#embedding-csp-header]].
+      the <{iframe}>'s <a>nested browsing context</a> in a <a http-header>`Sec-Required-CSP`</a>
+      HTTP request header. This header is described in more detail in [[#required-csp-header]].
 
-      ISSUE: Rename this? `Required-CSP`, perhaps, to match the rest of the spec?
-
-  3.  The server can examine the <a http-header>`Embedding-CSP`</a> header to determine whether
+  3.  The server can examine the <a http-header>`Sec-Required-CSP`</a> header to determine whether
       it wishes to accept the required policy.If so, it can implicitly opt-in by sending a
       <a http-header>`Content-Security-Policy`</a> header in the response that contains a policy
       which is at least as strong as the required policy, or explicitly opt-in by sending an
@@ -196,7 +201,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
   `<iframe>`'s `csp` attribute {#csp-attribute}
   ----------------------------
-  
+
   <{iframe}> elements have a <dfn element-attr for="iframe">csp</dfn> attribute, which specifies
   the policy that an embedded document must agree to enforce upon itself. For example, the following
   HTML would load `https://embedee.example.com/`, and ensure that `object-src 'none'` was enforced
@@ -215,13 +220,22 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
   1.  |value| is not the empty string.
 
-  2.  |value| matches the <a grammar>serialized-policy</a> ABNF grammar defined in [[!CSP3]].
+  2.  |value| matches the <a grammar>serialized-policy</a> ABNF grammar defined in [[!CSP]].
 
-  3.  |element|'s <a>node document</a>'s <a for="Document">browsing context</a>'s
-      <a for="browsing context">required CSP</a> is `null`, or the result of
-      <a lt="parse a serialized csp as disposition">parsing |value| as "`enforce`"</a> is
-      <a for="policy">subsumed by</a> |element|'s <a>node document</a>'s <a for="Document">browsing
-      context</a>'s <a for="browsing context">required CSP</a>.
+  3.  One of the following statements is true:
+
+      1.  |element|'s [=node document=]'s [=Document/browsing context=]'s
+          [=browsing context/required CSP=] is `null`.
+
+      2.  The result of [=parse a serialized csp as disposition|parsing=] |value| as "`enforce`" is
+          [=policy/subsumed by=] |element|'s [=node document=]'s [=Document/browsing context=]'s
+          [=browsing context/required CSP=].
+
+  4.  The result of [=parse a serialized csp as disposition|parsing=] |value| as "`enforce`" has a
+      [=policy/directive set=] that does not [=list/contain=] any of the following directives:
+
+      *   [=report-uri=]
+      *   [=report-to=]
 
   <div class="example">
     The following strings are valid values for the <{iframe/csp}> attribute, as they're valid CSP
@@ -254,45 +268,27 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
     };
   </pre>
 
-  <div algorithm="HTMLIframeElement's csp IDL attribute's getter">
-    The {{HTMLIFrameElement}} {{HTMLIFrameElement/csp}} IDL attribute's <a>getter</a> will run the
-    following steps on a given |element|:
-
-    1.  Let |value| be the value of |element|'s <{iframe/csp}> <a>content attribute</a>.
-
-    2.  If |value| is a <a for="iframe/csp">valid attribute value</a> for |element|, return |value|.
-        
-    3.  Return the empty string.
-  </div>
-
-  <div algorithm="HTMLIframeElement's csp IDL attribute's setter">
-    The {{HTMLIFrameElement}} {{HTMLIFrameElement/csp}} IDL attribute's <a>setter</a> will run the
-    following steps on a given |element| for a given |value|:
- 
-    1.  If |value| is a <a for="iframe/csp">valid attribute value</a> for |element|, set |element|'s
-        <{iframe/csp}> <a>content attribute</a> to the empty string and return.
-
-    2.  Set |element|'s <{iframe/csp}> <a>content attribute</a> to the empty string.
-  </div>
+  The {{HTMLIFrameElement/csp}} IDL attribute must [=reflect=] the element's <{iframe/csp}>
+  [=content attribute=].
 
   ISSUE: Upstream this to all the HTMLs.
- 
-  The `Embedding-CSP` HTTP Request Header {#embedding-csp-header}
+
+  The `Sec-Required-CSP` HTTP Request Header {#required-csp-header}
   ---------------------------------------
 
   In order to ensure that the embedded resource can decide whether or not it is willing to adhere to
   the embedder's requirements, the policy expressed in an <{iframe}>'s <{iframe/csp}> attribute is
-  communicated along with affected <a>navigation requests</a> via an
-  "<dfn export http-header>`Embedding-CSP`</dfn>" HTTP request header. The header's value is
+  communicated along with affected <a>navigation requests</a> via a
+  "<dfn export http-header>`Sec-Required-CSP`</dfn>" HTTP request header. The header's value is
   represented by the following ABNF [[!RFC5234]]:
 
   <pre>
-    Embedding-CSP = <a grammar>serialized-policy</a>
+    Sec-Required-CSP = <a grammar>serialized-policy</a>
   </pre>
 
-  A user agent MUST NOT send more than one HTTP response header field named "`Embedding-CSP`", and
+  A user agent MUST NOT send more than one HTTP response header field named "`Sec-Required-CSP`", and
   any such header MUST NOT contain more than one <a grammar>serialized-policy</a>.
-  
+
   Servers MUST process only the first policy in the first such header received. As discussed in
   [[#header-reflection]], servers SHOULD also carefully consider the implications of simply
   reflecting a policy back to a client. If the server wishes to simply accept an embedder's
@@ -301,8 +297,8 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
   This header is set as part of HTML's <a>navigate</a> algorithm (see [[#html-integration]] for
   details on the hook that calls the following algorithm):
 
-  <div algorithm="set a request's embedding-csp header">
-    To <dfn abstract-op local-lt="set-embedding-csp">set the `Embedding-CSP` header</dfn> for a
+  <div algorithm="set a request's required-csp header">
+    To <dfn abstract-op local-lt="set-required-csp">set the `Sec-Required-CSP` header</dfn> for a
     given <a>request</a> (|request|), run the following steps:
 
     1.  If |request| is not a <a>navigation request</a>, return.
@@ -314,9 +310,9 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
     3.  If |requirement| is `null`, return.
 
     4.  Assert: |requirement| is a <a>serialized CSP</a>, matching the
-        <a grammar>serialized-policy</a> grammar defined in [[!CSP3]].
+        <a grammar>serialized-policy</a> grammar defined in [[!CSP]].
 
-    5.  <a for="header list">Append</a> a header named "<a http-header>`Embedding-CSP`</a>" with a
+    5.  <a for="header list">Append</a> a header named "<a http-header>`Sec-Required-CSP`</a>" with a
         value of |requirement| to |request|'s <a for="request">header list</a>.
   </div>
 
@@ -340,7 +336,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
       [[#required-csp]].
 
   3.  Add the following after step 10 of HTML's <a>navigate</a> algorithm:
-      
+
       11. <a lt="set the required CSP" abstract-op>Set</a> `browsingContext`'s
           <a for="browsing context">required CSP</a>.
 
@@ -363,8 +359,8 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
   5.  Add the following after step 5 of HTML's <a>process a navigate fetch</a>
       algorithm:
 
-      6.  <a lt="set-embedding-csp" abstract-op>Set</a> `request`'s
-          "<a http-header>`Embedding-CSP`</a>" header.
+      6.  <a lt="set-required-csp" abstract-op>Set</a> `request`'s
+          "<a http-header>`Sec-Required-CSP`</a>" header.
 
       ISSUE: Upstream this to WHATWG's HTML.
 
@@ -382,7 +378,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
   <div algorithm="browsing context's required CSP">
     To <dfn abstract-op>set the required CSP</dfn> for a given <a>browsing context</a> (|context|),
     run the following steps:
-    
+
     1.  If |context| is a <a>nested browsing context</a>:
 
         1.  If |context|'s <a>browsing context container</a> has an <{iframe/csp}> <a>content
@@ -391,6 +387,8 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
         2.  Set |context|'s <a for="browsing context">required CSP</a> to the value of |context|'s
             <a>parent browsing context</a>'s <a for="browsing context">required CSP</a>.
+
+        3.  Return.
 
     2.  Set |context|'s <a for="browsing context">required CSP</a> to `null`.
   </div>
@@ -427,52 +425,50 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
       strict"ness are spelled out in [[#subsumption]].
 
   *   When multiple policies are present, they have a combined effect which is described in
-      [[CSP3#multiple-policies]]. Here, we'll talk about the combined effect of a <a>list</a> of
-      <a>policy</a> objects as their <dfn for="policy" export>intersection</dfn>. The details of
+      [[CSP3#multiple-policies|"The effect of multiple policies"]]. Here, we'll talk about the
+      combined effect of a [=/CSP list=] as their [=CSP list/intersection=]. The details of
       determining that are spelled out in [[#intersection]].
 
-  *   A <a>policy</a> (|A|) is said to <a>subsume</a> a <a>list</a> of <a>policy</a> objects if
-      |A| <a>subsumes</a> their <a for="policy">intersection</a>.
+  *   A <a>policy</a> (|A|) is said to <a>subsume</a> a [=/CSP list=] if |A| <a>subsumes</a> their
+      [=CSP list/intersection=].
 
   Intersection {#intersection}
   ------------
 
-  ### Policy List intersection ### {#intersection-policy-list}
+  <h4 algorithm id="intersection-policy-list">CSP List intersection</h4>
 
-  <div algorithm="intersection of policy list">
-    Given a <a>list</a> of <a>policies</a> (|policy list|) and an <a for="/">origin</a> (|origin|),
-    the <dfn abstract-op>intersection of |policy list| for |origin|</dfn> is a single <a>policy</a>
-    object representing their net effect, produced by the following algorithm:
+  The <dfn export for="CSP list">intersection</dfn> of a [=/CSP list=] (|list|) for an [=/origin=]
+  (|origin|) is a single [=Content Security Policy object=] representing their net effect,
+  produced by the following algorithm:
 
-    Note: It isn't always possible to represent the <a for="policy">intersection</a> of multiple
-    policies as a single policy. Consider `script-src 'unsafe-inline'` and `script-src 'nonce-abc'`,
-    for instance: the former allows only inline script, the latter allows only inline or
-    externalized script with a particular token. The net effect (only inline script with a
-    particular token) cannot be created with a single policy. Dealing with such policies is, for the
-    moment, left as an exercise for the reader.
+  Note: It isn't always possible to represent the [=CSP list/intersection=] of multiple policies as
+  a single policy. Consider `script-src 'unsafe-inline'` and `script-src 'nonce-abc'`, for instance:
+  the former allows only inline script, the latter allows only inline or externalized script with a
+  particular token. The net effect (only inline script with a particular token) cannot be created
+  with a single policy. Dealing with such policies is, for the moment, left as an exercise for the
+  reader.
 
-    ISSUE: We shouldn't make the reader do this exercise.
+  ISSUE: We shouldn't make the reader do this exercise.
 
-    1.  Let |intersection| be a <a for="/">policy</a> object with an empty <a>directive set</a>
+  <ol class="algorithm">
+    1.  Let |result| be a <a for="/">policy</a> object with an empty <a>directive set</a>
         and a disposition of "`enforce`".
 
-    2.  For each |policy| in |policy list|:
+    2.  For each |policy| in |list|:
 
         1.  If |policy|'s <a for="policy">disposition</a> is "`report`",
             <a for="iteration">continue</a>.
 
-        2.  Let |result| be the <a lt="intersection of two policies" abstract-op>intersection
-            of  |intersection| and |policy| for |origin|</a>
+        2.  Set |result| to the [=content security policy object/intersection=] of |result|
+            and |policy| for |origin|.
 
-        3.  Set |intersection| to |result|.
-
-    3.  Return |intersection|.
-  </div>
+    3.  Return |result|.
+  </ol>
 
   <div class="example">
     The intersection of the policies created by parsing each item in the following list of
     <a>serialized CSPs</a>:
-      
+
     <pre>
     «
         "default-src 'self' http://example.com http://example.net;
@@ -498,12 +494,11 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
   ### Policy Intersection ### {#intersection-policy}
 
-  <div algorithm="intersection of two policies">
-    Given two <a>policies</a> (|A| and |B|), and an <a for="/">origin</a> (|origin|), the
-    <dfn abstract-op lt="intersection of two policies">intersection of |A| and |B| for
-    |origin|</dfn> is a single <a>policy</a> representing their net effect, produced by the
-    following algorithm:
+  The <dfn for="content security policy object">intersection</dfn> of two [=Content Security Policy
+  objects=] (|A| and |B|) for an [=/origin=] (|origin|) is a single [=Content Security Policy
+  object=] representing their combined effect, produced by the following algorithm:
 
+  <ol class="algorithm">
     1.  Assert: |A| and |B| both have a <a for="policy">disposition</a> of "`enforce`".
 
     2.  If |A|'s <a>directive set</a> <a for="list">is empty</a>, return |B|.
@@ -544,9 +539,9 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
             directive" that we could check against |directive name|.
 
         6.  If |directive A| is `null`:
-       
+
             1.  Let |directive| be a new <a>directive</a> with the following properties:
-                
+
                 :   <a for="directive">name</a>
                 ::  |directive name|
                 :   <a for="directive">value</a>
@@ -557,9 +552,9 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
             3.  <a for="iteration">Continue</a>.
 
         7.  If |directive B| is `null`:
-       
+
             1.  Let |directive| be a new <a>directive</a> with the following properties:
-                
+
                 :   <a for="directive">name</a>
                 ::  |directive name|
                 :   <a for="directive">value</a>
@@ -569,13 +564,12 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
             3.  <a for="iteration">Continue</a>.
 
-        8.  Let |directive value| be the
-            <a lt="intersection of two source lists" abstract-op>intersection of |directive A|'s
+        8.  Let |directive value| be the [=source list/intersection=] of |directive A|'s
             <a for="directive">value</a>, |directive B|'s <a for="directive">value</a>, |directive
             name|, and |origin|.
 
         9.  Let |directive| be a new <a>directive</a> with he following properties:
-                
+
                 :   <a for="directive">name</a>
                 ::  |directive name|
                 :   <a for="directive">value</a>
@@ -584,11 +578,11 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
         10. <a for="set">Append</a> |directive| to |policy|'s <a>directive set</a>.
 
     9.  Return |policy|.
-  </div>
+  </ol>
 
   <div class="example">
     The intersection of the policies obtained by parsing the following <a>serialized CSPs</a>:
-      
+
     <pre>
       "default-src 'self' http://example.com http://example.net;
        connect-src 'none';"
@@ -607,28 +601,26 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
        script-src http://example.com/;
     </pre>
 
-    Both of the given policies <a>subsume</a> the <a for="policy">intersection</a>. For example,
-    the <a for="policy">intersection</a>'s "`script-src http://example.com/`" is
+    Both of the given policies <a>subsume</a> the <a for="CSP list">intersection</a>. For example,
+    the <a for="CSP list">intersection</a>'s "`script-src http://example.com/`" is
     <a for="policy">subsumed by</a> the first policy's "`default-src 'self' http://example.com
     http://example.net`" and the second policy's "`script-src http://example.com/`".
   </div>
 
   ### Source List Intersection ### {#intersection-source-list}
 
-  <div algorithm="intersection of two source lists">
-    Given two <a>source lists</a> (|A| and |B|), their <a for="directive">name</a> (|name|), and
-    their <a for="/">origin</a> (|origin|), the
-    <dfn lt="intersection of two source lists" abstract-op>intersection of |A| and |B| for |name|
-    and |origin|</dfn> is a <a>source list</a> representing their net effect. If no such <a>source
-    expressions</a> exist because the lists contain only divergent expressions (for example:
-    `https://example.com/` in |A|, and `https://not-example.com/` in |B|), then the intersection
-    will be the list « <a grammar>'none'</a> ».
+  The <dfn for="source list">intersection</dfn> of two [=source lists=] for a
+  [=directive/name|directive name=] (|name|) and an [=/origin=] (|origin|) is a [=source list=]
+  representing their net effect. If no such [=source list=] exists (for example,
+  `https://example.com/` in |A| and `https://not-example.com` in |B|), then the intersection will
+  be the list « <a grammar>'none'</a> ».
 
-    1.  Let |effective A| be the <a>effective source list</a> for |A|, |directive A|, and |origin|.
+  <ol class="algorithm">
+    1.  Let |effective A| be the <a>effective source list</a> for |A|, |name|, and |origin|.
 
-    2.  Let |effective B| be the <a>effective source list</a> for |B|, |directive B|, and |origin|.
+    2.  Let |effective B| be the <a>effective source list</a> for |B|, |name|, and |origin|.
 
-    3.  If either |effective A| or |effective B| is « <a grammar>`'none'`</a> », 
+    3.  If either |effective A| or |effective B| is « <a grammar>`'none'`</a> »,
         return « <a grammar>`'none'`</a> ».
 
     4.  If |effective A| is empty, return |effective B|.
@@ -679,7 +671,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
                 2.  If |expression A| matches <a grammar>`nonce-source`</a> or
                     <a grammar>`hash-source`</a> grammar and is a
-                    <a>case-sensitive</a> match for |expression B|, 
+                    <a>case-sensitive</a> match for |expression B|,
                     <a for="set">append</a> |expression A| to |intersection|.
 
                 3.  <a for="iteration">Continue</a> to the next |expression B|.
@@ -694,7 +686,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
                     and the result of executing
                     [[#intersection-source-expressions]] is not `null` given
                     |expression A| and |expression B|, <a for="set">append</a> the
-                    result to |intersection|. 
+                    result to |intersection|.
 
                 2.  <a for="iteration">Continue</a> to the next |expression B|.
 
@@ -711,12 +703,12 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
             |intersection|.
 
     11.  Return |intersection|.
-  </div>
+  </ol>
 
   <div class="example">
-    In these cases, `intersection` is an 
+    In these cases, `intersection` is an
     <a for="source expression">intersection</a> for |A| and |B|.
-      
+
     <pre>
       A = wss: http://example.com
       B = https: wss: 'none'
@@ -735,7 +727,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
       intersection = https://a.com
     </pre>
 
-    Only two sources are similar: "http://*.a.com" in |A| is similar to 
+    Only two sources are similar: "http://*.a.com" in |A| is similar to
     "https://a.com:*" in |B| so the intersection of the two source lists is
     "https://a.com".
 
@@ -746,8 +738,8 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
     </pre>
 
     Since "`strict-dynamic`" honors only <a grammar>`nonce-source`</a> and
-    <a grammar>`hash-source`</a> expressions, |B| is effectively 
-    "'strict-dynamic' 'nonce-abc'". That is why the intersection is 
+    <a grammar>`hash-source`</a> expressions, |B| is effectively
+    "'strict-dynamic' 'nonce-abc'". That is why the intersection is
     "'nonce-abc'".
   </div>
 
@@ -771,13 +763,13 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
         :   "`object-src`"
         :   "`script-src`"
         :   "`style-src`"
-        ::  
+        ::
             1.  If |policy|'s <a>directive set</a> <a for="set">contains</a> a <a>directive</a>
-                whose <a for="directive">name</a> is |name|, return that<a>directive</a>'s
+                whose <a for="directive">name</a> is |name|, return that <a>directive</a>'s
                 <a for="directive">value</a>.
 
             2.  If |policy|'s <a>directive set</a> <a for="set">contains</a> a <a>directive</a>
-                whose <a for="directive">name</a> is "`default-src`", return that<a>directive</a>'s
+                whose <a for="directive">name</a> is "`default-src`", return that <a>directive</a>'s
                 <a for="directive">value</a>.
 
             3.  Return `null`.
@@ -786,15 +778,15 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
         : "`worker-src`"
         ::
             1.  If |policy|'s <a>directive set</a> <a for="set">contains</a> a <a>directive</a>
-                whose <a for="directive">name</a> is |name|, return that<a>directive</a>'s
+                whose <a for="directive">name</a> is |name|, return that <a>directive</a>'s
                 <a for="directive">value</a>.
 
             2.  If |policy|'s <a>directive set</a> <a for="set">contains</a> a <a>directive</a>
-                whose <a for="directive">name</a> is "`child-src`", return that<a>directive</a>'s
+                whose <a for="directive">name</a> is "`child-src`", return that <a>directive</a>'s
                 <a for="directive">value</a>.
 
             3.  If |policy|'s <a>directive set</a> <a for="set">contains</a> a <a>directive</a>
-                whose <a for="directive">name</a> is "`default-src`", return that<a>directive</a>'s
+                whose <a for="directive">name</a> is "`default-src`", return that <a>directive</a>'s
                 <a for="directive">value</a>.
 
             4.  Return `null`.
@@ -811,7 +803,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
         : "`upgrade-insecure-requests`"
         ::
             1.  If |policy|'s <a>directive set</a> <a for="set">contains</a> a <a>directive</a>
-                whose <a for="directive">name</a> is |name|, return that<a>directive</a>'s
+                whose <a for="directive">name</a> is |name|, return that <a>directive</a>'s
                 <a for="directive">value</a>.
 
             2.  Return `null`.
@@ -820,7 +812,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
   </div>
 
   #### Effective Source List #### {#the-effective-source-list}
- 
+
   <div algorithm="effective source list">
     Given a <a>source list</a> (|list|), a <a>string</a> (|name|), and an <a for="/">origin</a>
     (|origin|), the <dfn lt="effective source list">effective source list for |list|, |name|, and
@@ -837,7 +829,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
     3.  For each |expression| in |list|:
 
         1.  If |expression| is "<a grammar>`'self'`</a>":
-            
+
             1.  <a for="set">Append</a> the result of executing [[#rewrite-self]] given |origin| to
                 |result|.
 
@@ -877,7 +869,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
             2.  Append the concatenation of |origin|'s <a for="origin">scheme</a> and "`:`" to
                 |result|.
 
-            3.  <a for="iteration">Continue</a>. 
+            3.  <a for="iteration">Continue</a>.
 
         4.  If |expression| matches the <a grammar>scheme-source</a> grammar:
 
@@ -885,7 +877,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
                 |result|.
 
             2.  If |expression| is "`ws:`", <a for="set">append</a> "`wss:`" to |result|.
-   
+
         5.  If |expression| matches the <a grammar>host-source</a> grammar:
 
             1.  If |expression|'s <a grammar>scheme-part</a> is "http", append the result of
@@ -898,7 +890,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
         6.  <a for="set">Append</a> |expression| to |result|.
 
-    4.  If |result| <a for="set">is empty</a> or « 'strict-dynamic' », return « 'none' ». 
+    4.  If |result| <a for="set">is empty</a> or « 'strict-dynamic' », return « 'none' ».
 
     5.  Return |result|.
   </div>
@@ -929,6 +921,136 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
     source expressions.
   </div>
 
+  #### Source Expression Similarity #### {#similarity-source-expressions}
+
+  A [=source expression=] (|A|) is said to be <dfn export>source-expression similar</dfn> to
+  another [=source expression=] (|B|) if the two expressions are <a>case-sensitive</a>
+  matches, or if the relevant parts of their grammar match (for example, in the case of
+  <a grammar>`scheme-source`</a> expressions, the respective <a grammar>`scheme-part`</a>s
+  must <a>`scheme-part` match</a> in one direction or the other.
+
+  Note: This property is symmetric. That is if |A| is <a>source-expression similar</a> to |B|,
+  then |B| will be <a>source-expression similar</a> to |A|.
+
+  A <a>source expression</a> has a
+  <dfn for="source expression">wildcard host</dfn> if the first character of the
+  <a>source expression</a>'s <a grammar>`host-part`</a> is an U+002A ASTERISK
+  character (`*`).
+
+  A <a>source expression</a> has a
+  <dfn for="source expression">wildcard port</dfn> if the
+  <a grammar>`port-part`</a> of the <a>source expression</a> is an U+002A
+  ASTERISK character (`*`).
+
+  <ol class="algorithm">
+    1.  If |A|'s grammar does not match |B|'s grammar, return "`Not Similar`".
+
+    2.  If |A| matches the <a grammar>`keyword-source`</a>, <a grammar>`nonce-source`</a>,
+        or <a grammar>`hash-source`</a> grammar:
+
+        1.  If |A| is a <a>case-sensitive</a> match to |B|, return "`Similar`".
+
+        2.  Return "`Not Similar`".
+
+    2.  Let |scheme A| be |A|'s <a grammar>`scheme-part`</a>, if present, and
+        `null` otherwise.
+
+    3.  Let |scheme B| be |B|'s <a grammar>`scheme-part`</a>, if present, and
+        `null` otherwise.
+
+    4.  If the |scheme A| does not <a>scheme-part match</a> |scheme B|, and |scheme B| does not
+        <a>scheme-part match</a> |scheme A|, return "`Not Similar`".
+
+    5.  If |A| or |B| matches  <a grammar>`scheme-source`</a> grammar, return "`Similar`".
+
+    6.  Let |host A| be |A|'s <a grammar>`host-part`</a>, if present, and `null` otherwise.
+
+    7.  Let |host B| be |B|'s <a grammar>`host-part`</a>, if present, and `null` otherwise.
+
+    8.  Let |port A| be |A|'s <a grammar>`port-part`</a>, if present, and `null` otherwise.
+
+    9.  Let |port B| be |B|'s <a grammar>`port-part`</a>, if present, and `null` otherwise.
+
+    10. Let |path A| be |A|'s <a grammar>`path-part`</a>, if present, and `null` otherwise.
+
+    11. Let |path B| be |B|'s <a grammar>`path-part`</a>, if present, and `null` otherwise.
+
+    12. Return "`Not Similar`" if any of the following is true:
+
+        1.  Both |A| and |B| have a <a for="source expression">wildcard host</a>, but |host A| is
+            not an <a>ASCII case-insensitive</a> match to |host B|.
+
+        2.  At most one of |A| and |B| has a <a for="source expression">wildcard host</a>, |host A|
+            does not <a>`host-part` match</a> |host B|, and |host B| does not <a>`host-part`
+            match</a> |host A|.
+
+        3.  Neither |A| nor |B| has a <a for="source expression">wildcard port</a>, |port A|
+            does not <a>`port-part` match</a> |port B|, and |port B| does not <a>`port-part`
+            match</a> |port A|.
+
+        4.  |path A| does not <a>`path-part` match</a> |path B|, and |path B| does not
+            <a>`path-part` match</a> |path A|.
+
+    13. Return "`Similar`".
+  </ol>
+
+  <div class="example">
+    <pre>
+      A = 'nonce-ch4hvvbHDpv7xCSvXCs3BrNggHdTzxUA'
+      B = 'nonce-ch4hvvbHDpv7xCSvXCs3BrNggHdTzxUA'
+    </pre>
+
+    Since both |A| and |B| match the <a grammar>`nonce-source`</a> grammar and |A|
+    is a <a>case-sensitive</a> match for |B|, |A| is similar to |B|.
+
+    <pre>
+      A = https://inner.example.com/foo/
+      B = http://*.example.com/foo/bar/
+    </pre>
+
+    Since |A| has a <a for="source expression">wildcard host</a>, it matches any
+    subdomain which in this case is "inner" so that |A| is similar to |B|.
+
+    <pre>
+      A = http://*.example.com
+      B = https://example.com:*
+    </pre>
+
+    Even though |A| and |B|'s ports are different, |A| and |B| are similar
+    because "http" matches both "http" and a more secure variant "https".
+
+    <pre>
+      A = http://example.com:80/page1/html
+      B = https://example.com:443/
+    </pre>
+
+    In both sources specified ports are defalt ports for the respective schemes
+    and |B|'s path would match any path, |A| is similar to |B|.
+
+    <pre>
+      A = 'sha256-abc123'
+      B = 'sha512-cde456'
+    </pre>
+
+    Even though both |A| and |B| match the <a grammar>`hash-source`</a> grammar, |A|
+    is not a <a>case-sensitive</a> match for |B| because the hashes don't match.
+
+    <pre>
+      A = http://example.com:80
+      B = http://example.com:334
+    </pre>
+
+    In this case, ports of |A| and |B| do not match so that the two sources are
+    not similar .
+
+    <pre>
+      A = http://example.com/page.html
+      B = http://example.com/index.html
+    </pre>
+
+    The two sources are not similar because their paths do not match.
+  </div>
+
   ISSUE: Move the remaining intersection algorithms into this section.
 
 
@@ -951,19 +1073,19 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
   <ol class="algorithm">
     1.  Return "`Allowed`" if either of the following is true:
-    
+
         1.  |context| is not a <a>nested browsing context</a>.
 
         2.  |context|'s <a for="browsing context">required CSP</a> is `null`.
 
-    2.  Let |embedding policy| be the result of executing
+    2.  Let |required policy| be the result of executing
         [[csp3#parse-serialized-policy]] on |context|'s <a for="browsing context">required CSP</a> and
         "`enforce`".
 
     3.  If the [[#origin-allowed]] algorithm returns "`Allowed`" when executed upon
         |response| and |request|:
 
-        1.  Append |embedding policy| to |response|'s <a for="response">CSP
+        1.  Append |required policy| to |response|'s <a for="response">CSP
             list</a>.
 
         2.  Return "`Allowed`".
@@ -972,7 +1094,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
         a cross-origin, <a>network schemed</a> resource.
 
     5.  If the [[#subsume-policy-list]] algorithm returns "`Subsumes`" when
-        executed upon |embedding policy|, |request|'s <a for="request">origin</a>,
+        executed upon |required policy|, |request|'s <a for="request">origin</a>,
         |response|'s <a for="response">CSP list</a>, and |response|'s
         <a for="response">url</a>'s <a for="url">origin</a>, return "`Allowed`".
 
@@ -993,7 +1115,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
       Note: The embedder has direct access to same-origin responses, so if it
       wishes to enforce a policy on that same-origin response, we simply do so.
-      
+
   2.  If |response|'s <a for="response">url</a>'s <a for="url">origin</a> is the
       same as |request|'s <a for="request">origin</a>, return "`Allowed`".
 
@@ -1012,151 +1134,23 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
   4.  Return "`Not Allowed`".
 
-  <h4 id="similarity-source-expressions" algorithm>
-    Is an expression matching <a grammar>`scheme-source`</a> or 
-    <a grammar>`host-source`</a> grammar |A| similar to an expression matching 
-    <a grammar>`scheme-source`</a> or <a grammar>`host-source`</a> grammar |B|?
-  </h4>
-
-  Given two expressions matching the <a grammar>`scheme-source`</a>  or 
-  <a grammar>`host-source`</a> grammar (|A| and |B|), return "`Similar`" if |A|
-  is <a for="source expression">similar</a> to |B|. Otherwise, return 
-  "`Not Similar`".
-
-  |A| and |B| are said to be <dfn for="source expression">similar</dfn> if their
-  parts individually match, that is <a grammar>`scheme-part`</a>, 
-  <a grammar>`host-part`</a>, <a grammar>`port-part`</a>, and 
-  <a grammar>`path-part`</a>. 
-
-  NOTE: This property is symmetric. That is if |A| is 
-  <a for="source expression">similar</a> to |B|, it must be that |B| is 
-  <a for="source expression">similar</a> to |A|.
-
-  <div class="example">
-    Cases when |A| is <a for="source expression">similar</a> to |B|.
-
-    <pre>
-      A = https://inner.example.com/foo/
-      B = http://*.example.com/foo/bar/
-    </pre>
-    Since |A| has a <a for="source expression">wildcard host</a>, it matches any
-    subdomain which in this case is "inner" so that |A| is similar to |B|.
-
-    <pre>
-      A = http://*.example.com
-      B = https://example.com:*
-    </pre>
-    Even though |A| and |B|'s ports are different, |A| and |B| are similar 
-    because "http" matches both "http" and a more secure variant "https".
-
-    <pre>
-      A = http://example.com:80/page1/html
-      B = https://example.com:443/
-    </pre>
-    In both sources specified ports are defalt ports for the respective schemes
-    and |B|'s path would match any path, |A| is similar to |B|.
-
-
-    Cases when |A| is not <a for="source expression">similar</a> to |B|.
-
-    <pre>
-      A = http://example.com:80
-      B = http://example.com:334
-    </pre>
-    In this case, ports of |A| and |B| do not match so that the two sources are
-    not <a for="source expression">similar</a> .
-
-    <pre>
-      A = http://example.com/page.html
-      B = http://example.com/index.html
-    </pre>
-    The two sources are not <a for="source expression">similar</a> beucase their
-    paths do not match.
-  </div>
-
-  A <a>source expression</a> has a 
-  <dfn for="source expression">wildcard host</dfn> if the first character of the
-  <a>source expression</a>'s <a grammar>`host-part`</a> is an U+002A ASTERISK 
-  character (`*`).
-
-  A <a>source expression</a> has a 
-  <dfn for="source expression">wildcard port</dfn> if the 
-  <a grammar>`port-part`</a> of the <a>source expression</a> is an U+002A 
-  ASTERISK character (`*`).
-
-  1.  Let |scheme A| be |A|'s <a grammar>`scheme-part`</a>, if present, and 
-      `null` otherwise.
-      
-  2.  Let |scheme B| be |B|'s <a grammar>`scheme-part`</a>, if present, and 
-      `null` otherwise.
-
-  3.  If the result of executing [[csp3#match-schemes]] returns 
-      "`Does Not Match`" given |scheme A| and |scheme B|, and the result of 
-      executing [[csp3#match-schemes]] on |scheme B| and |scheme A| is 
-      "`Does Not Match`", return "`Not Similar`".
-
-  4.  If |A| or |B| matches  <a grammar>`scheme-source`</a> grammar,
-      return "`Similar`".
-
-  5.  Return "`Not Similar`" if any of the following is true:
-
-      1.  Let |host A| be |A|'s <a grammar>`host-part`</a>, if present, and 
-          `null` otherwise.
-      
-      2.  Let |host B| be |B|'s <a grammar>`host-part`</a>, if present, and 
-          `null` otherwise.
-
-      3.  Both |A| and |B| have a <a for="source expression">wildcard host</a>,
-          but |host A| is not an <a>ASCII case-insensitive</a> match to |host B|.
-
-      4.  At most one of |A| and |B| has a 
-          <a for="source expression">wildcard host</a>, the result of executing 
-          [[csp3#match-hosts]] is "`Does Not Match`" given |host A| and 
-          |host B|, and the result of executing [[csp3#match-hosts]] on |host B|
-          and |host A| is also "`Does Not Match`".
-
-      5.  Let |port A| be |A|'s <a grammar>`port-part`</a>, if present, and 
-          `null` otherwise.
-      
-      6.  Let |port B| be |B|'s <a grammar>`port-part`</a>, if present, and 
-          `null` otherwise.
-
-      7.  Neither |A| nor |B| has a <a for="source expression">wildcard port</a>,
-          the result of executing [[csp3#match-ports]] is "`Does Not Match`"
-          given |port A| and |port B|, and the result of executing 
-          [[csp3#match-ports]] given |port B| and |port A| is also 
-          "`Does Not Match`".
-
-      8.  Let |path A| be |A|'s <a grammar>`path-part`</a>, if present, and 
-          `null` otherwise.
-      
-      9.  Let |path B| be |B|'s <a grammar>`path-part`</a>, if present, and 
-          `null` otherwise.
-
-      10.  The result of executing [[csp3#match-paths]] is "`Does Not Match`"
-           given |path A| and |path B| and the result of executing 
-           [[csp3#match-paths]] given |path B| and |path A| is also 
-           "`Does Not Match`".
-
-  6.  Return "`Similar`".
-
   <h4 id="intersection-source-expressions" algorithm>
-    What is an intersection of two expressions matching 
-    <a grammar>`scheme-source`</a> or <a grammar>`host-source`</a> 
+    What is an intersection of two expressions matching
+    <a grammar>`scheme-source`</a> or <a grammar>`host-source`</a>
     grammar |A| and |B|?
   </h4>
 
-  <a>Source expression</a> is said to be an 
-  <dfn for="source expression">intersection</dfn> of two other 
-  expressions matching <a grammar>`scheme-source`</a> or 
+  <a>Source expression</a> is said to be an
+  <dfn for="source expression">intersection</dfn> of two other
+  expressions matching <a grammar>`scheme-source`</a> or
   <a grammar>`host-source`</a>  grammar |A| and |B| if it contains the more
-  restrictive <a grammar>`scheme-part`</a>, <a grammar>`host-part`</a>, 
-  <a grammar>`port-part`</a>, and <a grammar>`path-part`</a> of the two. 
+  restrictive <a grammar>`scheme-part`</a>, <a grammar>`host-part`</a>,
+  <a grammar>`port-part`</a>, and <a grammar>`path-part`</a> of the two.
 
   <div class="example">
-    In these cases, `Intersect` is an 
+    In these cases, `Intersect` is an
     <a for="source expression">intersection</a> for |A| and |B|.
-      
+
     <pre>
       A = https:
       B = http:
@@ -1188,39 +1182,37 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
     </pre>
   </div>
 
-  Given two expressions matching the <a grammar>`scheme-source`</a> or 
-  <a grammar>`host-source`</a> grammar (|A| and |B|), return their 
-  <a for="source expression">intersection</a> if |A| is 
-  <a for="source expression">similar</a> to |B|. Otherwise, return `null`.
+  Given two expressions matching the <a grammar>`scheme-source`</a> or
+  <a grammar>`host-source`</a> grammar (|A| and |B|), return their
+  <a for="source expression">intersection</a> if |A| is <a>source-expression similar</a> to |B|.
+  Otherwise, return `null`.
 
-  1.  If the result of executing [[#similarity-source-expressions]] on |A| and 
-      |B| is "`Not Similar`", return `null`.
+  1.  If |A| is not <a>source-expression similar</a> to |B|, return `null`.
 
   2.  Let |source| be an empty string.
 
-  3.  Let |scheme A| be |A|'s <a grammar>`scheme-part`</a>, if present, and 
-      `null` otherwise.
-      
-  4.  Let |scheme B| be |B|'s <a grammar>`scheme-part`</a>, if present, and 
+  3.  Let |scheme A| be |A|'s <a grammar>`scheme-part`</a>, if present, and
       `null` otherwise.
 
-  5.  Let |more secure scheme B| be `true` if the result of executing 
-      [[csp3#match-schemes]] is "`Does Not match`" given |scheme A| and 
+  4.  Let |scheme B| be |B|'s <a grammar>`scheme-part`</a>, if present, and
+      `null` otherwise.
+
+  5.  Let |more secure scheme B| be `true` if |scheme A| does not <a>`scheme-part` match</a>
       |scheme B|, and `false` otherwise.
 
-  6.  Append |scheme A| and ":" to |source| if |scheme A| is not `null` and 
+  6.  Append |scheme A| and ":" to |source| if |scheme A| is not `null` and
       |more secure scheme B| is `false`. Otherwise, append |scheme B| and ":"
       to |source| if |scheme B| is not `null`.
 
   7.  If both |A| and |B| match the <a grammar>`scheme-source`</a> grammar,
-      return |source|. 
+      return |source|.
 
   8.  Append "//" to |source| if it is not empty.
 
-  9.  Let |host A| be |A|'s <a grammar>`host-part`</a>, if present, and 
+  9.  Let |host A| be |A|'s <a grammar>`host-part`</a>, if present, and
       `null` otherwise.
-      
-  10.  Let |host B| be |B|'s <a grammar>`host-part`</a>, if present, and 
+
+  10.  Let |host B| be |B|'s <a grammar>`host-part`</a>, if present, and
        `null` otherwise.
 
   11.  If |host A| is not `null`:
@@ -1228,50 +1220,48 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
        1.  If |host B| is `null`, append |host A| to |source|.
            Continue to the next step in the main algorithm.
 
-       2.  If |A| doesn't match the <a grammar>`scheme-source`</a> grammar and 
-           doesn't have a <a for="source expression">wildcard host</a>, append 
+       2.  If |A| doesn't match the <a grammar>`scheme-source`</a> grammar and
+           doesn't have a <a for="source expression">wildcard host</a>, append
            |host A| to |source|.
 
        3.  Otherwise, append |host B| to |source|.
 
   12.  If |host A| is `null`, append |host B| to |source|.
 
-  13.  Let |port A| be |A|'s <a grammar>`port-part`</a>, if present, and 
-       `null` otherwise.
-      
-  14.  Let |port B| be |B|'s <a grammar>`port-part`</a>, if present, and 
+  13.  Let |port A| be |A|'s <a grammar>`port-part`</a>, if present, and
        `null` otherwise.
 
-  15.  If |port A| is `null`, append ":" and |port B| to |source| if it is 
-       not `null`. 
+  14.  Let |port B| be |B|'s <a grammar>`port-part`</a>, if present, and
+       `null` otherwise.
+
+  15.  If |port A| is `null`, append ":" and |port B| to |source| if it is
+       not `null`.
 
   16.  If |port A| is not `null`:
 
        1.  If |port B| is `null`, append ":" and |port A| to |source|.
            Continue to the next step in the main algorithm.
 
-       2.  If |A| doesn't have a <a for="source expression">wildcard port</a> 
-           and |more secure scheme B| is `false`, append ":" and |port A| 
+       2.  If |A| doesn't have a <a for="source expression">wildcard port</a>
+           and |more secure scheme B| is `false`, append ":" and |port A|
            to |source|.
-       
+
        3.  Otherwise, append ":" and |port B| to |source|.
 
-  17.  Let |path A| be |A|'s <a grammar>`path-part`</a>, if present, and 
-      `null` otherwise.
-      
-  18.  Let |path B| be |B|'s <a grammar>`path-part`</a>, if present, and 
+  17.  Let |path A| be |A|'s <a grammar>`path-part`</a>, if present, and
       `null` otherwise.
 
-  19.  If |path A| is `null`, append |path B| to |source| if it is not `null`. 
+  18.  Let |path B| be |B|'s <a grammar>`path-part`</a>, if present, and
+      `null` otherwise.
+
+  19.  If |path A| is `null`, append |path B| to |source| if it is not `null`.
 
   20.  If |path A| is not `null`:
 
-       1.  If |path B| is `null`, append |path A| to |source|.
-           Continue to the next step in the main algorithm.
+       1.  If |path B| is `null`, return the result of appending |path A| to |source|.
 
-       2.  If the result of executing [[csp3#match-paths]] on |path A| and 
-           |path B| is "`Does Not Match`", append |path A| to |source|.
-       
+       2.  If |path A| <a>`path-part` matches</a> |path B|, append |path A| to |source|.
+
        3.  Otherwise, append |path B| to |source|.
 
   21.  Return |source|.
@@ -1286,74 +1276,78 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
   1.  If |origin| is an <a>opaque origin</a>, return the empty string.
 
-  2.  Return the  <a lt="ascii serialization of an origin">ASCII 
+  2.  Return the  <a lt="ascii serialization of an origin">ASCII
       serialization</a> of |origin|.
 
   <h4 id="subsume-source-expressions" algorithm>
     Does `source expression` |A| subsume `source expression` |B|?
   </h4>
 
-  Given two <a>source expressions</a> |A| and |B|, this algorithm returns 
+  Given two <a>source expressions</a> |A| and |B|, this algorithm returns
   "`Subsumes`" if |A| <a for="policy">subsumes</a> |B|, and returns
   "`Does Not Subsume`" otherwise.
 
   1.  Assert: Neither |A| nor |B| match the <a grammar>`keyword-source`</a>
       grammar.
 
-  2.  If both |A| and |B| match either <a grammar>`host-source`</a> or 
+  2.  If both |A| and |B| match either <a grammar>`host-source`</a> or
       <a grammar>`scheme-source`</a> grammar:
 
-      1.  If [[csp3#match-schemes]] returns "`Does Not Match`" given |A|'s 
-          <a grammar>`scheme-part`</a> (or `null` if |A| does not contain a 
-          <a grammar>`scheme-part`</a>) and |B|'s <a grammar>`scheme-part`</a> 
-          (or `null` if |B| does not contain a <a grammar>`scheme-part`</a>), 
+      1.  If [[csp3#match-schemes]] returns "`Does Not Match`" given |A|'s
+          <a grammar>`scheme-part`</a> (or `null` if |A| does not contain a
+          <a grammar>`scheme-part`</a>) and |B|'s <a grammar>`scheme-part`</a>
+          (or `null` if |B| does not contain a <a grammar>`scheme-part`</a>),
           return "`Does Not Subsume`".
 
       2.  If |A| or |B| matches the <a grammar>`scheme-source`</a> grammar:
 
-          1.  If |A| matches the <a grammar>`scheme-source`</a> grammar, return 
+          1.  If |A| matches the <a grammar>`scheme-source`</a> grammar, return
               "`Subsumes`". Otherwise, return "`Does Not Subsume`".
 
       3.  If |B| has a `wildcard host`:
 
           1.  If |A| doesn't have a `wildcard host`, return "`Does not Subsume`".
 
-          2.  Let |remaining host B| be the result of removing the leading 
+          2.  Let |remaining host B| be the result of removing the leading
               ("*.") from |B|'s <a grammar>`host-part`</a>.
 
-          3.  If [[csp3#match-hosts]] returns "`Does Not Match`" given |A|'s 
-              <a grammar>`host-part`</a> and |remaining host B|, return 
+          3.  If [[csp3#match-hosts]] returns "`Does Not Match`" given |A|'s
+              <a grammar>`host-part`</a> and |remaining host B|, return
               "`Does Not Subsume`".
 
-      3.  If |B| doesn't have a `wildcard host` and [[csp3#match-hosts]] returns 
-          "`Does Not Match`" given |A|'s  <a grammar>`host-part`</a> and |B|'s 
+      3.  If |B| doesn't have a `wildcard host` and [[csp3#match-hosts]] returns
+          "`Does Not Match`" given |A|'s  <a grammar>`host-part`</a> and |B|'s
           <a grammar>`host-part`</a>, return "`Does Not Subsume`".
 
-      4.  If |A| has a `wildcard port` but |B| doesn't have a `wildcard port`, 
+      4.  If |A| has a `wildcard port` but |B| doesn't have a `wildcard port`,
           return "`Does Not Subsume`".
 
       5.  If |A| doesn't have a `wildcard port` and [[csp3#match-ports]] returns
-          "`Does Not Match`" given |A|'s <a grammar>`port-part`</a> 
+          "`Does Not Match`" given |A|'s <a grammar>`port-part`</a>
           (or `null` if |A| does not contain a <a grammar>`port-part`</a>)
-          and |B|'s <a grammar>`port-part`</a> (or `null` if |B| does not 
+          and |B|'s <a grammar>`port-part`</a> (or `null` if |B| does not
           contain a <a grammar>`port-part`</a>), return "`Does Not Subsume`".
 
-      6.  If [[csp3#match-paths]] returns "`Does Not Match`" given |A|'s 
-          <a grammar>`path-part`</a> (or `null` if |A| does not contain a 
-          <a grammar>`path-part`</a>) and |B|'s <a grammar>`path-part`</a> (or 
-          `null` if |B| does not contain a <a grammar>`path-part`</a>), return 
+      6.  If [[csp3#match-paths]] returns "`Does Not Match`" given |A|'s
+          <a grammar>`path-part`</a> (or `null` if |A| does not contain a
+          <a grammar>`path-part`</a>) and |B|'s <a grammar>`path-part`</a> (or
+          `null` if |B| does not contain a <a grammar>`path-part`</a>), return
           "`Does Not Subsume`".
 
       7.  Return "`Subsumes`".
 
   3.  If both |A| and |B| match the <a grammar>`hash-source`</a> grammar:
 
-      1.  If |A| is a <a>case-sensitive</a> match to |B|, return "`Subsumes`". 
+      1.  If |A| is a <a>case-sensitive</a> match to |B|, return "`Subsumes`".
           Otherwise, return "`Does Not Subsume`".
 
   4.  If both |A| and |B| match the <a grammar>`nonce-source`</a> grammar:
 
-      1.  ISSUE: TODO.
+      1.  Return "`Subsumes`".
+
+      Note: Nonce source matching is value-agnostic to prevent a malicious
+      embedder from brute forcing the nonce value with an attack as
+      described in [[#policy-leakage]]
 
   5.  Return "`Does Not Subsume`".
 
@@ -1372,7 +1366,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
   <a>source expression</a> if the expression is <a for="list">contained</a> by
   its <a for="directive">value</a>.
 
-  1.  If |directive A| is not an <a>ASCII case-insensitive</a> match to 
+  1.  If |directive A| is not an <a>ASCII case-insensitive</a> match to
       |directive B|, return "`Does Not Subsume`".
 
   2.  If |A| is empty or |B| is `none`, return "`Subsumes`".
@@ -1394,12 +1388,12 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
           "`unsafe-hashed-attributes`" but |A| does not contain it, return
           "`Does Not Subsume`".
 
-      3.  Let |type B| be "`script`" if |directive B| is "`script-src`" and 
-          "`style`" otherwise. Similarly, let |type A| be "`script`" if 
+      3.  Let |type B| be "`script`" if |directive B| is "`script-src`" and
+          "`style`" otherwise. Similarly, let |type A| be "`script`" if
           |directive A| is "`script-src`" and "`style`" otherwise.
 
-      4.  If [[csp3#allow-all-inline]] returns "`Allows`" given |B| with 
-          |type B|, but returns "`Does Not Allow`" given |A| with 
+      4.  If [[csp3#allow-all-inline]] returns "`Allows`" given |B| with
+          |type B|, but returns "`Does Not Allow`" given |A| with
           |type A|, return "`Does Not Subsume`".
 
   6.  Let |list A| and |list B| be empty lists.
@@ -1413,14 +1407,14 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
            append to |list A| the following <a grammar>`scheme-source`</a>
            expressions: "`ftp:`", "`http:`", "`https:`", "`ws:`", "`wss:`",
            and |origin A|'s <a for="origin">scheme</a>.
-           
-           1.  If |directive A| is either "`img-src`" or "`media-src", append a 
+
+           1.  If |directive A| is either "`img-src`" or "`media-src", append a
                <a grammar>`scheme-source`</a> expression "`data:`" to |list A|.
-           
-           2.  If |directive A| is "`media-src", append a 
+
+           2.  If |directive A| is "`media-src", append a
                <a grammar>`scheme-source`</a> expression "`blob:`" to |list A|.
 
-           3.  <a for="iteration">Continue</a> to the next |expression A|. 
+           3.  <a for="iteration">Continue</a> to the next |expression A|.
 
        3.  If |expression A| does not match <a grammar>`keyword-source`</a>
            grammar, append |expression A| to |list A|.
@@ -1435,13 +1429,13 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
           expressions: "`ftp:`", "`http:`", "`https:`", "`ws:`", "`wss:`",
           and |origin B|'s <a for="origin">scheme</a>.
 
-          1.  If |directive B| is either "`img-src`" or "`media-src", append a 
+          1.  If |directive B| is either "`img-src`" or "`media-src", append a
               <a grammar>`scheme-source`</a> expression "`data:`" to |list B|.
-           
-          2.  If |directive B| is "`media-src", append a 
+
+          2.  If |directive B| is "`media-src", append a
               <a grammar>`scheme-source`</a> expression "`blob:`" to |list B|.
 
-          3.  <a for="iteration">Continue</a> to the next |expression B|. 
+          3.  <a for="iteration">Continue</a> to the next |expression B|.
 
       3.  If |expression B| does not match <a grammar>`keyword-source`</a>
           grammar, append |expression B| to |list B|.
@@ -1477,6 +1471,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
       A = "http://example.com 'sha256-xzi4zkCjuC8'"
       B = "http://example.com"
     </pre>
+
     Since |B| does not allow <a grammar>`hash-source`</a> expressions, but its
     value is found in |A|, |A| subsumes |B|. It is, however, not true that |A|
     <a for="policy">subsumes</a> |B|.
@@ -1485,6 +1480,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
       A = "https://example.com 'sha256-xzi4zkCjuC8'"
       B = "http://example.com"
     </pre>
+
     In this case, |A| does not subsume |B| since "https://example.com" does
     not <a>subsume</a> "http://example.com".
 
@@ -1492,13 +1488,15 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
       A = "http://example.com 'sha256-xzi4zkCjuC8'"
       B = "http://example.com 'unsafe-inline'"
     </pre>
-    Since |B| <a for="source list">allows all inline behavior</a>, 
-    but |A| does not, |A| doesn't <a>subsume</a> |B|. 
+
+    Since |B| <a for="source list">allows all inline behavior</a>,
+    but |A| does not, |A| doesn't <a>subsume</a> |B|.
 
     <pre>
       A = "http://example.com 'sha256-xzi4zkCjuC8' 'strict-dynamic'"
       B = "http://example.com 'unsafe-inline' 'strict-dynamic'"
     </pre>
+
     Neither |A| nor |B| <a for="source list">allows all inline behavior</a>.
     In this case, |A| <a for="policy">subsumes</a> |B|.
   </div>
@@ -1551,9 +1549,9 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
       11.  Otherwise:
 
-            1.  If the result of executing [[#subsume-source-list]] is 
-                "`Does Not Subsume`" given |effective directive A|, |origin A|, 
-                |directive name|, |effective directive B|, |origin B|, and 
+            1.  If the result of executing [[#subsume-source-list]] is
+                "`Does Not Subsume`" given |effective directive A|, |origin A|,
+                |directive name|, |effective directive B|, |origin B|, and
                 |directive name|, return "`Does Not Subsume`".
 
     3.  Return "`Subsumes`".
@@ -1586,13 +1584,13 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
     6.  Return the result of executing [[#subsume-policy]] given
         |subsuming policy|, |subsuming origin|, |effective policy|, and
-        |origin|. 
+        |origin|.
   </ol>
 </section>
 
 <section>
   Security and Privacy Considerations {#security-and-privacy-considerations}
-  =================================== 
+  ===================================
 
   Policy Enforcement {#policy-enforcement}
   ------------------
@@ -1621,7 +1619,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
   -----------------
 
   This feature allows an embedder to send information to a third-party endpoint
-  via the <a http-header>`Embedding-CSP`</a> HTTP header. This doesn't seem to
+  via the <a http-header>`Sec-Required-CSP`</a> HTTP header. This doesn't seem to
   expose any information that couldn't be tunneled in the HTTP request itself
   (via GET parameters, etc), and embedders remain in control over the endpoints
   to which such requests may be made by enforcing a Content Security Policy with
@@ -1668,14 +1666,14 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
      Content-Security-Policy: script-src 'self'
     </pre>
 
-    Then this <{iframe}> element will be loaded. 
+    Then this <{iframe}> element will be loaded.
 
     If, however, the returned CSP is:
     <pre>
      Content-Security-Policy: script-src "https://example.com/"
     </pre>
 
-    Then this <{iframe}> element will not be loaded. 
+    Then this <{iframe}> element will not be loaded.
 </section>
 
 <section>
@@ -1684,10 +1682,10 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
 
   The permanent message header field registry should be updated
   with the following registration for the
-  <a http-header>`Embedding-CSP`</a> header: [[!RFC3864]]
+  <a http-header>`Sec-Required-CSP`</a> header: [[!RFC3864]]
 
   :   Header field name
-  ::  Embedding-CSP
+  ::  Sec-Required-CSP
   :   Applicable protocol
   ::  http
   :   Status
@@ -1695,7 +1693,7 @@ spec: CSP; urlPrefix: https://w3c.github.io/webappsec-csp/
   :   Author/Change controller
   ::  W3C
   :   Specification document
-  ::  This specification (See [[#embedding-csp-header]])
+  ::  This specification (See [[#required-csp-header]])
 
   Likewise, the registry should be updated with the following registration
   for the <a http-header>`Allow-CSP-From`</a> header: [[!RFC3864]]

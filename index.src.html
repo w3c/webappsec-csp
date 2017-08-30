@@ -16,6 +16,7 @@ Indent: 2
 Version History: https://github.com/w3c/webappsec-csp/commits/master/index.src.html
 Boilerplate: omit conformance, omit feedback-header
 !Participate: <a href="https://github.com/w3c/webappsec-csp/issues/new">File an issue</a> (<a href="https://github.com/w3c/webappsec-csp/issues">open issues</a>)
+!Tests: <a href=https://github.com/w3c/web-platform-tests/tree/master/content-security-policy>web-platform-tests content-security-policy/</a> (<a href=https://github.com/w3c/web-platform-tests/labels/content-security-policy>ongoing work</a>)
 Markup Shorthands: css off, markdown on
 At Risk: The [[#is-element-nonceable]] algorithm.
 </pre>
@@ -58,10 +59,11 @@ spec:css-cascade
 spec:infra;
   type:dfn;
     text:string; for: /
-    text:list; for: / 
-    text:set; for: / 
+    text:list; for: /
+    text:set; for: /
     text:append; for: set
     text:empty; for: set
+    text:strictly split a string
 </pre>
 <pre class="anchors">
 spec: RFC6454; urlPrefix: https://tools.ietf.org/html/rfc6454
@@ -96,12 +98,12 @@ spec: RFC3986; urlPrefix: https://tools.ietf.org/html/rfc3986
 spec: RFC4648; urlPrefix: https://tools.ietf.org/html/rfc4648
   type: dfn
     text: base64 encoding; url: section-4
+    text: base64url encoding; url: section-5
 spec: RFC5234; urlPrefix: https://tools.ietf.org/html/rfc5234
   type: grammar
     text: ALPHA; url: appendix-B.1
     text: DIGIT; url: appendix-B.1
     text: VCHAR; url: appendix-B.1
-    text: WSP; url: appendix-B.1
 spec: RFC5890; urlPrefix: https://tools.ietf.org/html/rfc5890
   type: dfn
     text: label; url: section-2.2
@@ -128,6 +130,11 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     text: SHA-256; url: #
     text: SHA-384; url: #
     text: SHA-512; url: #
+
+spec: HTML; urlPrefix: https://html.spec.whatwg.org/
+  type: dfn
+    for: WorkerGlobalScope
+      text: owner set; url: concept-WorkerGlobalScope-owner-set
 </pre>
 <pre class="biblio">
 {
@@ -205,6 +212,9 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     content: "Work In Progress: ";
     display: block;
     color: #827017;
+  }
+  section.wip {
+    padding-left: 2em;
   }
 
 </style>
@@ -343,11 +353,19 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       metadata which is listed in the current policy. Details in
       [[#external-hash]].
 
-  11. The <a>`disown-opener`</a> directive ensures that a resource can't be opened
-      in such a way as to give another browsing context control over its contents.
+  11. <div class="wip">
+        The <a>`disown-opener`</a> directive ensures that a resource can't be opened
+        in such a way as to give another browsing context control over its contents.
 
-  12. The <a>`navigation-to`</a> directive gives a resource control over the endpoints
-      to which it can initiate navigation.
+        ISSUE(w3c/webappsec-csp#194): `disown-opener` is a work in progress.
+      </div>
+
+  12. <div class="wip">
+        The <a>`navigation-to`</a> directive gives a resource control over the endpoints
+        to which it can initiate navigation.
+
+        ISSUE(w3c/webappsec-csp#125): `navigation-to` is a work in progress.
+      </div>
 
   13. Reports generated for inline violations will contain a <a for="violation">sample</a>
       attribute if the relevant directive contains the <a grammar>`'report-sample'`</a>
@@ -379,6 +397,15 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   Each policy has an associated <dfn for="policy" export>disposition</dfn>, which is either
   "`enforce`" or "`report`".
 
+  Each policy has an associated <dfn for="policy" export>source</dfn>, which is either "`header`"
+  or "`meta`".
+
+  Multiple [=/policies=] can be applied to a single resource, and are collected into a [=list=] of
+  [=/policies=] known as a <dfn export>CSP list</dfn>.
+
+  A [=/CSP list=] <dfn export>contains a header-delivered Content Security Policy</dfn> if it
+  [=list/contains=] a [=/policy=] whose [=policy/source=] is "`header`".
+
   A <dfn export>serialized CSP</dfn> is an <a>ASCII string</a> consisting of a semicolon-delimited
   series of <a>serialized directives</a>, adhering to the following ABNF grammar [[!RFC5234]]:
 
@@ -387,73 +414,83 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
                         ; <a>OWS</a> is defined in section 3.2.3 of RFC 7230
   </pre>
 
-  <h4 id="parse-serialized-policy" dfn lt="parse a serialized CSP" algorithm>
-    Parse a |serialized CSP| as |disposition|
+  A <dfn export>serialized CSP list</dfn> is an [=ASCII string=] consisting of a comma-delimited
+  series of [=serialized CSPs=], adhering to the following ABNF grammar [[!RFC5234]]:
+
+  <pre dfn-type="grammar" link-type="grammar">
+    <dfn>serialized-policy-list</dfn> = 1#<a>serialized-policy</a>
+                        ; The '#' rule is defined in section 7 of RFC 7230
+  </pre>
+
+  <h4 id="parse-serialized-policy" algorithm>
+    Parse a serialized CSP
   </h4>
 
-  Given a <a>serialized CSP</a> (|serialized CSP|), and a
-  <a for="policy">disposition</a> (|disposition|), this algorithm will return a
-  <a for="/">policy</a> object. If the string cannot be parsed, the resulting
-  <a for="/">policy</a>'s <a>directive set</a> will be empty.
+  To <dfn abstract-op>parse a serialized CSP</dfn>, given a [=serialized CSP=] (|serialized|), a
+  [=policy/source=] (|source|), and a [=policy/disposition=] (|disposition|), execute the
+  following steps.
 
-  1.  Let |policy| be a new <a for="/">policy</a> with an empty
-      <a for="policy">directive set</a>, and a <a for="policy">disposition</a>
-      of |disposition|.
+  This algorithm returns a [=Content Security Policy object=]. If |serialized| could not be
+  parsed, the object's [=policy/directive set=] will be empty.
 
-  2.  For each |token| returned by
-      <a lt="strictly split a string">strictly splitting</a> |serialized
-      CSP| on the U+003B SEMICOLON character (`;`):
+  <ol class="algorithm">
+    1.  Let |policy| be a new [=/policy=] with an empty [=policy/directive set=], a [=policy/source=]
+        of |source|, and a [=policy/disposition=] of |disposition|.
 
-      1.  <a>Strip leading and trailing ASCII whitespace</a> from |token|.
+    2.  For each |token| returned by [=strictly split a string|strictly splitting=] |serialized| on
+        the U+003B SEMICOLON character (`;`):
 
-      2.  If |token| is an empty string, skip the remaining substeps
-          and continue to the next item.
+        1.  [=Strip leading and trailing ASCII whitespace=] from |token|.
 
-      3.  Let |directive name| be the result of
-          <a lt="collect a sequence of code points">collecting a sequence of
-          code points</a> from |token| which are not <a>ASCII whitespace</a>.
+        2.  If |token| is an empty string, [=iteration/continue=].
 
-      4.  If |policy|'s <a>directive set</a> contains a
-          <a>directive</a> whose <a for="directive">name</a> is |directive
-          name|, <a for="iteration">continue</a>.
+        3.  Let |directive name| be the result of [=collecting a sequence of code points=] from
+            |token| which are not [=ASCII whitespace=].
 
-          The user agent SHOULD notify developers that a directive was ignored.
-          A console warning might be appropriate, for example.
+        4.  If |policy|'s [=policy/directive set=] contains a [=directive=] whose [=directive/name=]
+            is |directive name|, [=iteration/continue=].
 
-      5.  Let |directive value| be the result of
-          <a lt="split a string on ASCII whitespace">splitting |token| on
-          ASCII whitespace</a>.
+            In this case, the user agent SHOULD notify developers that a duplicate directive was
+            ignored. A console warning might be appropriate, for example.
 
-      6.  Let |directive| be a new <a>directive</a> whose
-          <a for="directive">name</a> is |directive name|, and
-          <a for="directive">value</a> is |directive value|.
+        5.  Let |directive value| be the result of
+            <a lt="split a string on ASCII whitespace">splitting |token| on
+            ASCII whitespace</a>.
 
-      7.  <a for="set">Append</a> |directive| to |policy|'s <a>directive set</a>.
+        6.  Let |directive| be a new [=directive=] whose [=directive/name=] is |directive name|, and
+            [=directive/value=] is |directive value|.
 
-  3.  Return |policy|.
+        7.  [=set/append|Append=] |directive| to |policy|'s [=policy/directive set=].
+
+    3.  Return |policy|.
+  </ol>
 
   <h4 id="parse-serialized-policy-list" algorithm>
-    Parse a serialized CSP |list| as |disposition|
+    Parse a serialized CSP list
   </h4>
 
-  Given a <a>string</a> which contains a comma-delimited series of <a>serialized CSP</a> strings
-  (|list|) and a <a for="policy">disposition</a> (|disposition|), the following algorithm will
-  return a <a>list</a> of <a for="/">policy</a> objects:
+  To <dfn abstract-op>parse a serialized CSP list</dfn>, given a [=serialized CSP list=] (|list|), a
+  [=policy/source=] (|source|), and a [=policy/disposition=] (|disposition|), execute the following
+  steps.
+ 
+  This algorithm returns a [=list=] of [=Content Security Policy objects=]. If |list| cannot be
+  parsed, the returned list will be empty.
 
-  1.  Let |policies| be an empty <a>list</a>.
+  <ol class="algorithm">
+    1.  Let |policies| be an empty [=list=].
 
-  2.  For each |token| returned by
-      <a lt="split a string on commas">splitting |list| on commas</a>:
+    2.  For each |token| returned by <a lt="split a string on commas">splitting |list| on commas</a>:
 
-      1.  Let |policy| be the result of executing
-          [[#parse-serialized-policy]] on |token| with |disposition|.
+        1.  Let |policy| be the result of <a abstract-op lt="parse a serialized CSP">parsing</a>
+            |token|, with a [=policy/source=] of |source|, and [=policy/disposition=] of
+            |disposition|.
 
-      2.  If |policy|'s <a>directive set</a> is empty, skip the
-          remaining substeps, and continue to the next item.
+        2.  If |policy|'s [=policy/directive set=] is empty, [=iteration/continue=].
 
-      3.  <a for="list">Append</a> |policy| to |policies|.
+        3.  [=list/append|Append=] |policy| to |policies|.
 
-  3.  Return |policies|.
+    3.  Return |policies|.
+  </ol>
 
   <h3 id="framework-directives">Directives</h3>
 
@@ -594,6 +631,14 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   properties of IP addresses are suspect, and authors ought to prefer hostnames
   whenever possible.
 
+  Note: The <a grammar>base64-value</a> grammar allows both [=base64 encoding|base64=] and
+  [=base64url encoding|base64url=] encoding. These encodings are treated as equivalant when
+  processing <a grammar>hash-source</a> values. Nonces, however, are strict string matches:
+  we use the <a grammar>base64-value</a> grammar to limit the characters available, and
+  reduce the complexity for the server-side operator (encodings, etc), but the user agent
+  doesn't actually care about any underlying value, nor does it do any decoding of the
+  <a grammar>nonce-source</a> value.
+
   <h3 id="framework-violation">Violations</h3>
 
   A <dfn export>violation</dfn> represents an action or resource which goes against the
@@ -677,6 +722,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
       ISSUE: Is this kind of thing specified anywhere? I didn't see anything
       that looked useful in [[ECMA262]].
+
+      Note: User agents need to ensure that the [=violation/source file=] is the URL requested by
+      the page, pre-redirects. If that's not possible, user agents need to strip the URL down to an
+      origin to avoid unintentional leakage.
 
   3.  If |global| is a {{Window}} object, set |violation|'s
       <a for="violation">referrer</a> to |global|'s {{Window/document}}'s
@@ -901,20 +950,24 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   <a for="response">header list</a> for <a>serialized CSP</a> values, and
   populates its <a for="response">CSP list</a> accordingly:
 
-  1.  Set |response|'s <a for="response">CSP list</a> to the
-      empty list.
+  <ol class="algorithm">
+    1.  Set |response|'s [=response/CSP list=] to the empty list.
 
-  2.  Let |policies| be the result of executing [[#parse-serialized-policy-list]] on the result of
-      <a>extracting header list values</a> given `Content-Security-Policy` and |response|'s
-      <a for="response">header list</a>, with a disposition of "`enforce`".
+    2.  Let |policies| be the result of <a abstract-op lt="parse a serialized CSP list">parsing</a>
+        the result of [=extracting header list values=] given `Content-Security-Policy` and
+        |response|'s [=response/header list=], with a [=policy/source=] of "`header`", and a
+        [=policy/disposition=] of "`enforce`".
 
-  3.  Append to |policies| the result of executing [[#parse-serialized-policy-list]] on the result
-      of <a>extracting header list values</a> given `Content-Security-Policy-Report-Only` and
-      |response|'s <a for="response">header list</a>, with a disposition of "`report`".
+    3.  Append to |policies| the result of
+        <a abstract-op lt="parse a serialized CSP list">parsing</a> the result of
+        [=extracting header list values=] given `Content-Security-Policy-Report-Only` and
+        |response|'s [=response/header list=], with a [=policy/source=] of "`header`", and a
+        [=policy/disposition=] of "`report`".
 
-  4.  For each |policy| in |policies|:
+    4.  For each |policy| in |policies|:
 
-      1.  Insert |policy| into |response|'s <a for="response">CSP list</a>.
+        1.  Insert |policy| into |response|'s <a for="response">CSP list</a>.
+  </ol>
 
   <h4 id="report-for-request" algorithm>
     Report Content Security Policy violations for |request|
@@ -1149,15 +1202,13 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   1.  If |response|'s <a for="response">url</a>'s <a for="url">scheme</a> is a
       <a>local scheme</a>, or if |global| is a {{DedicatedWorkerGlobalScope}}:
 
-      1.  Let |documents| be an empty list.
+      1.  Let |owners| be an empty list.
 
-      2.  Add each of |global|'s
-          <a lt="the worker's documents">document</a>s to |documents|.
+      2.  Add each of the items in |global|'s [=WorkerGlobalScope/owner set=] to |owners|.
 
-      4.  For each |document| in |documents|:
+      4.  For each |owner| in |owners|:
 
-          1.  For each |policy| in |document|'s <a for="/">global
-              object</a>'s <a for="global object">CSP list</a>:
+          1.  For each |policy| in |owner|'s <a for="global object">CSP list</a>:
 
               1.  Insert an alias to |policy| in |global|'s
                   <a for="global object">CSP list</a>.
@@ -1334,35 +1385,52 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   to determine whether such compilation ought to be blocked.
 
   <h4 id="can-compile-strings" algorithm dfn>
-    EnsureCSPDoesNotBlockStringCompilation(|callerRealm|, |calleeRealm|)
+    EnsureCSPDoesNotBlockStringCompilation(|callerRealm|, |calleeRealm|, |source|)
   </h4>
 
-  Given two <a>realms</a> (|callerRealm| and |calleeRealm|), this algorithm
-  returns normally if string compilation is allowed, and throws an "`EvalError`"
-  if not:
+  Given two <a>realms</a> (|callerRealm| and |calleeRealm|), and a string (|source|), this algorithm
+  returns normally if string compilation is allowed, and throws an "`EvalError`" if not:
 
-  1.  Let |globals| be a list containing |callerRealm|'s
-      <a for="Realm">global object</a> and |calleeRealm|'s
-      <a for="Realm">global object</a>.
+  1.  Let |globals| be a list containing |callerRealm|'s [=Realm/global object=] and |calleeRealm|'s
+      [=Realm/global object=].
 
   2.  For each |global| in |globals|:
 
-      1.  For each |policy| in |global|'s <a for="global object">CSP list</a>:
+      1.  Let |result| be "`Allowed`".
 
-          1.  Let |source-list| be null.
+      2.  For each |policy| in |global|'s [=global object/CSP list=]:
 
-          2.  If |policy| contains a <a>directive</a> whose
-              <a for="directive">name</a> is "`script-src`", then set |source-list|
-              to that <a>directive</a>'s <a for="directive">value</a>.
+          1.  Let |source-list| be `null`.
 
-              Otherwise if |policy| contains a <a>directive</a> whose
-              <a for="directive">name</a> is "`default-src`", then set |source-list|
-              to that directive's <a for="directive">value</a>.
+          2.  If |policy| contains a [=directive=] whose [=directive/name=] is "`script-src`", then
+              set |source-list| to that [=directive=]'s [=directive/value=].
 
-          3.  If |source-list| is non-null, and does not contain a <a>source
-              expression</a> which is an <a>ASCII case-insensitive</a> match for the
-              string "<a grammar>`'unsafe-eval'`</a>", then throw an `EvalError`
-              exception.
+              Otherwise if |policy| contains a [=directive=] whose [=directive/name=] is
+              "`default-src`", then set |source-list| to that directive's [=directive/value=].
+
+          3.  If |source-list| is non-`null`, and does not contain a [=source expression=] which is
+              an [=ASCII case-insensitive=] match for the string "<a grammar>`'unsafe-eval'`</a>",
+              then:
+              
+              1.  Let |violation| be the result of executing [[#create-violation-for-global]] on
+                  |global|, |policy|, and "`script-src`".
+
+              2.  Set |violation|'s [=violation/resource=] to "`inline`".
+
+              3.  If |source-list| [=list/contains=] the expression
+                  "<a grammar>`'report-sample'`</a>", then set |violation|'s [=violation/sample=] to
+                  the substring of |source| containing its first 40 characters.
+
+              4.  Execute [[#report-violation]] on |violation|.
+
+              5.  If |policy|'s [=policy/disposition=] is "`enforce`", then set |result| to
+                  "`Blocked`".
+
+      3.  If |result| is "`Blocked`", throw an `EvalError` exception.
+
+  ISSUE(tc39/ecma262#938): {{HostEnsureCanCompileStrings()}} does not include the string which is
+  going to be compiled as a parameter. We'll also need to update HTML to pipe that value through
+  to CSP.
 </section>
 
 <!-- Big Text: Reporting -->
@@ -1456,7 +1524,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
           the name, this field will contain samples for non-script violations, like stylesheets. The
           data contained in a {{SecurityPolicyViolationEvent}} object, and in reports generated via
           the new <a>`report-to`</a> directive, is named in a more encompassing fashion:
-          {{SecurityPolicyViolationEvent/sample}}. 
+          {{SecurityPolicyViolationEvent/sample}}.
 
   2.  If |violation|'s <a for="violation">source file</a> is not `null`:
 
@@ -1479,10 +1547,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     Report a |violation|
   </h3>
 
-  Given a <a>violation</a> (|violation|), this algorithm reports it to the
-  endpoint specified in |violation|'s <a for="violation">policy</a>, and
-  fires a {{SecurityPolicyViolationEvent}} at |violation|'s
-  <a for="violation">global object</a>.
+  Given a <a>violation</a> (|violation|), this algorithm reports it to the endpoint specified in
+  |violation|'s <a for="violation">policy</a>, and fires a {{SecurityPolicyViolationEvent}} at
+  |violation|'s [=violation/element=], or at |violation|'s <a for="violation">global object</a>
+  as described below:
 
   1.  Let |global| be |violation|'s <a for="violation">global object</a>.
 
@@ -1835,7 +1903,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
   2.  If |request|'s <a for="request">initiator</a> is "`fetch`", or its
       <a for="request">type</a> is "" and <a for="request">destination</a> is
-      "`subresource`":
+      "":
 
       1.  If the result of executing [[#match-request-to-source-list]] on
           |request| and this directive's <a for="directive">value</a> is
@@ -3047,26 +3115,28 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       <a for="directive">value</a> as the input, and |context|'s <a>forced
       sandboxing flag set</a> as the output.
 
-  <h4 id="directive-disown-opener">`disown-opener`</h4>
+  <section class="wip">
+    <h4 id="directive-disown-opener">`disown-opener`</h4>
 
-  The <dfn export>`disown-opener`</dfn> directive ensures that a resource
-  will <a>disown its opener</a> when navigated to. The directive's syntax is
-  described by the following ABNF grammar:
+    The <dfn export>`disown-opener`</dfn> directive ensures that a resource
+    will <a>disown its opener</a> when navigated to. The directive's syntax is
+    described by the following ABNF grammar:
 
-  <pre dfn-type="grammar" link-type="grammar">
-    directive-name  = "disown-opener"
-    directive-value = ""
-  </pre>
+    <pre dfn-type="grammar" link-type="grammar">
+      directive-name  = "disown-opener"
+      directive-value = ""
+    </pre>
 
-  This directive has no reporting requirements; it will be ignored entirely when
-  delivered in a <a http-header>`Content-Security-Policy-Report-Only`</a> header, or within
-  a <{meta}> element.
+    This directive has no reporting requirements; it will be ignored entirely when
+    delivered in a <a http-header>`Content-Security-Policy-Report-Only`</a> header, or within
+    a <{meta}> element.
 
-  ISSUE: Not sure this is the right model. We need to ensure that we take care
-  of <a href="https://github.com/w3c/webappsec/issues/139">the inverse</a> as
-  well, and there might be a cleverer syntax that could encompass both a
-  document's opener, and a document's openees. `disown-openee` is weird.
-  Maybe `disown 'opener' 'openee'`? Do we need origin restrictions on either/both?
+    ISSUE: Not sure this is the right model. We need to ensure that we take care
+    of <a href="https://github.com/w3c/webappsec/issues/139">the inverse</a> as
+    well, and there might be a cleverer syntax that could encompass both a
+    document's opener, and a document's openees. `disown-openee` is weird.
+    Maybe `disown 'opener' 'openee'`? Do we need origin restrictions on either/both?
+  </section>
 
   <h5 algorithm id="disown-opener-init">
     `disown-opener` Initialization
@@ -3175,7 +3245,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
         1.  Set |current| to |parent|.
 
         2.  Let |origin| be the result of executing the <a>URL parser</a> on the
-            <a lt="unicode serialization of an origin">unicode serialization</a>
+            <a lt="ASCII serialization of an origin">ASCII serialization</a>
             of |parent|'s <a>active document</a>'s <a>relevant settings
             object</a>'s <a for="environment settings object">origin</a>.
 
@@ -3207,45 +3277,47 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   ISSUE(whatwg/html#1230): Spell this out in more detail as part of defining `X-Frame-Options`
   integration with the <a>process a navigate response</a> algorithm.
 
-  <h4 id="directive-navigation-to">`navigation-to`</h4>
+  <section class="wip">
+    <h4 id="directive-navigation-to">`navigation-to`</h4>
 
-  The <dfn export>navigation-to</dfn> directive restricts the {{URL}}s to which
-  a document can navigate by any means (<{a}>, <{form}>, `window.location`,
-  `window.open`, etc.). The directive's syntax is described by the following ABNF grammar:
+    The <dfn export>navigation-to</dfn> directive restricts the {{URL}}s to which
+    a document can navigate by any means (<{a}>, <{form}>, `window.location`,
+    `window.open`, etc.). The directive's syntax is described by the following ABNF grammar:
 
-  <pre dfn-type="grammar" link-type="grammar" class="abnf">
-    directive-name  = "navigation-to"
-    directive-value = <a>serialized-source-list</a>
-  </pre>
+    <pre dfn-type="grammar" link-type="grammar" class="abnf">
+      directive-name  = "navigation-to"
+      directive-value = <a>serialized-source-list</a>
+    </pre>
 
-  ISSUE: Should we use `ancestor-source-list` (basically, origins as opposed to
-  paths?) It doesn't appear that blocking navigation targets is any worse than
-  blocking any other request type with regard to leakage. Given the redirect
-  behavior, this devolves to an origin check in the presence of a malicious
-  party anyway...
+    ISSUE: Should we use `ancestor-source-list` (basically, origins as opposed to
+    paths?) It doesn't appear that blocking navigation targets is any worse than
+    blocking any other request type with regard to leakage. Given the redirect
+    behavior, this devolves to an origin check in the presence of a malicious
+    party anyway...
 
-  <h5 algorithm id="navigation-to-pre-navigate">
-    `navigation-to` Pre-Navigation Check
-  </h5>
+    <h5 algorithm id="navigation-to-pre-navigate">
+      `navigation-to` Pre-Navigation Check
+    </h5>
 
-  Given a <a for="/">request</a> (|request|), a string (|type|, "`form-submission` or
-  "`other`") and two <a>browsing contexts</a> (|source| and |target|), this
-  algorithm returns "`Blocked`" if the navigation violates the `navigation-to`
-  directive's constraints, and "`Allowed`" otherwise. This constitutes the
-  `navigation-to`' directive's <a>pre-navigation check</a>:
+    Given a <a for="/">request</a> (|request|), a string (|type|, "`form-submission` or
+    "`other`") and two <a>browsing contexts</a> (|source| and |target|), this
+    algorithm returns "`Blocked`" if the navigation violates the `navigation-to`
+    directive's constraints, and "`Allowed`" otherwise. This constitutes the
+    `navigation-to`' directive's <a>pre-navigation check</a>:
 
-  <ol class="algorithm">
-    1.  Assert: |source| and |target| are unused in this algorithm, as
-        `navigation-to` is concerned only with details of the outgoing request.
-        Likewise, |type| is unused, as all navigation requests are treated
-        identically.
+    <ol class="algorithm">
+      1.  Assert: |source| and |target| are unused in this algorithm, as
+          `navigation-to` is concerned only with details of the outgoing request.
+          Likewise, |type| is unused, as all navigation requests are treated
+          identically.
 
-    2.  If the result of executing [[#match-request-to-source-list]] on
-        |request| and this directive's <a for="directive">value</a> is
-        "`Does Not Match`", return "`Blocked`".
+      2.  If the result of executing [[#match-request-to-source-list]] on
+          |request| and this directive's <a for="directive">value</a> is
+          "`Does Not Match`", return "`Blocked`".
 
-    3.  Return "`Allowed`".
-  </ol>
+      3.  Return "`Allowed`".
+    </ol>
+  </section>
 
   <h3 id="directives-reporting">
     Reporting Directives
@@ -3444,10 +3516,8 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   2.  If |expression| matches the <a grammar>`scheme-source`</a> or
       <a grammar>`host-source`</a> grammar:
 
-      1.  If |expression| has a <a grammar>`scheme-part`</a> and 
-          [[#match-schemes]] returns "`Does Not Match`" given |expression|'s 
-          <a grammar>`scheme-part`</a> and |url|'s <a for="url">scheme</a>, 
-          return "`Does Not Match`".
+      1.  If |expression| has a <a grammar>`scheme-part`</a>, and it does not <a>`scheme-part`
+          match</a> |url|'s <a for="url">scheme</a>, return "`Does Not Match`".
 
       2.  If |expression| matches the <a grammar>`scheme-source`</a> grammar,
           return "`Matches`".
@@ -3456,33 +3526,33 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 
       1.  If |url|'s {{URL/host}} is `null`, return "`Does Not Match`".
 
-      2.  If |expression| does not have a <a grammar>`scheme-part`</a> and
-          and [[#match-schemes]] returns "`Does Not Match`" given `null` and 
-          |url|'s <a for="url">scheme</a>, return "`Does Not Match`".
+      2.  If |expression| does not have a <a grammar>`scheme-part`</a>, and |origin|'s
+          [=origin/scheme=] does not <a>`scheme-part` match</a> |url|'s <a for="url">scheme</a>,
+          return "`Does Not Match`".
 
           Note: As with <a grammar>`scheme-part`</a> above, we allow schemeless
           <a grammar>`host-source`</a> expressions to be upgraded from insecure
           schemes to secure schemes.
 
-      3.  If [[#match-hosts]] returns "`Does Not Match`" given |expression|'s 
-          <a grammar>`host-part`</a> and |url|'s {{URL/host}}, return "`Does 
-          Not Match`".
+      3.  If |expression|'s <a grammar>`host-part`</a> does not <a>`host-part` match</a> |url|'s
+          {{URL/host}}, return "`Does Not Match`".
 
-      4.  If [[#match-ports]] returns "`Does Not Match`" given |expression|'s 
-          <a grammar>`port-part`</a> (or `null` if |expression| does not 
-          contain a <a grammar>`port-part`</a>) and |url|'s {{URL/port}}, return 
-          "`Does Not Match`".
+      4.  Let |port-part| be |expression|'s <a grammar>`port-part`</a> if present, and `null`
+          otherwise.
+          
+      5.  If |port-part| does not <a>`port-part` match</a> |url|'s [=url/port=] and |url|'s
+          [=url/scheme=], return "`Does Not Match`".
 
-      5.  If |expression| contains a non-empty <a grammar>`path-part`</a>, and
+      6.  If |expression| contains a non-empty <a grammar>`path-part`</a>, and
           |redirect count| is 0, then:
 
           1.  Let |path| be the resulting of joining |url|'s <a for="url">path</a>
               on the U+002F SOLIDUS character (`/`).
 
-          2.  If [[#match-paths]] returns "`Does Not Match`" given |expression|'s 
-              <a grammar>`path-part`</a> and |path|, return "`Does Not Match`".
+          2.  If |expression|'s <a grammar>`path-part`</a> does not <a>`path-part` match</a> |path|,
+              return "`Does Not Match`".
 
-      6.  Return "`Matches`".
+      7.  Return "`Matches`".
 
   4.  If |expression| is an <a>ASCII case-insensitive</a> match for "`'self'`",
       return "`Matches`" if one or more of the following conditions is met:
@@ -3507,140 +3577,161 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   5.  Return "`Does Not Match`".
 
   <h5 id="match-schemes" algorithm>
-    Does `scheme-part` |A| match `scheme-part` |B|?
+    `scheme-part` matching
   </h5>
 
-  Given two <a>ASCII strings</a> (|A| and |B|), this algorithm returns "`Matches`" if |A| matches
-  |B|, and returns "`Does Not Match`" otherwise.
+  An <a>ASCII string</a> <dfn export lt="scheme-part match">`scheme-part` matches</dfn> another
+  <a>ASCII string</a> if a CSP source expression that contained the first as a
+  <a grammar>`scheme-part`</a> could potentially match a URL containing the latter as a
+  [=url/scheme=]. For example, we say that "http" <a>`scheme-part` matches</a> "https".
 
-  Note: The matching relation is assymetric. That is, |A| matching |B| does not
-  mean that |B| will match |A|.
+  Note: The matching relation is asymmetric. For example, the source expressions `https:` and
+  `https://example.com/` do not match the URL `http://example.com/`. We always allow a
+  secure upgrade from an explicitly insecure expression. `script-src http:` is treated as equivalent
+  to `script-src http: https:`, `script-src http://example.com` to `script-src http://example.com
+  https://example.com`, and `connect-src ws:` to `connect-src ws: wss:`.
 
-  1.  If one of the following is true, return "`Matches`":
+  More formally, two <a>ASCII strings</a> (|A| and |B|) are said to <a>`scheme-part` match</a> if the
+  following algorithm returns "`Matches`":
 
-      1.  |A| is an <a>ASCII case-insensitive</a> match for |B|.
+  <ol class="algorithm">
+    1.  If one of the following is true, return "`Matches`":
 
-      2.  |A| is an <a>ASCII case-insensitive</a> match for "`http`", and |B| 
-          is an <a>ASCII case-insensitive</a> match for "`https`".
+        1.  |A| is an <a>ASCII case-insensitive</a> match for |B|.
 
-      3.  |A| is an <a>ASCII case-insensitive</a> match for "`ws`", and |B| 
-          is an <a>ASCII case-insensitive</a> match for "`wss`", "`http`", or 
-          "`https`".
+        2.  |A| is an <a>ASCII case-insensitive</a> match for "`http`", and |B|
+            is an <a>ASCII case-insensitive</a> match for "`https`".
 
-      4.  |A| is an <a>ASCII case-insensitive</a> match for "`wss`", and |B| 
-          is an <a>ASCII case-insensitive</a> match for "`https`".
+        3.  |A| is an <a>ASCII case-insensitive</a> match for "`ws`", and |B|
+            is an <a>ASCII case-insensitive</a> match for "`wss`", "`http`", or
+            "`https`".
 
-  2.  Return "`Does Not Match`".
+        4.  |A| is an <a>ASCII case-insensitive</a> match for "`wss`", and |B|
+            is an <a>ASCII case-insensitive</a> match for "`https`".
 
-  Note: We always allow a secure upgrade from an explicitly insecure expression.
-  That is, script-src http: is treated as equivalent to script-src http: https:,
-  script-src http://example.com to script-src http://example.com 
-  https://example.com, and connect-src ws: to connect-src ws: wss:.
-
-  ISSUE: Add a reference to https://github.com/diracdeltas/sniffly.
+    2.  Return "`Does Not Match`".
+  </ol>
 
   <h5 id="match-hosts" algorithm>
-    Does `host-part` |A| match `host-part` |B|?
+    `host-part` matching
   </h5>
 
-  Given two <a>ASCII strings</a> (|A| and |B|), this algorithm returns "`Matches`" if |A| matches
-  |B|, and returns "`Does Not Match`" otherwise.
+  An <a>ASCII string</a> <dfn export lt="host-part match">`host-part` matches</dfn> another <a>ASCII
+  string</a> if a CSP source expression that contained the first as a <a grammar>`host-part`</a> could
+  potentially match a URL containing the latter as a [=url/host=]. For example, we say that
+  "www.example.com" <a>host-part matches</a> "www.example.com".
 
-  Note: The matching relation is assymetric. That is, |A| matching |B| does not 
-  mean that |B| will match |A|.
+  More formally, two <a>ASCII strings</a> (|A| and |B|) are said to <a>`host-part` match</a> if the
+  following algorithm returns "`Matches`":
 
-  1.  If the first character of |A| is an U+002A ASTERISK character (`*`):
+  Note: The matching relation is asymmetric. That is, |A| matching |B| does not
+  mean that |B| will match |A|. For example, `*.example.com` <a>`host-part` matches</a>
+  `www.example.com`, but `www.example.com` does not <a>`host-part` match</a> `*.example.com`.
 
-      1.  Let |remaining| be the result of removing the leading ("*") from |A|.
+  <ol class="algorithm">
+    1.  If the first character of |A| is an U+002A ASTERISK character (`*`):
 
-      2.  If |remaining| (including the leading U+002E FULL STOP character 
-          (`.`)) is an <a>ASCII case-insensitive</a> match for the rightmost 
-          characters of |B|, then return "`Matches`". Otherwise, return 
-          "`Does Not Match`".      
+        1.  Let |remaining| be the result of removing the leading ("*") from |A|.
 
-  2.  If |A| is not an <a>ASCII case-insensitive</a> match for |B|, return 
-      "`Does Not Match`".
+        2.  If |remaining| (including the leading U+002E FULL STOP character
+            (`.`)) is an <a>ASCII case-insensitive</a> match for the rightmost
+            characters of |B|, then return "`Matches`". Otherwise, return
+            "`Does Not Match`".
 
-  3.  If |A| matches the <a grammar>IPv4address</a> rule from [[!RFC3986]], and
-      is not "`127.0.0.1`"; or if |A| is an <a>IPv6 address</a>, return 
-      "`Does Not Match`".
+    2.  If |A| is not an <a>ASCII case-insensitive</a> match for |B|, return
+        "`Does Not Match`".
 
-      Note: A future version of this specification may allow literal IPv6
-      and IPv4 addresses, depending on usage and demand. Given the weak
-      security properties of IP addresses in relation to named hosts,
-      however, authors are encouraged to prefer the latter whenever
-      possible.
+    3.  If |A| matches the <a grammar>IPv4address</a> rule from [[!RFC3986]], and
+        is not "`127.0.0.1`"; or if |A| is an <a>IPv6 address</a>, return
+        "`Does Not Match`".
 
-  4.  Return "`Matches`".
+        Note: A future version of this specification may allow literal IPv6
+        and IPv4 addresses, depending on usage and demand. Given the weak
+        security properties of IP addresses in relation to named hosts,
+        however, authors are encouraged to prefer the latter whenever
+        possible.
+
+    4.  Return "`Matches`".
+  </ol>
 
   <h5 id="match-ports" algorithm>
-    Does |port A| match |port B| for |scheme B|?
+    `port-part` matching
   </h5>
 
-  Given three <a>ASCII strings</a> (|port A|, |port B|, and |scheme B|), this algorithm returns
-  "`Matches`" if |port A| matches |port B|, and returns "`Does Not Match`" otherwise.
+  An <a>ASCII string</a> (|port A|) <dfn export>`port-part` matches</dfn> two other <a>ASCII
+  strings</a> (|port B| and |scheme B|) if a CSP source expression that contained the first as a
+  <a grammar>`port-part`</a> could potentially match a URL containing the latter as [=url/port=]
+  and [=url/scheme=]. For example, "80" <a>`port-part` matches</a> matches "80"/"http".
 
-  Note: The matching relation is assymetric. That is, |port A| matching |port B| does not mean that
-  |port B| will match |port A|.
+  <ol class="algorithm">
+    1.  If |port A| is empty:
 
-  1.  If |port A| is empty:
+        1.  If |port B| is the <a>default port</a> for |scheme B|, return "`Matches`". Otherwise,
+            return "`Does Not Match`".
 
-      1.  If |port B| is the <a>default port</a> for |scheme B|, return 
-          "`Matches`". Otherwise, return "`Does Not Match`".
+    2.  If |port A| is equal to "*", return "`Matches`".
 
-  2.  If |port A| is equal to "*", return "`Matches`".
+    3.  If |port A| is a <a>case-sensitive</a> match for |port B|, return "`Matches`".
 
-  3.  If |port A| is a <a>case-sensitive</a> match for |port B|, return 
-      "`Matches`".
+    4.  If |port B| is empty:
 
-  4.  If |port B| is empty:
+        1.  If |port A| is the <a>default port</a> for |scheme B|, return "`Matches`". Otherwise,
+            return "`Does not Match`".
 
-      1.  If |port A| is the <a>default port</a> for |scheme B|, return 
-          "`Matches`". Otherwise, return "`Does not Match`".
-
-  5. Return "`Does Not Match`".
+    5. Return "`Does Not Match`".
+  </ol>
 
   <h5 id="match-paths" algorithm>
-    Does |path A| match |path B|?
+    `path-part` matching
   </h5>
 
-  Given two <a>ASCII strings</a> (|path A| and |path B|), this algorithm returns
-  "`Matches`" if |path A| matches |path B|, and returns "`Does Not Match`"
-  otherwise.
+  An <a>ASCII string</a> (|path A|) <dfn export lt="path-part match">`path-part` matches</dfn>
+  another <a>ASCII string</a> (|path B|) if a CSP source expression that contained the first as a
+  <a grammar>`path-part`</a> could potentially match a URL containing the latter as a [=url/path=].
+  For example, we say that "/subdirectory/" <a>`path-part` matches</a> "/subdirectory/file".
 
-  Note: The matching relation is assymetric. That is, |path A| matching |path B|
+  Note: The matching relation is asymmetric. That is, |path A| matching |path B|
   does not mean that |path B| will match |path A|.
 
-  1.  If |path A| is empty, return "`Matches`".
+  <ol class="algorithm">
+    1.  If |path A| is empty, return "`Matches`".
 
-  2.  If |path A| consists of one character that is equal to the U+002F SOLIDUS
-      character (`/`) and |path B| is empty, return "`Matches`".
+    2.  If |path A| consists of one character that is equal to the U+002F SOLIDUS
+        character (`/`) and |path B| is empty, return "`Matches`".
 
-  3.  Let |exact match| be `false` if the final character of |path A| is the U+002F 
-      SOLIDUS character (`/`), and `true` otherwise.
+    3.  Let |exact match| be `false` if the final character of |path A| is the U+002F
+        SOLIDUS character (`/`), and `true` otherwise.
 
-  4.  Let |path list A| and |path list B| be the result of 
-      <a lt="strictly split a string">strictly splitting</a> |path A| and |path B| 
-      respestively on the U+002F SOLIDUS character (`/`).
+    4.  Let |path list A| and |path list B| be the result of
+        <a lt="strictly split a string">strictly splitting</a> |path A| and |path B|
+        respestively on the U+002F SOLIDUS character (`/`).
 
-  5.  If |path list A| has more items than |path list B|, return 
-      "`Does Not Match`".
+    5.  If |path list A| has more items than |path list B|, return
+        "`Does Not Match`".
 
-  6.  If |exact match| is `true`, and |path list A| does not have the same
-      number of items as |path list B|, return "`Does Not Match`".
+    6.  If |exact match| is `true`, and |path list A| does not have the same
+        number of items as |path list B|, return "`Does Not Match`".
 
-  7.  For each |piece A| in |path list A|:
+    7.  If |exact match| is `false`:                                                                                                
+   
+        1.  Assert: the final item in |path list A| is the empty string.
+       
+        2.  Remove the final item from |path list A|.
 
-      1.  Let |piece B| be the next item in |path list B|.
+    8.  For each |piece A| in |path list A|:
 
-      2.  <a>Percent decode</a> |piece A|.
+        1.  Let |piece B| be the next item in |path list B|.
 
-      3.  <a>Percent decode</a> |piece B|.
+        2.  <a>Percent decode</a> |piece A|.
 
-      4.  If |piece A| is not a <a>case-sensitive</a> match
-          for |piece B|, return "`Does Not Match`".
+        3.  <a>Percent decode</a> |piece B|.
 
-  8.  Return "`Matches`".
+        4.  If |piece A| is not a <a>case-sensitive</a> match
+            for |piece B|, return "`Does Not Match`".
+
+    9.  Return "`Matches`".
+  </ol>
+
 
   <h5 id="effective-directive-for-a-request" algorithm>
     Get the effective directive for |request|
@@ -3745,14 +3836,14 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     Does a source list allow all inline behavior for |type|?
   </h5>
 
-  A <a>source list</a> 
+  A <a>source list</a>
   <dfn export for="source list" local-lt="allow all inline behavior">allows all inline behavior</dfn>
   of a given |type| if it contains the <a grammar>`keyword-source`</a>
   expression <a grammar>`'unsafe-inline'`</a>, and does not override that
   expression as described in the following algorithm:
 
   Given a <a>source list</a> (|list|) and a string (|type|), the following
-  algorithm returns "`Allows`" if all inline content of a given |type| is 
+  algorithm returns "`Allows`" if all inline content of a given |type| is
   allowed and "`Does Not Allow`" otherwise.
 
   1.  Let |allow all inline| be `false`.
@@ -3762,15 +3853,15 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       1.  If |expression| matches the <a grammar>`nonce-source`</a> or
           <a grammar>`hash-source`</a> grammar, return "`Does Not Allow`".
 
-      2.  If |type| is "`script`" or "`script attribute`" and |expression| 
-          matches the <a grammar>keyword-source</a> 
+      2.  If |type| is "`script`" or "`script attribute`" and |expression|
+          matches the <a grammar>keyword-source</a>
           "<a grammar>`'strict-dynamic'`</a>", return "`Does Not Allow`".
 
           Note: `'strict-dynamic'` only applies to scripts, not other resource
           types. Usage is explained in more detail in [[#strict-dynamic-usage]].
 
       3.  If |expression| is an <a>ASCII case-insensitive</a> match for the
-          <a grammar>`keyword-source`</a> "<a grammar>`'unsafe-inline'`</a>", 
+          <a grammar>`keyword-source`</a> "<a grammar>`'unsafe-inline'`</a>",
           set |allow all inline| to `true`.
 
   3.  If |allow all inline| is `true`, return "`Allows`".
@@ -3785,7 +3876,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       'unsafe-inline'
     </pre>
 
-    <a>Source lists</a> that do not 
+    <a>Source lists</a> that do not
     <a for="source list">allow all inline behavior</a> due to
     the presence of nonces and/or hashes, or absence of '`unsafe-inline`':
 
@@ -3794,10 +3885,10 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
       http://example.com 'unsafe-inline' 'nonce-abc'
     </pre>
 
-     <a>Source lists</a> that do not 
-     <a for="source list">allow all inline behavior</a> when |type| is 
-     '`script`' or '`script attribute`' due to the presence of 
-     '`strict-dynamic`', but <a for="source list">allow all inline behavior</a> 
+     <a>Source lists</a> that do not
+     <a for="source list">allow all inline behavior</a> when |type| is
+     '`script`' or '`script attribute`' due to the presence of
+     '`strict-dynamic`', but <a for="source list">allow all inline behavior</a>
      otherwise:
 
      <pre>
@@ -3844,8 +3935,8 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   5.  For each |expression| in |list|:
 
       1.  If |expression| is an <a>ASCII case-insensitive</a> match for the
-          <a grammar>`keyword-source`</a> 
-          "<a grammar>`'unsafe-hashed-attributes'`</a>", 
+          <a grammar>`keyword-source`</a>
+          "<a grammar>`'unsafe-hashed-attributes'`</a>",
           set |hashes match attributes| to `true`. Break out of the loop.
 
   6.  If |type| is "`script`" or "`style`", or |hashes match attributes| is
@@ -3874,8 +3965,14 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
                   1.  Let |actual| be the result of <a>base64 encoding</a> the
                       result of applying |algorithm| to |source|.
 
-                  2.  If |actual| is a <a>case-sensitive</a> match for
-                      |expression|'s <a grammar>`base64-value`</a> part, return
+                  2.  Let |expected| be |expression|'s <a grammar>`base64-value`</a> part,
+                      with all '`-`' characters replaced with '`+`', and all '`_`' characters
+                      replaced with '`/`'.
+
+                      Note: This replacement normalizes hashes expressed in [=base64url
+                      encoding=] into [=base64 encoding=] for matching.
+
+                  2.  If |actual| is a <a>case-sensitive</a> match for |expected|, return
                       "`Matches`".
 
       Note: Hashes apply to inline <{script}> and inline <{style}>. If the
@@ -3939,6 +4036,29 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   attack by walking through <{script}> element attributes, looking for the
   string "<code>&lt;script</code>" or "<code>&lt;style</code>" in their names or values.
 
+  <h3 id="security-nonce-retargeting">Nonce Retargeting</h3>
+
+  Nonces bypass <a grammar>host-source</a> expressions, enabling developers to load code from any
+  origin. This, generally, is fine, and desirable from the developer's perspective. However, if an
+  attacker can inject a <{base}> element, then an otherwise safe page can be subverted when relative
+  URLs are resolved. That is, on `https://example.com/` the following code will load
+  `https://example.com/good.js`:
+
+  <pre highlight="html">
+    &lt;script nonce=abc src=/good.js&gt;&lt;/script&gt;
+  </pre>
+
+  However, the following will load `https://evil.com/good.js`:
+
+  <pre highlight="html">
+    &lt;base href="https://evil.com"&gt;
+    &lt;script nonce=abc src=/good.js&gt;&lt;/script&gt;
+  </pre>
+
+  To mitigate this risk, it is advisable to set an explicit <{base}> element on every page, or to
+  limit the ability of an attacker to inject their own <{base}> element by setting a
+  <a>`base-uri`</a> directive in your page's policy. For example, `base-uri 'none'`.
+
   <h3 id="security-css-parsing">CSS Parsing</h3>
 
   The <a>style-src</a> directive restricts the locations from which the
@@ -3971,6 +4091,43 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   mitigate the risk of injection). This is especially true for the "`script-sample`" property of
   violation reports, and the {{SecurityPolicyViolationEvent/sample}} property of
   {{SecurityPolicyViolationEvent}}, which are both completely attacker-controlled strings.
+
+  <h3 id="source-list-paths-and-redirects">Paths and Redirects</h3>
+
+  To avoid leaking path information cross-origin (as discussed
+  in Egor Homakov's
+  <a href="http://homakov.blogspot.de/2014/01/using-content-security-policy-for-evil.html">Using Content-Security-Policy for Evil</a>),
+  the matching algorithm ignores the path component of a source
+  expression if the resource being loaded is the result of a
+  redirect. For example, given a page with an active policy of
+  <code><a>img-src</a> example.com not-example.com/path</code>:
+
+  *   Directly loading <code>https://not-example.com/not-path</code>
+      would fail, as it doesn't match the policy.
+
+  *   Directly loading <code>https://example.com/redirector</code>
+      would pass, as it matches <code>example.com</code>.
+
+  *   Assuming that <code>https://example.com/redirector</code>
+      delivered a redirect response pointing to <code>https://not-example.com/not-path</code>,
+      the load would succeed, as the initial URL matches <code>example.com</code>,
+      and the redirect target matches <code>not-example.com/path</code>
+      if we ignore its path component.
+
+  This restriction reduces the granularity of a document's policy when redirects are in play, a
+  necessary compromise to avoid brute-forced information leaks of this type.
+
+  The relatively long thread
+  <a href="http://lists.w3.org/Archives/Public/public-webappsec/2014Feb/0036.html">"Remove paths from CSP?"</a>
+  from public-webappsec@w3.org has more detailed discussion around alternate proposals.
+
+  <h3 id="security-secure-upgrades">Secure Upgrades</h3>
+
+  To mitigate one variant of history-scanning attacks like Yan Zhu's
+  <a href="http://diracdeltas.github.io/sniffly/">Sniffly</a>, CSP will not allow pages to lock
+  themselves into insecure URLs via policies like `script-src http://example.com`. As described in
+  [[#match-schemes]], the scheme portion of a source expression will always allow upgrading to a
+  secure variant.
 </section>
 
 <!-- Big text: Authoring -->
@@ -4096,7 +4253,7 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
     </h3>
 
     <em>This section is not normative.</em>
-    
+
     ISSUE(w3c/webappsec-csp#13): Work in progress.
 
     Legacy websites and websites with legacy dependencies might find it difficult
@@ -4123,6 +4280,15 @@ spec: SHA2; urlPrefix: http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
         <a>Content-Security-Policy</a>:  <a>script-src</a> <a grammar>'unsafe-hashed-attributes'</a> 'sha256-jzgBGA4UWFFmpOBq0JpdsySukE1FrEN5bUpoK8Z29fY='
       </pre>
     </div>
+
+    The capabilities `'unsafe-hashed-attributes'` provides is useful for legacy sites, but should be
+    avoided for modern sites. In particular, note that hashes allow a particular script to execute,
+    but do not ensure that it executes in the way a developer intends. If an interesting capability
+    is exposed as an inline event handler (say `<a onclick="transferAllMyMoney()">Transfer</a>`),
+    then that script becomes available for an attacker to inject as
+    `<script>transferAllMyMoney()</script>`. Developers should be careful to balance the risk of
+    allowing specific scripts to execute against the deployment advantages that allowing inline
+    event handlers might provide.
   </section>
 
   <section>
