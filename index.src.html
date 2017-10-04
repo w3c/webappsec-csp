@@ -332,13 +332,9 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       executes on a page to load more script via non-<a>"parser-inserted"</a>
       <{script}> elements. Details are in [[#strict-dynamic-usage]].
 
-  8.  <div class="wip">
-        The `'unsafe-hashed-attributes'` source expression will now allow event
-        handlers and style attributes to match hash source expressions. Details
-        in [[#unsafe-hashed-attributes-usage]].
-
-        ISSUE(w3c/webappsec-csp#13): `unsafe-hashed-attributes` is a work in progress.
-      </div>
+  8.  The `'unsafe-hashed-attributes'` source expression will now allow event
+      handlers and style attributes to match hash source expressions. Details
+      in [[#unsafe-hashed-attributes-usage]].
 
   9.  The <a>source expression</a> matching has been changed to require explicit presence
       of any non-<a>network scheme</a>, rather than <a>local scheme</a>,
@@ -4214,14 +4210,10 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     <{script}> elements which are <a>"parser-inserted"</a>.
   </div>
 
-  <section class="wip">
+  <section>
     <h3 id="unsafe-hashed-attributes-usage">
       Usage of "`'unsafe-hashed-attributes'`"
     </h3>
-
-    <em>This section is not normative.</em>
-
-    ISSUE(w3c/webappsec-csp#13): Work in progress.
 
     Legacy websites and websites with legacy dependencies might find it difficult
     to entirely externalize event handlers. These sites could enable such handlers
@@ -4256,6 +4248,34 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     `<script>transferAllMyMoney()</script>`. Developers should be careful to balance the risk of
     allowing specific scripts to execute against the deployment advantages that allowing inline
     event handlers might provide.
+
+    Note: "<a grammar>`'unsafe-hashed-attributes'`</a>" is not backwards compatible with [[CSP2]] because of the
+    interaction between "`'unsafe-inline'`" and <a>`script-src`</a> hash source expressions. This 
+    means that different CSP policies need to be delivered based on the version of CSP supported
+    by the user agent.
+    <div class="example">
+      MegaCorp, Inc. wants to use `'unsafe-hashed-attributes'` to safely allow their inline event
+      handler to run and they come up with:
+
+      <pre>
+        <a>Content-Security-Policy</a>:  <a>script-src</a> <a grammar>'unsafe-hashed-attributes'</a> 'sha256-jzgBGA4UWFFmpOBq0JpdsySukE1FrEN5bUpoK8Z29fY='
+      </pre>
+
+      If CSP3 is not supported by the user agent, MegaCorp, Inc. wants to fallback to the less
+      secure `'unsafe-inline'` to keep the page from breaking. Unfortunately since a hash source 
+      expression is present, just adding `'unsafe-inline'` to the above policy will not work for
+      CSP2 (but it will work for CSP1). They arrive at the following policy for CSP3 and CSP1:
+      
+      <pre>
+        <a>Content-Security-Policy</a>:  <a>script-src</a> <a grammar>'unsafe-hashed-attributes'</a> <a grammar>'unsafe-inline'</a> 'sha256-jzgBGA4UWFFmpOBq0JpdsySukE1FrEN5bUpoK8Z29fY='
+      </pre>
+
+      And for CSP2 the following policy:
+
+      <pre>
+        <a>Content-Security-Policy</a>:  <a>script-src</a> <a grammar>'unsafe-inline'</a>
+      </pre>
+    </div>
   </section>
 
   <section>
