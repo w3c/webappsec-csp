@@ -388,8 +388,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   <h3 id="framework-policy">Policies</h3>
 
   A <dfn export lt="content security policy object" local-lt="policy">policy</dfn> defines allowed
-  and restricted behaviors, and may be applied to a {{Window}} or {{WorkerGlobalScope}} as described
-  in [[#initialize-global-object-csp]].
+  and restricted behaviors, and may be applied to a {{Window}}, {{WorkerGlobalScope}, or
+  {{WorkletGlobalScope}} as described in [[#initialize-global-object-csp]].
 
   Each policy has an associated <dfn for="policy" export>directive set</dfn>, which is an <a>ordered
   set</a> of <a>directives</a> that define the policy's implications when applied.
@@ -1084,7 +1084,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     Integration with HTML
   </h3>
 
-  1.  The {{Document}} and {{WorkerGlobalScope}} objects have a
+  1.  The {{Document}}, {{WorkerGlobalScope}}, and {{WorkletGlobalScope}} objects have a
       <dfn for="global object" id="global-object-csp-list">CSP list</dfn>,
       which holds all the <a for="/">policy</a> objects which are active for a given
       context. This list is empty unless otherwise specified, and is populated
@@ -1222,6 +1222,14 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       1.  For each |policy| in |response|'s
           <a for="response">CSP list</a>, insert |policy| into
           |global|'s <a for="global object">CSP list</a>.
+
+  3. If |global| is a {{WorkletGlobalScope}}:
+
+      1. Let |owner| be |global|'s [=WorkletGlobalScope/owner document=].
+
+      2. For each |policy| in |owner|'s <a for="global object">CSP list</a>:
+
+          1.  Insert an alias to |policy| in |global|'s <a for="global object">CSP list</a>.
 
   <h4 id="should-block-inline" algorithm>
     Should |element|'s inline |type| behavior be blocked by Content Security Policy?
