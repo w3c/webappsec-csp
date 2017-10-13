@@ -24,6 +24,7 @@ At Risk: The [[#is-element-nonceable]] algorithm.
 spec:dom; type:interface; text:Document
 spec:html
   type: dfn
+    text: applet
     text: case-sensitive
     text: browsing context; for: /
     text: plugin document
@@ -91,7 +92,7 @@ spec: RFC2045; urlPrefix: https://tools.ietf.org/html/rfc2045
     text: subtype; url: section-5.1
 spec: RFC3986; urlPrefix: https://tools.ietf.org/html/rfc3986
   type: grammar
-    text: path-abempty; url: section-3.3
+    text: path-absolute; url: section-3.3
     text: scheme; url: section-3.1
     text: IPv4address; url: section-3.2.2
     text: uri-reference; url: section-4.1
@@ -388,8 +389,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   <h3 id="framework-policy">Policies</h3>
 
   A <dfn export lt="content security policy object" local-lt="policy">policy</dfn> defines allowed
-  and restricted behaviors, and may be applied to a {{Window}} or {{WorkerGlobalScope}} as described
-  in [[#initialize-global-object-csp]].
+  and restricted behaviors, and may be applied to a {{Window}}, {{WorkerGlobalScope}, or
+  {{WorkletGlobalScope}} as described in [[#initialize-global-object-csp]].
 
   Each policy has an associated <dfn for="policy" export>directive set</dfn>, which is an <a>ordered
   set</a> of <a>directives</a> that define the policy's implications when applied.
@@ -574,7 +575,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   4.  Hosts such as `example.com` (which matches any resource on
       the host, regardless of scheme) or `*.example.com` (which
-      matches any resource on the host or any of its subdomains (and any of
+      matches any resource on the host's subdomains (and any of
       its subdomains' subdomains, and so on))
 
   5.  Nonces such as `'nonce-ch4hvvbHDpv7xCSvXCs3BrNggHdTzxUA'` (which can match
@@ -602,8 +603,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     <dfn>host-part</dfn>   = "*" / [ "*." ] 1*<a>host-char</a> *( "." 1*<a>host-char</a> )
     <dfn>host-char</dfn>   = <a>ALPHA</a> / <a>DIGIT</a> / "-"
     <dfn>port-part</dfn>   = 1*<a>DIGIT</a> / "*"
-    <dfn>path-part</dfn>   = <a>path-abempty</a>
-                  ; <a>path-abempty</a> is defined in section 3.3 of RFC 3986.
+    <dfn>path-part</dfn>   = <a>path-absolute</a>
+                  ; <a>path-absolute</a> is defined in section 3.3 of RFC 3986.
 
     ; Keywords:
     <dfn>keyword-source</dfn> = "<dfn>'self'</dfn>" / "<dfn>'unsafe-inline'</dfn>" / "<dfn>'unsafe-eval'</dfn>"
@@ -1084,7 +1085,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     Integration with HTML
   </h3>
 
-  1.  The {{Document}} and {{WorkerGlobalScope}} objects have a
+  1.  The {{Document}}, {{WorkerGlobalScope}}, and {{WorkletGlobalScope}} objects have a
       <dfn for="global object" id="global-object-csp-list">CSP list</dfn>,
       which holds all the <a for="/">policy</a> objects which are active for a given
       context. This list is empty unless otherwise specified, and is populated
@@ -1130,8 +1131,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       base URL</a> algorithm to ensure that the <{base/href}> attribute's value
       is valid.
 
-  10.  [[#should-plugin-element-be-blocked-a-priori-by-content-security-policy]]
-      is called during the processing of <{object}>, <{embed}>, and <{applet}>
+  10. [[#should-plugin-element-be-blocked-a-priori-by-content-security-policy]]
+      is called during the processing of <{object}>, <{embed}>, and <a>`applet`</a>
       elements to determine whether they may trigger a fetch.
 
       Note: Fetched plugin resources are handled in [[#should-block-response]].
@@ -1222,6 +1223,14 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       1.  For each |policy| in |response|'s
           <a for="response">CSP list</a>, insert |policy| into
           |global|'s <a for="global object">CSP list</a>.
+
+  3. If |global| is a {{WorkletGlobalScope}}:
+
+      1. Let |owner| be |global|'s [=WorkletGlobalScope/owner document=].
+
+      2. For each |policy| in |owner|'s <a for="global object">CSP list</a>:
+
+          1.  Insert an alias to |policy| in |global|'s <a for="global object">CSP list</a>.
 
   <h4 id="should-block-inline" algorithm>
     Should |element|'s inline |type| behavior be blocked by Content Security Policy?
@@ -1656,8 +1665,6 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
               ::  "`report`"
               :   <a for="request">initiator</a>
               ::  ""
-              :   <a for="request">type</a>
-              ::  ""
               :   <a for="request">credentials mode</a>
               ::  "`same-origin`"
               :   <a for="request">keepalive flag</a>
@@ -1900,9 +1907,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   1.  Assert: |policy| is unused.
 
-  2.  If |request|'s <a for="request">initiator</a> is "`fetch`", or its
-      <a for="request">type</a> is "" and <a for="request">destination</a> is
-      "":
+  2.  If |request|'s <a for="request">initiator</a> is "`fetch`" or its
+      <a for="request">destination</a> is "":
 
       1.  If the result of executing [[#match-request-to-source-list]] on
           |request| and this directive's <a for="directive">value</a> is
@@ -1921,9 +1927,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   1.  Assert: |policy| is unused.
 
-  2.  If |request|'s <a for="request">initiator</a> is "`fetch`", or its
-      <a for="request">type</a> is "" and <a for="request">destination</a> is
-      "`subresource`":
+  2.  If |request|'s <a for="request">initiator</a> is "`fetch`" or its
+      <a for="request">destination</a> is "":
 
       1.  If the result of executing [[#match-response-to-source-list]] on
           |response|, |request|, and this directive's
@@ -2104,7 +2109,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   1.  Assert: |policy| is unused.
 
-  2.  If |request|'s <a for="request">type</a> is "`font`":
+  2.  If |request|'s <a for="request">destination</a> is "`font`":
 
       1.  If the result of executing [[#match-request-to-source-list]] on
           |request| and this directive's <a for="directive">value</a> is
@@ -2123,7 +2128,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   1.  Assert: |policy| is unused.
 
-  2.  If |request|'s <a for="request">type</a> is "`font`":
+  2.  If |request|'s <a for="request">destination</a> is "`font`":
 
       1.  If the result of executing [[#match-response-to-source-list]] on
           |response|, |request|, and this directive's
@@ -2169,7 +2174,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   1.  Assert: |policy| is unused.
 
-  2.  If |request|'s <a for="request">type</a> is "`document`" and
+  2.  If |request|'s <a for="request">destination</a> is "`document`" and
       <a for="request">target browsing context</a> is a <a>nested browsing
       context</a>:
 
@@ -2190,7 +2195,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   1.  Assert: |policy| is unused.
 
-  2.  If |request|'s <a for="request">type</a> is "`document`" and
+  2.  If |request|'s <a for="request">destination</a> is "`document`" and
       <a for="request">target browsing context</a> is a <a>nested browsing
       context</a>:
 
@@ -2213,7 +2218,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   </pre>
 
   This directive controls <a for="/">requests</a> which load images. More formally, this
-  includes <a for="/">requests</a> whose <a for="request">type</a> is "`image`"
+  includes <a for="/">requests</a> whose <a for="request">destination</a> is "`image`"
   [[FETCH]].
 
   <div class="example">
@@ -2241,7 +2246,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   1.  Assert: |policy| is unused.
 
-  2.  If |request|'s <a for="request">type</a> is "`image`":
+  2.  If |request|'s <a for="request">destination</a> is "`image`":
 
       1.  If the result of executing [[#match-request-to-source-list]] on
           |request| and this directive's <a for="directive">value</a> is
@@ -2260,7 +2265,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   1.  Assert: |policy| is unused.
 
-  2.  If |request|'s <a for="request">type</a> is "`image`":
+  2.  If |request|'s <a for="request">destination</a> is "`image`":
 
       1.  If the result of executing [[#match-response-to-source-list]] on
           |response|, |request|, and this directive's
@@ -2305,8 +2310,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   1.  Assert: |policy| is unused.
 
-  2.  If |request|'s <a for="request">type</a> is "", and its
-      <a for="request">initiator</a> is "`manifest`":
+  2.  If |request|'s <a for="request">destination</a> is "`manifest`":
 
       1.  If the result of executing [[#match-request-to-source-list]] on
           |request| and this directive's <a for="directive">value</a> is
@@ -2325,8 +2329,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   1.  Assert: |policy| is unused.
 
-  2.  If |request|'s <a for="request">type</a> is "", and its
-      <a for="request">initiator</a> is "`manifest`":
+  2.  If |request|'s <a for="request">destination</a> is "`manifest`":
 
       1.  If the result of executing [[#match-response-to-source-list]] on
           |response|, |request|, and this directive's
@@ -2374,7 +2377,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   1.  Assert: |policy| is unused.
 
-  2.  If |request|'s <a for="request">type</a> is one of "`audio`", "`video`",
+  2.  If |request|'s <a for="request">destination</a> is one of "`audio`", "`video`",
       or "`track`":
 
       1.  If the result of executing [[#match-request-to-source-list]] on
@@ -2394,7 +2397,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   1.  Assert: |policy| is unused.
 
-  2.  If |request|'s <a for="request">type</a> is one of "`audio`", "`video`",
+  2.  If |request|'s <a for="request">destination</a> is one of "`audio`", "`video`",
       or "`track`":
 
       1.  If the result of executing [[#match-response-to-source-list]] on
@@ -2438,7 +2441,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   `'none'`, but will otherwise be allowed.
 
   Note: The `object-src` directive acts upon any request made on behalf of
-  an <{object}>, <{embed}>, or <{applet}> element. This includes requests
+  an <{object}>, <{embed}>, or <a>`applet`</a> element. This includes requests
   which would populate the <a>nested browsing context</a> generated by the
   former two (also including navigations). This is true even when the data is
   semantically equivalent to content which would otherwise be restricted by
@@ -2447,7 +2450,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   Note: When a plugin resource is navigated to directly (that is, as a <a>plugin document</a> in the
   <a>top-level browsing context</a> or a <a>nested browsing context</a>, and not as an embedded
-  subresource via <{embed}>, <{object}>, or <{applet}>), any <a for="/">policy</a> delivered along
+  subresource via <{embed}>, <{object}>, or <a>`applet`</a>), any <a for="/">policy</a> delivered along
   with that resource will be applied to the <a>plugin document</a>. This means, for instance, that
   developers can prevent the execution of arbitrary resources as plugin content by delivering the
   policy `object-src 'none'` along with a response. Given plugins' power (and the
@@ -2465,8 +2468,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   1.  Assert: |policy| is unused.
 
-  2.  If |request|'s <a for="request">type</a> is "", and its
-      <a for="request">destination</a> is "`unknown`":
+  2.  If |request|'s <a for="request">destination</a> is "`object`" or "`embed`":
 
       1.  If the result of executing [[#match-request-to-source-list]] on
           |request| and this directive's <a for="directive">value</a> is
@@ -2485,8 +2487,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   1.  Assert: |policy| is unused.
 
-  2.  If |request|'s <a for="request">type</a> is "", and its
-      <a for="request">destination</a> is "`unknown`":
+  2.  If |request|'s <a for="request">destination</a> is "`object`" or "`embed`":
 
       1.  If the result of executing [[#match-response-to-source-list]] on
           |response|, |request|, and this directive's
@@ -2546,7 +2547,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
       Note: If `worker-src` is present, we'll defer to it when handling worker requests.
 
-  2.  If |request|'s <a for="request">type</a> is "`script`":
+  2.  If |request|'s <a for="request">destination</a> is <a for="request/destination">script-like</a>:
 
       1.  If the result of executing [[#match-nonce-to-source-list]] on
           |request|'s <a for="request">cryptographic nonce metadata</a> and this
@@ -2620,7 +2621,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
       Note: If `worker-src` is present, we'll defer to it when handling worker requests.
 
-  2.  If |request|'s <a for="request">type</a> is "`script`":
+  2.  If |request|'s <a for="request">destination</a> is <a for="request/destination">script-like</a>:
 
       1.  If the result of executing [[#match-nonce-to-source-list]] on
           |request|'s <a for="request">cryptographic nonce metadata</a> and this
@@ -2735,7 +2736,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   1.  Assert: |policy| is unused.
 
-  2.  If |request|'s <a for="request">type</a> is "`style`":
+  2.  If |request|'s <a for="request">destination</a> is "`style`":
 
       1.  If the result of executing [[#match-nonce-to-source-list]] on
           |request|'s <a for="request">cryptographic nonce metadata</a> and this
@@ -2759,7 +2760,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   1.  Assert: |policy| is unused.
 
-  2.  If |request|'s <a for="request">type</a> is "`style`":
+  2.  If |request|'s <a for="request">destination</a> is "`style`":
 
       1.  If the result of executing [[#match-nonce-to-source-list]] on
           |request|'s <a for="request">cryptographic nonce metadata</a> and this
@@ -3026,7 +3027,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
             `plugin-types`:
 
             1.  Let |type| be "`application/x-java-applet`" if |plugin element|
-                is an <{applet}> element, or |plugin element|'s `type` attribute's
+                is an <a>`applet`</a> element, or |plugin element|'s `type` attribute's
                 value if present, or "`null`" otherwise.
 
             2.  Return "`Blocked`" if any of the following are true:
@@ -3197,7 +3198,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   The <dfn export>frame-ancestors</dfn> directive restricts the {{URL}}s which can
   embed the resource using <{frame}>, <{iframe}>, <{object}>, <{embed}>, or
-  <{applet}> element. Resources can use this directive to avoid many UI
+  <a>`applet`</a> element. Resources can use this directive to avoid many UI
   Redressing [[UISECURITY]] attacks, by avoiding the risk of being embedded into
   potentially hostile contexts.
 
@@ -3736,28 +3737,29 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     Get the effective directive for |request|
   </h5>
 
-  Each <a>fetch directive</a> controls a specific type of <a for="/">request</a>. Given
+  Each <a>fetch directive</a> controls a specific destination of <a for="/">request</a>. Given
   a <a for="/">request</a> (|request|), the following algorithm returns either
   `null` or the <a for="directive">name</a> of the request's
   <dfn for="request" export>effective directive</dfn>:
 
-  1.  Switch on |request|'s <a for="request">type</a>, and execute
+  1.  Switch on |request|'s <a for="request">destination</a>, and execute
       the associated steps:
 
       : ""
       ::
-        1.  If the |request|'s <a for="request">initiator</a> and <a for="request">destination</a>
-            are both the empty string, return `connect-src`.
-        2.  If the |request|'s <a for="request">initiator</a> is
-            "`manifest`", return `manifest-src`.
-        3.  If the |request|'s <a for="request">destination</a> is
-            "`subresource`", return `connect-src`.
-        4.  If the |request|'s <a for="request">destination</a> is
-            "`unknown`", return `object-src`.
-        5.  If the |request|'s <a for="request">destination</a> is
-            "`document`" <em>and</em> the |request|'s
-            <a for="request">target browsing context</a> is a <a>nested browsing
-            context</a>, return `frame-src`.
+        1.  If the |request|'s <a for="request">initiator</a> is
+            the empty string, return `connect-src`.
+      : "`manifest`"
+      ::
+        1.  Return `manifest-src`.
+      : "`object`"
+      : "`embed`"
+      ::
+        1.  Return `object-src`.
+      : "`document`"
+      ::
+        1.  If the |request|'s <a for="request">target browsing context</a>
+            is a <a>nested browsing context</a>, return `frame-src`.
 
       : "`audio`"
       : "`track`"
@@ -3778,20 +3780,14 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
         1.  Return `style-src`.
 
       : "`script`"
+      : "`xslt`"
       ::
-        1.  Switch on |request|'s <a for="request">destination</a>, and
-            execute the associated steps:
+        1. Return `script-src`.
 
-            : "`script`"
-            : "`subresource`"
-            ::
-              1.  Return `script-src`.
-
-            : "`serviceworker`"
-            : "`sharedworker`"
-            : "`worker`"
-            ::
-              1.  Return `worker-src`.
+      : "`sharedworker`"
+      : "`worker`"
+      ::
+        1. Return `worker-src`.
 
   2.  Return `null`.
 
