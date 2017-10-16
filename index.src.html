@@ -388,9 +388,13 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   <h3 id="framework-policy">Policies</h3>
 
+  A <dfn export lt="csp global object">CSP global object</dfn> is a {{Document}}, {{WorkerGlobalScope}}
+  or {{WorkletGlobalScope}}. A <a>CSP global object</a> has a [=/CSP list=]
+  as described in [[#html-integration]]
+
   A <dfn export lt="content security policy object" local-lt="policy">policy</dfn> defines allowed
-  and restricted behaviors, and may be applied to a {{Window}}, {{WorkerGlobalScope}, or
-  {{WorkletGlobalScope}} as described in [[#initialize-global-object-csp]].
+  and restricted behaviors, and may be applied to a <a>CSP global object</a> as described
+  in [[#initialize-document-csp]] and [[#initialize-worker-global-object-csp]].
 
   Each policy has an associated <dfn for="policy" export>directive set</dfn>, which is an <a>ordered
   set</a> of <a>directives</a> that define the policy's implications when applied.
@@ -473,7 +477,6 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   To <dfn abstract-op>parse a serialized CSP list</dfn>, given a [=serialized CSP list=] (|list|), a
   [=policy/source=] (|source|), and a [=policy/disposition=] (|disposition|), execute the following
   steps.
- 
   This algorithm returns a [=list=] of [=Content Security Policy objects=]. If |list| cannot be
   parsed, the returned list will be empty.
 
@@ -540,8 +543,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       [[#should-block-inline]]. This algorithm returns "`Allowed`" unless
       otherwise specified.
 
-  5.  An <dfn for="directive" export>initialization</dfn>, which takes a {{Document}}
-      or <a for="/">global object</a>, a <a>response</a>, and a <a for="/">policy</a>
+  5.  An <dfn for="directive" export>initialization</dfn>, which takes a
+      <a>CSP global object</a>, a <a>response</a>, and a <a for="/">policy</a>
       as arguments. This algorithm is executed during [[#initialize-document-csp]],
       and has no effect unless otherwise specified.
 
@@ -643,11 +646,11 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   <h3 id="framework-violation">Violations</h3>
 
   A <dfn export>violation</dfn> represents an action or resource which goes against the
-  set of <a for="/">policy</a> objects associated with a <a for="/">global object</a>.
+  set of <a for="/">policy</a> objects associated with a <a>CSP global object</a>.
 
   Each <a>violation</a> has a
   <dfn for="violation" id="violation-global-object" export>global object</dfn>, which
-  is the <a for="/">global object</a> whose <a for="/">policy</a> has been violated.
+  is the <a>CSP global object</a> whose <a for="/">policy</a> has been violated.
 
   Each <a>violation</a> has a <dfn for="violation" id="violation-url" export>url</dfn>
   which is its <a for="violation">global object</a>'s {{URL}}.
@@ -703,11 +706,30 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   characters of an inline script, event handler, or style that caused an violation. Violations
   which stem from an external file will not include a sample in the violation report.
 
+  <h4 id="get-csp-global-object-for-request">
+    Retrieve the `CSP global object` for a request
+  </h4>
+
+  Given a <a for="/">request</a> (|request|), the following algorithm returns the
+  <a>CSP global object</a> associated with the request.
+
+  1.  If |request|'s <a for="request">client</a>'s <a for="environment settings object">responsible document</a>
+      is not `null`:
+
+      1.  return |request|'s <a for="request">client</a>'s <a for="environment settings object">responsible document</a>.
+
+  2.  If |request|'s <a for="request">client</a>'s <a for="environment settings object">global object</a>
+      is a {{WorkerGlobalScope}} or {{WorkletGlobalScope}}:
+
+      1.  return |request|'s <a for="request">client</a>'s <a for="environment settings object">global object</a>.
+
+  3.  return `null`.
+
   <h4 id="create-violation-for-global" algorithm>
     Create a violation object for |global|, |policy|, and |directive|
   </h4>
 
-  Given a <a for="/">global object</a> (|global|), a <a for="/">policy</a> (|policy|), and a
+  Given a <a>CSP global object</a> (|global|), a <a for="/">policy</a> (|policy|), and a
   <a>string</a> (|directive|), the following algorithm creates a new <a>violation</a>
   object, and populates it with an initial set of data:
 
@@ -749,19 +771,21 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   (|directive|), the following algorithm creates a new <a>violation</a> object,
   and populates it with an initial set of data:
 
-  1.  Let |violation| be the result of executing
-      [[#create-violation-for-global]] on |request|'s
-      <a for="request">client</a>'s <a for="environment settings object">global object</a>,
+  1.  Let |CSP global object| be the result of executing [[#get-csp-global-object-for-request]]
+      on |request|.
+
+  2.  Let |violation| be the result of executing
+      [[#create-violation-for-global]] on |CSP global object|,
       |policy|, and |directive|.
 
-  2.  Set |violation|'s <a for="violation">resource</a> to |request|'s
+  3.  Set |violation|'s <a for="violation">resource</a> to |request|'s
       <a for="request">url</a>.
 
       Note: We use |request|'s <a for="request">url</a>, and <em>not</em> its
       <a for="request">current url</a>, as the latter might contain information
       about redirect targets to which the page MUST NOT be given access.
 
-  3.  Return |violation|.
+  4.  Return |violation|.
 </section>
 
 <!-- Big Text: Delivery -->
@@ -922,9 +946,9 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       and <a>response checks</a> to be executed on the <a>response</a> delivered
       from the network or from a Service Worker.
 
-  A <a for="/">policy</a> is generally enforced upon a <a for="/">global object</a>, but the
+  A <a for="/">policy</a> is generally enforced upon a <a>CSP global object</a>, but the
   user agent needs to <a lt="parse a serialized CSP">parse</a> any policy
-  delivered via an HTTP response header field before any <a for="/">global object</a>
+  delivered via an HTTP response header field before any <a>CSP global object</a>
   is created in order to handle directives that require knowledge of a
   <a>response</a>'s details. To that end:
 
@@ -977,11 +1001,12 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   Given a <a for="/">request</a> (|request|), this algorithm reports violations based
   on <a for="request">client</a>'s "report only" policies.
 
-  1.  Let |CSP list| be |request|'s
-      <a for="request">client</a>'s <a for="environment settings object">global object</a>'s
-      <a for="global object">CSP list</a>.
+  1.  Let |CSP global object| be the result of executing [[#get-csp-global-object-for-request]]
+      on |request|.
 
-  2.  For each |policy| in |CSP list|:
+  2.  Let |CSP list| be |CSP global object|'s <a for="csp global object">CSP list</a>.
+
+  3.  For each |policy| in |CSP list|:
 
       1.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
           then skip to the next |policy|.
@@ -1002,13 +1027,14 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   `Blocked` or `Allowed` and reports violations based on |request|'s
   <a for="request">client</a>'s Content Security Policy.
 
-  1.  Let |CSP list| be |request|'s
-      <a for="request">client</a>'s <a for="environment settings object">global object</a>'s
-      <a for="global object">CSP list</a>.
+  1.  Let |CSP global object| be the result of executing [[#get-csp-global-object-for-request]]
+      on |request|.
 
-  2.  Let |result| be "`Allowed`".
+  2.  Let |CSP list| be |CSP global object|'s <a for="csp global object">CSP list</a>.
 
-  3.  For each |policy| in |CSP list|:
+  3.  Let |result| be "`Allowed`".
+
+  4.  For each |policy| in |CSP list|:
 
       1.  If |policy|'s <a for="policy">disposition</a> is "`report`",
           then skip to the next |policy|.
@@ -1024,7 +1050,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
           2.  Set |result| to "`Blocked`".
 
-  4.  Return |result|.
+  5.  Return |result|.
 
   <h4 id="should-block-response" algorithm>
     Should |response| to |request| be blocked by Content
@@ -1036,13 +1062,14 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   `Allowed`, and reports violations based on |request|'s
   <a for="request">client</a>'s Content Security Policy.
 
-  1.  Let |CSP list| be |request|'s
-      <a for="request">client</a>'s <a for="environment settings object">global object</a>'s
-      <a for="global object">CSP list</a>.
+  1.  Let |CSP global object| be the result of executing [[#get-csp-global-object-for-request]]
+      on |request|.
 
-  2.  Let |result| be "`Allowed`".
+  2.  Let |CSP list| be |CSP global object|'s <a for="csp global object">CSP list</a>.
 
-  3.  For each |policy| in |CSP list|:
+  3.  Let |result| be "`Allowed`".
+
+  4.  For each |policy| in |CSP list|:
 
       1.  For each |directive| in |policy|:
 
@@ -1060,7 +1087,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       response. That is, that a Service Worker hasn't substituted a file which
       would violate the page's CSP.
 
-  4.  For each |policy| in |response|'s <a for="response">CSP list</a>:
+  5.  For each |policy| in |response|'s <a for="response">CSP list</a>:
 
       1.  For each |directive| in |policy|:
 
@@ -1078,7 +1105,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       Note: This portion of the check allows policies delivered with the
       response to determine whether the response is allowed to be delivered.
 
-  5.  Return |result|.
+  6.  Return |result|.
 
 
   <h3 id="html-integration">
@@ -1086,21 +1113,22 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   </h3>
 
   1.  The {{Document}}, {{WorkerGlobalScope}}, and {{WorkletGlobalScope}} objects have a
-      <dfn for="global object" id="global-object-csp-list">CSP list</dfn>,
+      <dfn for="csp global object" id="global-object-csp-list">CSP list</dfn>,
       which holds all the <a for="/">policy</a> objects which are active for a given
       context. This list is empty unless otherwise specified, and is populated
-      via the [[#initialize-global-object-csp]] algorithm.
+      via the [[#initialize-document-csp]] or [[#initialize-worker-global-object-csp]]
+      algorithms, respectively.
 
       ISSUE(w3c/html#187): This concept is missing from W3C's Workers.
 
   2.  A <a for="/">policy</a> is <dfn export>enforced</dfn> or <dfn export>monitored</dfn> for a
-      <a for="/">global object</a> by inserting it into the <a for="/">global object</a>'s
-      <a for="global object">CSP list</a>.
+      <a>CSP global object</a> by inserting it into the <a>CSP global object</a>'s
+      <a for="csp global object">CSP list</a>.
 
-  3.  [[#initialize-global-object-csp]] is called during the <a>initializing a
+  3.  [[#initialize-document-csp]] is called during the <a>initializing a
       new `Document` object</a> and <a>run a worker</a> algorithms in order to
       bind a set of <a for="/">policy</a> objects associated with a <a>response</a> to a
-      newly created <a for="/">global object</a>.
+      newly created <a>CSP global object</a>.
 
   4.  [[#should-block-inline]] is called during the <a>prepare a script</a> and
       <a>update a `style` block</a> algorithms in order to determine whether or
@@ -1192,13 +1220,13 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
           1.  Execute |directive|'s <a for="directive">initialization</a>
               algorithm on |document| and |response|.
 
-  <h4 id="initialize-global-object-csp" algorithm>
-    Initialize a global object's `CSP list`
+  <h4 id="initialize-worker-global-object-csp" algorithm>
+    Initialize a `WorkerGlobalScope`'s or `WorkletGlobalScope`'s' `CSP list`
   </h4>
 
-  Given a <a for="/">global object</a> (|global|), and a <a>response</a>
+  Given a {{WorkerGlobalScope}} or {{WorkletGlobalScope}} (|global|), and a <a>response</a>
   (|response|), the user agent performs the following steps in order
-  to initialize |global|'s <a for="global object">CSP list</a>:
+  to initialize |global|'s <a for="csp global object">CSP list</a>:
 
   1.  If |response|'s <a for="response">url</a>'s <a for="url">scheme</a> is a
       <a>local scheme</a>, or if |global| is a {{DedicatedWorkerGlobalScope}}:
@@ -1209,10 +1237,10 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
       4.  For each |owner| in |owners|:
 
-          1.  For each |policy| in |owner|'s <a for="global object">CSP list</a>:
+          1.  For each |policy| in |owner|'s <a for="csp global object">CSP list</a>:
 
               1.  Insert an alias to |policy| in |global|'s
-                  <a for="global object">CSP list</a>.
+                  <a for="csp global object">CSP list</a>.
 
       Note: <a>local scheme</a> includes `about:`, and this algorithm will
       therefore alias the <a>embedding document</a>'s policies for <a>an iframe
@@ -1222,15 +1250,15 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
       1.  For each |policy| in |response|'s
           <a for="response">CSP list</a>, insert |policy| into
-          |global|'s <a for="global object">CSP list</a>.
+          |global|'s <a for="csp global object">CSP list</a>.
 
   3. If |global| is a {{WorkletGlobalScope}}:
 
       1. Let |owner| be |global|'s [=WorkletGlobalScope/owner document=].
 
-      2. For each |policy| in |owner|'s <a for="global object">CSP list</a>:
+      2. For each |policy| in |owner|'s <a for="csp global object">CSP list</a>:
 
-          1.  Insert an alias to |policy| in |global|'s <a for="global object">CSP list</a>.
+          1.  Insert an alias to |policy| in |global|'s <a for="csp global object">CSP list</a>.
 
   <h4 id="should-block-inline" algorithm>
     Should |element|'s inline |type| behavior be blocked by Content Security Policy?
@@ -1249,8 +1277,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
     2.  Let |result| be "`Allowed`".
 
-    3.  For each |policy| in |element|'s {{Document}}'s <a for="/">global object</a>'s
-        <a for="global object">CSP list</a>:
+    3.  For each |policy| in |element|'s {{Document}}'s <a>CSP global object</a>'s
+        <a for="csp global object">CSP list</a>:
 
         1.  For each |directive| in |policy|'s <a for="policy">directive set</a>:
 
@@ -1259,8 +1287,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
                 skip to the next |directive|.
 
             2.  Otherwise, let |violation| be the result of executing
-                [[#create-violation-for-global]] on the <a>current settings
-                object</a>'s <a for="environment settings object">global object</a>, |policy|,
+                [[#create-violation-for-global]] on |element|'s {{Document}}, |policy|,
                 and "`style-src`" if |type| is "`style`" or "`style-attribute`",
                 or "`script-src`" otherwise.
 
@@ -1389,7 +1416,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   ECMAScript defines a {{HostEnsureCanCompileStrings()}} abstract operation
   which allows the host environment to block the compilation of strings into
   ECMAScript code. This document defines an implementation of that abstract
-  operation thich examines the relevant <a for="global object">CSP list</a>
+  operation which examines the relevant <a for="csp global object">CSP list</a>
   to determine whether such compilation ought to be blocked.
 
   <h4 id="can-compile-strings" algorithm dfn>
@@ -1419,7 +1446,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
           3.  If |source-list| is non-`null`, and does not contain a [=source expression=] which is
               an [=ASCII case-insensitive=] match for the string "<a grammar>`'unsafe-eval'`</a>",
               then:
-              
+
               1.  Let |violation| be the result of executing [[#create-violation-for-global]] on
                   |global|, |policy|, and "`script-src`".
 
@@ -2895,8 +2922,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   returns "`Allowed`" if |base| may be used as the value of a <{base}>
   element's <{base/href}> attribute, and "`Blocked`" otherwise:
 
-  1.  For each |policy| in |document|'s <a for="/">global object</a>'s
-      <a for="global object">csp list</a>:
+  1.  For each |policy| in |document|'s
+      <a for="csp global object">CSP list</a>:
 
       1.  Let |source list| be `null`.
 
@@ -3100,7 +3127,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   according to the <a>`sandbox`</a> values present in its policies, as
   follows:
 
-  Given a {{Document}} or <a for="/">global object</a> (|context|), a <a>response</a>
+  Given a <a>CSP global object</a> (|context|), a <a>response</a>
   (|response|), and a <a for="/">policy</a> (|policy|):
 
   1.  Assert: |response| is unused.
@@ -3145,7 +3172,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   This directive's <a for="directive">initialization</a> algorithm is as
   follows:
 
-  Given a {{Document}} or <a for="/">global object</a> (|context|), a <a>response</a>
+  Given a <a>CSP global object</a> (|context|), a <a>response</a>
   (|response|), and a <a for="/">policy</a> (|policy|):
 
   1.  Assert: |response| and |policy| are unused.
@@ -3539,7 +3566,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
       4.  Let |port-part| be |expression|'s <a grammar>`port-part`</a> if present, and `null`
           otherwise.
-          
+
       5.  If |port-part| does not <a>`port-part` match</a> |url|'s [=url/port=] and |url|'s
           [=url/scheme=], return "`Does Not Match`".
 
@@ -3560,7 +3587,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       1.  |origin| is the same as |url|'s <a for="url">origin</a>
 
       2.  |origin|'s {{URL/host}} is the same as |url|'s {{URL/host}},
-          |origin|'s {{URL/port}} and |url|'s {{URL/port} are either the same
+          |origin|'s {{URL/port}} and |url|'s {{URL/port}} are either the same
           or the <a>default ports</a> for their respective <a for="url">scheme</a>s, and
           one or more of the following conditions is met:
 
@@ -3712,10 +3739,10 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     6.  If |exact match| is `true`, and |path list A| does not have the same
         number of items as |path list B|, return "`Does Not Match`".
 
-    7.  If |exact match| is `false`:                                                                                                
-   
+    7.  If |exact match| is `false`:
+
         1.  Assert: the final item in |path list A| is the empty string.
-       
+
         2.  Remove the final item from |path list A|.
 
     8.  For each |piece A| in |path list A|:
