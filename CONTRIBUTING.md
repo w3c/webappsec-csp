@@ -1,8 +1,8 @@
 # Web Application Security Working Group
 
 Contributions to this repository are intended to become part of Recommendation-track documents
-governed by the [W3C Patent Policy](http://www.w3.org/Consortium/Patent-Policy-20040205/) and
-[Document License](http://www.w3.org/Consortium/Legal/copyright-documents). To contribute, you must
+governed by the [W3C Patent Policy](https://www.w3.org/Consortium/Patent-Policy/) and
+[Document License](https://www.w3.org/Consortium/Legal/copyright-documents). To contribute, you must
 either participate in the relevant W3C Working Group or make a non-member patent licensing
 commitment.
 
@@ -26,9 +26,4 @@ feature, you can remove yourself with the above syntax.
 
 # Tests
 
-For normative changes, a corresponding
-[web-platform-tests](https://github.com/w3c/web-platform-tests) PR is highly appreciated. Typically,
-both PRs will be merged at the same time. Note that a test change that contradicts the spec should
-not be merged before the corresponding spec change. If testing is not practical, please explain why
-and if appropriate [file an issue](https://github.com/w3c/web-platform-tests/issues/new) to follow
-up later. Add the `type:untestable` or `type:missing-coverage` label as appropriate.
+See [CONTRIBUTING.md](https://github.com/w3c/webappsec/blob/master/CONTRIBUTING.md).
