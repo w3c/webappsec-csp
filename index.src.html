@@ -474,7 +474,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   To <dfn abstract-op>parse a serialized CSP list</dfn>, given a [=serialized CSP list=] (|list|), a
   [=policy/source=] (|source|), and a [=policy/disposition=] (|disposition|), execute the following
   steps.
- 
+
   This algorithm returns a [=list=] of [=Content Security Policy objects=]. If |list| cannot be
   parsed, the returned list will be empty.
 
@@ -1420,7 +1420,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
           3.  If |source-list| is non-`null`, and does not contain a [=source expression=] which is
               an [=ASCII case-insensitive=] match for the string "<a grammar>`'unsafe-eval'`</a>",
               then:
-              
+
               1.  Let |violation| be the result of executing [[#create-violation-for-global]] on
                   |global|, |policy|, and "`script-src`".
 
@@ -1463,33 +1463,33 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
     [Constructor(DOMString type, optional SecurityPolicyViolationEventInit eventInitDict)]
     interface SecurityPolicyViolationEvent : Event {
-        readonly    attribute DOMString      documentURI;
-        readonly    attribute DOMString      referrer;
-        readonly    attribute DOMString      blockedURI;
+        readonly    attribute USVString      documentURI;
+        readonly    attribute USVString      referrer;
+        readonly    attribute USVString      blockedURI;
         readonly    attribute DOMString      violatedDirective;
         readonly    attribute DOMString      effectiveDirective;
         readonly    attribute DOMString      originalPolicy;
-        readonly    attribute DOMString      sourceFile;
+        readonly    attribute USVString      sourceFile;
         readonly    attribute DOMString      sample;
         readonly    attribute SecurityPolicyViolationEventDisposition      disposition;
         readonly    attribute unsigned short statusCode;
-        readonly    attribute long           lineNumber;
-        readonly    attribute long           columnNumber;
+        readonly    attribute unsigned long  lineNumber;
+        readonly    attribute unsigned long  columnNumber;
     };
 
     dictionary SecurityPolicyViolationEventInit : EventInit {
-        DOMString      documentURI;
-        DOMString      referrer;
-        DOMString      blockedURI;
-        DOMString      violatedDirective;
-        DOMString      effectiveDirective;
-        DOMString      originalPolicy;
-        DOMString      sourceFile;
-        DOMString      sample;
-        SecurityPolicyViolationEventDisposition      disposition;
-        unsigned short statusCode;
-        long           lineNumber;
-        long           columnNumber;
+        required USVString      documentURI;
+                 USVString      referrer = "";
+                 USVString      blockedURI = "";
+        required DOMString      violatedDirective;
+        required DOMString      effectiveDirective;
+        required DOMString      originalPolicy;
+                 USVString      sourceFile = "";
+                 DOMString      sample = "";
+        required SecurityPolicyViolationEventDisposition disposition;
+        required unsigned short statusCode;
+                 unsigned long  lineNumber = 0;
+                 unsigned long  columnNumber = 0;
     };
   </pre>
 
@@ -1642,46 +1642,50 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
               <a for="policy">directive set</a> contains a <a>directive</a> named
               "<a>`report-to`</a>", skip the remaining substeps.
 
-          2.  Let |endpoint| be the result of executing the <a>URL parser</a> with |directive|'s
-              <a for="directive">value</a> as the input, and |violation|'s
-              <a for="violation">url</a> as the <a>base URL</a>.
+          2.  For each |token| returned by <a lt="split a string on ASCII whitespace">
+              splitting a string on ASCII whitespace</a> with |directive|'s
+              <a for="directive">value</a> as the `input`.
 
-          3.  If |endpoint| is not a valid URL, skip the remaining substeps.
+              1.  Let |endpoint| be the result of executing the <a>URL parser</a>
+                  with |token| as the input, and |violation|'s
+                  <a for="violation">url</a> as the <a>base URL</a>.
 
-          4.  Let |request| be a new <a for="/">request</a>, initialized as follows:
+              2.  If |endpoint| is not a valid URL, skip the remaining substeps.
 
-              :   <a for="request">method</a>
-              ::  "`POST`"
-              :   <a for="request">url</a>
-              ::  |violation|'s <a for="violation">url</a>
-              :   <a for="request">origin</a>
-              ::  |violation|'s <a for="violation">global object</a>'s <a>relevant settings
-                  object</a>'s <a for="environment settings object">origin</a>
-              :   <a for="request">window</a>
-              ::  "`no-window`"
-              :   <a for="request">client</a>
-              ::  |violation|'s <a for="violation">global object</a>'s <a>relevant
-                  settings object</a>
-              :   <a for="request">destination</a>
-              ::  "`report`"
-              :   <a for="request">initiator</a>
-              ::  ""
-              :   <a for="request">credentials mode</a>
-              ::  "`same-origin`"
-              :   <a for="request">keepalive flag</a>
-              ::  "`true`"
-              :   <a for="request">header list</a>
-              ::  A header list containing a single header whose name is
-                  "`Content-Type`", and value is "`application/csp-report`"
-              :   <a for="request">body</a>
-              ::  The result of executing [[#deprecated-serialize-violation]] on
-                  |violation|
-              :   <a for="request">redirect mode</a>
-              ::  "`error`"
+              3.  Let |request| be a new <a for="/">request</a>, initialized as follows:
 
-              Note: |request|'s <a for="request">mode</a> defaults to "`no-cors`"; the response is ignored entirely.
+                  :   <a for="request">method</a>
+                  ::  "`POST`"
+                  :   <a for="request">url</a>
+                  ::  |violation|'s <a for="violation">url</a>
+                  :   <a for="request">origin</a>
+                  ::  |violation|'s <a for="violation">global object</a>'s <a>relevant settings
+                      object</a>'s <a for="environment settings object">origin</a>
+                  :   <a for="request">window</a>
+                  ::  "`no-window`"
+                  :   <a for="request">client</a>
+                  ::  |violation|'s <a for="violation">global object</a>'s <a>relevant
+                      settings object</a>
+                  :   <a for="request">destination</a>
+                  ::  "`report`"
+                  :   <a for="request">initiator</a>
+                  ::  ""
+                  :   <a for="request">credentials mode</a>
+                  ::  "`same-origin`"
+                  :   <a for="request">keepalive flag</a>
+                  ::  "`true`"
+                  :   <a for="request">header list</a>
+                  ::  A header list containing a single header whose name is
+                      "`Content-Type`", and value is "`application/csp-report`"
+                  :   <a for="request">body</a>
+                  ::  The result of executing [[#deprecated-serialize-violation]] on
+                      |violation|
+                  :   <a for="request">redirect mode</a>
+                  ::  "`error`"
 
-          5.  <a for="/">Fetch</a> |request|. The result will be ignored.
+                  Note: |request|'s <a for="request">mode</a> defaults to "`no-cors`"; the response is ignored entirely.
+
+              4.  <a for="/">Fetch</a> |request|. The result will be ignored.
 
           Note: All of this should be considered deprecated. It sends a single
           request per violation, which simply isn't scalable. As soon as this
@@ -3540,7 +3544,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
       4.  Let |port-part| be |expression|'s <a grammar>`port-part`</a> if present, and `null`
           otherwise.
-          
+
       5.  If |port-part| does not <a>`port-part` match</a> |url|'s [=url/port=] and |url|'s
           [=url/scheme=], return "`Does Not Match`".
 
@@ -3713,10 +3717,10 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     6.  If |exact match| is `true`, and |path list A| does not have the same
         number of items as |path list B|, return "`Does Not Match`".
 
-    7.  If |exact match| is `false`:                                                                                                
-   
+    7.  If |exact match| is `false`:
+
         1.  Assert: the final item in |path list A| is the empty string.
-       
+
         2.  Remove the final item from |path list A|.
 
     8.  For each |piece A| in |path list A|:
@@ -3819,7 +3823,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   3.  If |element| had a [=duplicate-attribute=] [=parse error=] during tokenization, return
       "`Not Nonceable`".
-  
+
       ISSUE(whatwg/html#3257): We need some sort of hook in HTML to record this error if we're
       planning on using it here.
 
