@@ -1473,8 +1473,10 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
         readonly    attribute DOMString      sample;
         readonly    attribute SecurityPolicyViolationEventDisposition      disposition;
         readonly    attribute unsigned short statusCode;
-        readonly    attribute unsigned long  lineNumber;
-        readonly    attribute unsigned long  columnNumber;
+        readonly    attribute unsigned long  lineNumber; // deprecated, use lineno instead
+        readonly    attribute unsigned long  columnNumber; // deprecated, use colno instead
+        readonly    attribute unsigned long  lineno;
+        readonly    attribute unsigned long  colno;
     };
 
     dictionary SecurityPolicyViolationEventInit : EventInit {
@@ -1572,9 +1574,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       given violation (which might manipulate the DOM).
 
       1.  If |target| is not `null`, and |global| is a {{Window}}, and |target|'s
-          <a>shadow-including root</A policy defines allowed and restricted behaviors, and may be applied to a Window, {{WorkerGlobalScope}, or WorkletGlobalScope as described in §4.2.2 Initialize a global object’s CSP list.
-
-a> is not |global|'s <a>associated
+          <a>shadow-including root</a> is not |global|'s <a>associated
           `Document`</a>, set |target| to `null`.
 
           Note: This ensures that we fire events only at elements <a>connected</a>
@@ -1617,12 +1617,18 @@ a> is not |global|'s <a>associated
           :: The result of executing the <a>URL serializer</a> on |violation|'s
              <a for="violation">source file</a>, with the `exclude fragment`
              flag set if the |violation|'s <a for="violation">source file</a>
-             it not null and the `empty string` otherwise.
+             it not `null` and the empty string otherwise.
           :  {{SecurityPolicyViolationEvent/statusCode}}
           :: |violation|'s <a for="violation">status</a>
           :  {{SecurityPolicyViolationEvent/lineNumber}}
           :: |violation|'s <a for="violation">line number</a>
           :  {{SecurityPolicyViolationEvent/columnNumber}}
+          :: |violation|'s <a for="violation">column number</a>
+          :: Note: `lineNumber` and `columnNumber` are deprecated please use
+             `lineno` and `colno` instead.
+          :  {{SecurityPolicyViolationEvent/lineno}}
+          :: |violation|'s <a for="violation">line number</a>
+          :  {{SecurityPolicyViolationEvent/colno}}
           :: |violation|'s <a for="violation">column number</a>
           :  {{SecurityPolicyViolationEvent/sample}}
           :: |violation|'s <a for="violation">sample</a>
