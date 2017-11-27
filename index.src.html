@@ -29,6 +29,7 @@ spec:html
     text: browsing context; for: /
     text: plugin document
     text: fallback base url
+    text: duplicate-attribute
   type: element
     text: a
     text: link
@@ -2700,7 +2701,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       2.  Stylesheet requests originating from the <a at-rule>`@import`</a>
           rule.
       3.  Stylesheet requests originating from a `Link` HTTP response header
-          field [[!RFC5988]].
+          field [[!RFC8288]].
 
   2.  <a>Responses</a> to style requests MUST pass through
       [[#should-block-response]].
@@ -3816,7 +3817,13 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
           the string "<code>&lt;script</code>" or the string
           "<code>&lt;style</code>", return "`Not Nonceable`".
 
-  3.  Return "`Nonceable`".
+  3.  If |element| had a [=duplicate-attribute=] [=parse error=] during tokenization, return
+      "`Not Nonceable`".
+  
+      ISSUE(whatwg/html#3257): We need some sort of hook in HTML to record this error if we're
+      planning on using it here.
+
+  4.  Return "`Nonceable`".
 
   ISSUE(w3c/webappsec-csp#98): This processing is meant to mitigate the risk
   of dangling markup attacks that steal the nonce from an existing element
