@@ -29,6 +29,7 @@ spec:html
     text: browsing context; for: /
     text: plugin document
     text: fallback base url
+    text: duplicate-attribute
   type: element
     text: a
     text: link
@@ -1818,7 +1819,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     provided do not match `child-src`'s <a>source list</a>:
 
     <pre highlight="html">
-      &lt;iframe src="https://not-example.com"&gt;&lt;/iframe&gt;
+      &lt;iframe src="https://example.org"&gt;&lt;/iframe&gt;
       &lt;script&gt;
         var blockedWorker = new Worker("data:application/javascript,...");
       &lt;/script&gt;
@@ -1908,17 +1909,17 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     provided do not match `connect-src`'s <a>source list</a>:
 
     <pre highlight="html">
-      &lt;a ping="https://not-example.com"&gt;...
+      &lt;a ping="https://example.org"&gt;...
       &lt;script&gt;
         var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'https://not-example.com/');
+        xhr.open('GET', 'https://example.org/');
         xhr.send();
 
-        var ws = new WebSocket("https://not-example.com/");
+        var ws = new WebSocket("https://example.org/");
 
-        var es = new EventSource("https://not-example.com/");
+        var es = new EventSource("https://example.org/");
 
-        navigator.sendBeacon("https://not-example.com/", { ... });
+        navigator.sendBeacon("https://example.org/", { ... });
       &lt;/script&gt;
     </pre>
   </div>
@@ -2117,7 +2118,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       &lt;style&gt;
         @font-face {
           font-family: "Example Font";
-          src: url("https://not-example.com/font");
+          src: url("https://example.org/font");
         }
         body {
           font-family: "Example Font";
@@ -2186,7 +2187,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     provided do not match `frame-src`'s <a>source list</a>:
 
     <pre highlight="html">
-      &lt;iframe src="https://not-example.com/"&gt;
+      &lt;iframe src="https://example.org/"&gt;
       &lt;/iframe&gt;
     </pre>
   </div>
@@ -2259,7 +2260,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     provided do not match `img-src`'s <a>source list</a>:
 
     <pre highlight="html">
-      &lt;img src="https://not-example.com/img"&gt;
+      &lt;img src="https://example.org/img"&gt;
     </pre>
   </div>
 
@@ -2323,7 +2324,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     provided do not match `manifest-src`'s <a>source list</a>:
 
     <pre highlight="html">
-      &lt;link rel="manifest" href="https://not-example.com/manifest"&gt;
+      &lt;link rel="manifest" href="https://example.org/manifest"&gt;
     </pre>
   </div>
 
@@ -2387,9 +2388,9 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     provided do not match `media-src`'s <a>source list</a>:
 
     <pre highlight="html">
-      &lt;audio src="https://not-example.com/audio"&gt;&lt;/audio&gt;
-      &lt;video src="https://not-example.com/video"&gt;
-          &lt;track kind="subtitles" src="https://not-example.com/subtitles"&gt;
+      &lt;audio src="https://example.org/audio"&gt;&lt;/audio&gt;
+      &lt;video src="https://example.org/video"&gt;
+          &lt;track kind="subtitles" src="https://example.org/subtitles"&gt;
       &lt;/video&gt;
     </pre>
   </div>
@@ -2456,9 +2457,9 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     provided do not match `object-src`'s <a>source list</a>:
 
     <pre highlight="html">
-      &lt;embed src="https://not-example.com/flash"&gt;&lt;/embed&gt;
-      &lt;object data="https://not-example.com/flash"&gt;&lt;/object&gt;
-      &lt;applet archive="https://not-example.com/flash"&gt;&lt;/applet&gt;
+      &lt;embed src="https://example.org/flash"&gt;&lt;/embed&gt;
+      &lt;object data="https://example.org/flash"&gt;&lt;/object&gt;
+      &lt;applet archive="https://example.org/flash"&gt;&lt;/applet&gt;
     </pre>
   </div>
 
@@ -2727,7 +2728,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       2.  Stylesheet requests originating from the <a at-rule>`@import`</a>
           rule.
       3.  Stylesheet requests originating from a `Link` HTTP response header
-          field [[!RFC5988]].
+          field [[!RFC8288]].
 
   2.  <a>Responses</a> to style requests MUST pass through
       [[#should-block-response]].
@@ -2847,8 +2848,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     <pre highlight="html">
       &lt;script&gt;
         var blockedWorker = new Worker("data:application/javascript,...");
-        blockedWorker = new SharedWorker("https://not-example.com/");
-        navigator.serviceWorker.register('https://not-example.com/sw.js');
+        blockedWorker = new SharedWorker("https://example.org/");
+        navigator.serviceWorker.register('https://example.org/sw.js');
       &lt;/script&gt;
     </pre>
   </div>
@@ -3843,7 +3844,13 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
           the string "<code>&lt;script</code>" or the string
           "<code>&lt;style</code>", return "`Not Nonceable`".
 
-  3.  Return "`Nonceable`".
+  3.  If |element| had a [=duplicate-attribute=] [=parse error=] during tokenization, return
+      "`Not Nonceable`".
+  
+      ISSUE(whatwg/html#3257): We need some sort of hook in HTML to record this error if we're
+      planning on using it here.
+
+  4.  Return "`Nonceable`".
 
   ISSUE(w3c/webappsec-csp#98): This processing is meant to mitigate the risk
   of dangling markup attacks that steal the nonce from an existing element
@@ -4122,18 +4129,18 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   the matching algorithm ignores the path component of a source
   expression if the resource being loaded is the result of a
   redirect. For example, given a page with an active policy of
-  <code><a>img-src</a> example.com not-example.com/path</code>:
+  <code><a>img-src</a> example.com example.org/path</code>:
 
-  *   Directly loading <code>https://not-example.com/not-path</code>
+  *   Directly loading <code>https://example.org/not-path</code>
       would fail, as it doesn't match the policy.
 
   *   Directly loading <code>https://example.com/redirector</code>
       would pass, as it matches <code>example.com</code>.
 
   *   Assuming that <code>https://example.com/redirector</code>
-      delivered a redirect response pointing to <code>https://not-example.com/not-path</code>,
+      delivered a redirect response pointing to <code>https://example.org/not-path</code>,
       the load would succeed, as the initial URL matches <code>example.com</code>,
-      and the redirect target matches <code>not-example.com/path</code>
+      and the redirect target matches <code>example.org/path</code>
       if we ignore its path component.
 
   This restriction reduces the granularity of a document's policy when redirects are in play, a
