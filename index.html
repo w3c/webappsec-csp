@@ -1178,7 +1178,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 598edd67958c4af02f5d5c1b80d0267afc6cccf8" name="generator">
   <link href="https://www.w3.org/TR/CSP3/" rel="canonical">
-  <meta content="24c27c9c5fac6ea1d2c85deb6a8c6b3caca2f3df" name="document-revision">
+  <meta content="d5a5f52f312e59e16392e7fa7bcd42d06de77572" name="document-revision">
 <style>
   ul.toc ul ul ul {
     margin: 0 0 0 2em;
@@ -1770,6 +1770,7 @@ of security-relevant policy decisions.</p>
       <li><a href="#security-violation-reports"><span class="secno">7.5</span> <span class="content">Violation Reports</span></a>
       <li><a href="#source-list-paths-and-redirects"><span class="secno">7.6</span> <span class="content">Paths and Redirects</span></a>
       <li><a href="#security-secure-upgrades"><span class="secno">7.7</span> <span class="content">Secure Upgrades</span></a>
+      <li><a href="#security-inherit-csp"><span class="secno">7.8</span> <span class="content"> CSP Inheriting to avoid bypasses </span></a>
      </ol>
     <li>
      <a href="#authoring-considerations"><span class="secno">8</span> <span class="content">Authoring Considerations</span></a>
@@ -2513,7 +2514,7 @@ of security-relevant policy decisions.</p>
           <p>For each <var>policy</var> in <var>doc</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-document-csp-list" id="ref-for-concept-document-csp-list①">CSP list</a>:</p>
           <ol>
            <li data-md="">
-            <p>Insert a copy of <var>policy</var> in <var>document</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-document-csp-list" id="ref-for-concept-document-csp-list②">CSP list</a>.</p>
+            <p>Insert a copy of <var>policy</var> into <var>document</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-document-csp-list" id="ref-for-concept-document-csp-list②">CSP list</a>.</p>
           </ol>
         </ol>
       </ol>
@@ -2552,7 +2553,7 @@ of security-relevant policy decisions.</p>
           <p>For each <var>policy</var> in <var>owner</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑤">CSP list</a>:</p>
           <ol>
            <li data-md="">
-            <p>Insert a copy of <var>policy</var> in <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑥">CSP list</a>.</p>
+            <p>Insert a copy of <var>policy</var> into <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑥">CSP list</a>.</p>
           </ol>
         </ol>
       </ol>
@@ -2573,7 +2574,7 @@ of security-relevant policy decisions.</p>
         <p>For each <var>policy</var> in <var>owner</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑧">CSP list</a>:</p>
         <ol>
          <li data-md="">
-          <p>Insert a copy of <var>policy</var> in <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑨">CSP list</a>.</p>
+          <p>Insert a copy of <var>policy</var> into <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑨">CSP list</a>.</p>
         </ol>
       </ol>
     </ol>
@@ -4953,6 +4954,31 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
     <p>To mitigate one variant of history-scanning attacks like Yan Zhu’s <a href="http://diracdeltas.github.io/sniffly/">Sniffly</a>, CSP will not allow pages to lock
   themselves into insecure URLs via policies like <code>script-src http://example.com</code>. As described in <a href="#match-schemes">§6.6.1.7 scheme-part matching</a>, the scheme portion of a source expression will always allow upgrading to a
   secure variant.</p>
+    <h3 class="heading settled" data-level="7.8" id="security-inherit-csp"><span class="secno">7.8. </span><span class="content"> CSP Inheriting to avoid bypasses </span><a class="self-link" href="#security-inherit-csp"></a></h3>
+    <p>As described in <a href="#initialize-document-csp">§4.2.1 Initialize a Document's CSP list</a> and <a href="#initialize-global-object-csp">§4.2.2 Initialize a global object’s CSP list</a>,
+  documents loaded from <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#local-scheme" id="ref-for-local-scheme⑤">local schemes</a> will inherit a copy of the
+  policies in the <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list①⑧">CSP list</a> of the <a data-link-type="dfn" href="#embedding-document" id="ref-for-embedding-document③">embedding document</a> or <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#opener-browsing-context" id="ref-for-opener-browsing-context②">opener browsing context</a>. The goal is to ensure that a page can’t
+  bypass its policy by embedding a frame or opening a new window containg
+  content that is entirely under its control (<code>srcdoc</code> documents, <code>blob:</code> or <code>data:</code> URLs, <code>about:blank</code> documents that can be manipulated via <code>document.write()</code>, etc).</p>
+    <div class="example" id="example-7a5b0df0">
+     <a class="self-link" href="#example-7a5b0df0"></a> If this would not happen a page could execute inline scripts even without <code>unsafe-inline</code> in the page’s execution context by simply embedding a <code>srcdoc</code> <code>iframe</code>. 
+<pre class="highlight"><span class="p">&lt;</span><span class="nt">iframe</span> <span class="na">srcdoc</span><span class="o">=</span><span class="s">"&lt;script>alert(1);&lt;/script>"</span><span class="p">>&lt;/</span><span class="nt">iframe</span><span class="p">></span>
+</pre>
+    </div>
+    <p>Note that we create a copy of the <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list①⑨">CSP list</a> which
+  means that the new <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①⑨">Document</a></code>'s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list②⓪">CSP list</a> is a
+  snapshot of the relevant policies at its creation time. Modifications in the <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list②①">CSP list</a> of the new <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document②⓪">Document</a></code> won’t affect the <a data-link-type="dfn" href="#embedding-document" id="ref-for-embedding-document④">embedding document</a> or <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#opener-browsing-context" id="ref-for-opener-browsing-context③">opener browsing context</a>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list②②">CSP list</a> or vice-versa.</p>
+    <div class="example" id="example-3c6e0109">
+     <a class="self-link" href="#example-3c6e0109"></a> In the example below the image inside the iframe will not load because it is
+    blocked by the policy in the <code>meta</code> tag of the iframe. The image outside the
+    iframe will load (assuming the main page policy does not block it) since the
+    policy inserted in the iframe will not affect it. 
+<pre class="highlight"><span class="p">&lt;</span><span class="nt">iframe</span> <span class="na">srcdoc</span><span class="o">=</span><span class="s">'&lt;meta http-equiv="Content-Security-Policy" content="img-src example.com;"></span>
+<span class="s">                   &lt;img src="not-example.com/image">'</span><span class="p">>&lt;/</span><span class="nt">iframe</span><span class="p">></span>
+
+<span class="p">&lt;</span><span class="nt">img</span> <span class="na">src</span><span class="o">=</span><span class="s">"not-example.com/image"</span><span class="p">></span>
+</pre>
+    </div>
    </section>
    <section>
     <h2 class="heading settled" data-level="8" id="authoring-considerations"><span class="secno">8. </span><span class="content">Authoring Considerations</span><a class="self-link" href="#authoring-considerations"></a></h2>
@@ -6953,6 +6979,8 @@ rest of Google’s CSP Cabal.</p>
     EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a>
     <li><a href="#ref-for-global-object-csp-list①⑦">6.2.1.1. 
     Is base allowed for document? </a>
+    <li><a href="#ref-for-global-object-csp-list①⑧">7.8. 
+    CSP Inheriting to avoid bypasses </a> <a href="#ref-for-global-object-csp-list①⑨">(2)</a> <a href="#ref-for-global-object-csp-list②⓪">(3)</a> <a href="#ref-for-global-object-csp-list②①">(4)</a> <a href="#ref-for-global-object-csp-list②②">(5)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="enforced">
@@ -6978,6 +7006,8 @@ rest of Google’s CSP Cabal.</p>
     Initialize a Document's CSP list </a> <a href="#ref-for-embedding-document①">(2)</a>
     <li><a href="#ref-for-embedding-document②">4.2.2. 
     Initialize a global object’s CSP list </a>
+    <li><a href="#ref-for-embedding-document③">7.8. 
+    CSP Inheriting to avoid bypasses </a> <a href="#ref-for-embedding-document④">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="violation-report">
