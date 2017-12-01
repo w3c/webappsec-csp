@@ -390,7 +390,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   <h3 id="framework-policy">Policies</h3>
 
   A <dfn export lt="content security policy object" local-lt="policy">policy</dfn> defines allowed
-  and restricted behaviors, and may be applied to a {{Window}}, {{WorkerGlobalScope}, or
+  and restricted behaviors, and may be applied to a {{Window}}, {{WorkerGlobalScope}}, or
   {{WorkletGlobalScope}} as described in [[#initialize-global-object-csp]].
 
   Each policy has an associated <dfn for="policy" export>directive set</dfn>, which is an <a>ordered
@@ -474,7 +474,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   To <dfn abstract-op>parse a serialized CSP list</dfn>, given a [=serialized CSP list=] (|list|), a
   [=policy/source=] (|source|), and a [=policy/disposition=] (|disposition|), execute the following
   steps.
- 
+
   This algorithm returns a [=list=] of [=Content Security Policy objects=]. If |list| cannot be
   parsed, the returned list will be empty.
 
@@ -1087,38 +1087,41 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   </h3>
 
   1.  The {{Document}}, {{WorkerGlobalScope}}, and {{WorkletGlobalScope}} objects have a
-      <dfn for="global object" id="global-object-csp-list">CSP list</dfn>,
-      which holds all the <a for="/">policy</a> objects which are active for a given
-      context. This list is empty unless otherwise specified, and is populated
-      via the [[#initialize-global-object-csp]] algorithm.
+      `CSP list`, which holds all the <a for="/">policy</a> objects which are
+      active for a given context. This list is empty unless otherwise specified,
+      and is populated via the [[#initialize-global-object-csp]] algorithm.
 
       ISSUE(w3c/html#187): This concept is missing from W3C's Workers.
 
-  2.  A <a for="/">policy</a> is <dfn export>enforced</dfn> or <dfn export>monitored</dfn> for a
+  2.  A <a for="/">global object</a>'s <dfn for="global object" id="global-object-csp-list">CSP list</dfn>
+      is the result of executing [[#get-csp-of-object]] with the <a for="/">global object</a>
+      as the `object`.
+
+  3.  A <a for="/">policy</a> is <dfn export>enforced</dfn> or <dfn export>monitored</dfn> for a
       <a for="/">global object</a> by inserting it into the <a for="/">global object</a>'s
       <a for="global object">CSP list</a>.
 
-  3.  [[#initialize-global-object-csp]] is called during the <a>initializing a
+  4.  [[#initialize-global-object-csp]] is called during the <a>initializing a
       new `Document` object</a> and <a>run a worker</a> algorithms in order to
-      bind a set of <a for="/">policy</a> objects associated with a <a>response</a> to a
-      newly created <a for="/">global object</a>.
+      bind a set of <a for="/">policy</a> objects associated with a <a>response</a>
+      to a newly created {{Document}}, {{WorkerGlobalScope}} or {{WorkletGlobalScope}}.
 
-  4.  [[#should-block-inline]] is called during the <a>prepare a script</a> and
+  5.  [[#should-block-inline]] is called during the <a>prepare a script</a> and
       <a>update a `style` block</a> algorithms in order to determine whether or
       not an inline script or style block is allowed to execute/render.
 
-  5.  [[#should-block-inline]] is called during handling of inline event
+  6.  [[#should-block-inline]] is called during handling of inline event
       handlers (like `onclick`) and inline `style` attributes in order to
       determine whether or not they ought to be allowed to execute/render.
 
-  6.  <a for="/">policy</a> is <a>enforced</a> during processing of the <{meta}>
+  7.  <a for="/">policy</a> is <a>enforced</a> during processing of the <{meta}>
       element's <{meta/http-equiv}>.
 
-  7.  A {{Document}}'s <dfn>embedding document</dfn> is the {{Document}}
+  8.  A {{Document}}'s <dfn>embedding document</dfn> is the {{Document}}
       <a lt="nested through">through which</a> the {{Document}}'s
       <a>browsing context</a> is nested.
 
-  8.  HTML populates each <a for="/">request</a>'s <a for="request">cryptographic nonce
+  9.  HTML populates each <a for="/">request</a>'s <a for="request">cryptographic nonce
       metadata</a> and <a>parser metadata</a> with relevant data from the
       elements responsible for resource loading.
 
@@ -1128,11 +1131,11 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       ISSUE(whatwg/html#968): Stylesheet loading is not yet integrated with
       Fetch in WHATWG's HTML.
 
-  9.  [[#allow-base-for-document]] is called during <{base}>'s <a>set the frozen
+  10. [[#allow-base-for-document]] is called during <{base}>'s <a>set the frozen
       base URL</a> algorithm to ensure that the <{base/href}> attribute's value
       is valid.
 
-  10. [[#should-plugin-element-be-blocked-a-priori-by-content-security-policy]]
+  11. [[#should-plugin-element-be-blocked-a-priori-by-content-security-policy]]
       is called during the processing of <{object}>, <{embed}>, and <a>`applet`</a>
       elements to determine whether they may trigger a fetch.
 
@@ -1140,7 +1143,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
       ISSUE(w3c/html#547): This hook is missing from W3C's HTML.
 
-  11. [[#should-block-navigation-request]] is called during the <a>process a
+  12. [[#should-block-navigation-request]] is called during the <a>process a
       navigate fetch</a> algorithm, and [[#should-block-navigation-response]]
       is called during the <a>process a navigate response</a> algorithm to
       apply directive's navigation checks, as well as inline checks for
@@ -1232,6 +1235,23 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       2. For each |policy| in |owner|'s <a for="global object">CSP list</a>:
 
           1.  Insert an alias to |policy| in |global|'s <a for="global object">CSP list</a>.
+
+  <h4 id="get-csp-of-object" algorithm>
+    Retrieve the <a for="global object">CSP list</a> of an |object|
+  </h4>
+
+  To obtain |object|'s <a for="global object">CSP list</a>:
+
+  1.  If |object| is a {{Document}} return |object|'s <a for="Document">CSP list</a>.
+
+  2.  If |object| is a {{Window}} return |object|'s <a>associated `Document`</a>'s
+      <a for="Document">CSP list</a>.
+
+  3.  If |object| is a {{WorkerGlobalScope}}, return |object|'s <a for="global object">CSP list</a>.
+
+  4.  If |object| is a {{WorkletGlobalScope}}, return |object|'s <a for="global object">CSP list</a>.
+
+  5.  Return `null`.
 
   <h4 id="should-block-inline" algorithm>
     Should |element|'s inline |type| behavior be blocked by Content Security Policy?
@@ -1420,7 +1440,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
           3.  If |source-list| is non-`null`, and does not contain a [=source expression=] which is
               an [=ASCII case-insensitive=] match for the string "<a grammar>`'unsafe-eval'`</a>",
               then:
-              
+
               1.  Let |violation| be the result of executing [[#create-violation-for-global]] on
                   |global|, |policy|, and "`script-src`".
 
@@ -3540,7 +3560,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
       4.  Let |port-part| be |expression|'s <a grammar>`port-part`</a> if present, and `null`
           otherwise.
-          
+
       5.  If |port-part| does not <a>`port-part` match</a> |url|'s [=url/port=] and |url|'s
           [=url/scheme=], return "`Does Not Match`".
 
@@ -3561,7 +3581,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       1.  |origin| is the same as |url|'s <a for="url">origin</a>
 
       2.  |origin|'s {{URL/host}} is the same as |url|'s {{URL/host}},
-          |origin|'s {{URL/port}} and |url|'s {{URL/port} are either the same
+          |origin|'s {{URL/port}} and |url|'s {{URL/port}} are either the same
           or the <a>default ports</a> for their respective <a for="url">scheme</a>s, and
           one or more of the following conditions is met:
 
@@ -3713,10 +3733,10 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     6.  If |exact match| is `true`, and |path list A| does not have the same
         number of items as |path list B|, return "`Does Not Match`".
 
-    7.  If |exact match| is `false`:                                                                                                
-   
+    7.  If |exact match| is `false`:
+
         1.  Assert: the final item in |path list A| is the empty string.
-       
+
         2.  Remove the final item from |path list A|.
 
     8.  For each |piece A| in |path list A|:
@@ -3819,7 +3839,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   3.  If |element| had a [=duplicate-attribute=] [=parse error=] during tokenization, return
       "`Not Nonceable`".
-  
+
       ISSUE(whatwg/html#3257): We need some sort of hook in HTML to record this error if we're
       planning on using it here.
 
