@@ -1178,7 +1178,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version fbf1456a756299b3ff6d248d0857ec87f2e68cd7" name="generator">
   <link href="https://www.w3.org/TR/CSP3/" rel="canonical">
-  <meta content="cbf0037817daf1bb1a0ce4abb5fd567bd1423173" name="document-revision">
+  <meta content="4ba38508fb23a7ba4517458ed1a8535879ad358f" name="document-revision">
 <style>
   ul.toc ul ul ul {
     margin: 0 0 0 2em;
@@ -1458,7 +1458,7 @@ pre.highlight, pre > code.highlight { display: block; padding: 1em; margin: .5em
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1>Content Security Policy Level 3</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2017-11-29">29 November 2017</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2017-12-01">1 December 2017</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1770,6 +1770,7 @@ of security-relevant policy decisions.</p>
       <li><a href="#security-violation-reports"><span class="secno">7.5</span> <span class="content">Violation Reports</span></a>
       <li><a href="#source-list-paths-and-redirects"><span class="secno">7.6</span> <span class="content">Paths and Redirects</span></a>
       <li><a href="#security-secure-upgrades"><span class="secno">7.7</span> <span class="content">Secure Upgrades</span></a>
+      <li><a href="#security-inherit-csp"><span class="secno">7.8</span> <span class="content"> CSP Inheriting to avoid bypasses </span></a>
      </ol>
     <li>
      <a href="#authoring-considerations"><span class="secno">8</span> <span class="content">Authoring Considerations</span></a>
@@ -2267,7 +2268,7 @@ of security-relevant policy decisions.</p>
   whose <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/multipage/semantics.html#attr-meta-http-equiv" id="ref-for-attr-meta-http-equiv①">http-equiv</a></code> attributes are an <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ascii-case-insensitive" id="ref-for-ascii-case-insensitive">ASCII case-insensitive</a> match for the string "<code>Content-Security-Policy</code>". For example:</p>
     <div class="example" id="example-f977fbdb">
      <a class="self-link" href="#example-f977fbdb"></a> 
-<pre class="highlight"><span class="p">&lt;</span><span class="nt">meta</span> <span class="na">http-equiv</span><span class="o">=</span><span class="s">"Content-Security-Policy"</span> <span class="na">content</span><span class="o">=</span><span class="s">"script-src 'self'"</span><span class="p">></span>
+<pre class="highlight"><span class="nt">&lt;meta</span> <span class="na">http-equiv=</span><span class="s">"Content-Security-Policy"</span> <span class="na">content=</span><span class="s">"script-src 'self'"</span><span class="nt">></span>
 </pre>
     </div>
     <p>Implementation details can be found in HTML’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/semantics.html#attr-meta-http-equiv-content-security-policy" id="ref-for-attr-meta-http-equiv-content-security-policy">Content Security Policy
@@ -2513,12 +2514,12 @@ of security-relevant policy decisions.</p>
           <p>For each <var>policy</var> in <var>doc</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-document-csp-list" id="ref-for-concept-document-csp-list①">CSP list</a>:</p>
           <ol>
            <li data-md="">
-            <p>Insert an alias to <var>policy</var> in <var>document</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-document-csp-list" id="ref-for-concept-document-csp-list②">CSP list</a>.</p>
+            <p>Insert a copy of <var>policy</var> into <var>document</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-document-csp-list" id="ref-for-concept-document-csp-list②">CSP list</a>.</p>
           </ol>
         </ol>
       </ol>
       <p class="note" role="note"><span>Note:</span> <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#local-scheme" id="ref-for-local-scheme②">local scheme</a> includes <code>about:</code>, and this algorithm will
-  therefore alias the <a data-link-type="dfn" href="#embedding-document" id="ref-for-embedding-document①">embedding document</a>’s policies for <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#an-iframe-srcdoc-document" id="ref-for-an-iframe-srcdoc-document">an iframe <code>srcdoc</code> <code>Document</code></a>.</p>
+  therefore copy the <a data-link-type="dfn" href="#embedding-document" id="ref-for-embedding-document①">embedding document</a>’s policies for <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#an-iframe-srcdoc-document" id="ref-for-an-iframe-srcdoc-document">an iframe <code>srcdoc</code> <code>Document</code></a>.</p>
       <p class="note" role="note"><span>Note:</span> We do all this to ensure that a page cannot bypass its <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object②④">policy</a> by embedding a frame or popping up a new window containing content it
   controls (<code>blob:</code> resources, or <code>document.write()</code>).</p>
      <li data-md="">
@@ -2552,12 +2553,12 @@ of security-relevant policy decisions.</p>
           <p>For each <var>policy</var> in <var>owner</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑤">CSP list</a>:</p>
           <ol>
            <li data-md="">
-            <p>Insert an alias to <var>policy</var> in <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑥">CSP list</a>.</p>
+            <p>Insert a copy of <var>policy</var> into <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑥">CSP list</a>.</p>
           </ol>
         </ol>
       </ol>
       <p class="note" role="note"><span>Note:</span> <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#local-scheme" id="ref-for-local-scheme④">local scheme</a> includes <code>about:</code>, and this algorithm will
-  therefore alias the <a data-link-type="dfn" href="#embedding-document" id="ref-for-embedding-document②">embedding document</a>’s policies for <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#an-iframe-srcdoc-document" id="ref-for-an-iframe-srcdoc-document①">an iframe <code>srcdoc</code> <code>Document</code></a>.</p>
+  therefore copy the <a data-link-type="dfn" href="#embedding-document" id="ref-for-embedding-document②">embedding document</a>’s policies for <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#an-iframe-srcdoc-document" id="ref-for-an-iframe-srcdoc-document①">an iframe <code>srcdoc</code> <code>Document</code></a>.</p>
      <li data-md="">
       <p>If <var>global</var> is a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#sharedworkerglobalscope" id="ref-for-sharedworkerglobalscope">SharedWorkerGlobalScope</a></code> or <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/ServiceWorker/#serviceworkerglobalscope" id="ref-for-serviceworkerglobalscope">ServiceWorkerGlobalScope</a></code>:</p>
       <ol>
@@ -2573,7 +2574,7 @@ of security-relevant policy decisions.</p>
         <p>For each <var>policy</var> in <var>owner</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑧">CSP list</a>:</p>
         <ol>
          <li data-md="">
-          <p>Insert an alias to <var>policy</var> in <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑨">CSP list</a>.</p>
+          <p>Insert a copy of <var>policy</var> into <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑨">CSP list</a>.</p>
         </ol>
       </ol>
     </ol>
@@ -3117,10 +3118,10 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 </pre>
      <p>Fetches for the following code will all return network errors, as the URLs
     provided do not match <code>child-src</code>'s <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists">source list</a>:</p>
-<pre class="highlight"><span class="p">&lt;</span><span class="nt">iframe</span> <span class="na">src</span><span class="o">=</span><span class="s">"https://example.org"</span><span class="p">>&lt;/</span><span class="nt">iframe</span><span class="p">></span>
-<span class="p">&lt;</span><span class="nt">script</span><span class="p">></span>
+<pre class="highlight"><span class="nt">&lt;iframe</span> <span class="na">src=</span><span class="s">"https://example.org"</span><span class="nt">>&lt;/iframe></span>
+<span class="nt">&lt;script></span>
   <span class="kd">var</span> blockedWorker <span class="o">=</span> <span class="k">new</span> Worker<span class="p">(</span><span class="s2">"data:application/javascript,..."</span><span class="p">);</span>
-<span class="p">&lt;/</span><span class="nt">script</span><span class="p">></span>
+<span class="nt">&lt;/script></span>
 </pre>
     </div>
     <h5 class="heading settled algorithm" data-algorithm="child-src Pre-request check" data-level="6.1.1.1" id="child-src-pre-request"><span class="secno">6.1.1.1. </span><span class="content"> <code>child-src</code> Pre-request check </span><a class="self-link" href="#child-src-pre-request"></a></h5>
@@ -3177,8 +3178,8 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 </pre>
      <p>Fetches for the following code will all return network errors, as the URLs
     provided do not match <code>connect-src</code>'s <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists①">source list</a>:</p>
-<pre class="highlight"><span class="p">&lt;</span><span class="nt">a</span> <span class="na">ping</span><span class="o">=</span><span class="s">"https://example.org"</span><span class="p">></span>...
-<span class="p">&lt;</span><span class="nt">script</span><span class="p">></span>
+<pre class="highlight"><span class="nt">&lt;a</span> <span class="na">ping=</span><span class="s">"https://example.org"</span><span class="nt">></span>...
+<span class="nt">&lt;script></span>
   <span class="kd">var</span> xhr <span class="o">=</span> <span class="k">new</span> XMLHttpRequest<span class="p">();</span>
   xhr<span class="p">.</span>open<span class="p">(</span><span class="s1">'GET'</span><span class="p">,</span> <span class="s1">'https://example.org/'</span><span class="p">);</span>
   xhr<span class="p">.</span>send<span class="p">();</span>
@@ -3188,7 +3189,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
   <span class="kd">var</span> es <span class="o">=</span> <span class="k">new</span> EventSource<span class="p">(</span><span class="s2">"https://example.org/"</span><span class="p">);</span>
 
   navigator<span class="p">.</span>sendBeacon<span class="p">(</span><span class="s2">"https://example.org/"</span><span class="p">,</span> <span class="p">{</span> <span class="p">...</span> <span class="p">});</span>
-<span class="p">&lt;/</span><span class="nt">script</span><span class="p">></span>
+<span class="nt">&lt;/script></span>
 </pre>
     </div>
     <h5 class="heading settled algorithm" data-algorithm="connect-src Pre-request check" data-level="6.1.2.1" id="connect-src-pre-request"><span class="secno">6.1.2.1. </span><span class="content"> <code>connect-src</code> Pre-request check </span><a class="self-link" href="#connect-src-pre-request"></a></h5>
@@ -3325,15 +3326,15 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 </pre>
      <p>Fetches for the following code will return a network errors, as the URL
     provided do not match <code>font-src</code>'s <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists③">source list</a>:</p>
-<pre class="highlight"><span class="p">&lt;</span><span class="nt">style</span><span class="p">></span>
-  <span class="p">@</span><span class="k">font-face</span> <span class="p">{</span>
+<pre class="highlight"><span class="nt">&lt;style></span>
+  <span class="k">@font-face</span> <span class="p">{</span>
     <span class="nt">font-family</span><span class="o">:</span> <span class="s2">"Example Font"</span><span class="o">;</span>
     <span class="nt">src</span><span class="o">:</span> <span class="nt">url</span><span class="o">(</span><span class="s2">"https://example.org/font"</span><span class="o">);</span>
   <span class="p">}</span>
   <span class="nt">body</span> <span class="p">{</span>
-    <span class="k">font-family</span><span class="p">:</span> <span class="s2">"Example Font"</span><span class="p">;</span>
+    <span class="k">font-family</span><span class="o">:</span> <span class="s2">"Example Font"</span><span class="p">;</span>
   <span class="p">}</span>
-<span class="p">&lt;/</span><span class="nt">style</span><span class="p">></span>
+<span class="nt">&lt;/style></span>
 </pre>
     </div>
     <h5 class="heading settled algorithm" data-algorithm="font-src Pre-request check" data-level="6.1.4.1" id="font-src-pre-request"><span class="secno">6.1.4.1. </span><span class="content"> <code>font-src</code> Pre-request check </span><a class="self-link" href="#font-src-pre-request"></a></h5>
@@ -3380,8 +3381,8 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 </pre>
      <p>Fetches for the following code will return a network errors, as the URL
     provided do not match <code>frame-src</code>'s <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists④">source list</a>:</p>
-<pre class="highlight"><span class="p">&lt;</span><span class="nt">iframe</span> <span class="na">src</span><span class="o">=</span><span class="s">"https://example.org/"</span><span class="p">></span>
-<span class="p">&lt;/</span><span class="nt">iframe</span><span class="p">></span>
+<pre class="highlight"><span class="nt">&lt;iframe</span> <span class="na">src=</span><span class="s">"https://example.org/"</span><span class="nt">></span>
+<span class="nt">&lt;/iframe></span>
 </pre>
     </div>
     <h5 class="heading settled algorithm" data-algorithm="frame-src Pre-request check" data-level="6.1.5.1" id="frame-src-pre-request"><span class="secno">6.1.5.1. </span><span class="content"> <code>frame-src</code> Pre-request check </span><a class="self-link" href="#frame-src-pre-request"></a></h5>
@@ -3433,7 +3434,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 </pre>
      <p>Fetches for the following code will return a network errors, as the URL
     provided do not match <code>img-src</code>'s <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists⑤">source list</a>:</p>
-<pre class="highlight"><span class="p">&lt;</span><span class="nt">img</span> <span class="na">src</span><span class="o">=</span><span class="s">"https://example.org/img"</span><span class="p">></span>
+<pre class="highlight"><span class="nt">&lt;img</span> <span class="na">src=</span><span class="s">"https://example.org/img"</span><span class="nt">></span>
 </pre>
     </div>
     <h5 class="heading settled algorithm" data-algorithm="img-src Pre-request check" data-level="6.1.6.1" id="img-src-pre-request"><span class="secno">6.1.6.1. </span><span class="content"> <code>img-src</code> Pre-request check </span><a class="self-link" href="#img-src-pre-request"></a></h5>
@@ -3481,7 +3482,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 </pre>
      <p>Fetches for the following code will return a network errors, as the URL
     provided do not match <code>manifest-src</code>'s <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists⑥">source list</a>:</p>
-<pre class="highlight"><span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">"manifest"</span> <span class="na">href</span><span class="o">=</span><span class="s">"https://example.org/manifest"</span><span class="p">></span>
+<pre class="highlight"><span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">"manifest"</span> <span class="na">href=</span><span class="s">"https://example.org/manifest"</span><span class="nt">></span>
 </pre>
     </div>
     <h5 class="heading settled algorithm" data-algorithm="manifest-src Pre-request check" data-level="6.1.7.1" id="manifest-src-pre-request"><span class="secno">6.1.7.1. </span><span class="content"> <code>manifest-src</code> Pre-request check </span><a class="self-link" href="#manifest-src-pre-request"></a></h5>
@@ -3529,10 +3530,10 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 </pre>
      <p>Fetches for the following code will return a network errors, as the URL
     provided do not match <code>media-src</code>'s <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists⑦">source list</a>:</p>
-<pre class="highlight"><span class="p">&lt;</span><span class="nt">audio</span> <span class="na">src</span><span class="o">=</span><span class="s">"https://example.org/audio"</span><span class="p">>&lt;/</span><span class="nt">audio</span><span class="p">></span>
-<span class="p">&lt;</span><span class="nt">video</span> <span class="na">src</span><span class="o">=</span><span class="s">"https://example.org/video"</span><span class="p">></span>
-    <span class="p">&lt;</span><span class="nt">track</span> <span class="na">kind</span><span class="o">=</span><span class="s">"subtitles"</span> <span class="na">src</span><span class="o">=</span><span class="s">"https://example.org/subtitles"</span><span class="p">></span>
-<span class="p">&lt;/</span><span class="nt">video</span><span class="p">></span>
+<pre class="highlight"><span class="nt">&lt;audio</span> <span class="na">src=</span><span class="s">"https://example.org/audio"</span><span class="nt">>&lt;/audio></span>
+<span class="nt">&lt;video</span> <span class="na">src=</span><span class="s">"https://example.org/video"</span><span class="nt">></span>
+    <span class="nt">&lt;track</span> <span class="na">kind=</span><span class="s">"subtitles"</span> <span class="na">src=</span><span class="s">"https://example.org/subtitles"</span><span class="nt">></span>
+<span class="nt">&lt;/video></span>
 </pre>
     </div>
     <h5 class="heading settled algorithm" data-algorithm="media-src Pre-request check" data-level="6.1.8.1" id="media-src-pre-request"><span class="secno">6.1.8.1. </span><span class="content"> <code>media-src</code> Pre-request check </span><a class="self-link" href="#media-src-pre-request"></a></h5>
@@ -3582,9 +3583,9 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 </pre>
      <p>Fetches for the following code will return a network errors, as the URL
     provided do not match <code>object-src</code>'s <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists⑧">source list</a>:</p>
-<pre class="highlight"><span class="p">&lt;</span><span class="nt">embed</span> <span class="na">src</span><span class="o">=</span><span class="s">"https://example.org/flash"</span><span class="p">>&lt;/</span><span class="nt">embed</span><span class="p">></span>
-<span class="p">&lt;</span><span class="nt">object</span> <span class="na">data</span><span class="o">=</span><span class="s">"https://example.org/flash"</span><span class="p">>&lt;/</span><span class="nt">object</span><span class="p">></span>
-<span class="p">&lt;</span><span class="nt">applet</span> <span class="na">archive</span><span class="o">=</span><span class="s">"https://example.org/flash"</span><span class="p">>&lt;/</span><span class="nt">applet</span><span class="p">></span>
+<pre class="highlight"><span class="nt">&lt;embed</span> <span class="na">src=</span><span class="s">"https://example.org/flash"</span><span class="nt">>&lt;/embed></span>
+<span class="nt">&lt;object</span> <span class="na">data=</span><span class="s">"https://example.org/flash"</span><span class="nt">>&lt;/object></span>
+<span class="nt">&lt;applet</span> <span class="na">archive=</span><span class="s">"https://example.org/flash"</span><span class="nt">>&lt;/applet></span>
 </pre>
     </div>
     <p>If plugin content is loaded without an associated URL (perhaps an <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-object-element" id="ref-for-the-object-element①">object</a></code> element lacks a <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#attr-object-data" id="ref-for-attr-object-data">data</a></code> attribute, but loads some default plugin based
@@ -3839,7 +3840,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
         <p><a data-link-type="dfn" href="https://drafts.csswg.org/cssom-1/#parse-a-group-of-selectors" id="ref-for-parse-a-group-of-selectors">parse a group of selectors</a></p>
       </ol>
       <p>This would include, for example, all invocations of CSSOM’s various <code>cssText</code> setters and <code>insertRule</code> methods <a data-link-type="biblio" href="#biblio-cssom">[CSSOM]</a> <a data-link-type="biblio" href="#biblio-html">[HTML]</a>.</p>
-      <p class="issue" id="issue-ba1a0a35"><a class="self-link" href="#issue-ba1a0a35"></a> This needs to be better explained.</p>
+      <p class="issue" id="issue-ba1a0a35"><a class="self-link" href="#issue-ba1a0a35"></a> This needs to be better explained. <a href="https://github.com/w3c/webappsec-csp/issues/212">&lt;https://github.com/w3c/webappsec-csp/issues/212></a></p>
     </ol>
     <h5 class="heading settled algorithm" data-algorithm="style-src Pre-request Check" data-level="6.1.11.1" id="style-src-pre-request"><span class="secno">6.1.11.1. </span><span class="content"> <code>style-src</code> Pre-request Check </span><a class="self-link" href="#style-src-pre-request"></a></h5>
     <p>This directive’s <a data-link-type="dfn" href="#directive-pre-request-check" id="ref-for-directive-pre-request-check①③">pre-request check</a> is as follows:</p>
@@ -3912,11 +3913,11 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 </pre>
      <p>Fetches for the following code will return a network errors, as the URL
     provided do not match <code>worker-src</code>'s <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists⑨">source list</a>:</p>
-<pre class="highlight"><span class="p">&lt;</span><span class="nt">script</span><span class="p">></span>
+<pre class="highlight"><span class="nt">&lt;script></span>
   <span class="kd">var</span> blockedWorker <span class="o">=</span> <span class="k">new</span> Worker<span class="p">(</span><span class="s2">"data:application/javascript,..."</span><span class="p">);</span>
   blockedWorker <span class="o">=</span> <span class="k">new</span> SharedWorker<span class="p">(</span><span class="s2">"https://example.org/"</span><span class="p">);</span>
   navigator<span class="p">.</span>serviceWorker<span class="p">.</span>register<span class="p">(</span><span class="s1">'https://example.org/sw.js'</span><span class="p">);</span>
-<span class="p">&lt;/</span><span class="nt">script</span><span class="p">></span>
+<span class="nt">&lt;/script></span>
 </pre>
     </div>
     <h5 class="heading settled algorithm" data-algorithm="worker-src Pre-request Check" data-level="6.1.12.1" id="worker-src-pre-request"><span class="secno">6.1.12.1. </span><span class="content"> <code>worker-src</code> Pre-request Check </span><a class="self-link" href="#worker-src-pre-request"></a></h5>
@@ -4025,20 +4026,20 @@ directive-value = <a data-link-type="grammar" href="#grammardef-media-type-list"
 </pre>
      <p>Fetches for the following code will all return network errors:</p>
 <pre class="highlight"><span class="c">&lt;!-- No 'type' declaration --></span>
-<span class="p">&lt;</span><span class="nt">object</span> <span class="na">data</span><span class="o">=</span><span class="s">"https://example.com/flash"</span><span class="p">>&lt;/</span><span class="nt">object</span><span class="p">></span>
+<span class="nt">&lt;object</span> <span class="na">data=</span><span class="s">"https://example.com/flash"</span><span class="nt">>&lt;/object></span>
 
 <span class="c">&lt;!-- Non-matching 'type' declaration --></span>
-<span class="p">&lt;</span><span class="nt">object</span> <span class="na">data</span><span class="o">=</span><span class="s">"https://example.com/flash"</span> <span class="na">type</span><span class="o">=</span><span class="s">"application/x-shockwave-flash"</span><span class="p">>&lt;/</span><span class="nt">object</span><span class="p">></span>
+<span class="nt">&lt;object</span> <span class="na">data=</span><span class="s">"https://example.com/flash"</span> <span class="na">type=</span><span class="s">"application/x-shockwave-flash"</span><span class="nt">>&lt;/object></span>
 
 <span class="c">&lt;!-- Non-matching resource --></span>
-<span class="p">&lt;</span><span class="nt">object</span> <span class="na">data</span><span class="o">=</span><span class="s">"https://example.com/flash"</span> <span class="na">type</span><span class="o">=</span><span class="s">"application/pdf"</span><span class="p">>&lt;/</span><span class="nt">object</span><span class="p">></span>
+<span class="nt">&lt;object</span> <span class="na">data=</span><span class="s">"https://example.com/flash"</span> <span class="na">type=</span><span class="s">"application/pdf"</span><span class="nt">>&lt;/object></span>
 </pre>
      <p>If the page allowed Flash content by sending the following header:</p>
 <pre>Content-Security-Policy: <a data-link-type="dfn" href="#plugin-types" id="ref-for-plugin-types①">plugin-types</a> application/x-shockwave-flash
 </pre>
      <p>Then the second item above would load successfully:</p>
 <pre class="highlight"><span class="c">&lt;!-- Matching 'type' declaration and resource --></span>
-<span class="p">&lt;</span><span class="nt">object</span> <span class="na">data</span><span class="o">=</span><span class="s">"https://example.com/flash"</span> <span class="na">type</span><span class="o">=</span><span class="s">"application/x-shockwave-flash"</span><span class="p">>&lt;/</span><span class="nt">object</span><span class="p">></span>
+<span class="nt">&lt;object</span> <span class="na">data=</span><span class="s">"https://example.com/flash"</span> <span class="na">type=</span><span class="s">"application/x-shockwave-flash"</span><span class="nt">>&lt;/object></span>
 </pre>
     </div>
     <h5 class="heading settled algorithm" data-algorithm="plugin-types Post-Request Check" data-dfn-type="dfn" data-level="6.2.2.1" data-lt="plugin-types Post-Request Check" data-noexport="" id="plugin-types-post-request-check"><span class="secno">6.2.2.1. </span><span class="content"> <code>plugin-types</code> Post-Request Check </span><a class="self-link" href="#plugin-types-post-request-check"></a></h5>
@@ -4800,7 +4801,7 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
         <ol>
          <li data-md="">
           <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source⑧"><code>nonce-source</code></a> grammar,
-  and <var>element</var> has a <code><a data-link-type="element-sub">nonce</a></code> attribute whose value is a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#case-sensitive" id="ref-for-case-sensitive⑤">case-sensitive</a> match for <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-base64-value" id="ref-for-grammardef-base64-value⑥"><code>base64-value</code></a> part, return "<code>Matches</code>".</p>
+  and <var>element</var> has a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/urls-and-fetching.html#dom-noncedelement-nonce" id="ref-for-dom-noncedelement-nonce">nonce</a></code> attribute whose value is a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#case-sensitive" id="ref-for-case-sensitive⑤">case-sensitive</a> match for <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-base64-value" id="ref-for-grammardef-base64-value⑥"><code>base64-value</code></a> part, return "<code>Matches</code>".</p>
         </ol>
       </ol>
       <p class="note" role="note"><span>Note:</span> Nonces only apply to inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script⑨">script</a></code> and inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-style-element" id="ref-for-the-style-element②">style</a></code>, not to
@@ -4878,13 +4879,13 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
     <h3 class="heading settled" data-level="7.2" id="security-nonce-stealing"><span class="secno">7.2. </span><span class="content">Nonce Stealing</span><a class="self-link" href="#security-nonce-stealing"></a></h3>
     <p>Dangling markup attacks such as those discussed in <a data-link-type="biblio" href="#biblio-filedescriptor-2015">[FILEDESCRIPTOR-2015]</a> can be used to repurpose a page’s legitimate nonces for injections. For
   example, given an injection point before a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①①">script</a></code> element:</p>
-<pre class="highlight"><span class="p">&lt;</span><span class="nt">p</span><span class="p">></span>Hello, [INJECTION POINT]<span class="p">&lt;/</span><span class="nt">p</span><span class="p">></span>
-<span class="p">&lt;</span><span class="nt">script</span> <span class="na">nonce</span><span class="o">=</span><span class="s">abc</span> <span class="na">src</span><span class="o">=</span><span class="s">/good.js</span><span class="p">>&lt;/</span><span class="nt">script</span><span class="p">></span>
+<pre class="highlight"><span class="nt">&lt;p></span>Hello, [INJECTION POINT]<span class="nt">&lt;/p></span>
+<span class="nt">&lt;script </span><span class="na">nonce=</span><span class="s">abc</span> <span class="na">src=</span><span class="s">/good.js</span><span class="nt">>&lt;/script></span>
 </pre>
     <p>If an attacker injects the string "<code>&lt;script src='https://evil.com/evil.js' </code>",
   then the browser will receive the following:</p>
-<pre class="highlight"><span class="p">&lt;</span><span class="nt">p</span><span class="p">></span>Hello, <span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">'https://evil.com/evil.js'</span> &lt;/<span class="na">p</span><span class="p">></span>
-<span class="o">&lt;</span>script nonce<span class="o">=</span>abc src<span class="o">=</span>/good.js><span class="p">&lt;/</span><span class="nt">script</span><span class="p">></span>
+<pre class="highlight"><span class="nt">&lt;p></span>Hello, <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">'https://evil.com/evil.js'</span> &lt;/<span class="na">p</span><span class="nt">></span>
+<span class="o">&lt;</span>script nonce<span class="o">=</span>abc src<span class="o">=</span>/good.js><span class="nt">&lt;/script></span>
 </pre>
     <p>It will then parse that code, ending up with a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①②">script</a></code> element with a <code>src</code> attribute pointing to a malicious payload, an attribute named <code>&lt;/p></code>,
   an attribute named "<code>&lt;script</code>", a <code>nonce</code> attribute, and a
@@ -4897,11 +4898,11 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
   origin. This, generally, is fine, and desirable from the developer’s perspective. However, if an
   attacker can inject a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-base-element" id="ref-for-the-base-element③">base</a></code> element, then an otherwise safe page can be subverted when relative
   URLs are resolved. That is, on <code>https://example.com/</code> the following code will load <code>https://example.com/good.js</code>:</p>
-<pre class="highlight"><span class="p">&lt;</span><span class="nt">script</span> <span class="na">nonce</span><span class="o">=</span><span class="s">abc</span> <span class="na">src</span><span class="o">=</span><span class="s">/good.js</span><span class="p">>&lt;/</span><span class="nt">script</span><span class="p">></span>
+<pre class="highlight"><span class="nt">&lt;script </span><span class="na">nonce=</span><span class="s">abc</span> <span class="na">src=</span><span class="s">/good.js</span><span class="nt">>&lt;/script></span>
 </pre>
     <p>However, the following will load <code>https://evil.com/good.js</code>:</p>
-<pre class="highlight"><span class="p">&lt;</span><span class="nt">base</span> <span class="na">href</span><span class="o">=</span><span class="s">"https://evil.com"</span><span class="p">></span>
-<span class="p">&lt;</span><span class="nt">script</span> <span class="na">nonce</span><span class="o">=</span><span class="s">abc</span> <span class="na">src</span><span class="o">=</span><span class="s">/good.js</span><span class="p">>&lt;/</span><span class="nt">script</span><span class="p">></span>
+<pre class="highlight"><span class="nt">&lt;base</span> <span class="na">href=</span><span class="s">"https://evil.com"</span><span class="nt">></span>
+<span class="nt">&lt;script </span><span class="na">nonce=</span><span class="s">abc</span> <span class="na">src=</span><span class="s">/good.js</span><span class="nt">>&lt;/script></span>
 </pre>
     <p>To mitigate this risk, it is advisable to set an explicit <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-base-element" id="ref-for-the-base-element④">base</a></code> element on every page, or to
   limit the ability of an attacker to inject their own <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-base-element" id="ref-for-the-base-element⑤">base</a></code> element by setting a <a data-link-type="dfn" href="#base-uri" id="ref-for-base-uri①"><code>base-uri</code></a> directive in your page’s policy. For example, <code>base-uri 'none'</code>.</p>
@@ -4953,6 +4954,31 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
     <p>To mitigate one variant of history-scanning attacks like Yan Zhu’s <a href="http://diracdeltas.github.io/sniffly/">Sniffly</a>, CSP will not allow pages to lock
   themselves into insecure URLs via policies like <code>script-src http://example.com</code>. As described in <a href="#match-schemes">§6.6.1.7 scheme-part matching</a>, the scheme portion of a source expression will always allow upgrading to a
   secure variant.</p>
+    <h3 class="heading settled" data-level="7.8" id="security-inherit-csp"><span class="secno">7.8. </span><span class="content"> CSP Inheriting to avoid bypasses </span><a class="self-link" href="#security-inherit-csp"></a></h3>
+    <p>As described in <a href="#initialize-document-csp">§4.2.1 Initialize a Document's CSP list</a> and <a href="#initialize-global-object-csp">§4.2.2 Initialize a global object’s CSP list</a>,
+  documents loaded from <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#local-scheme" id="ref-for-local-scheme⑤">local schemes</a> will inherit a copy of the
+  policies in the <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list①⑧">CSP list</a> of the <a data-link-type="dfn" href="#embedding-document" id="ref-for-embedding-document③">embedding document</a> or <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#opener-browsing-context" id="ref-for-opener-browsing-context②">opener browsing context</a>. The goal is to ensure that a page can’t
+  bypass its policy by embedding a frame or opening a new window containg
+  content that is entirely under its control (<code>srcdoc</code> documents, <code>blob:</code> or <code>data:</code> URLs, <code>about:blank</code> documents that can be manipulated via <code>document.write()</code>, etc).</p>
+    <div class="example" id="example-7a5b0df0">
+     <a class="self-link" href="#example-7a5b0df0"></a> If this would not happen a page could execute inline scripts even without <code>unsafe-inline</code> in the page’s execution context by simply embedding a <code>srcdoc</code> <code>iframe</code>. 
+<pre class="highlight"><span class="nt">&lt;iframe</span> <span class="na">srcdoc=</span><span class="s">"&lt;script>alert(1);&lt;/script>"</span><span class="nt">>&lt;/iframe></span>
+</pre>
+    </div>
+    <p>Note that we create a copy of the <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list①⑨">CSP list</a> which
+  means that the new <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①⑨">Document</a></code>'s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list②⓪">CSP list</a> is a
+  snapshot of the relevant policies at its creation time. Modifications in the <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list②①">CSP list</a> of the new <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document②⓪">Document</a></code> won’t affect the <a data-link-type="dfn" href="#embedding-document" id="ref-for-embedding-document④">embedding document</a> or <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#opener-browsing-context" id="ref-for-opener-browsing-context③">opener browsing context</a>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list②②">CSP list</a> or vice-versa.</p>
+    <div class="example" id="example-3c6e0109">
+     <a class="self-link" href="#example-3c6e0109"></a> In the example below the image inside the iframe will not load because it is
+    blocked by the policy in the <code>meta</code> tag of the iframe. The image outside the
+    iframe will load (assuming the main page policy does not block it) since the
+    policy inserted in the iframe will not affect it. 
+<pre class="highlight"><span class="nt">&lt;iframe</span> <span class="na">srcdoc=</span><span class="s">'&lt;meta http-equiv="Content-Security-Policy" content="img-src example.com;"></span>
+<span class="s">                   &lt;img src="not-example.com/image">'</span><span class="nt">>&lt;/iframe></span>
+
+<span class="nt">&lt;img</span> <span class="na">src=</span><span class="s">"not-example.com/image"</span><span class="nt">></span>
+</pre>
+    </div>
    </section>
    <section>
     <h2 class="heading settled" data-level="8" id="authoring-considerations"><span class="secno">8. </span><span class="content">Authoring Considerations</span><a class="self-link" href="#authoring-considerations"></a></h2>
@@ -5010,17 +5036,17 @@ Content-Security-Policy: connect-src http://example.com/;
     <p>The second allows scripts which are given access to the page via nonces or
   hashes to bring in their dependencies without adding them explicitly to the
   page’s policy.</p>
-    <div class="example" id="example-716fbdf7">
-     <a class="self-link" href="#example-716fbdf7"></a> Suppose MegaCorp, Inc. deploys the following policy: 
+    <div class="example" id="example-e30022c4">
+     <a class="self-link" href="#example-e30022c4"></a> Suppose MegaCorp, Inc. deploys the following policy: 
 <pre><a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#header-content-security-policy" id="ref-for-header-content-security-policy⑥">Content-Security-Policy</a>: <a data-link-type="dfn" href="#script-src" id="ref-for-script-src⑥">script-src</a> 'nonce-DhcnhD3khTMePgXwdayK9BsMqXjhguVV' <a data-link-type="grammar" href="#grammardef-strict-dynamic" id="ref-for-grammardef-strict-dynamic⑧">'strict-dynamic'</a>
 </pre>
      <p>And serves the following HTML with that policy active:</p>
 <pre class="highlight">...
-<span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">"https://cdn.example.com/script.js"</span> <span class="na">nonce</span><span class="o">=</span><span class="s">"DhcnhD3khTMePgXwdayK9BsMqXjhguVV"</span> <span class="p">>&lt;/</span><span class="nt">script</span><span class="p">></span>
+<span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"https://cdn.example.com/script.js"</span> <span class="na">nonce=</span><span class="s">"DhcnhD3khTMePgXwdayK9BsMqXjhguVV"</span> <span class="nt">>&lt;/script></span>
 ...
 </pre>
      <p>This will generate a request for <code>https://cdn.example.com/script.js</code>, which
-    will not be blocked because of the matching <code><a data-link-type="element-sub">nonce</a></code> attribute.</p>
+    will not be blocked because of the matching <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/urls-and-fetching.html#dom-noncedelement-nonce" id="ref-for-dom-noncedelement-nonce①">nonce</a></code> attribute.</p>
      <p>If <code>script.js</code> contains the following code:</p>
 <pre class="highlight"><span class="kd">var</span> s <span class="o">=</span> document<span class="p">.</span>createElement<span class="p">(</span><span class="s1">'script'</span><span class="p">);</span>
 s<span class="p">.</span>src <span class="o">=</span> <span class="s1">'https://othercdn.not-example.net/dependency.js'</span><span class="p">;</span>
@@ -5045,7 +5071,7 @@ document<span class="p">.</span>write<span class="p">(</span><span class="s1">'&
      <div class="example" id="example-58b9ab8c">
       <a class="self-link" href="#example-58b9ab8c"></a> MegaCorp, Inc. can’t quite get rid of the following HTML on anything
       resembling a reasonable schedule: 
-<pre class="highlight"><span class="p">&lt;</span><span class="nt">button</span> <span class="na">id</span><span class="o">=</span><span class="s">"action"</span> <span class="na">onclick</span><span class="o">=</span><span class="s">"doSubmit()"</span><span class="p">></span>
+<pre class="highlight"><span class="nt">&lt;button</span> <span class="na">id=</span><span class="s">"action"</span> <span class="na">onclick=</span><span class="s">"doSubmit()"</span><span class="nt">></span>
 </pre>
       <p>Rather than reducing security by specifying "<code>'unsafe-inline'</code>", they decide to use
       "<code>'unsafe-hashed-attributes'</code>" along with a hash source expression, as follows:</p>
@@ -5076,16 +5102,16 @@ document<span class="p">.</span>write<span class="p">(</span><span class="s1">'&
       <p>In the presence of that policy, the following <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑨">script</a></code> elements would be
       allowed to execute because they contain only integrity metadata that matches
       the policy:</p>
-<pre class="highlight"><span class="p">&lt;</span><span class="nt">script</span> <span class="na">integrity</span><span class="o">=</span><span class="s">"sha256-abc123"</span> ...<span class="p">>&lt;/</span><span class="nt">script</span><span class="p">></span>
-<span class="p">&lt;</span><span class="nt">script</span> <span class="na">integrity</span><span class="o">=</span><span class="s">"sha512-321cba"</span> ...<span class="p">>&lt;/</span><span class="nt">script</span><span class="p">></span>
-<span class="p">&lt;</span><span class="nt">script</span> <span class="na">integrity</span><span class="o">=</span><span class="s">"sha256-abc123 sha512-321cba"</span> ...<span class="p">>&lt;/</span><span class="nt">script</span><span class="p">></span>
+<pre class="highlight"><span class="nt">&lt;script </span><span class="na">integrity=</span><span class="s">"sha256-abc123"</span> ...<span class="nt">>&lt;/script></span>
+<span class="nt">&lt;script </span><span class="na">integrity=</span><span class="s">"sha512-321cba"</span> ...<span class="nt">>&lt;/script></span>
+<span class="nt">&lt;script </span><span class="na">integrity=</span><span class="s">"sha256-abc123 sha512-321cba"</span> ...<span class="nt">>&lt;/script></span>
 </pre>
       <p>While the following <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script②⓪">script</a></code> elements would not execute because they
       contain valid metadata that does not match the policy (even though other
       metadata does match):</p>
-<pre class="highlight"><span class="p">&lt;</span><span class="nt">script</span> <span class="na">integrity</span><span class="o">=</span><span class="s">"</span><b><span class="s">sha384-xyz789</span></b><span class="s">"</span> ...<span class="p">>&lt;/</span><span class="nt">script</span><span class="p">></span>
-<span class="p">&lt;</span><span class="nt">script</span> <span class="na">integrity</span><span class="o">=</span><span class="s">"</span><b><span class="s">sha384-xyz789</span></b><span class="s"> sha512-321cba"</span> ...<span class="p">>&lt;/</span><span class="nt">script</span><span class="p">></span>
-<span class="p">&lt;</span><span class="nt">script</span> <span class="na">integrity</span><span class="o">=</span><span class="s">"sha256-abc123 </span><b><span class="s">sha384-xyz789</span></b><span class="s"> sha512-321cba"</span> ...<span class="p">>&lt;/</span><span class="nt">script</span><span class="p">></span>
+<pre class="highlight"><span class="nt">&lt;script </span><span class="na">integrity=</span><span class="s">"</span><b><span class="s">sha384-xyz789</span></b><span class="s">"</span> ...<span class="nt">>&lt;/script></span>
+<span class="nt">&lt;script </span><span class="na">integrity=</span><span class="s">"</span><b><span class="s">sha384-xyz789</span></b><span class="s"> sha512-321cba"</span> ...<span class="nt">>&lt;/script></span>
+<span class="nt">&lt;script </span><span class="na">integrity=</span><span class="s">"sha256-abc123 </span><b><span class="s">sha384-xyz789</span></b><span class="s"> sha512-321cba"</span> ...<span class="nt">>&lt;/script></span>
 </pre>
       <p>Metadata that is not recognized (either because it’s entirely invalid, or
       because it specifies a not-yet-supported hashing algorithm) does not affect
@@ -5093,9 +5119,9 @@ document<span class="p">.</span>write<span class="p">(</span><span class="s1">'&
       allowed to execute in the presence of the above policy, as the additional
       metadata is invalid and therefore wouldn’t allow a script whose content
       wasn’t listed explicitly in the policy to execute:</p>
-<pre class="highlight"><span class="p">&lt;</span><span class="nt">script</span> <span class="na">integrity</span><span class="o">=</span><span class="s">"sha256-abc123 </span><b><span class="s">sha1024-abcd</span></b><span class="s">"</span> ...<span class="p">>&lt;/</span><span class="nt">script</span><span class="p">></span>
-<span class="p">&lt;</span><span class="nt">script</span> <span class="na">integrity</span><span class="o">=</span><span class="s">"sha512-321cba </span><b><span class="s">entirely-invalid</span></b><span class="s">"</span> ...<span class="p">>&lt;/</span><span class="nt">script</span><span class="p">></span>
-<span class="p">&lt;</span><span class="nt">script</span> <span class="na">integrity</span><span class="o">=</span><span class="s">"sha256-abc123 </span><b><span class="s">not-a-hash-at-all</span></b><span class="s"> sha512-321cba"</span> ...<span class="p">>&lt;/</span><span class="nt">script</span><span class="p">></span>
+<pre class="highlight"><span class="nt">&lt;script </span><span class="na">integrity=</span><span class="s">"sha256-abc123 </span><b><span class="s">sha1024-abcd</span></b><span class="s">"</span> ...<span class="nt">>&lt;/script></span>
+<span class="nt">&lt;script </span><span class="na">integrity=</span><span class="s">"sha512-321cba </span><b><span class="s">entirely-invalid</span></b><span class="s">"</span> ...<span class="nt">>&lt;/script></span>
+<span class="nt">&lt;script </span><span class="na">integrity=</span><span class="s">"sha256-abc123 </span><b><span class="s">not-a-hash-at-all</span></b><span class="s"> sha512-321cba"</span> ...<span class="nt">>&lt;/script></span>
 </pre>
      </div>
     </section>
@@ -5589,6 +5615,7 @@ rest of Google’s CSP Cabal.</p>
      <li><a href="https://html.spec.whatwg.org/multipage/semantics.html#meta">meta</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context">nested browsing context</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context-nested-through">nested through</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/urls-and-fetching.html#dom-noncedelement-nonce">nonce</a>
      <li><a href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-object-element">object</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#opener-browsing-context">opener browsing context</a>
      <li><a href="https://html.spec.whatwg.org/multipage/origin.html#concept-origin">origin</a>
@@ -5889,7 +5916,7 @@ rest of Google’s CSP Cabal.</p>
    <div class="issue"> <code class="idl"><a data-link-type="idl" href="https://tc39.github.io/ecma262#sec-hostensurecancompilestrings">HostEnsureCanCompileStrings()</a></code> does not include the string which is
   going to be compiled as a parameter. We’ll also need to update HTML to pipe that value through
   to CSP. <a href="https://github.com/tc39/ecma262/issues/938">&lt;https://github.com/tc39/ecma262/issues/938></a><a href="#issue-910d1dca"> ↵ </a></div>
-   <div class="issue"> This needs to be better explained.<a href="#issue-ba1a0a35"> ↵ </a></div>
+   <div class="issue"> This needs to be better explained. <a href="https://github.com/w3c/webappsec-csp/issues/212">&lt;https://github.com/w3c/webappsec-csp/issues/212></a><a href="#issue-ba1a0a35"> ↵ </a></div>
    <div class="issue"> Do something interesting to the execution context in order to lock down
   interesting CSSOM algorithms. I don’t think CSSOM gives us any hooks here, so
   let’s work with them to put something reasonable together.<a href="#issue-eba1ebc1"> ↵ </a></div>
@@ -6953,6 +6980,8 @@ rest of Google’s CSP Cabal.</p>
     EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a>
     <li><a href="#ref-for-global-object-csp-list①⑦">6.2.1.1. 
     Is base allowed for document? </a>
+    <li><a href="#ref-for-global-object-csp-list①⑧">7.8. 
+    CSP Inheriting to avoid bypasses </a> <a href="#ref-for-global-object-csp-list①⑨">(2)</a> <a href="#ref-for-global-object-csp-list②⓪">(3)</a> <a href="#ref-for-global-object-csp-list②①">(4)</a> <a href="#ref-for-global-object-csp-list②②">(5)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="enforced">
@@ -6978,6 +7007,8 @@ rest of Google’s CSP Cabal.</p>
     Initialize a Document's CSP list </a> <a href="#ref-for-embedding-document①">(2)</a>
     <li><a href="#ref-for-embedding-document②">4.2.2. 
     Initialize a global object’s CSP list </a>
+    <li><a href="#ref-for-embedding-document③">7.8. 
+    CSP Inheriting to avoid bypasses </a> <a href="#ref-for-embedding-document④">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="violation-report">
