@@ -1176,9 +1176,9 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version 61f7f45585e13d349f2bd5c7609dec79c275c01a" name="generator">
+  <meta content="Bikeshed version 549748cf00f6303618e14a7868fb2ecd5725161f" name="generator">
   <link href="https://www.w3.org/TR/CSP3/" rel="canonical">
-  <meta content="721a7c76eeafa2f15419011f68564d9cec049966" name="document-revision">
+  <meta content="d846aed3746df8a41a3eb35c14b17f71e7efa4f7" name="document-revision">
 <style>
   ul.toc ul ul ul {
     margin: 0 0 0 2em;
@@ -1458,7 +1458,7 @@ pre.highlight, pre > code.highlight { display: block; padding: 1em; margin: .5em
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1>Content Security Policy Level 3</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2017-11-27">27 November 2017</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2017-12-12">12 December 2017</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1579,10 +1579,11 @@ of security-relevant policy decisions.</p>
        <ol class="toc">
         <li><a href="#initialize-document-csp"><span class="secno">4.2.1</span> <span class="content"> Initialize a <code>Document</code>'s <code>CSP list</code> </span></a>
         <li><a href="#initialize-global-object-csp"><span class="secno">4.2.2</span> <span class="content"> Initialize a global object’s <code>CSP list</code> </span></a>
-        <li><a href="#should-block-inline"><span class="secno">4.2.3</span> <span class="content"> Should <var>element</var>’s inline <var>type</var> behavior be blocked by Content Security Policy? </span></a>
-        <li><a href="#should-block-navigation-request"><span class="secno">4.2.4</span> <span class="content"> Should <var>navigation request</var> of <var>type</var> from <var>source</var> in <var>target</var> be blocked
+        <li><a href="#get-csp-of-object"><span class="secno">4.2.3</span> <span class="content"> Retrieve the <span>CSP list</span> of an <var>object</var> </span></a>
+        <li><a href="#should-block-inline"><span class="secno">4.2.4</span> <span class="content"> Should <var>element</var>’s inline <var>type</var> behavior be blocked by Content Security Policy? </span></a>
+        <li><a href="#should-block-navigation-request"><span class="secno">4.2.5</span> <span class="content"> Should <var>navigation request</var> of <var>type</var> from <var>source</var> in <var>target</var> be blocked
     by Content Security Policy? </span></a>
-        <li><a href="#should-block-navigation-response"><span class="secno">4.2.5</span> <span class="content"> Should <var>navigation response</var> to <var>navigation request</var> of <var>type</var> from <var>source</var> in <var>target</var> be blocked by Content Security Policy? </span></a>
+        <li><a href="#should-block-navigation-response"><span class="secno">4.2.6</span> <span class="content"> Should <var>navigation response</var> to <var>navigation request</var> of <var>type</var> from <var>source</var> in <var>target</var> be blocked by Content Security Policy? </span></a>
        </ol>
       <li>
        <a href="#ecma-integration"><span class="secno">4.3</span> <span class="content">Integration with ECMAScript</span></a>
@@ -1769,6 +1770,7 @@ of security-relevant policy decisions.</p>
       <li><a href="#security-violation-reports"><span class="secno">7.5</span> <span class="content">Violation Reports</span></a>
       <li><a href="#source-list-paths-and-redirects"><span class="secno">7.6</span> <span class="content">Paths and Redirects</span></a>
       <li><a href="#security-secure-upgrades"><span class="secno">7.7</span> <span class="content">Secure Upgrades</span></a>
+      <li><a href="#security-inherit-csp"><span class="secno">7.8</span> <span class="content"> CSP Inheriting to avoid bypasses </span></a>
      </ol>
     <li>
      <a href="#authoring-considerations"><span class="secno">8</span> <span class="content">Authoring Considerations</span></a>
@@ -1951,7 +1953,7 @@ of security-relevant policy decisions.</p>
   algorithms and prose <a data-link-type="biblio" href="#biblio-infra">[INFRA]</a>.</p>
     <h3 class="heading settled" data-level="2.2" id="framework-policy"><span class="secno">2.2. </span><span class="content">Policies</span><a class="self-link" href="#framework-policy"></a></h3>
     <p>A <dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" data-local-lt="policy" data-lt="content security policy object" id="content-security-policy-object">policy</dfn> defines allowed
-  and restricted behaviors, and may be applied to a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/window-object.html#window" id="ref-for-window">Window</a></code>, {{WorkerGlobalScope}, or <code class="idl"><a data-link-type="idl" href="https://drafts.css-houdini.org/worklets/#workletglobalscope" id="ref-for-workletglobalscope">WorkletGlobalScope</a></code> as described in <a href="#initialize-global-object-csp">§4.2.2 Initialize a global object’s CSP list</a>.</p>
+  and restricted behaviors, and may be applied to a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/window-object.html#window" id="ref-for-window">Window</a></code>, <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#workerglobalscope" id="ref-for-workerglobalscope">WorkerGlobalScope</a></code>, or <code class="idl"><a data-link-type="idl" href="https://drafts.css-houdini.org/worklets/#workletglobalscope" id="ref-for-workletglobalscope">WorkletGlobalScope</a></code> as described in <a href="#initialize-global-object-csp">§4.2.2 Initialize a global object’s CSP list</a>.</p>
     <p>Each policy has an associated <dfn class="dfn-paneled" data-dfn-for="policy" data-dfn-type="dfn" data-export="" id="policy-directive-set">directive set</dfn>, which is an <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-set" id="ref-for-ordered-set">ordered
   set</a> of <a data-link-type="dfn" href="#directives" id="ref-for-directives">directives</a> that define the policy’s implications when applied.</p>
     <p>Each policy has an associated <dfn class="dfn-paneled" data-dfn-for="policy" data-dfn-type="dfn" data-export="" id="policy-disposition">disposition</dfn>, which is either
@@ -2058,19 +2060,19 @@ of security-relevant policy decisions.</p>
   "<code>Allowed</code>" unless otherwise specified.</p>
      <li data-md="">
       <p>An <dfn class="dfn-paneled" data-dfn-for="directive" data-dfn-type="dfn" data-export="" id="directive-inline-check">inline check</dfn>, which takes an <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element">Element</a></code> a
-  type string, and a soure string as arguments, and is executed during <a href="#should-block-inline">§4.2.3 Should element’s inline type behavior be blocked by Content Security Policy?</a>. This algorithm returns "<code>Allowed</code>" unless
+  type string, and a soure string as arguments, and is executed during <a href="#should-block-inline">§4.2.4 Should element’s inline type behavior be blocked by Content Security Policy?</a>. This algorithm returns "<code>Allowed</code>" unless
   otherwise specified.</p>
      <li data-md="">
       <p>An <dfn class="dfn-paneled" data-dfn-for="directive" data-dfn-type="dfn" data-export="" id="directive-initialization">initialization</dfn>, which takes a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①">Document</a></code> or <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object">global object</a>, a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response②">response</a>, and a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object①⓪">policy</a> as arguments. This algorithm is executed during <a href="#initialize-document-csp">§4.2.1 Initialize a Document's CSP list</a>,
   and has no effect unless otherwise specified.</p>
      <li data-md="">
       <p>A <dfn class="dfn-paneled" data-dfn-for="directive" data-dfn-type="dfn" data-export="" id="directive-pre-navigation-check">pre-navigation check</dfn>, which takes a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request③">request</a>, type string, and two <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context" id="ref-for-browsing-context">browsing contexts</a> as arguments, and
-  is executed during <a href="#should-block-navigation-request">§4.2.4 Should navigation request of type from source in target be blocked
+  is executed during <a href="#should-block-navigation-request">§4.2.5 Should navigation request of type from source in target be blocked
     by Content Security Policy?</a>. It returns
   "<code>Allowed</code>" unless otherwise specified.</p>
      <li data-md="">
       <p>A <dfn class="dfn-paneled" data-dfn-for="directive" data-dfn-type="dfn" data-export="" id="directive-navigation-response-check">navigation response check</dfn>, which takes a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request④">request</a>, a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response③">response</a> and two <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context" id="ref-for-browsing-context①">browsing contexts</a> as
-  arguments, and is executed during <a href="#should-block-navigation-response">§4.2.5 Should navigation response to navigation request of type from source
+  arguments, and is executed during <a href="#should-block-navigation-response">§4.2.6 Should navigation response to navigation request of type from source
     in target be blocked by Content Security Policy?</a>.
   It returns "<code>Allowed</code>" unless otherwise specified.</p>
     </ol>
@@ -2183,7 +2185,7 @@ of security-relevant policy decisions.</p>
       <p>If the user agent is currently executing script, and can extract a source
   file’s URL, line number, and column number from the <var>global</var>, set <var>violation</var>’s <a data-link-type="dfn" href="#violation-source-file" id="ref-for-violation-source-file">source file</a>, <a data-link-type="dfn" href="#violation-line-number" id="ref-for-violation-line-number">line
   number</a>, and <a data-link-type="dfn" href="#violation-column-number" id="ref-for-violation-column-number">column number</a> accordingly.</p>
-      <p class="issue" id="issue-c404edb5"><a class="self-link" href="#issue-c404edb5"></a> Is this kind of thing specified anywhere? I didn’t see anything
+      <p class="issue" id="issue-de937cf3"><a class="self-link" href="#issue-de937cf3"></a> Is this kind of thing specified anywhere? I didn’t see anything
   that looked useful in <a data-link-type="biblio" href="#biblio-ecma262">[ECMA262]</a>.</p>
       <p class="note" role="note"><span>Note:</span> User agents need to ensure that the <a data-link-type="dfn" href="#violation-source-file" id="ref-for-violation-source-file①">source file</a> is the URL requested by
   the page, pre-redirects. If that’s not possible, user agents need to strip the URL down to an
@@ -2441,29 +2443,29 @@ of security-relevant policy decisions.</p>
     <h3 class="heading settled" data-level="4.2" id="html-integration"><span class="secno">4.2. </span><span class="content"> Integration with HTML </span><a class="self-link" href="#html-integration"></a></h3>
     <ol>
      <li data-md="">
-      <p>The <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document③">Document</a></code>, <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#workerglobalscope" id="ref-for-workerglobalscope">WorkerGlobalScope</a></code>, and <code class="idl"><a data-link-type="idl" href="https://drafts.css-houdini.org/worklets/#workletglobalscope" id="ref-for-workletglobalscope①">WorkletGlobalScope</a></code> objects have a <dfn class="dfn-paneled" data-dfn-for="global object" data-dfn-type="dfn" data-noexport="" id="global-object-csp-list">CSP list</dfn>,
-  which holds all the <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object②⓪">policy</a> objects which are active for a given
-  context. This list is empty unless otherwise specified, and is populated
-  via the <a href="#initialize-global-object-csp">§4.2.2 Initialize a global object’s CSP list</a> algorithm.</p>
+      <p>The <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document③">Document</a></code>, <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#workerglobalscope" id="ref-for-workerglobalscope①">WorkerGlobalScope</a></code>, and <code class="idl"><a data-link-type="idl" href="https://drafts.css-houdini.org/worklets/#workletglobalscope" id="ref-for-workletglobalscope①">WorkletGlobalScope</a></code> objects have a <code>CSP list</code>, which holds all the <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object②⓪">policy</a> objects which are
+  active for a given context. This list is empty unless otherwise specified,
+  and is populated via the <a href="#initialize-global-object-csp">§4.2.2 Initialize a global object’s CSP list</a> algorithm.</p>
       <p class="issue" id="issue-a794766b"><a class="self-link" href="#issue-a794766b"></a> This concept is missing from W3C’s Workers. <a href="https://github.com/w3c/html/issues/187">&lt;https://github.com/w3c/html/issues/187></a></p>
      <li data-md="">
-      <p>A <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object②①">policy</a> is <dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="enforced">enforced</dfn> or <dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="monitored">monitored</dfn> for a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object⑥">global object</a> by inserting it into the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object⑦">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list③">CSP list</a>.</p>
+      <p>A <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object⑥">global object</a>’s <dfn class="dfn-paneled" data-dfn-for="global object" data-dfn-type="dfn" data-noexport="" id="global-object-csp-list">CSP list</dfn> is the result of executing <a href="#get-csp-of-object">§4.2.3 Retrieve the CSP list of an object</a> with the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object⑦">global object</a> as the <code>object</code>.</p>
+     <li data-md="">
+      <p>A <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object②①">policy</a> is <dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="enforced">enforced</dfn> or <dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="monitored">monitored</dfn> for a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object⑧">global object</a> by inserting it into the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object⑨">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list③">CSP list</a>.</p>
      <li data-md="">
       <p><a href="#initialize-global-object-csp">§4.2.2 Initialize a global object’s CSP list</a> is called during the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#initialise-the-document-object" id="ref-for-initialise-the-document-object">initializing a
   new <code>Document</code> object</a> and <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/workers.html#run-a-worker" id="ref-for-run-a-worker">run a worker</a> algorithms in order to
-  bind a set of <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object②②">policy</a> objects associated with a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response①③">response</a> to a
-  newly created <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object⑧">global object</a>.</p>
+  bind a set of <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object②②">policy</a> objects associated with a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response①③">response</a> to a newly created <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document④">Document</a></code>, <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#workerglobalscope" id="ref-for-workerglobalscope②">WorkerGlobalScope</a></code> or <code class="idl"><a data-link-type="idl" href="https://drafts.css-houdini.org/worklets/#workletglobalscope" id="ref-for-workletglobalscope②">WorkletGlobalScope</a></code>.</p>
      <li data-md="">
-      <p><a href="#should-block-inline">§4.2.3 Should element’s inline type behavior be blocked by Content Security Policy?</a> is called during the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#prepare-a-script" id="ref-for-prepare-a-script">prepare a script</a> and <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/semantics.html#update-a-style-block" id="ref-for-update-a-style-block">update a <code>style</code> block</a> algorithms in order to determine whether or
+      <p><a href="#should-block-inline">§4.2.4 Should element’s inline type behavior be blocked by Content Security Policy?</a> is called during the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#prepare-a-script" id="ref-for-prepare-a-script">prepare a script</a> and <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/semantics.html#update-a-style-block" id="ref-for-update-a-style-block">update a <code>style</code> block</a> algorithms in order to determine whether or
   not an inline script or style block is allowed to execute/render.</p>
      <li data-md="">
-      <p><a href="#should-block-inline">§4.2.3 Should element’s inline type behavior be blocked by Content Security Policy?</a> is called during handling of inline event
+      <p><a href="#should-block-inline">§4.2.4 Should element’s inline type behavior be blocked by Content Security Policy?</a> is called during handling of inline event
   handlers (like <code>onclick</code>) and inline <code>style</code> attributes in order to
   determine whether or not they ought to be allowed to execute/render.</p>
      <li data-md="">
       <p><a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object②③">policy</a> is <a data-link-type="dfn" href="#enforced" id="ref-for-enforced①">enforced</a> during processing of the <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#meta" id="ref-for-meta⑨">meta</a></code> element’s <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/multipage/semantics.html#attr-meta-http-equiv" id="ref-for-attr-meta-http-equiv②">http-equiv</a></code>.</p>
      <li data-md="">
-      <p>A <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document④">Document</a></code>'s <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport="" id="embedding-document">embedding document</dfn> is the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document⑤">Document</a></code> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context-nested-through" id="ref-for-browsing-context-nested-through">through which</a> the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document⑥">Document</a></code>'s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context" id="ref-for-browsing-context②">browsing context</a> is nested.</p>
+      <p>A <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document⑤">Document</a></code>'s <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport="" id="embedding-document">embedding document</dfn> is the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document⑥">Document</a></code> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context-nested-through" id="ref-for-browsing-context-nested-through">through which</a> the <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document⑦">Document</a></code>'s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context" id="ref-for-browsing-context②">browsing context</a> is nested.</p>
      <li data-md="">
       <p>HTML populates each <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request①②">request</a>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-nonce-metadata" id="ref-for-concept-request-nonce-metadata">cryptographic nonce
   metadata</a> and <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-parser-metadata" id="ref-for-concept-request-parser-metadata">parser metadata</a> with relevant data from the
@@ -2483,9 +2485,9 @@ of security-relevant policy decisions.</p>
     Security Policy?</a>.</p>
       <p class="issue" id="issue-5faf83e6"><a class="self-link" href="#issue-5faf83e6"></a> This hook is missing from W3C’s HTML. <a href="https://github.com/w3c/html/issues/547">&lt;https://github.com/w3c/html/issues/547></a></p>
      <li data-md="">
-      <p><a href="#should-block-navigation-request">§4.2.4 Should navigation request of type from source in target be blocked
+      <p><a href="#should-block-navigation-request">§4.2.5 Should navigation request of type from source in target be blocked
     by Content Security Policy?</a> is called during the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#process-a-navigate-fetch" id="ref-for-process-a-navigate-fetch">process a
-  navigate fetch</a> algorithm, and <a href="#should-block-navigation-response">§4.2.5 Should navigation response to navigation request of type from source
+  navigate fetch</a> algorithm, and <a href="#should-block-navigation-response">§4.2.6 Should navigation response to navigation request of type from source
     in target be blocked by Content Security Policy?</a> is called during the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#process-a-navigate-response" id="ref-for-process-a-navigate-response">process a navigate response</a> algorithm to
   apply directive’s navigation checks, as well as inline checks for
   navigations to <code>javascript:</code>.</p>
@@ -2493,7 +2495,7 @@ of security-relevant policy decisions.</p>
   have a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#process-a-navigate-response" id="ref-for-process-a-navigate-response①">process a navigate response</a> algorithm into which to hook. <a href="https://github.com/w3c/html/issues/548">&lt;https://github.com/w3c/html/issues/548></a></p>
     </ol>
     <h4 class="heading settled algorithm" data-algorithm="Initialize a Document&apos;s CSP list" data-level="4.2.1" id="initialize-document-csp"><span class="secno">4.2.1. </span><span class="content"> Initialize a <code>Document</code>'s <code>CSP list</code> </span><a class="self-link" href="#initialize-document-csp"></a></h4>
-    <p>Given a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document⑦">Document</a></code> (<var>document</var>), and a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response①④">response</a> (<var>response</var>), the
+    <p>Given a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document⑧">Document</a></code> (<var>document</var>), and a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response①④">response</a> (<var>response</var>), the
   user agent performs the following steps in order to initialize <var>document</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-document-csp-list" id="ref-for-concept-document-csp-list">CSP list</a>:</p>
     <ol>
      <li data-md="">
@@ -2512,12 +2514,12 @@ of security-relevant policy decisions.</p>
           <p>For each <var>policy</var> in <var>doc</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-document-csp-list" id="ref-for-concept-document-csp-list①">CSP list</a>:</p>
           <ol>
            <li data-md="">
-            <p>Insert an alias to <var>policy</var> in <var>document</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-document-csp-list" id="ref-for-concept-document-csp-list②">CSP list</a>.</p>
+            <p>Insert a copy of <var>policy</var> into <var>document</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-document-csp-list" id="ref-for-concept-document-csp-list②">CSP list</a>.</p>
           </ol>
         </ol>
       </ol>
       <p class="note" role="note"><span>Note:</span> <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#local-scheme" id="ref-for-local-scheme②">local scheme</a> includes <code>about:</code>, and this algorithm will
-  therefore alias the <a data-link-type="dfn" href="#embedding-document" id="ref-for-embedding-document①">embedding document</a>’s policies for <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#an-iframe-srcdoc-document" id="ref-for-an-iframe-srcdoc-document">an iframe <code>srcdoc</code> <code>Document</code></a>.</p>
+  therefore copy the <a data-link-type="dfn" href="#embedding-document" id="ref-for-embedding-document①">embedding document</a>’s policies for <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#an-iframe-srcdoc-document" id="ref-for-an-iframe-srcdoc-document">an iframe <code>srcdoc</code> <code>Document</code></a>.</p>
       <p class="note" role="note"><span>Note:</span> We do all this to ensure that a page cannot bypass its <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object②④">policy</a> by embedding a frame or popping up a new window containing content it
   controls (<code>blob:</code> resources, or <code>document.write()</code>).</p>
      <li data-md="">
@@ -2534,7 +2536,7 @@ of security-relevant policy decisions.</p>
       </ol>
     </ol>
     <h4 class="heading settled algorithm" data-algorithm="Initialize a global object’s CSP list" data-level="4.2.2" id="initialize-global-object-csp"><span class="secno">4.2.2. </span><span class="content"> Initialize a global object’s <code>CSP list</code> </span><a class="self-link" href="#initialize-global-object-csp"></a></h4>
-    <p>Given a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object⑨">global object</a> (<var>global</var>), and a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response①⑤">response</a> (<var>response</var>), the user agent performs the following steps in order
+    <p>Given a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object①⓪">global object</a> (<var>global</var>), and a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response①⑤">response</a> (<var>response</var>), the user agent performs the following steps in order
   to initialize <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list④">CSP list</a>:</p>
     <ol>
      <li data-md="">
@@ -2551,12 +2553,12 @@ of security-relevant policy decisions.</p>
           <p>For each <var>policy</var> in <var>owner</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑤">CSP list</a>:</p>
           <ol>
            <li data-md="">
-            <p>Insert an alias to <var>policy</var> in <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑥">CSP list</a>.</p>
+            <p>Insert a copy of <var>policy</var> into <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑥">CSP list</a>.</p>
           </ol>
         </ol>
       </ol>
       <p class="note" role="note"><span>Note:</span> <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#local-scheme" id="ref-for-local-scheme④">local scheme</a> includes <code>about:</code>, and this algorithm will
-  therefore alias the <a data-link-type="dfn" href="#embedding-document" id="ref-for-embedding-document②">embedding document</a>’s policies for <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#an-iframe-srcdoc-document" id="ref-for-an-iframe-srcdoc-document①">an iframe <code>srcdoc</code> <code>Document</code></a>.</p>
+  therefore copy the <a data-link-type="dfn" href="#embedding-document" id="ref-for-embedding-document②">embedding document</a>’s policies for <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#an-iframe-srcdoc-document" id="ref-for-an-iframe-srcdoc-document①">an iframe <code>srcdoc</code> <code>Document</code></a>.</p>
      <li data-md="">
       <p>If <var>global</var> is a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#sharedworkerglobalscope" id="ref-for-sharedworkerglobalscope">SharedWorkerGlobalScope</a></code> or <code class="idl"><a data-link-type="idl" href="https://w3c.github.io/ServiceWorker/#serviceworkerglobalscope" id="ref-for-serviceworkerglobalscope">ServiceWorkerGlobalScope</a></code>:</p>
       <ol>
@@ -2564,7 +2566,7 @@ of security-relevant policy decisions.</p>
         <p>For each <var>policy</var> in <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list" id="ref-for-concept-response-csp-list⑧">CSP list</a>, insert <var>policy</var> into <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑦">CSP list</a>.</p>
       </ol>
      <li data-md="">
-      <p>If <var>global</var> is a <code class="idl"><a data-link-type="idl" href="https://drafts.css-houdini.org/worklets/#workletglobalscope" id="ref-for-workletglobalscope②">WorkletGlobalScope</a></code>:</p>
+      <p>If <var>global</var> is a <code class="idl"><a data-link-type="idl" href="https://drafts.css-houdini.org/worklets/#workletglobalscope" id="ref-for-workletglobalscope③">WorkletGlobalScope</a></code>:</p>
       <ol>
        <li data-md="">
         <p>Let <var>owner</var> be <var>global</var>’s <a data-link-type="dfn" href="https://drafts.css-houdini.org/worklets/#workletglobalscope-owner-document" id="ref-for-workletglobalscope-owner-document">owner document</a>.</p>
@@ -2572,11 +2574,25 @@ of security-relevant policy decisions.</p>
         <p>For each <var>policy</var> in <var>owner</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑧">CSP list</a>:</p>
         <ol>
          <li data-md="">
-          <p>Insert an alias to <var>policy</var> in <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑨">CSP list</a>.</p>
+          <p>Insert a copy of <var>policy</var> into <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑨">CSP list</a>.</p>
         </ol>
       </ol>
     </ol>
-    <h4 class="heading settled algorithm" data-algorithm="Should element’s inline type behavior be blocked by Content Security Policy?" data-level="4.2.3" id="should-block-inline"><span class="secno">4.2.3. </span><span class="content"> Should <var>element</var>’s inline <var>type</var> behavior be blocked by Content Security Policy? </span><a class="self-link" href="#should-block-inline"></a></h4>
+    <h4 class="heading settled algorithm" data-algorithm="Retrieve the CSP list of an object" data-level="4.2.3" id="get-csp-of-object"><span class="secno">4.2.3. </span><span class="content"> Retrieve the <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list①⓪">CSP list</a> of an <var>object</var> </span><a class="self-link" href="#get-csp-of-object"></a></h4>
+    <p>To obtain <var>object</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list①①">CSP list</a>:</p>
+    <ol>
+     <li data-md="">
+      <p>If <var>object</var> is a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document⑨">Document</a></code> return <var>object</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-document-csp-list" id="ref-for-concept-document-csp-list⑤">CSP list</a>.</p>
+     <li data-md="">
+      <p>If <var>object</var> is a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/window-object.html#window" id="ref-for-window②">Window</a></code> return <var>object</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/window-object.html#concept-document-window" id="ref-for-concept-document-window">associated <code>Document</code></a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-document-csp-list" id="ref-for-concept-document-csp-list⑥">CSP list</a>.</p>
+     <li data-md="">
+      <p>If <var>object</var> is a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#workerglobalscope" id="ref-for-workerglobalscope③">WorkerGlobalScope</a></code>, return <var>object</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list①②">CSP list</a>.</p>
+     <li data-md="">
+      <p>If <var>object</var> is a <code class="idl"><a data-link-type="idl" href="https://drafts.css-houdini.org/worklets/#workletglobalscope" id="ref-for-workletglobalscope④">WorkletGlobalScope</a></code>, return <var>object</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list①③">CSP list</a>.</p>
+     <li data-md="">
+      <p>Return <code>null</code>.</p>
+    </ol>
+    <h4 class="heading settled algorithm" data-algorithm="Should element’s inline type behavior be blocked by Content Security Policy?" data-level="4.2.4" id="should-block-inline"><span class="secno">4.2.4. </span><span class="content"> Should <var>element</var>’s inline <var>type</var> behavior be blocked by Content Security Policy? </span><a class="self-link" href="#should-block-inline"></a></h4>
     <p>Given an <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element①">Element</a></code> (<var>element</var>), a string (<var>type</var>), and a string (<var>source</var>)
   this algorithm returns "<code>Allowed</code>" if the element is allowed to have inline
   definition of a particular type of behavior (script execution, style
@@ -2589,7 +2605,7 @@ of security-relevant policy decisions.</p>
      <li data-md="">
       <p>Let <var>result</var> be "<code>Allowed</code>".</p>
      <li data-md="">
-      <p>For each <var>policy</var> in <var>element</var>’s <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document⑧">Document</a></code>'s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object①⓪">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list①⓪">CSP list</a>:</p>
+      <p>For each <var>policy</var> in <var>element</var>’s <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①⓪">Document</a></code>'s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object①①">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list①④">CSP list</a>:</p>
       <ol>
        <li data-md="">
         <p>For each <var>directive</var> in <var>policy</var>’s <a data-link-type="dfn" href="#policy-directive-set" id="ref-for-policy-directive-set⑥">directive set</a>:</p>
@@ -2622,7 +2638,7 @@ of security-relevant policy decisions.</p>
       <p>Return <var>result</var>.</p>
     </ol>
     <h4 class="heading settled algorithm" data-algorithm="Should navigation request of type from source in target be blocked
-    by Content Security Policy?" data-level="4.2.4" id="should-block-navigation-request"><span class="secno">4.2.4. </span><span class="content"> Should <var>navigation request</var> of <var>type</var> from <var>source</var> in <var>target</var> be blocked
+    by Content Security Policy?" data-level="4.2.5" id="should-block-navigation-request"><span class="secno">4.2.5. </span><span class="content"> Should <var>navigation request</var> of <var>type</var> from <var>source</var> in <var>target</var> be blocked
     by Content Security Policy? </span><a class="self-link" href="#should-block-navigation-request"></a></h4>
     <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request①③">request</a> (<var>navigation request</var>), a string (<var>type</var>, either
   "<code>form-submission</code>" or "<code>other</code>"), and two <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context" id="ref-for-browsing-context③">browsing contexts</a> (<var>source</var> and <var>target</var>), this algorithm return "<code>Blocked</code>" if the active policy blocks
@@ -2631,7 +2647,7 @@ of security-relevant policy decisions.</p>
      <li data-md="">
       <p>Let <var>result</var> be "<code>Allowed</code>".</p>
      <li data-md="">
-      <p>For each <var>policy</var> in <var>source</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document" id="ref-for-active-document①">active document</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-document-csp-list" id="ref-for-concept-document-csp-list⑤">CSP list</a>:</p>
+      <p>For each <var>policy</var> in <var>source</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document" id="ref-for-active-document①">active document</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-document-csp-list" id="ref-for-concept-document-csp-list⑦">CSP list</a>:</p>
       <ol>
        <li data-md="">
         <p>For each <var>directive</var> in <var>policy</var>:</p>
@@ -2655,7 +2671,7 @@ of security-relevant policy decisions.</p>
       <p>If <var>result</var> is "<code>Allowed</code>", and if <var>navigation request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url" id="ref-for-concept-request-url②">url</a>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme②">scheme</a> is <code>javascript</code>:</p>
       <ol>
        <li data-md="">
-        <p>For each <var>policy</var> in <var>source</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document" id="ref-for-active-document②">active document</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-document-csp-list" id="ref-for-concept-document-csp-list⑥">CSP List</a>:</p>
+        <p>For each <var>policy</var> in <var>source</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document" id="ref-for-active-document②">active document</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-document-csp-list" id="ref-for-concept-document-csp-list⑧">CSP List</a>:</p>
         <ol>
          <li data-md="">
           <p>For each <var>directive</var> in <var>policy</var>:</p>
@@ -2680,7 +2696,7 @@ of security-relevant policy decisions.</p>
       <p>Return <var>result</var>.</p>
     </ol>
     <h4 class="heading settled algorithm" data-algorithm="Should navigation response to navigation request of type from source
-    in target be blocked by Content Security Policy?" data-level="4.2.5" id="should-block-navigation-response"><span class="secno">4.2.5. </span><span class="content"> Should <var>navigation response</var> to <var>navigation request</var> of <var>type</var> from <var>source</var> in <var>target</var> be blocked by Content Security Policy? </span><a class="self-link" href="#should-block-navigation-response"></a></h4>
+    in target be blocked by Content Security Policy?" data-level="4.2.6" id="should-block-navigation-response"><span class="secno">4.2.6. </span><span class="content"> Should <var>navigation response</var> to <var>navigation request</var> of <var>type</var> from <var>source</var> in <var>target</var> be blocked by Content Security Policy? </span><a class="self-link" href="#should-block-navigation-response"></a></h4>
     <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request①④">request</a> (<var>navigation request</var>),, a string (<var>type</var>, either
   "<code>form-submission</code>" or "<code>other</code>"), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response①⑥">response</a> <var>navigation
   response</var>, and two <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context" id="ref-for-browsing-context④">browsing contexts</a> (<var>source</var> and <var>target</var>), this algorithm
@@ -2718,7 +2734,7 @@ of security-relevant policy decisions.</p>
     <p>ECMAScript defines a <code class="idl"><a data-link-type="idl" href="https://tc39.github.io/ecma262#sec-hostensurecancompilestrings" id="ref-for-sec-hostensurecancompilestrings">HostEnsureCanCompileStrings()</a></code> abstract operation
   which allows the host environment to block the compilation of strings into
   ECMAScript code. This document defines an implementation of that abstract
-  operation thich examines the relevant <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list①①">CSP list</a> to determine whether such compilation ought to be blocked.</p>
+  operation thich examines the relevant <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list①⑤">CSP list</a> to determine whether such compilation ought to be blocked.</p>
     <h4 class="heading settled algorithm" data-algorithm="EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source)" data-dfn-type="dfn" data-level="4.3.1" data-lt="EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source)" data-noexport="" id="can-compile-strings"><span class="secno">4.3.1. </span><span class="content"> EnsureCSPDoesNotBlockStringCompilation(<var>callerRealm</var>, <var>calleeRealm</var>, <var>source</var>) </span><a class="self-link" href="#can-compile-strings"></a></h4>
     <p>Given two <a data-link-type="dfn" href="https://tc39.github.io/ecma262#realm" id="ref-for-realm">realms</a> (<var>callerRealm</var> and <var>calleeRealm</var>), and a string (<var>source</var>), this algorithm
   returns normally if string compilation is allowed, and throws an "<code>EvalError</code>" if not:</p>
@@ -2731,7 +2747,7 @@ of security-relevant policy decisions.</p>
        <li data-md="">
         <p>Let <var>result</var> be "<code>Allowed</code>".</p>
        <li data-md="">
-        <p>For each <var>policy</var> in <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list①②">CSP list</a>:</p>
+        <p>For each <var>policy</var> in <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list①⑥">CSP list</a>:</p>
         <ol>
          <li data-md="">
           <p>Let <var>source-list</var> be <code>null</code>.</p>
@@ -2764,7 +2780,7 @@ of security-relevant policy decisions.</p>
         <p>If <var>result</var> is "<code>Blocked</code>", throw an <code>EvalError</code> exception.</p>
       </ol>
     </ol>
-    <p class="issue" id="issue-910d1dca"><a class="self-link" href="#issue-910d1dca"></a> <code class="idl"><a data-link-type="idl" href="https://tc39.github.io/ecma262#sec-hostensurecancompilestrings" id="ref-for-sec-hostensurecancompilestrings①">HostEnsureCanCompileStrings()</a></code> does not include the string which is
+    <p class="issue" id="issue-c0b6be8f"><a class="self-link" href="#issue-c0b6be8f"></a> <code class="idl"><a data-link-type="idl" href="https://tc39.github.io/ecma262#sec-hostensurecancompilestrings" id="ref-for-sec-hostensurecancompilestrings①">HostEnsureCanCompileStrings()</a></code> does not include the string which is
   going to be compiled as a parameter. We’ll also need to update HTML to pipe that value through
   to CSP. <a href="https://github.com/tc39/ecma262/issues/938">&lt;https://github.com/tc39/ecma262/issues/938></a></p>
    </section>
@@ -2883,8 +2899,8 @@ of security-relevant policy decisions.</p>
   given violation (which might manipulate the DOM).</p>
       <ol>
        <li data-md="">
-        <p>If <var>target</var> is not <code>null</code>, and <var>global</var> is a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/window-object.html#window" id="ref-for-window②">Window</a></code>, and <var>target</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-shadow-including-root" id="ref-for-concept-shadow-including-root">shadow-including root</a> is not <var>global</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/window-object.html#concept-document-window" id="ref-for-concept-document-window">associated <code>Document</code></a>, set <var>target</var> to <code>null</code>.</p>
-        <p class="note" role="note"><span>Note:</span> This ensures that we fire events only at elements <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#connected" id="ref-for-connected">connected</a> to <var>violation</var>’s <a data-link-type="dfn" href="#violation-policy" id="ref-for-violation-policy④">policy</a>’s <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document⑨">Document</a></code>. If a
+        <p>If <var>target</var> is not <code>null</code>, and <var>global</var> is a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/window-object.html#window" id="ref-for-window③">Window</a></code>, and <var>target</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-shadow-including-root" id="ref-for-concept-shadow-including-root">shadow-including root</a> is not <var>global</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/window-object.html#concept-document-window" id="ref-for-concept-document-window①">associated <code>Document</code></a>, set <var>target</var> to <code>null</code>.</p>
+        <p class="note" role="note"><span>Note:</span> This ensures that we fire events only at elements <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#connected" id="ref-for-connected">connected</a> to <var>violation</var>’s <a data-link-type="dfn" href="#violation-policy" id="ref-for-violation-policy④">policy</a>’s <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①①">Document</a></code>. If a
   violation is caused by an element which isn’t connected to that
   document, we’ll fire the event at the document rather than the element
   in order to ensure that the violation is visible to the document’s
@@ -2895,7 +2911,7 @@ of security-relevant policy decisions.</p>
          <li data-md="">
           <p>Set <var>target</var> be <var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object⑤">global object</a>.</p>
          <li data-md="">
-          <p>If <var>target</var> is a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/window-object.html#window" id="ref-for-window③">Window</a></code>, set <var>target</var> to <var>target</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/window-object.html#concept-document-window" id="ref-for-concept-document-window①">associated <code>Document</code></a>.</p>
+          <p>If <var>target</var> is a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/window-object.html#window" id="ref-for-window④">Window</a></code>, set <var>target</var> to <var>target</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/window-object.html#concept-document-window" id="ref-for-concept-document-window②">associated <code>Document</code></a>.</p>
         </ol>
        <li data-md="">
         <p><a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-event-fire" id="ref-for-concept-event-fire">Fire an event</a> named <code>securitypolicyviolation</code> that uses the <code class="idl"><a data-link-type="idl" href="#securitypolicyviolationevent" id="ref-for-securitypolicyviolationevent②">SecurityPolicyViolationEvent</a></code> interface at <var>target</var> with
@@ -3639,7 +3655,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <p>Script <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response②⑥">responses</a> MUST pass through <a href="#should-block-response">§4.1.4 Should response to request be blocked by Content
     Security Policy?</a>.</p>
      <li data-md="">
-      <p>Inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script④">script</a></code> blocks MUST pass through <a href="#should-block-inline">§4.2.3 Should element’s inline type behavior be blocked by Content Security Policy?</a>. Their
+      <p>Inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script④">script</a></code> blocks MUST pass through <a href="#should-block-inline">§4.2.4 Should element’s inline type behavior be blocked by Content Security Policy?</a>. Their
   behavior will be blocked unless every policy allows inline script, either
   implicitly by not specifying a <code>script-src</code> (or <code>default-src</code>) directive,
   or explicitly, by specifying "<code>unsafe-inline</code>", a <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source②">nonce-source</a> or a <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source②">hash-source</a> that matches
@@ -3786,7 +3802,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
     </ol>
     <h4 class="heading settled" data-level="6.1.11" id="directive-style-src"><span class="secno">6.1.11. </span><span class="content"><code>style-src</code></span><a class="self-link" href="#directive-style-src"></a></h4>
     <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="style-src">style-src</dfn> directive restricts the locations from which style
-  may be applied to a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①⓪">Document</a></code>. The syntax for the directive’s name and
+  may be applied to a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①②">Document</a></code>. The syntax for the directive’s name and
   value is described by the following ABNF:</p>
 <pre>directive-name  = "style-src"
 directive-value = <a data-link-type="grammar" href="#grammardef-serialized-source-list" id="ref-for-grammardef-serialized-source-list①⓪">serialized-source-list</a>
@@ -3809,7 +3825,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response②⑧">Responses</a> to style requests MUST pass through <a href="#should-block-response">§4.1.4 Should response to request be blocked by Content
     Security Policy?</a>.</p>
      <li data-md="">
-      <p>Inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-style-element" id="ref-for-the-style-element">style</a></code> blocks MUST pass through <a href="#should-block-inline">§4.2.3 Should element’s inline type behavior be blocked by Content Security Policy?</a>. The
+      <p>Inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-style-element" id="ref-for-the-style-element">style</a></code> blocks MUST pass through <a href="#should-block-inline">§4.2.4 Should element’s inline type behavior be blocked by Content Security Policy?</a>. The
   styles will be blocked unless every policy allows inline style, either
   implicitly by not specifying a <code>style-src</code> (or <code>default-src</code>) directive,
   or explicitly, by specifying "<code>unsafe-inline</code>", a <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source④">nonce-source</a> or a <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source⑥">hash-source</a> that matches
@@ -3828,7 +3844,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
         <p><a data-link-type="dfn" href="https://drafts.csswg.org/cssom-1/#parse-a-group-of-selectors" id="ref-for-parse-a-group-of-selectors">parse a group of selectors</a></p>
       </ol>
       <p>This would include, for example, all invocations of CSSOM’s various <code>cssText</code> setters and <code>insertRule</code> methods <a data-link-type="biblio" href="#biblio-cssom">[CSSOM]</a> <a data-link-type="biblio" href="#biblio-html">[HTML]</a>.</p>
-      <p class="issue" id="issue-ba1a0a35"><a class="self-link" href="#issue-ba1a0a35"></a> This needs to be better explained.</p>
+      <p class="issue" id="issue-ba1a0a35"><a class="self-link" href="#issue-ba1a0a35"></a> This needs to be better explained. <a href="https://github.com/w3c/webappsec-csp/issues/212">&lt;https://github.com/w3c/webappsec-csp/issues/212></a></p>
     </ol>
     <h5 class="heading settled algorithm" data-algorithm="style-src Pre-request Check" data-level="6.1.11.1" id="style-src-pre-request"><span class="secno">6.1.11.1. </span><span class="content"> <code>style-src</code> Pre-request Check </span><a class="self-link" href="#style-src-pre-request"></a></h5>
     <p>This directive’s <a data-link-type="dfn" href="#directive-pre-request-check" id="ref-for-directive-pre-request-check①③">pre-request check</a> is as follows:</p>
@@ -3947,18 +3963,18 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
   environment to which a policy applies.</p>
     <h4 class="heading settled" data-level="6.2.1" id="directive-base-uri"><span class="secno">6.2.1. </span><span class="content"><code>base-uri</code></span><a class="self-link" href="#directive-base-uri"></a></h4>
     <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="base-uri">base-uri</dfn> directive restricts the <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url④">URL</a></code>s which can be used in
-  a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①①">Document</a></code>'s <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-base-element" id="ref-for-the-base-element①">base</a></code> element. The syntax for the directive’s name and
+  a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①③">Document</a></code>'s <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-base-element" id="ref-for-the-base-element①">base</a></code> element. The syntax for the directive’s name and
   value is described by the following ABNF:</p>
 <pre>directive-name  = "base-uri"
 directive-value = <a data-link-type="grammar" href="#grammardef-serialized-source-list" id="ref-for-grammardef-serialized-source-list①②">serialized-source-list</a>
 </pre>
     <p>The following algorithm is called during HTML’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/semantics.html#set-the-frozen-base-url" id="ref-for-set-the-frozen-base-url①">set the frozen base url</a> algorithm in order to monitor and enforce this directive:</p>
     <h5 class="heading settled algorithm" data-algorithm="Is base allowed for document?" data-level="6.2.1.1" id="allow-base-for-document"><span class="secno">6.2.1.1. </span><span class="content"> Is <var>base</var> allowed for <var>document</var>? </span><a class="self-link" href="#allow-base-for-document"></a></h5>
-    <p>Given a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url⑤">URL</a></code> (<var>base</var>), and a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①②">Document</a></code> (<var>document</var>), this algorithm
+    <p>Given a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url⑤">URL</a></code> (<var>base</var>), and a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①④">Document</a></code> (<var>document</var>), this algorithm
   returns "<code>Allowed</code>" if <var>base</var> may be used as the value of a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-base-element" id="ref-for-the-base-element②">base</a></code> element’s <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/multipage/semantics.html#attr-base-href" id="ref-for-attr-base-href①">href</a></code> attribute, and "<code>Blocked</code>" otherwise:</p>
     <ol>
      <li data-md="">
-      <p>For each <var>policy</var> in <var>document</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object①①">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list①③">csp list</a>:</p>
+      <p>For each <var>policy</var> in <var>document</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object①②">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list①⑦">csp list</a>:</p>
       <ol>
        <li data-md="">
         <p>Let <var>source list</var> be <code>null</code>.</p>
@@ -3972,7 +3988,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
         <p>If the result of executing <a href="#match-url-to-source-list">§6.6.1.5 Does url match source list in origin with redirect count?</a> on <var>base</var>, <var>source list</var>, <var>document</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/urls-and-fetching.html#fallback-base-url" id="ref-for-fallback-base-url">fallback base URL</a>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-origin" id="ref-for-concept-url-origin">origin</a>, and <code>0</code> is "<code>Does Not Match</code>":</p>
         <ol>
          <li data-md="">
-          <p>Let <var>violation</var> be the result of executing <a href="#create-violation-for-global">§2.4.1 Create a violation object for global, policy, and directive</a> on <var>document</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object①②">global
+          <p>Let <var>violation</var> be the result of executing <a href="#create-violation-for-global">§2.4.1 Create a violation object for global, policy, and directive</a> on <var>document</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object①③">global
   object</a>, <var>policy</var>, and "<a data-link-type="dfn" href="#base-uri" id="ref-for-base-uri"><code>base-uri</code></a>".</p>
          <li data-md="">
           <p>Set <var>violation</var>’s <a data-link-type="dfn" href="#violation-resource" id="ref-for-violation-resource⑨">resource</a> to "<code>inline</code>".</p>
@@ -4059,7 +4075,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-media-type-list"
   its document:</p>
     <ol class="algorithm">
      <li data-md="">
-      <p>For each <var>policy</var> in <var>plugin element</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document" id="ref-for-concept-node-document">node document</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-document-csp-list" id="ref-for-concept-document-csp-list⑦">CSP list</a>:</p>
+      <p>For each <var>policy</var> in <var>plugin element</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document" id="ref-for-concept-node-document">node document</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-document-csp-list" id="ref-for-concept-document-csp-list⑨">CSP list</a>:</p>
       <ol>
        <li data-md="">
         <p>If <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives②⑨">directive</a> (<var>directive</var>) whose name is <code>plugin-types</code>:</p>
@@ -4124,14 +4140,14 @@ directive-value = "" / <a data-link-type="grammar" href="https://tools.ietf.org/
     </ol>
     <h5 class="heading settled algorithm" data-algorithm="sandbox Initialization" data-level="6.2.3.2" id="sandbox-init"><span class="secno">6.2.3.2. </span><span class="content"> <code>sandbox</code> Initialization </span><a class="self-link" href="#sandbox-init"></a></h5>
     <p>This directive’s <a data-link-type="dfn" href="#directive-initialization" id="ref-for-directive-initialization②">initialization</a> algorithm is
-  responsible for adjusting a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①③">Document</a></code>'s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/origin.html#forced-sandboxing-flag-set" id="ref-for-forced-sandboxing-flag-set">forced sandboxing flag set</a> according to the <a data-link-type="dfn" href="#sandbox" id="ref-for-sandbox"><code>sandbox</code></a> values present in its policies, as
+  responsible for adjusting a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①⑤">Document</a></code>'s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/origin.html#forced-sandboxing-flag-set" id="ref-for-forced-sandboxing-flag-set">forced sandboxing flag set</a> according to the <a data-link-type="dfn" href="#sandbox" id="ref-for-sandbox"><code>sandbox</code></a> values present in its policies, as
   follows:</p>
-    <p>Given a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①④">Document</a></code> or <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object①③">global object</a> (<var>context</var>), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response③③">response</a> (<var>response</var>), and a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object⑤④">policy</a> (<var>policy</var>):</p>
+    <p>Given a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①⑥">Document</a></code> or <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object①④">global object</a> (<var>context</var>), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response③③">response</a> (<var>response</var>), and a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object⑤④">policy</a> (<var>policy</var>):</p>
     <ol>
      <li data-md="">
       <p class="assertion">Assert: <var>response</var> is unused.</p>
      <li data-md="">
-      <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①⑨">disposition</a> is not "<code>enforce</code>", or <var>context</var> is not a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①⑤">Document</a></code>, then abort this algorithm.</p>
+      <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①⑨">disposition</a> is not "<code>enforce</code>", or <var>context</var> is not a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①⑦">Document</a></code>, then abort this algorithm.</p>
       <p class="note" role="note"><span>Note:</span> This will need to change if we allow Workers to be sandboxed,
   which seems like a pretty reasonable thing to do.</p>
      <li data-md="">
@@ -4158,7 +4174,7 @@ directive-value = ""
     <h5 class="heading settled algorithm" data-algorithm="disown-opener Initialization" data-level="6.2.4.1" id="disown-opener-init"><span class="secno">6.2.4.1. </span><span class="content"> <code>disown-opener</code> Initialization </span><a class="self-link" href="#disown-opener-init"></a></h5>
     <p>This directive’s <a data-link-type="dfn" href="#directive-initialization" id="ref-for-directive-initialization③">initialization</a> algorithm is as
   follows:</p>
-    <p>Given a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①⑥">Document</a></code> or <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object①④">global object</a> (<var>context</var>), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response③④">response</a> (<var>response</var>), and a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object⑤⑤">policy</a> (<var>policy</var>):</p>
+    <p>Given a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①⑧">Document</a></code> or <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object①⑤">global object</a> (<var>context</var>), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response③④">response</a> (<var>response</var>), and a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object⑤⑤">policy</a> (<var>policy</var>):</p>
     <ol>
      <li data-md="">
       <p class="assertion">Assert: <var>response</var> and <var>policy</var> are unused.</p>
@@ -4166,7 +4182,7 @@ directive-value = ""
       <p>If <var>context</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#responsible-browsing-context" id="ref-for-responsible-browsing-context">responsible browsing context</a> has an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#opener-browsing-context" id="ref-for-opener-browsing-context①">opener browsing
   context</a>, <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#disowned-its-opener" id="ref-for-disowned-its-opener①">disown its opener</a>.</p>
     </ol>
-    <p class="issue" id="issue-466edd09"><a class="self-link" href="#issue-466edd09"></a> What should this do in an <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-iframe-element" id="ref-for-the-iframe-element④">iframe</a></code>? Anything?</p>
+    <p class="issue" id="issue-7782dc5e"><a class="self-link" href="#issue-7782dc5e"></a> What should this do in an <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-iframe-element" id="ref-for-the-iframe-element④">iframe</a></code>? Anything?</p>
     <h3 class="heading settled" data-level="6.3" id="directives-navigation"><span class="secno">6.3. </span><span class="content"> Navigation Directives </span><a class="self-link" href="#directives-navigation"></a></h3>
     <h4 class="heading settled" data-level="6.3.1" id="directive-form-action"><span class="secno">6.3.1. </span><span class="content"><code>form-action</code></span><a class="self-link" href="#directive-form-action"></a></h4>
     <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="form-action">form-action</dfn> directive restricts the <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url⑥">URL</a></code>s which can be used
@@ -4461,7 +4477,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
        <li data-md="">
         <p><var>origin</var> is the same as <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-origin" id="ref-for-concept-url-origin②">origin</a></p>
        <li data-md="">
-        <p><var>origin</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-host" id="ref-for-dom-url-host②">host</a></code> is the same as <var>url</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-host" id="ref-for-dom-url-host③">host</a></code>, <var>origin</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-port" id="ref-for-dom-url-port">port</a></code> and <var>url</var>’s {{URL/port} are either the same
+        <p><var>origin</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-host" id="ref-for-dom-url-host②">host</a></code> is the same as <var>url</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-host" id="ref-for-dom-url-host③">host</a></code>, <var>origin</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-port" id="ref-for-dom-url-port">port</a></code> and <var>url</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-port" id="ref-for-dom-url-port①">port</a></code> are either the same
   or the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#default-port" id="ref-for-default-port">default ports</a> for their respective <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme⑧">scheme</a>s, and
   one or more of the following conditions is met:</p>
         <ol>
@@ -4717,7 +4733,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
      <li data-md="">
       <p>Return "<code>Nonceable</code>".</p>
     </ol>
-    <p class="issue" id="issue-c41e2850"><a class="self-link" href="#issue-c41e2850"></a> This processing is meant to mitigate the risk
+    <p class="issue" id="issue-f811e9ff"><a class="self-link" href="#issue-f811e9ff"></a> This processing is meant to mitigate the risk
   of dangling markup attacks that steal the nonce from an existing element
   in order to load injected script. It is fairly expensive, however, as it
   requires that we walk through all attributes and their values in order to
@@ -4751,8 +4767,8 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
       <p>If <var>allow all inline</var> is <code>true</code>, return "<code>Allows</code>".
   Otherwise, return "<code>Does Not Allow</code>".</p>
     </ol>
-    <div class="example" id="example-da6a7e8f">
-     <a class="self-link" href="#example-da6a7e8f"></a> <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists①⑦">Source lists</a> that <a data-link-type="dfn" href="#source-list-allows-all-inline-behavior" id="ref-for-source-list-allows-all-inline-behavior">allow all inline behavior</a>: 
+    <div class="example" id="example-c68bb999">
+     <a class="self-link" href="#example-c68bb999"></a> <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists①⑦">Source lists</a> that <a data-link-type="dfn" href="#source-list-allows-all-inline-behavior" id="ref-for-source-list-allows-all-inline-behavior">allow all inline behavior</a>: 
 <pre>'unsafe-inline' http://a.com http://b.com
 'unsafe-inline'
 </pre>
@@ -4789,7 +4805,7 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
         <ol>
          <li data-md="">
           <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source⑧"><code>nonce-source</code></a> grammar,
-  and <var>element</var> has a <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/multipage/scripting.html#attr-script-nonce" id="ref-for-attr-script-nonce">nonce</a></code> attribute whose value is a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#case-sensitive" id="ref-for-case-sensitive⑤">case-sensitive</a> match for <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-base64-value" id="ref-for-grammardef-base64-value⑥"><code>base64-value</code></a> part, return "<code>Matches</code>".</p>
+  and <var>element</var> has a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/urls-and-fetching.html#dom-noncedelement-nonce" id="ref-for-dom-noncedelement-nonce">nonce</a></code> attribute whose value is a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#case-sensitive" id="ref-for-case-sensitive⑤">case-sensitive</a> match for <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-base64-value" id="ref-for-grammardef-base64-value⑥"><code>base64-value</code></a> part, return "<code>Matches</code>".</p>
         </ol>
       </ol>
       <p class="note" role="note"><span>Note:</span> Nonces only apply to inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script⑨">script</a></code> and inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-style-element" id="ref-for-the-style-element②">style</a></code>, not to
@@ -4942,6 +4958,31 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
     <p>To mitigate one variant of history-scanning attacks like Yan Zhu’s <a href="http://diracdeltas.github.io/sniffly/">Sniffly</a>, CSP will not allow pages to lock
   themselves into insecure URLs via policies like <code>script-src http://example.com</code>. As described in <a href="#match-schemes">§6.6.1.7 scheme-part matching</a>, the scheme portion of a source expression will always allow upgrading to a
   secure variant.</p>
+    <h3 class="heading settled" data-level="7.8" id="security-inherit-csp"><span class="secno">7.8. </span><span class="content"> CSP Inheriting to avoid bypasses </span><a class="self-link" href="#security-inherit-csp"></a></h3>
+    <p>As described in <a href="#initialize-document-csp">§4.2.1 Initialize a Document's CSP list</a> and <a href="#initialize-global-object-csp">§4.2.2 Initialize a global object’s CSP list</a>,
+  documents loaded from <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#local-scheme" id="ref-for-local-scheme⑤">local schemes</a> will inherit a copy of the
+  policies in the <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list①⑧">CSP list</a> of the <a data-link-type="dfn" href="#embedding-document" id="ref-for-embedding-document③">embedding document</a> or <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#opener-browsing-context" id="ref-for-opener-browsing-context②">opener browsing context</a>. The goal is to ensure that a page can’t
+  bypass its policy by embedding a frame or opening a new window containg
+  content that is entirely under its control (<code>srcdoc</code> documents, <code>blob:</code> or <code>data:</code> URLs, <code>about:blank</code> documents that can be manipulated via <code>document.write()</code>, etc).</p>
+    <div class="example" id="example-7a5b0df0">
+     <a class="self-link" href="#example-7a5b0df0"></a> If this would not happen a page could execute inline scripts even without <code>unsafe-inline</code> in the page’s execution context by simply embedding a <code>srcdoc</code> <code>iframe</code>. 
+<pre class="highlight"><span class="p">&lt;</span><span class="nt">iframe</span> <span class="na">srcdoc</span><span class="o">=</span><span class="s">"&lt;script>alert(1);&lt;/script>"</span><span class="p">>&lt;/</span><span class="nt">iframe</span><span class="p">></span>
+</pre>
+    </div>
+    <p>Note that we create a copy of the <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list①⑨">CSP list</a> which
+  means that the new <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①⑨">Document</a></code>'s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list②⓪">CSP list</a> is a
+  snapshot of the relevant policies at its creation time. Modifications in the <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list②①">CSP list</a> of the new <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document②⓪">Document</a></code> won’t affect the <a data-link-type="dfn" href="#embedding-document" id="ref-for-embedding-document④">embedding document</a> or <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#opener-browsing-context" id="ref-for-opener-browsing-context③">opener browsing context</a>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list②②">CSP list</a> or vice-versa.</p>
+    <div class="example" id="example-3c6e0109">
+     <a class="self-link" href="#example-3c6e0109"></a> In the example below the image inside the iframe will not load because it is
+    blocked by the policy in the <code>meta</code> tag of the iframe. The image outside the
+    iframe will load (assuming the main page policy does not block it) since the
+    policy inserted in the iframe will not affect it. 
+<pre class="highlight"><span class="p">&lt;</span><span class="nt">iframe</span> <span class="na">srcdoc</span><span class="o">=</span><span class="s">'&lt;meta http-equiv="Content-Security-Policy" content="img-src example.com;"></span>
+<span class="s">                   &lt;img src="not-example.com/image">'</span><span class="p">>&lt;/</span><span class="nt">iframe</span><span class="p">></span>
+
+<span class="p">&lt;</span><span class="nt">img</span> <span class="na">src</span><span class="o">=</span><span class="s">"not-example.com/image"</span><span class="p">></span>
+</pre>
+    </div>
    </section>
    <section>
     <h2 class="heading settled" data-level="8" id="authoring-considerations"><span class="secno">8. </span><span class="content">Authoring Considerations</span><a class="self-link" href="#authoring-considerations"></a></h2>
@@ -4999,8 +5040,8 @@ Content-Security-Policy: connect-src http://example.com/;
     <p>The second allows scripts which are given access to the page via nonces or
   hashes to bring in their dependencies without adding them explicitly to the
   page’s policy.</p>
-    <div class="example" id="example-716fbdf7">
-     <a class="self-link" href="#example-716fbdf7"></a> Suppose MegaCorp, Inc. deploys the following policy: 
+    <div class="example" id="example-08637c68">
+     <a class="self-link" href="#example-08637c68"></a> Suppose MegaCorp, Inc. deploys the following policy: 
 <pre><a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#header-content-security-policy" id="ref-for-header-content-security-policy⑥">Content-Security-Policy</a>: <a data-link-type="dfn" href="#script-src" id="ref-for-script-src⑥">script-src</a> 'nonce-DhcnhD3khTMePgXwdayK9BsMqXjhguVV' <a data-link-type="grammar" href="#grammardef-strict-dynamic" id="ref-for-grammardef-strict-dynamic⑧">'strict-dynamic'</a>
 </pre>
      <p>And serves the following HTML with that policy active:</p>
@@ -5009,7 +5050,7 @@ Content-Security-Policy: connect-src http://example.com/;
 ...
 </pre>
      <p>This will generate a request for <code>https://cdn.example.com/script.js</code>, which
-    will not be blocked because of the matching <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/multipage/scripting.html#attr-script-nonce" id="ref-for-attr-script-nonce①">nonce</a></code> attribute.</p>
+    will not be blocked because of the matching <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/urls-and-fetching.html#dom-noncedelement-nonce" id="ref-for-dom-noncedelement-nonce①">nonce</a></code> attribute.</p>
      <p>If <code>script.js</code> contains the following code:</p>
 <pre class="highlight"><span class="kd">var</span> s <span class="o">=</span> document<span class="p">.</span>createElement<span class="p">(</span><span class="s1">'script'</span><span class="p">);</span>
 s<span class="p">.</span>src <span class="o">=</span> <span class="s1">'https://othercdn.not-example.net/dependency.js'</span><span class="p">;</span>
@@ -5056,8 +5097,8 @@ document<span class="p">.</span>write<span class="p">(</span><span class="s1">'&
     the scope to enable externalized JavaScript as well.</p>
      <p>If multiple sets of integrity metadata are specified for a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑦">script</a></code>, the
     request will match a policy’s <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source①⓪">hash-source</a>s if and only if <em>each</em> item in a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑧">script</a></code>'s integrity metadata matches the policy.</p>
-     <div class="example" id="example-7bc6634d">
-      <a class="self-link" href="#example-7bc6634d"></a> MegaCorp, Inc. wishes to allow two specific scripts on a page in a way
+     <div class="example" id="example-9a71f03d">
+      <a class="self-link" href="#example-9a71f03d"></a> MegaCorp, Inc. wishes to allow two specific scripts on a page in a way
       that ensures that the content matches their expectations. They do so by
       setting the following policy: 
 <pre>Content-Security-Policy: script-src 'sha256-abc123' 'sha512-321cba'
@@ -5578,7 +5619,7 @@ rest of Google’s CSP Cabal.</p>
      <li><a href="https://html.spec.whatwg.org/multipage/semantics.html#meta">meta</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context">nested browsing context</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context-nested-through">nested through</a>
-     <li><a href="https://html.spec.whatwg.org/multipage/scripting.html#attr-script-nonce">nonce</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/urls-and-fetching.html#dom-noncedelement-nonce">nonce</a>
      <li><a href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-object-element">object</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#opener-browsing-context">opener browsing context</a>
      <li><a href="https://html.spec.whatwg.org/multipage/origin.html#concept-origin">origin</a>
@@ -5793,7 +5834,7 @@ rest of Google’s CSP Cabal.</p>
   <h3 class="no-num no-ref heading settled" id="informative"><span class="content">Informative References</span><a class="self-link" href="#informative"></a></h3>
   <dl>
    <dt id="biblio-appmanifest">[APPMANIFEST]
-   <dd>Marcos Caceres; et al. <a href="https://www.w3.org/TR/appmanifest/">Web App Manifest</a>. 26 October 2017. WD. URL: <a href="https://www.w3.org/TR/appmanifest/">https://www.w3.org/TR/appmanifest/</a>
+   <dd>Marcos Caceres; et al. <a href="https://www.w3.org/TR/appmanifest/">Web App Manifest</a>. 29 November 2017. WD. URL: <a href="https://www.w3.org/TR/appmanifest/">https://www.w3.org/TR/appmanifest/</a>
    <dt id="biblio-beacon">[BEACON]
    <dd>Ilya Grigorik; et al. <a href="https://www.w3.org/TR/beacon/">Beacon</a>. 13 April 2017. CR. URL: <a href="https://www.w3.org/TR/beacon/">https://www.w3.org/TR/beacon/</a>
    <dt id="biblio-csp2">[CSP2]
@@ -5866,7 +5907,7 @@ rest of Google’s CSP Cabal.</p>
    <div class="issue"> <code>disown-opener</code> is a work in progress. <a href="https://github.com/w3c/webappsec-csp/issues/194">&lt;https://github.com/w3c/webappsec-csp/issues/194></a><a href="#issue-0915ad11"> ↵ </a></div>
    <div class="issue"> <code>navigation-to</code> is a work in progress. <a href="https://github.com/w3c/webappsec-csp/issues/125">&lt;https://github.com/w3c/webappsec-csp/issues/125></a><a href="#issue-a305d3f5"> ↵ </a></div>
    <div class="issue"> Is this kind of thing specified anywhere? I didn’t see anything
-  that looked useful in <a data-link-type="biblio" href="#biblio-ecma262">[ECMA262]</a>.<a href="#issue-c404edb5"> ↵ </a></div>
+  that looked useful in <a data-link-type="biblio" href="#biblio-ecma262">[ECMA262]</a>.<a href="#issue-de937cf3"> ↵ </a></div>
    <div class="issue"> How, exactly, do we get the status code? We don’t actually store it
   anywhere.<a href="#issue-99576800"> ↵ </a></div>
    <div class="issue"> This concept is missing from W3C’s Workers. <a href="https://github.com/w3c/html/issues/187">&lt;https://github.com/w3c/html/issues/187></a><a href="#issue-a794766b"> ↵ </a></div>
@@ -5879,8 +5920,8 @@ rest of Google’s CSP Cabal.</p>
   have a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#process-a-navigate-response">process a navigate response</a> algorithm into which to hook. <a href="https://github.com/w3c/html/issues/548">&lt;https://github.com/w3c/html/issues/548></a><a href="#issue-7b0f92da"> ↵ </a></div>
    <div class="issue"> <code class="idl"><a data-link-type="idl" href="https://tc39.github.io/ecma262#sec-hostensurecancompilestrings">HostEnsureCanCompileStrings()</a></code> does not include the string which is
   going to be compiled as a parameter. We’ll also need to update HTML to pipe that value through
-  to CSP. <a href="https://github.com/tc39/ecma262/issues/938">&lt;https://github.com/tc39/ecma262/issues/938></a><a href="#issue-910d1dca"> ↵ </a></div>
-   <div class="issue"> This needs to be better explained.<a href="#issue-ba1a0a35"> ↵ </a></div>
+  to CSP. <a href="https://github.com/tc39/ecma262/issues/938">&lt;https://github.com/tc39/ecma262/issues/938></a><a href="#issue-c0b6be8f"> ↵ </a></div>
+   <div class="issue"> This needs to be better explained. <a href="https://github.com/w3c/webappsec-csp/issues/212">&lt;https://github.com/w3c/webappsec-csp/issues/212></a><a href="#issue-ba1a0a35"> ↵ </a></div>
    <div class="issue"> Do something interesting to the execution context in order to lock down
   interesting CSSOM algorithms. I don’t think CSSOM gives us any hooks here, so
   let’s work with them to put something reasonable together.<a href="#issue-eba1ebc1"> ↵ </a></div>
@@ -5889,7 +5930,7 @@ rest of Google’s CSP Cabal.</p>
     well, and there might be a cleverer syntax that could encompass both a
     document’s opener, and a document’s openees. <code>disown-openee</code> is weird.
     Maybe <code>disown 'opener' 'openee'</code>? Do we need origin restrictions on either/both?<a href="#issue-55f190c5"> ↵ </a></div>
-   <div class="issue"> What should this do in an <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-iframe-element">iframe</a></code>? Anything?<a href="#issue-466edd09"> ↵ </a></div>
+   <div class="issue"> What should this do in an <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-iframe-element">iframe</a></code>? Anything?<a href="#issue-7782dc5e"> ↵ </a></div>
    <div class="issue"> Spell this out in more detail as part of defining <code>X-Frame-Options</code> integration with the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#process-a-navigate-response">process a navigate response</a> algorithm. <a href="https://github.com/whatwg/html/issues/1230">&lt;https://github.com/whatwg/html/issues/1230></a><a href="#issue-db2876b7"> ↵ </a></div>
    <div class="issue"> Should we use <code>ancestor-source-list</code> (basically, origins as opposed to
     paths?) It doesn’t appear that blocking navigation targets is any worse than
@@ -5905,7 +5946,7 @@ rest of Google’s CSP Cabal.</p>
   determine whether the script should execute. Here, we try to minimize the
   impact by doing this check only for <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code> elements when a nonce is
   present, but we should probably consider this algorithm as "at risk" until
-  we know its impact. <a href="https://github.com/w3c/webappsec-csp/issues/98">&lt;https://github.com/w3c/webappsec-csp/issues/98></a><a href="#issue-c41e2850"> ↵ </a></div>
+  we know its impact. <a href="https://github.com/w3c/webappsec-csp/issues/98">&lt;https://github.com/w3c/webappsec-csp/issues/98></a><a href="#issue-f811e9ff"> ↵ </a></div>
    <div class="issue"> Work in progress. <a href="https://github.com/w3c/webappsec-csp/issues/13">&lt;https://github.com/w3c/webappsec-csp/issues/13></a><a href="#issue-0e25e974"> ↵ </a></div>
   </div>
   <aside class="dfn-panel" data-for="content-security-policy-object">
@@ -6005,7 +6046,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-policy-directive-set④">2.2.2. 
     Parse a serialized CSP list </a>
     <li><a href="#ref-for-policy-directive-set⑤">2.3. Directives</a>
-    <li><a href="#ref-for-policy-directive-set⑥">4.2.3. 
+    <li><a href="#ref-for-policy-directive-set⑥">4.2.4. 
     Should element’s inline type behavior be blocked by Content Security Policy? </a>
     <li><a href="#ref-for-policy-directive-set⑦">5.3. 
     Report a violation </a> <a href="#ref-for-policy-directive-set⑧">(2)</a> <a href="#ref-for-policy-directive-set⑨">(3)</a>
@@ -6030,12 +6071,12 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-policy-disposition⑨">4.1.4. 
     Should response to request be blocked by Content
     Security Policy? </a> <a href="#ref-for-policy-disposition①⓪">(2)</a>
-    <li><a href="#ref-for-policy-disposition①①">4.2.3. 
+    <li><a href="#ref-for-policy-disposition①①">4.2.4. 
     Should element’s inline type behavior be blocked by Content Security Policy? </a>
-    <li><a href="#ref-for-policy-disposition①②">4.2.4. 
+    <li><a href="#ref-for-policy-disposition①②">4.2.5. 
     Should navigation request of type from source in target be blocked
     by Content Security Policy? </a> <a href="#ref-for-policy-disposition①③">(2)</a>
-    <li><a href="#ref-for-policy-disposition①④">4.2.5. 
+    <li><a href="#ref-for-policy-disposition①④">4.2.6. 
     Should navigation response to navigation request of type from source
     in target be blocked by Content Security Policy? </a>
     <li><a href="#ref-for-policy-disposition①⑤">4.3.1. 
@@ -6172,10 +6213,10 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-directive-name">2.2.1. 
     Parse a serialized CSP </a> <a href="#ref-for-directive-name①">(2)</a>
     <li><a href="#ref-for-directive-name②">2.3. Directives</a>
-    <li><a href="#ref-for-directive-name③">4.2.4. 
+    <li><a href="#ref-for-directive-name③">4.2.5. 
     Should navigation request of type from source in target be blocked
     by Content Security Policy? </a> <a href="#ref-for-directive-name④">(2)</a>
-    <li><a href="#ref-for-directive-name⑤">4.2.5. 
+    <li><a href="#ref-for-directive-name⑤">4.2.6. 
     Should navigation response to navigation request of type from source
     in target be blocked by Content Security Policy? </a>
     <li><a href="#ref-for-directive-name⑥">4.3.1. 
@@ -6205,7 +6246,7 @@ rest of Google’s CSP Cabal.</p>
     Parse a serialized CSP </a>
     <li><a href="#ref-for-directive-value①">2.3. Directives</a> <a href="#ref-for-directive-value②">(2)</a>
     <li><a href="#ref-for-directive-value③">2.3.1. Source Lists</a>
-    <li><a href="#ref-for-directive-value④">4.2.3. 
+    <li><a href="#ref-for-directive-value④">4.2.4. 
     Should element’s inline type behavior be blocked by Content Security Policy? </a>
     <li><a href="#ref-for-directive-value⑤">4.3.1. 
     EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a> <a href="#ref-for-directive-value⑥">(2)</a>
@@ -6400,9 +6441,9 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="directive-inline-check">
    <b><a href="#directive-inline-check">#directive-inline-check</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-directive-inline-check">4.2.3. 
+    <li><a href="#ref-for-directive-inline-check">4.2.4. 
     Should element’s inline type behavior be blocked by Content Security Policy? </a>
-    <li><a href="#ref-for-directive-inline-check①">4.2.4. 
+    <li><a href="#ref-for-directive-inline-check①">4.2.5. 
     Should navigation request of type from source in target be blocked
     by Content Security Policy? </a>
     <li><a href="#ref-for-directive-inline-check②">6.1.10.3. 
@@ -6429,7 +6470,7 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="directive-pre-navigation-check">
    <b><a href="#directive-pre-navigation-check">#directive-pre-navigation-check</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-directive-pre-navigation-check">4.2.4. 
+    <li><a href="#ref-for-directive-pre-navigation-check">4.2.5. 
     Should navigation request of type from source in target be blocked
     by Content Security Policy? </a>
     <li><a href="#ref-for-directive-pre-navigation-check①">6.3.1.1. 
@@ -6441,7 +6482,7 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="directive-navigation-response-check">
    <b><a href="#directive-navigation-response-check">#directive-navigation-response-check</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-directive-navigation-response-check">4.2.5. 
+    <li><a href="#ref-for-directive-navigation-response-check">4.2.6. 
     Should navigation response to navigation request of type from source
     in target be blocked by Content Security Policy? </a>
     <li><a href="#ref-for-directive-navigation-response-check①">6.3.2.1. 
@@ -6668,7 +6709,7 @@ rest of Google’s CSP Cabal.</p>
    <b><a href="#grammardef-report-sample">#grammardef-report-sample</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-grammardef-report-sample">1.3. Changes from Level 2</a>
-    <li><a href="#ref-for-grammardef-report-sample①">4.2.3. 
+    <li><a href="#ref-for-grammardef-report-sample①">4.2.4. 
     Should element’s inline type behavior be blocked by Content Security Policy? </a>
     <li><a href="#ref-for-grammardef-report-sample②">4.3.1. 
     EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a>
@@ -6790,12 +6831,12 @@ rest of Google’s CSP Cabal.</p>
     Create a violation object for global, policy, and directive </a>
     <li><a href="#ref-for-violation-resource①">2.4.2. 
     Create a violation object for request, policy, and directive </a>
-    <li><a href="#ref-for-violation-resource②">4.2.3. 
+    <li><a href="#ref-for-violation-resource②">4.2.4. 
     Should element’s inline type behavior be blocked by Content Security Policy? </a>
-    <li><a href="#ref-for-violation-resource③">4.2.4. 
+    <li><a href="#ref-for-violation-resource③">4.2.5. 
     Should navigation request of type from source in target be blocked
     by Content Security Policy? </a> <a href="#ref-for-violation-resource④">(2)</a>
-    <li><a href="#ref-for-violation-resource⑤">4.2.5. 
+    <li><a href="#ref-for-violation-resource⑤">4.2.6. 
     Should navigation response to navigation request of type from source
     in target be blocked by Content Security Policy? </a>
     <li><a href="#ref-for-violation-resource⑥">4.3.1. 
@@ -6884,7 +6925,7 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="violation-element">
    <b><a href="#violation-element">#violation-element</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-violation-element">4.2.3. 
+    <li><a href="#ref-for-violation-element">4.2.4. 
     Should element’s inline type behavior be blocked by Content Security Policy? </a>
     <li><a href="#ref-for-violation-element①">5.3. 
     Report a violation </a> <a href="#ref-for-violation-element②">(2)</a>
@@ -6895,7 +6936,7 @@ rest of Google’s CSP Cabal.</p>
    <ul>
     <li><a href="#ref-for-violation-sample">1.3. Changes from Level 2</a>
     <li><a href="#ref-for-violation-sample①">2.4. Violations</a>
-    <li><a href="#ref-for-violation-sample②">4.2.3. 
+    <li><a href="#ref-for-violation-sample②">4.2.4. 
     Should element’s inline type behavior be blocked by Content Security Policy? </a>
     <li><a href="#ref-for-violation-sample③">4.3.1. 
     EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a>
@@ -6938,12 +6979,16 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-global-object-csp-list④">4.2.2. 
     Initialize a global object’s CSP list </a> <a href="#ref-for-global-object-csp-list⑤">(2)</a> <a href="#ref-for-global-object-csp-list⑥">(3)</a> <a href="#ref-for-global-object-csp-list⑦">(4)</a> <a href="#ref-for-global-object-csp-list⑧">(5)</a> <a href="#ref-for-global-object-csp-list⑨">(6)</a>
     <li><a href="#ref-for-global-object-csp-list①⓪">4.2.3. 
+    Retrieve the CSP list of an object </a> <a href="#ref-for-global-object-csp-list①①">(2)</a> <a href="#ref-for-global-object-csp-list①②">(3)</a> <a href="#ref-for-global-object-csp-list①③">(4)</a>
+    <li><a href="#ref-for-global-object-csp-list①④">4.2.4. 
     Should element’s inline type behavior be blocked by Content Security Policy? </a>
-    <li><a href="#ref-for-global-object-csp-list①①">4.3. Integration with ECMAScript</a>
-    <li><a href="#ref-for-global-object-csp-list①②">4.3.1. 
+    <li><a href="#ref-for-global-object-csp-list①⑤">4.3. Integration with ECMAScript</a>
+    <li><a href="#ref-for-global-object-csp-list①⑥">4.3.1. 
     EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a>
-    <li><a href="#ref-for-global-object-csp-list①③">6.2.1.1. 
+    <li><a href="#ref-for-global-object-csp-list①⑦">6.2.1.1. 
     Is base allowed for document? </a>
+    <li><a href="#ref-for-global-object-csp-list①⑧">7.8. 
+    CSP Inheriting to avoid bypasses </a> <a href="#ref-for-global-object-csp-list①⑨">(2)</a> <a href="#ref-for-global-object-csp-list②⓪">(3)</a> <a href="#ref-for-global-object-csp-list②①">(4)</a> <a href="#ref-for-global-object-csp-list②②">(5)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="enforced">
@@ -6969,6 +7014,8 @@ rest of Google’s CSP Cabal.</p>
     Initialize a Document's CSP list </a> <a href="#ref-for-embedding-document①">(2)</a>
     <li><a href="#ref-for-embedding-document②">4.2.2. 
     Initialize a global object’s CSP list </a>
+    <li><a href="#ref-for-embedding-document③">7.8. 
+    CSP Inheriting to avoid bypasses </a> <a href="#ref-for-embedding-document④">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="violation-report">

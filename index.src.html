@@ -30,6 +30,7 @@ spec:html
     text: plugin document
     text: fallback base url
     text: duplicate-attribute
+    text: origin; for: /
   type: element
     text: a
     text: link
@@ -390,7 +391,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   <h3 id="framework-policy">Policies</h3>
 
   A <dfn export lt="content security policy object" local-lt="policy">policy</dfn> defines allowed
-  and restricted behaviors, and may be applied to a {{Window}}, {{WorkerGlobalScope}, or
+  and restricted behaviors, and may be applied to a {{Window}}, {{WorkerGlobalScope}}, or
   {{WorkletGlobalScope}} as described in [[#initialize-global-object-csp]].
 
   Each policy has an associated <dfn for="policy" export>directive set</dfn>, which is an <a>ordered
@@ -1087,38 +1088,41 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   </h3>
 
   1.  The {{Document}}, {{WorkerGlobalScope}}, and {{WorkletGlobalScope}} objects have a
-      <dfn for="global object" id="global-object-csp-list">CSP list</dfn>,
-      which holds all the <a for="/">policy</a> objects which are active for a given
-      context. This list is empty unless otherwise specified, and is populated
-      via the [[#initialize-global-object-csp]] algorithm.
+      `CSP list`, which holds all the <a for="/">policy</a> objects which are
+      active for a given context. This list is empty unless otherwise specified,
+      and is populated via the [[#initialize-global-object-csp]] algorithm.
 
       ISSUE(w3c/html#187): This concept is missing from W3C's Workers.
 
-  2.  A <a for="/">policy</a> is <dfn export>enforced</dfn> or <dfn export>monitored</dfn> for a
+  2.  A <a for="/">global object</a>'s <dfn for="global object" id="global-object-csp-list">CSP list</dfn>
+      is the result of executing [[#get-csp-of-object]] with the <a for="/">global object</a>
+      as the `object`.
+
+  3.  A <a for="/">policy</a> is <dfn export>enforced</dfn> or <dfn export>monitored</dfn> for a
       <a for="/">global object</a> by inserting it into the <a for="/">global object</a>'s
       <a for="global object">CSP list</a>.
 
-  3.  [[#initialize-global-object-csp]] is called during the <a>initializing a
+  4.  [[#initialize-global-object-csp]] is called during the <a>initializing a
       new `Document` object</a> and <a>run a worker</a> algorithms in order to
-      bind a set of <a for="/">policy</a> objects associated with a <a>response</a> to a
-      newly created <a for="/">global object</a>.
+      bind a set of <a for="/">policy</a> objects associated with a <a>response</a>
+      to a newly created {{Document}}, {{WorkerGlobalScope}} or {{WorkletGlobalScope}}.
 
-  4.  [[#should-block-inline]] is called during the <a>prepare a script</a> and
+  5.  [[#should-block-inline]] is called during the <a>prepare a script</a> and
       <a>update a `style` block</a> algorithms in order to determine whether or
       not an inline script or style block is allowed to execute/render.
 
-  5.  [[#should-block-inline]] is called during handling of inline event
+  6.  [[#should-block-inline]] is called during handling of inline event
       handlers (like `onclick`) and inline `style` attributes in order to
       determine whether or not they ought to be allowed to execute/render.
 
-  6.  <a for="/">policy</a> is <a>enforced</a> during processing of the <{meta}>
+  7.  <a for="/">policy</a> is <a>enforced</a> during processing of the <{meta}>
       element's <{meta/http-equiv}>.
 
-  7.  A {{Document}}'s <dfn>embedding document</dfn> is the {{Document}}
+  8.  A {{Document}}'s <dfn>embedding document</dfn> is the {{Document}}
       <a lt="nested through">through which</a> the {{Document}}'s
       <a>browsing context</a> is nested.
 
-  8.  HTML populates each <a for="/">request</a>'s <a for="request">cryptographic nonce
+  9.  HTML populates each <a for="/">request</a>'s <a for="request">cryptographic nonce
       metadata</a> and <a>parser metadata</a> with relevant data from the
       elements responsible for resource loading.
 
@@ -1128,11 +1132,11 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       ISSUE(whatwg/html#968): Stylesheet loading is not yet integrated with
       Fetch in WHATWG's HTML.
 
-  9.  [[#allow-base-for-document]] is called during <{base}>'s <a>set the frozen
+  10. [[#allow-base-for-document]] is called during <{base}>'s <a>set the frozen
       base URL</a> algorithm to ensure that the <{base/href}> attribute's value
       is valid.
 
-  10. [[#should-plugin-element-be-blocked-a-priori-by-content-security-policy]]
+  11. [[#should-plugin-element-be-blocked-a-priori-by-content-security-policy]]
       is called during the processing of <{object}>, <{embed}>, and <a>`applet`</a>
       elements to determine whether they may trigger a fetch.
 
@@ -1140,7 +1144,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
       ISSUE(w3c/html#547): This hook is missing from W3C's HTML.
 
-  11. [[#should-block-navigation-request]] is called during the <a>process a
+  12. [[#should-block-navigation-request]] is called during the <a>process a
       navigate fetch</a> algorithm, and [[#should-block-navigation-response]]
       is called during the <a>process a navigate response</a> algorithm to
       apply directive's navigation checks, as well as inline checks for
@@ -1172,11 +1176,12 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
           1.  For each |policy| in |doc|'s <a for="Document">CSP list</a>:
 
-              1.  Insert an alias to |policy| in |document|'s
+              1.  Insert a copy of |policy| into |document|'s
                   <a for="Document">CSP list</a>.
 
+
       Note: <a>local scheme</a> includes `about:`, and this algorithm will
-      therefore alias the <a>embedding document</a>'s policies for <a>an iframe
+      therefore copy the <a>embedding document</a>'s policies for <a>an iframe
       `srcdoc` `Document`</a>.
 
       Note: We do all this to ensure that a page cannot bypass its <a for="/">policy</a>
@@ -1212,11 +1217,11 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
           1.  For each |policy| in |owner|'s <a for="global object">CSP list</a>:
 
-              1.  Insert an alias to |policy| in |global|'s
+              1.  Insert a copy of |policy| into |global|'s
                   <a for="global object">CSP list</a>.
 
       Note: <a>local scheme</a> includes `about:`, and this algorithm will
-      therefore alias the <a>embedding document</a>'s policies for <a>an iframe
+      therefore copy the <a>embedding document</a>'s policies for <a>an iframe
       `srcdoc` `Document`</a>.
 
   2.  If |global| is a {{SharedWorkerGlobalScope}} or {{ServiceWorkerGlobalScope}}:
@@ -1231,7 +1236,24 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
       2. For each |policy| in |owner|'s <a for="global object">CSP list</a>:
 
-          1.  Insert an alias to |policy| in |global|'s <a for="global object">CSP list</a>.
+          1.  Insert a copy of |policy| into |global|'s <a for="global object">CSP list</a>.
+
+  <h4 id="get-csp-of-object" algorithm>
+    Retrieve the <a for="global object">CSP list</a> of an |object|
+  </h4>
+
+  To obtain |object|'s <a for="global object">CSP list</a>:
+
+  1.  If |object| is a {{Document}} return |object|'s <a for="Document">CSP list</a>.
+
+  2.  If |object| is a {{Window}} return |object|'s <a>associated `Document`</a>'s
+      <a for="Document">CSP list</a>.
+
+  3.  If |object| is a {{WorkerGlobalScope}}, return |object|'s <a for="global object">CSP list</a>.
+
+  4.  If |object| is a {{WorkletGlobalScope}}, return |object|'s <a for="global object">CSP list</a>.
+
+  5.  Return `null`.
 
   <h4 id="should-block-inline" algorithm>
     Should |element|'s inline |type| behavior be blocked by Content Security Policy?
@@ -2733,7 +2755,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       <code>cssText</code> setters and <code>insertRule</code> methods
       [[!CSSOM]] [[!HTML]].
 
-      ISSUE: This needs to be better explained.
+      ISSUE(w3c/webappsec-csp#212): This needs to be better explained.
 
   <h5 algorithm id="style-src-pre-request">
     `style-src` Pre-request Check
@@ -3569,7 +3591,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       1.  |origin| is the same as |url|'s <a for="url">origin</a>
 
       2.  |origin|'s {{URL/host}} is the same as |url|'s {{URL/host}},
-          |origin|'s {{URL/port}} and |url|'s {{URL/port} are either the same
+          |origin|'s {{URL/port}} and |url|'s {{URL/port}} are either the same
           or the <a>default ports</a> for their respective <a for="url">scheme</a>s, and
           one or more of the following conditions is met:
 
@@ -3933,7 +3955,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       1.  For each |expression| in |list|:
 
           1.  If |expression| matches the <a grammar>`nonce-source`</a> grammar,
-              and |element| has a <{script/nonce}> attribute whose value is a
+              and |element| has a {{NoncedElement/nonce}} attribute whose value is a
               <a>case-sensitive</a> match for |expression|'s
               <a grammar>`base64-value`</a> part, return "`Matches`".
 
@@ -4138,6 +4160,48 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   themselves into insecure URLs via policies like `script-src http://example.com`. As described in
   [[#match-schemes]], the scheme portion of a source expression will always allow upgrading to a
   secure variant.
+
+  <h3 id="security-inherit-csp">
+    CSP Inheriting to avoid bypasses
+  </h3>
+
+  As described in [[#initialize-document-csp]] and [[#initialize-global-object-csp]],
+  documents loaded from <a>local schemes</a> will inherit a copy of the
+  policies in the <a for="global object">CSP list</a> of the <a>embedding document</a>
+  or <a>opener browsing context</a>. The goal is to ensure that a page can't
+  bypass its policy by embedding a frame or opening a new window containg
+  content that is entirely under its control (`srcdoc` documents, `blob:` or `data:`
+  URLs, `about:blank` documents that can be manipulated via `document.write()`, etc).
+
+  <div class="example">
+    If this would not happen a page could execute inline scripts even without
+    `unsafe-inline` in the page's execution context by simply embedding a `srcdoc`
+    `iframe`.
+    <pre highlight="html">
+      &lt;iframe srcdoc="&lt;script&gt;alert(1);&lt;/script&gt;"&gt;&lt;/iframe&gt;
+    </pre>
+  </div>
+
+  Note that we create a copy of the <a for="global object">CSP list</a> which
+  means that the new {{Document}}'s <a for="global object">CSP list</a> is a
+  snapshot of the relevant policies at its creation time. Modifications in the
+  <a for="global object">CSP list</a> of the new {{Document}} won't affect the
+  <a>embedding document</a> or <a>opener browsing context</a>'s
+  <a for="global object">CSP list</a> or vice-versa.
+
+  <div class="example">
+    In the example below the image inside the iframe will not load because it is
+    blocked by the policy in the `meta` tag of the iframe. The image outside the
+    iframe will load (assuming the main page policy does not block it) since the
+    policy inserted in the iframe will not affect it.
+    <pre highlight="html">
+      &lt;iframe srcdoc='&lt;meta http-equiv="Content-Security-Policy" content="img-src example.com;"&gt;
+                         &lt;img src="not-example.com/image"&gt;'&gt;&lt;/iframe&gt;
+
+      &lt;img src="not-example.com/image"&gt;
+    </pre>
+  </div>
+
 </section>
 
 <!-- Big text: Authoring -->
@@ -4238,7 +4302,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     </pre>
 
     This will generate a request for `https://cdn.example.com/script.js`, which
-    will not be blocked because of the matching <{script/nonce}> attribute.
+    will not be blocked because of the matching {{NoncedElement/nonce}} attribute.
 
     If `script.js` contains the following code:
 
