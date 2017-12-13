@@ -1485,33 +1485,33 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
     [Constructor(DOMString type, optional SecurityPolicyViolationEventInit eventInitDict)]
     interface SecurityPolicyViolationEvent : Event {
-        readonly    attribute DOMString      documentURI;
-        readonly    attribute DOMString      referrer;
-        readonly    attribute DOMString      blockedURI;
+        readonly    attribute USVString      documentURI;
+        readonly    attribute USVString      referrer;
+        readonly    attribute USVString      blockedURI;
         readonly    attribute DOMString      violatedDirective;
         readonly    attribute DOMString      effectiveDirective;
         readonly    attribute DOMString      originalPolicy;
-        readonly    attribute DOMString      sourceFile;
+        readonly    attribute USVString      sourceFile;
         readonly    attribute DOMString      sample;
         readonly    attribute SecurityPolicyViolationEventDisposition      disposition;
         readonly    attribute unsigned short statusCode;
-        readonly    attribute long           lineNumber;
-        readonly    attribute long           columnNumber;
+        readonly    attribute unsigned long  lineNumber;
+        readonly    attribute unsigned long  columnNumber;
     };
 
     dictionary SecurityPolicyViolationEventInit : EventInit {
-        DOMString      documentURI;
-        DOMString      referrer;
-        DOMString      blockedURI;
-        DOMString      violatedDirective;
-        DOMString      effectiveDirective;
-        DOMString      originalPolicy;
-        DOMString      sourceFile;
-        DOMString      sample;
-        SecurityPolicyViolationEventDisposition      disposition;
-        unsigned short statusCode;
-        long           lineNumber;
-        long           columnNumber;
+        required USVString      documentURI;
+                 USVString      referrer = "";
+                 USVString      blockedURI = "";
+        required DOMString      violatedDirective;
+        required DOMString      effectiveDirective;
+        required DOMString      originalPolicy;
+                 USVString      sourceFile = "";
+                 DOMString      sample = "";
+        required SecurityPolicyViolationEventDisposition disposition;
+        required unsigned short statusCode;
+                 unsigned long  lineNumber = 0;
+                 unsigned long  columnNumber = 0;
     };
   </pre>
 
@@ -1629,11 +1629,15 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
           :  {{SecurityPolicyViolationEvent/violatedDirective}}
           :: |violation|'s <a for="violation">effective directive</a>
           :  {{SecurityPolicyViolationEvent/originalPolicy}}
-          :: |violation|'s <a for="violation">policy</a>
+          ::  The <a lt="serialized CSP">serialization</a> of |violation|'s
+              <a for="violation">policy</a>
           :  {{SecurityPolicyViolationEvent/disposition}}
           :: |violation|'s <a for="violation">disposition</a>
           :  {{SecurityPolicyViolationEvent/sourceFile}}
-          :: |violation|'s <a for="violation">source file</a>
+          :: The result of executing the <a>URL serializer</a> on |violation|'s
+             <a for="violation">source file</a>, with the `exclude fragment`
+             flag set if the |violation|'s <a for="violation">source file</a>
+             it not `null` and the empty string otherwise.
           :  {{SecurityPolicyViolationEvent/statusCode}}
           :: |violation|'s <a for="violation">status</a>
           :  {{SecurityPolicyViolationEvent/lineNumber}}
@@ -1664,46 +1668,50 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
               <a for="policy">directive set</a> contains a <a>directive</a> named
               "<a>`report-to`</a>", skip the remaining substeps.
 
-          2.  Let |endpoint| be the result of executing the <a>URL parser</a> with |directive|'s
-              <a for="directive">value</a> as the input, and |violation|'s
-              <a for="violation">url</a> as the <a>base URL</a>.
+          2.  For each |token| returned by <a lt="split a string on ASCII whitespace">
+              splitting a string on ASCII whitespace</a> with |directive|'s
+              <a for="directive">value</a> as the `input`.
 
-          3.  If |endpoint| is not a valid URL, skip the remaining substeps.
+              1.  Let |endpoint| be the result of executing the <a>URL parser</a>
+                  with |token| as the input, and |violation|'s
+                  <a for="violation">url</a> as the <a>base URL</a>.
 
-          4.  Let |request| be a new <a for="/">request</a>, initialized as follows:
+              2.  If |endpoint| is not a valid URL, skip the remaining substeps.
 
-              :   <a for="request">method</a>
-              ::  "`POST`"
-              :   <a for="request">url</a>
-              ::  |violation|'s <a for="violation">url</a>
-              :   <a for="request">origin</a>
-              ::  |violation|'s <a for="violation">global object</a>'s <a>relevant settings
-                  object</a>'s <a for="environment settings object">origin</a>
-              :   <a for="request">window</a>
-              ::  "`no-window`"
-              :   <a for="request">client</a>
-              ::  |violation|'s <a for="violation">global object</a>'s <a>relevant
-                  settings object</a>
-              :   <a for="request">destination</a>
-              ::  "`report`"
-              :   <a for="request">initiator</a>
-              ::  ""
-              :   <a for="request">credentials mode</a>
-              ::  "`same-origin`"
-              :   <a for="request">keepalive flag</a>
-              ::  "`true`"
-              :   <a for="request">header list</a>
-              ::  A header list containing a single header whose name is
-                  "`Content-Type`", and value is "`application/csp-report`"
-              :   <a for="request">body</a>
-              ::  The result of executing [[#deprecated-serialize-violation]] on
-                  |violation|
-              :   <a for="request">redirect mode</a>
-              ::  "`error`"
+              3.  Let |request| be a new <a for="/">request</a>, initialized as follows:
 
-              Note: |request|'s <a for="request">mode</a> defaults to "`no-cors`"; the response is ignored entirely.
+                  :   <a for="request">method</a>
+                  ::  "`POST`"
+                  :   <a for="request">url</a>
+                  ::  |violation|'s <a for="violation">url</a>
+                  :   <a for="request">origin</a>
+                  ::  |violation|'s <a for="violation">global object</a>'s <a>relevant settings
+                      object</a>'s <a for="environment settings object">origin</a>
+                  :   <a for="request">window</a>
+                  ::  "`no-window`"
+                  :   <a for="request">client</a>
+                  ::  |violation|'s <a for="violation">global object</a>'s <a>relevant
+                      settings object</a>
+                  :   <a for="request">destination</a>
+                  ::  "`report`"
+                  :   <a for="request">initiator</a>
+                  ::  ""
+                  :   <a for="request">credentials mode</a>
+                  ::  "`same-origin`"
+                  :   <a for="request">keepalive flag</a>
+                  ::  "`true`"
+                  :   <a for="request">header list</a>
+                  ::  A header list containing a single header whose name is
+                      "`Content-Type`", and value is "`application/csp-report`"
+                  :   <a for="request">body</a>
+                  ::  The result of executing [[#deprecated-serialize-violation]] on
+                      |violation|
+                  :   <a for="request">redirect mode</a>
+                  ::  "`error`"
 
-          5.  <a for="/">Fetch</a> |request|. The result will be ignored.
+                  Note: |request|'s <a for="request">mode</a> defaults to "`no-cors`"; the response is ignored entirely.
+
+              4.  <a for="/">Fetch</a> |request|. The result will be ignored.
 
           Note: All of this should be considered deprecated. It sends a single
           request per violation, which simply isn't scalable. As soon as this
