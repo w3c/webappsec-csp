@@ -2443,7 +2443,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   <h4 id="directive-prefetch-src">`prefetch-src`</h4>
 
   The <dfn export>prefetch-src</dfn> directive restrictes the URLs from which resources may be
-  prefetched. The syntax for the directive's name and value is described by the following ABNF:
+  prefetched or prerendered. The syntax for the directive's name and value is described by the
+  following ABNF:
 
   <pre>
     directive-name  = "prefetch-src"
@@ -2457,11 +2458,12 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       Content-Security-Policy: <a>prefetch-src</a> https://example.com/
     </pre>
 
-    Fetches for the following code will return a network error, as the URL
-    provided does not match `prefetch-src`'s <a>source list</a>:
+    Fetches for the following code will return network errors, as the URLs provided does not match
+    `prefetch-src`'s <a>source list</a>:
 
     <pre highlight="html">
       &lt;link rel="prefetch" src="https://example.org/"&gt;&lt;/link&gt;
+      &lt;link rel="prerender" src="https://example.org/"&gt;&lt;/link&gt;
     </pre>
   </div>
 
@@ -2475,7 +2477,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   1.  Assert: |policy| is unused.
 
-  2.  If |request|'s [=request/initiator=] is "`prefetch`":
+  2.  If |request|'s [=request/initiator=] is "`prefetch`" or "`prerender`":
 
       1.  If the result of executing [[#match-request-to-source-list]] on |request| and this
           directive's [=directive/value=] is "`Does Not Match`", return "`Blocked`".
@@ -2493,7 +2495,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   1.  Assert: |policy| is unused.
 
-  2.  If |request|'s [=request/initiator=] is "`prefetch`":
+  2.  If |request|'s [=request/initiator=] is "`prefetch`" or "`prerender`":
 
       1.  If the result of executing [[#match-response-to-source-list]] on |response|, |request|,
           and this directive's [=directive/value=] is "`Does Not Match`", return "`Blocked`".
@@ -3854,6 +3856,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       ::
         1.  Return `object-src`.
       : "`prefetch`"
+      : "`prerender`"
       ::
         1.  Return `prefetch-src`.
       : "`document`"
