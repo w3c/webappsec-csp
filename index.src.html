@@ -557,6 +557,10 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       arguments, and is executed during [[#should-block-navigation-response]].
       It returns "`Allowed`" unless otherwise specified.
 
+  8.  A <dfn for="directive" export>pre-connect check</dfn>, which takes a [=/host=], a [=/policy=], and
+      an [=origin=], and is executed during [[#should-block-rtc-connection]]. It returns "`Allowed`"
+      unless otherwise specified.
+
   <h4 id="framework-directive-source-list">Source Lists</h4>
 
   Many <a>directives</a>' <a>values</a> consist of <dfn export>source lists</dfn>: <a>sets</a>
@@ -1370,7 +1374,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     in |target| be blocked by Content Security Policy?
   </h4>
 
-  Given a <a for="/">request</a> (|navigation request|),, a string (|type|, either
+  Given a <a for="/">request</a> (|navigation request|), a string (|type|, either
   "`form-submission`" or "`other`"), a <a>response</a> |navigation
   response|, and two <a>browsing contexts</a> (|source| and |target|), this algorithm
   returns "`Blocked`" if the active policy blocks the navigation, and "`Allowed`"
@@ -1403,6 +1407,52 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
             5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
                 set |result| to "`Blocked`".
+
+    3.  Return |result|.
+  </ol>
+
+  <h3 id="webrtc-integration">Integration with WebRTC</h3>
+
+  Mostly TODO. The general idea is that WebRTC should call into [[#should-block-rtc-connection]],
+  passing in enough detail for CSP to return a "`Blocked`"/"`Allowed`" decision, and react
+  accordingly.
+
+  <h4 id="should-block-rtc-connection">
+    Should an RTC connection to (|host|,|port|) be blocked for |global|?
+  </h4>
+
+  Given a [=/host=] (|host|), a port (|port|), and a [=/global object=] (|global|), this algorithm returns "`Blocked`"
+  if the active policy for |global| blocks a connection to |host|, and "`Allowed`" otherwise:
+
+  <ol class="algorithm">
+    1.  Let |result| be "`Allowed`".
+
+    2.  For each |policy| in |global|'s [=global object/CSP list=]:
+
+          1.  Let |directive| be `null`.
+
+          2.  If |policy| contains a [=directive=] whose [=directive/name=] is "`webrtc-src`", then
+              set |directive| to that [=directive=].
+
+              Otherwise if |policy| contains a [=directive=] whose [=directive/name=] is
+              "`connect-src`", then set |directive| to that directive.
+
+              Otherwise if |policy| contains a [=directive=] whose [=directive/name=] is
+              "`default-src`", then set |directive| to that directive.
+
+          3.  If |directive| is not `null`, and the result of executing |directive|'s
+              [=pre-connect check=] on |host|, |policy|, and |global|'s [=/origin=] is
+              "`Blocked`":
+
+              1.  Let |violation| be the result of executing [[#create-violation-for-global]] on
+                  |global|, |policy|, and |directive|'s [=directive/name=].
+
+              2.  Set |violation|'s <a for="violation">resource</a> to |host|.
+
+              3.  Execute [[#report-violation]] on |violation|.
+
+              4.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
+                  set |result| to "`Blocked`".
 
     3.  Return |result|.
   </ol>
@@ -1968,6 +2018,25 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   3.  Return "`Allowed`".
 
+  <h5 algorithm id="connect-src-pre-connect">
+    `connect-src` Preconnect Check
+  </h5>
+
+  This directive's <a for="directive">pre-connect check</a> is as follows:
+
+  Given a [=/host=] (|host|), a port (|port|), an [=/origin=] (|origin|) and a [=/policy=]
+  (|policy|):
+
+  1.  Assert: |policy| is unused.
+
+  2.  Let |url| be a [=/url=] whose [=url/scheme=] is |origin|'s [=origin/scheme=], [=url/host=]
+      is |host|, and [=url/port=] is |port|.
+
+  3.  If the result of executing [[#match-url-to-source-list]] on |url|, this directive's
+      [=directive/value=], and |origin| is "`Matches`", return "`Allowed`".
+
+  4.  Return "`Blocked`".
+
   <h4 id="directive-default-src">`default-src`</h4>
 
   The <dfn export>default-src</dfn> directive serves as a fallback for the other
@@ -2098,6 +2167,25 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       <a for="directive">name</a> is |name| on |request|, |response|, and
       |policy|, using this directive's <a for="directive">value</a> for the
       comparison.
+
+  <h5 algorithm id="default-src-pre-connect">
+    `default-src` Preconnect Check
+  </h5>
+
+  This directive's <a for="directive">pre-connect check</a> is as follows:
+
+  Given a [=/host=] (|host|), a port (|port|), an [=/origin=] (|origin|) and a [=/policy=]
+  (|policy|):
+
+  1.  Assert: |policy| is unused.
+
+  2.  Let |url| be a [=/url=] whose [=url/scheme=] is |origin|'s [=origin/scheme=], [=url/host=]
+      is |host|, and [=url/port=] is |port|.
+
+  3.  If the result of executing [[#match-url-to-source-list]] on |url|, this directive's
+      [=directive/value=], and |origin| is "`Matches`", return "`Allowed`".
+
+  4.  Return "`Blocked`".
 
   <h4 id="directive-font-src">`font-src`</h4>
 
@@ -2894,6 +2982,60 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   ISSUE: Do something interesting to the execution context in order to lock down
   interesting CSSOM algorithms. I don't think CSSOM gives us any hooks here, so
   let's work with them to put something reasonable together.
+
+  <h4 id="directive-webrtc-src">`webrtc-src`</h4>
+
+  The <dfn export>webrtc-src</dfn> directive restricts the set of servers or peers to which
+  connections may be established via WebRTC. The syntax for the directive's name and value is
+  described by the following ABNF:
+
+  <pre>
+    directive-name  = "webrtc-src"
+    directive-value = <a grammar>serialized-source-list</a>
+  </pre>
+
+  <div class="example">
+    Given a page with the following Content Security Policy:
+
+    <pre>
+      Content-Security-Policy: <a>webrtc-src</a> example.com
+    </pre>
+
+    Connections for the following code will fail, as the URL provided for the TURN server does not
+    match `webrtc-src`'s <a>source list</a>:
+
+    <pre highlight="html">
+      &lt;script&gt;
+        var pc = new RTCPeerConnection({
+          "iceServers":[
+            {
+              "urls": ["turn:not-example.com:19305?transport=udp"],"username":"","credential":""
+            }
+          ]
+        });
+        pc.createOffer().then((sdp) => pc.setLocalDescription(sdp);
+      &lt;/script&gt;
+    </pre>
+  </div>
+
+  <h5 algorithm id="webrtc-src-pre-connect">
+    `webrtc-src` Preconnect Check
+  </h5>
+
+  This directive's <a for="directive">pre-connect check</a> is as follows:
+
+  Given a [=/host=] (|host|), a port (|port|), an [=/origin=] (|origin|) and a [=/policy=]
+  (|policy|):
+
+  1.  Assert: |policy| is unused.
+
+  2.  Let |url| be a [=/url=] whose [=url/scheme=] is |origin|'s [=origin/scheme=], [=url/host=]
+      is |host|, and [=url/port=] is |port|.
+
+  3.  If the result of executing [[#match-url-to-source-list]] on |url|, this directive's
+      [=directive/value=], and |origin| is "`Matches`", return "`Allowed`".
+
+  4.  Return "`Blocked`".
 
   <h4 id="directive-worker-src">`worker-src`</h4>
 
