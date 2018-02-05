@@ -544,15 +544,15 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       and has no effect unless otherwise specified.
 
   6.  A <dfn for="directive" export>pre-navigation check</dfn>, which takes a
-      <a for="/">request</a>, `navigation type` string, and two <a>browsing contexts</a>,
-      as arguments, and is executed during [[#should-block-navigation-request]].
-      It returns "`Allowed`" unless otherwise specified.
+      <a for="/">request</a>, a navigation type string, two <a>browsing contexts</a>,
+      and a <a for="/">policy</a> as arguments, and is executed during
+      [[#should-block-navigation-request]]. It returns "`Allowed`" unless otherwise specified.
 
   7.  A <dfn for="directive" export>navigation response check</dfn>, which takes a
-      <a for="/">request</a>, a <a>response</a>, two <a>browsing contexts</a>,
-      and a `check type` string ("`source`" or "`target`") as arguments, and is
-      executed during [[#should-block-navigation-response]].
-      It returns "`Allowed`" unless otherwise specified.
+      <a for="/">request</a>, a navigation type string, a <a>response</a>, two
+      <a>browsing contexts</a>, a check type string ("`source`" or "`response`"),
+      and a <a for="/">policy</a> as arguments, and is executed during
+      [[#should-block-navigation-response]]. It returns "`Allowed`" unless otherwise specified.
 
   <h4 id="framework-directive-source-list">Source Lists</h4>
 
@@ -608,7 +608,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     ; Keywords:
     <dfn>keyword-source</dfn> = "<dfn>'self'</dfn>" / "<dfn>'unsafe-inline'</dfn>" / "<dfn>'unsafe-eval'</dfn>"
                      / "<dfn>'strict-dynamic'</dfn>" / "<dfn>'unsafe-hashed-attributes'</dfn>" /
-                     / "<dfn>'report-sample'</dfn>" / "<dfn>'only-check-last-endpoint'</dfn>"
+                     / "<dfn>'report-sample'</dfn>" / "<dfn>'unsafe-allow-redirects'</dfn>"
 
     ; Nonces: 'nonce-[nonce goes here]'
     <dfn>nonce-source</dfn>  = "'nonce-" <a>base64-value</a> "'"
@@ -1321,7 +1321,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
             1.  If |directive|'s <a for="directive">pre-navigation check</a>
                 returns "`Allowed`" when executed upon |navigation request|,
-                |type|, |source|, and |target|, skip to the next |directive|.
+                |type|, |source|, |target|, and |policy| skip to the next |directive|.
 
             2.  Otherwise, let |violation| be the result of executing
                 [[#create-violation-for-global]] on |source|'s <a>relevant global
@@ -1367,7 +1367,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     in |target| be blocked by Content Security Policy?
   </h4>
 
-  Given a <a for="/">request</a> (|navigation request|),, a string (|type|, either
+  Given a <a for="/">request</a> (|navigation request|), a string (|type|, either
   "`form-submission`" or "`other`"), a <a>response</a> |navigation
   response|, and two <a>browsing contexts</a> (|source| and |target|), this algorithm
   returns "`Blocked`" if the active policy blocks the navigation, and "`Allowed`"
@@ -1379,12 +1379,15 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     2.  For each |policy| in |navigation response|'s
         <a for="response">CSP list</a>:
 
+        Note: Some directives (like <a>frame-ancestors</a>) allow a |response|'s
+        <a>Content Security Policy</a> to act on the navigation.
+
         1.  For each |directive| in |policy|:
 
             1.  If |directive|'s <a for="directive">navigation response check</a>
                 returns "`Allowed`" when executed upon |navigation request|, |type|,
-                |navigation response|, |source|, |target|, and "`target`" skip to the next
-                |directive|.
+                |navigation response|, |source|, |target|, "`response`", and |policy|
+                skip to the next |directive|.
 
             2.  Otherwise, let |violation| be the result of executing
                 [[#create-violation-for-global]] on `null`, |policy|, and
@@ -1403,22 +1406,27 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
     3.  For each |policy| in |source|'s <a>active document</a>'s <a for="Document">CSP List</a>:
 
+        Note: Some directives (like <a>navigate-to</a>) need the |response| before
+        acting on the navigation.
+
         1.  For each |directive| in |policy|:
 
             1.  If |directive|'s <a for="directive">navigation response check</a>
                 returns "`Allowed`" when executed upon |navigation request|, |type|,
-                |navigation response|, |source|, |target|, and "`source`" skip to the next
-                |directive|.
+                |navigation response|, |source|, |target|, "`source`", and |policy|
+                skip to the next |directive|.
 
             2.  Otherwise, let |violation| be the result of executing
-                [[#create-violation-for-global]] on `null`, |policy|, and
-                |directive|'s <a for="directive">name</a>.
+                [[#create-violation-for-global]] on |source|'s <a>relevant global
+                object</a>, |policy|, and |directive|'s <a for="directive">name</a>.
 
-                Note: We use `null` for the global object, as no global exists:
-                we haven't processed the navigation to create a Document yet.
+                Note: Depending on the browser's implementation it might not be
+                possible to obtain the |source|'s <a>relevant global object</a>
+                at this point in time. If that is the case `null` should be used
+                instead.
 
             3.  Set |violation|'s <a for="violation">resource</a> to |navigation
-                response|'s <a for="response">URL</a>.
+                request|'s <a for="request">URL</a>.
 
             4.  Execute [[#report-violation]] on |violation|.
 
@@ -3294,15 +3302,15 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     `form-action` Pre-Navigation Check
   </h5>
 
-  Given a <a for="/">request</a> (|request|), a string (|navigation type|, "`form-submission`" or
-  "`other`"), and two <a>browsing contexts</a> (|source| and |target|), this
-  algorithm returns "`Blocked`" if one or more of the ancestors of |target|
-  violate the `frame-ancestors` directive delivered with the response, and
-  "`Allowed`" otherwise. This constitutes the `form-action`' directive's
-  <a>pre-navigation check</a>:
+  Given a <a for="/">request</a> (|request|), a string |navigation type| ("`form-submission`" or
+  "`other`"), two <a>browsing contexts</a> (|source| and |target|), and a
+  <a for="/">policy</a> (|policy|) this algorithm returns "`Blocked`" if one or
+  more of the ancestors of |target| violate the `frame-ancestors` directive
+  delivered with the response, and "`Allowed`" otherwise. This constitutes the
+  `form-action`' directive's <a>pre-navigation check</a>:
 
   <ol class="algorithm">
-    1.  Assert: |source| and |target| are unused in this algorithm, as
+    1.  Assert: |source|, |target|, and |policy| are unused in this algorithm, as
         `form-action` is concerned only with details of the outgoing request.
 
     2.  If |navigation type| is "`form-submission`":
@@ -3344,21 +3352,23 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     `frame-ancestors` Navigation Response Check
   </h5>
 
-  Given a <a for="/">request</a> (|request|), a <a>response</a> (|navigation response|)
-  two <a>browsing contexts</a> (|source| and |target|), and a string |check type|
-  ("`source`" or "`target`") this algorithm returns "`Blocked`" if one or more of
-  the ancestors of |target| violate the `frame-ancestors` directive delivered
-  with the response, and "`Allowed`" otherwise. This constitutes the `frame-ancestors`
-  directive's <a>navigation response check</a>:
+  Given a <a for="/">request</a> (|request|), a string |navigation type|
+  ("`form-submission`" or "`other`"), a
+  <a>response</a> (|navigation response|) two <a>browsing contexts</a> (|source|
+  and |target|), a string |check type| ("`source`" or "`response`"), and a
+  <a for="/">policy</a> (|policy|) this algorithm returns "`Blocked`" if one or
+  more of the ancestors of |target| violate the `frame-ancestors` directive
+  delivered with the response, and "`Allowed`" otherwise. This constitutes the
+  `frame-ancestors` directive's <a>navigation response check</a>:
 
   <ol class="algorithm">
-    1.  Assert: |request|, |navigation response|, and |source| are unused in
-        this algorithm, as `frame-ancestors` is concerned only with |target|'s
-        ancestors.
+    1.  Assert: |request|, |navigation response|, |navigation type|, |source|, and
+        |policy| are unused in this algorithm, as `frame-ancestors` is concerned only
+        with |navigation response|'s <a>frame-ancestors</a> <a>directive</a>.
 
     2.  If |check type| is "`source`", return "`Allowed`".
 
-        Note: The 'frame-ancestors' <a>directive</a> is relevant only on the
+        Note: The 'frame-ancestors' <a>directive</a> is relevant only to the
         |target| <a>browsing context</a> and it has no impact on the |source|
         <a>browsing context</a>.
 
@@ -3409,6 +3419,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   a <a>document</a> can initiate navigations by any means (<{a}>, <{form}>, `window.location`,
   `window.open`, etc.). This is an enforcement on what navigations this <a>document</a>
   initiates `not` on what this <a>document</a> is allowed to navigate to.
+  If the <a>form-action</a> directive is present, the <a>navigate-to</a> directive
+  will not act on navigations that are form submissions.
 
   <div class="example">
     A <a>document</a> |initiator| has the following `Content-Security-Policy`:
@@ -3440,67 +3452,75 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     `navigate-to` Pre-Navigation Check
   </h5>
 
-  Given a <a for="/">request</a> (|request|), a string (|navigation type|, "`form-submission`
-  or "`other`"), and two <a>browsing contexts</a> (|source| and |target|), this
-  algorithm returns "`Blocked`" if the navigation violates the `navigate-to`
-  directive's constraints, and "`Allowed`" otherwise. This constitutes the
-  `navigate-to`' directive's <a>pre-navigation check</a>:
+  Given a <a for="/">request</a> (|request|), a string |navigation type| ("`form-submission`" or
+  "`other`"), two <a>browsing contexts</a> (|source| and |target|),
+  and a <a for="/">policy</a> (|policy|), this algorithm returns "`Blocked`"
+  if the navigation violates the `navigate-to` directive's constraints, and
+  "`Allowed`" otherwise. This constitutes the `navigate-to`' directive's <a>pre-navigation check</a>:
 
   <ol class="algorithm">
-    1.  Assert: |navigation type|, |source| and |target| are unused as 'navigate-to'
-        is concerned with the details of the request and affects all navigation types.
+    1.  Assert: |source| and |target| are unused as 'navigate-to'
+        is concerned with the details of the request.
 
-    2.  If this directive's <a for="directive">value</a> contains a <a>source
+    2.  If |navigation type| is "`form-submission`" and |policy| contains a
+        <a>directive</a> named "`form-action`", return "`Allowed`".
+
+    3.  If this directive's <a for="directive">value</a> contains a <a>source
         expression</a> that is an <a>ASCII case-insensitive</a> match for
-        the "<a grammar>`'only-check-last-endpoint'`</a>"
+        the "<a grammar>`'unsafe-allow-redirects'`</a>"
         <a grammar>keyword-source</a>, return "`Allowed`".
 
-        Note: If the 'only-check-last-endpoint' flag is present we have to
+        Note: If the 'unsafe-allow-redirects' flag is present we have to
         wait for the <a>response</a> and take into account the <a>response</a>'s
         <a for="response">status</a> in [[#navigate-to-navigation-response]].
-
-    3.  If the result of executing [[#match-request-to-source-list]] on
-        |request| and this directive's <a for="directive">value</a> is
-        "`Does Not Match`", return "`Blocked`".
-
-    4.  Return "`Allowed`".
-  </ol>
-
-  <h5 algorithm id="navigate-to-navigation-response">
-    `navigate-to` Navigation Response Check
-  </h5>
-
-  Given a <a for="/">request</a> (|request|), a <a>response</a> (|navigation response|)
-  two <a>browsing contexts</a> (|source| and |target|), and a string |check type|
-  ("`source`" or "`target`"), this algorithm returns "`Blocked`" if the navigation
-  violates the `navigate-to` directive's constraints, and "`Allowed`" otherwise.
-  This constitutes the `navigate-to` directive's <a>navigation response check</a>:
-
-  <ol class="algorithm">
-    1.  Assert: |source| and |target| are unused.
-
-    2.  If |check type| is "`target`", return "`Allowed`".
-
-        Note: The 'navigate-to' <a>directive</a> is relevant only on the
-        |source| <a>browsing context</a> and it has no impact on the |target|
-        <a>browsing context</a>.
-
-    2.  If this directive's <a for="directive">value</a> does not contain a <a>source
-        expression</a> that is an <a>ASCII case-insensitive</a> match for
-        the "<a grammar>`'only-check-last-endpoint'`</a>"
-        <a grammar>keyword-source</a>, return "`Allowed`".
-
-        Note: If the 'only-check-last-endpoint' flag is not present we have
-        already checked the navigation in [[#navigate-to-pre-navigate]].
-
-    3.  If |navigation response|'s <a for="response">status</a> is a
-        <a>redirect status</a>, return "`Allowed`".
 
     4.  If the result of executing [[#match-request-to-source-list]] on
         |request| and this directive's <a for="directive">value</a> is
         "`Does Not Match`", return "`Blocked`".
 
     5.  Return "`Allowed`".
+  </ol>
+
+  <h5 algorithm id="navigate-to-navigation-response">
+    `navigate-to` Navigation Response Check
+  </h5>
+
+  Given a <a for="/">request</a> (|request|), a string |navigation type|
+  ("`form-submission`" or "`other`"),  a <a>response</a> (|navigation response|)
+  two <a>browsing contexts</a> (|source| and |target|), a string |check type|
+  ("`source`" or "`response`"), and a <a for="/">policy</a> (|policy|), this
+  algorithm returns "`Blocked`" if the navigation violates the `navigate-to`
+  directive's constraints, and "`Allowed`" otherwise. This constitutes the
+  `navigate-to` directive's <a>navigation response check</a>:
+
+  <ol class="algorithm">
+    1.  Assert: |source|, and |target| are unused.
+
+    2.  If |check type| is "`response`", return "`Allowed`".
+
+        Note: The 'navigate-to' <a>directive</a> is relevant only to the
+        |source| <a>browsing context</a> and it has no impact on the |target|
+        <a>browsing context</a>.
+
+    3.  If |navigation type| is "`form-submission`" and |policy| contains a
+        <a>directive</a> named "`form-action`", return "`Allowed`".
+
+    4.  If this directive's <a for="directive">value</a> does not contain a <a>source
+        expression</a> that is an <a>ASCII case-insensitive</a> match for
+        the "<a grammar>`'unsafe-allow-redirects'`</a>"
+        <a grammar>keyword-source</a>, return "`Allowed`".
+
+        Note: If the 'unsafe-allow-redirects' flag is not present we have
+        already checked the navigation in [[#navigate-to-pre-navigate]].
+
+    5.  If |navigation response|'s <a for="response">status</a> is a
+        <a>redirect status</a>, return "`Allowed`".
+
+    6.  If the result of executing [[#match-request-to-source-list]] on
+        |request| and this directive's <a for="directive">value</a> is
+        "`Does Not Match`", return "`Blocked`".
+
+    7.  Return "`Allowed`".
   </ol>
 
   <h3 id="directives-reporting">
