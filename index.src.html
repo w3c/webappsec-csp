@@ -363,7 +363,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
         ISSUE(w3c/webappsec-csp#194): `disown-opener` is a work in progress.
       </div>
 
-  12. The <a>`navigation-to`</a> directive gives a resource control over the endpoints
+  12. The <a>`navigate-to`</a> directive gives a resource control over the endpoints
       to which it can initiate navigation.
 
   13. Reports generated for inline violations will contain a <a for="violation">sample</a>
@@ -3403,9 +3403,9 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   ISSUE(whatwg/html#1230): Spell this out in more detail as part of defining `X-Frame-Options`
   integration with the <a>process a navigate response</a> algorithm.
 
-  <h4 id="directive-navigation-to">`navigation-to`</h4>
+  <h4 id="directive-navigate-to">`navigate-to`</h4>
 
-  The <dfn export>navigation-to</dfn> directive restricts the {{URL}}s to which
+  The <dfn export>navigate-to</dfn> directive restricts the {{URL}}s to which
   a <a>document</a> can initiate navigations by any means (<{a}>, <{form}>, `window.location`,
   `window.open`, etc.). This is an enforcement on what navigations this <a>document</a>
   initiates `not` on what this <a>document</a> is allowed to navigate to.
@@ -3413,41 +3413,41 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   <div class="example">
     A <a>document</a> |initiator| has the following `Content-Security-Policy`:
     <pre>
-      Content-Security-Policy: navigation-to example.com
+      Content-Security-Policy: navigate-to example.com
     </pre>
     A <a>document</a> |target| has the following `Content-Security-Policy`:
     <pre>
-      Content-Security-Policy: navigation-to not-example.com
+      Content-Security-Policy: navigate-to not-example.com
     </pre>
 
     If the |initiator| attempts to navigate the |target| to `example.com`, the
-    navigation is allowed by the `navigation-to` directive.
+    navigation is allowed by the `navigate-to` directive.
 
     If the |initiator| attempts to navigate the |target| to `not-example.com`,
-    the navigation is blocked by the `navigation-to` directive.
+    the navigation is blocked by the `navigate-to` directive.
   </div>
 
 
   The directive's syntax is described by the following ABNF grammar:
 
   <pre dfn-type="grammar" link-type="grammar" class="abnf">
-    directive-name  = "navigation-to"
+    directive-name  = "navigate-to"
     directive-value = <a>serialized-source-list</a>
   </pre>
 
 
-  <h5 algorithm id="navigation-to-pre-navigate">
-    `navigation-to` Pre-Navigation Check
+  <h5 algorithm id="navigate-to-pre-navigate">
+    `navigate-to` Pre-Navigation Check
   </h5>
 
   Given a <a for="/">request</a> (|request|), a string (|navigation type|, "`form-submission`
   or "`other`"), and two <a>browsing contexts</a> (|source| and |target|), this
-  algorithm returns "`Blocked`" if the navigation violates the `navigation-to`
+  algorithm returns "`Blocked`" if the navigation violates the `navigate-to`
   directive's constraints, and "`Allowed`" otherwise. This constitutes the
-  `navigation-to`' directive's <a>pre-navigation check</a>:
+  `navigate-to`' directive's <a>pre-navigation check</a>:
 
   <ol class="algorithm">
-    1.  Assert: |navigation type|, |source| and |target| are unused as 'navigation-to'
+    1.  Assert: |navigation type|, |source| and |target| are unused as 'navigate-to'
         is concerned with the details of the request and affects all navigation types.
 
     2.  If this directive's <a for="directive">value</a> contains a <a>source
@@ -3457,7 +3457,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
         Note: If the 'only-check-last-endpoint' flag is present we have to
         wait for the <a>response</a> and take into account the <a>response</a>'s
-        <a for="response">status</a> in [[#navigation-to-navigation-response]].
+        <a for="response">status</a> in [[#navigate-to-navigation-response]].
 
     3.  If the result of executing [[#match-request-to-source-list]] on
         |request| and this directive's <a for="directive">value</a> is
@@ -3466,22 +3466,22 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     4.  Return "`Allowed`".
   </ol>
 
-  <h5 algorithm id="navigation-to-navigation-response">
-    `navigation-to` Navigation Response Check
+  <h5 algorithm id="navigate-to-navigation-response">
+    `navigate-to` Navigation Response Check
   </h5>
 
   Given a <a for="/">request</a> (|request|), a <a>response</a> (|navigation response|)
   two <a>browsing contexts</a> (|source| and |target|), and a string |check type|
   ("`source`" or "`target`"), this algorithm returns "`Blocked`" if the navigation
-  violates the `navigation-to` directive's constraints, and "`Allowed`" otherwise.
-  This constitutes the `navigation-to` directive's <a>navigation response check</a>:
+  violates the `navigate-to` directive's constraints, and "`Allowed`" otherwise.
+  This constitutes the `navigate-to` directive's <a>navigation response check</a>:
 
   <ol class="algorithm">
     1.  Assert: |source| and |target| are unused.
 
     2.  If |check type| is "`target`", return "`Allowed`".
 
-        Note: The 'navigation-to' <a>directive</a> is relevant only on the
+        Note: The 'navigate-to' <a>directive</a> is relevant only on the
         |source| <a>browsing context</a> and it has no impact on the |target|
         <a>browsing context</a>.
 
@@ -3491,7 +3491,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
         <a grammar>keyword-source</a>, return "`Allowed`".
 
         Note: If the 'only-check-last-endpoint' flag is not present we have
-        already checked the navigation in [[#navigation-to-pre-navigate]].
+        already checked the navigation in [[#navigate-to-pre-navigate]].
 
     3.  If |navigation response|'s <a for="response">status</a> is a
         <a>redirect status</a>, return "`Allowed`".
