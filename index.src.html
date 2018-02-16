@@ -611,7 +611,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     ; Keywords:
     <dfn>keyword-source</dfn> = "<dfn>'self'</dfn>" / "<dfn>'unsafe-inline'</dfn>" / "<dfn>'unsafe-eval'</dfn>"
                      / "<dfn>'strict-dynamic'</dfn>" / "<dfn>'unsafe-hashed-attributes'</dfn>" /
-                     / "<dfn>'report-sample'</dfn>"
+                     / "<dfn>'report-sample'</dfn>" / "<dfn>'wasm-eval'</dfn>"
 
     ; Nonces: 'nonce-[nonce goes here]'
     <dfn>nonce-source</dfn>  = "'nonce-" <a>base64-value</a> "'"
@@ -2605,7 +2605,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     directive-value = <a grammar>serialized-source-list</a>
   </pre>
 
-  The `script-src` directive governs five things:
+  The `script-src` directive governs six things:
 
   1.  Script <a for="/">requests</a> MUST pass through [[#should-block-request]].
 
@@ -2629,7 +2629,13 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       Note: If a user agent implements non-standard sinks like `setImmediate()`
       or `execScript()`, they SHOULD also be gated on "`unsafe-eval`".
 
-  5.  Navigation to `javascript:` URLs MUST pass through [[#should-block-inline]]. These navigations
+  5. The following WebAssembly execution sinks are gated on the "`wasm-eval`"
+     source expression:
+
+     *    {{WebAssembly.compile()}}
+     *    {{WebAssembly.instantiate()}}
+
+  6.  Navigation to `javascript:` URLs MUST pass through [[#should-block-inline]]. These navigations
       will only execute script if every policy allows inline script, as per #3 above.
 
   <h5 algorithm id="script-src-pre-request">
