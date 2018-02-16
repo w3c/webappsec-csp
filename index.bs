@@ -665,6 +665,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     <dfn>keyword-source</dfn> = "<dfn>'self'</dfn>" / "<dfn>'unsafe-inline'</dfn>" / "<dfn>'unsafe-eval'</dfn>"
                      / "<dfn>'strict-dynamic'</dfn>" / "<dfn>'unsafe-hashes'</dfn>" /
                      / "<dfn>'report-sample'</dfn>" / "<dfn>'unsafe-allow-redirects'</dfn>"
+                     / "<dfn>'wasm-unsafe-eval'</dfn>"
 
     ISSUE: Bikeshed `unsafe-allow-redirects`.
 
@@ -2657,7 +2658,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   as in most situations there is no particular reason to have separate lists of
   permissions for inline event handlers and <{script}> elements.
 
-  The `script-src` directive governs five things:
+  The `script-src` directive governs six things:
 
   1.  Script <a for="/">requests</a> MUST pass through [[#should-block-request]].
 
@@ -2684,7 +2685,13 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       and <a>`script-src-elem`</a> are not used when performing this check, instead
       `script-src` (or it's fallback directive) is always used.
 
-  5.  Navigation to `javascript:` URLs MUST pass through [[#script-src-inline]].
+  5. The following WebAssembly execution sinks are gated on the "`wasm-unsafe-eval`"
+     source expression:
+
+     *    {{WebAssembly.compile()}}
+     *    {{WebAssembly.instantiate()}}
+
+  6.  Navigation to `javascript:` URLs MUST pass through [[#script-src-inline]].
 
   <h5 algorithm id="script-src-pre-request">
     `script-src` Pre-request check
