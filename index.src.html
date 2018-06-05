@@ -338,13 +338,9 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       executes on a page to load more script via non-<a>"parser-inserted"</a>
       <{script}> elements. Details are in [[#strict-dynamic-usage]].
 
-  8.  <div class="wip">
-        The `'unsafe-hashed-attributes'` source expression will now allow event
-        handlers and style attributes to match hash source expressions. Details
-        in [[#unsafe-hashed-attributes-usage]].
-
-        ISSUE(w3c/webappsec-csp#13): `unsafe-hashed-attributes` is a work in progress.
-      </div>
+  8.  The `'unsafe-hashes'` source expression will now allow event
+      handlers, style attributes and `javascript:` navigation targets to match
+      hashes. Details in [[#unsafe-hashes-usage]].
 
   9.  The <a>source expression</a> matching has been changed to require explicit presence
       of any non-<a>network scheme</a>, rather than <a>local scheme</a>,
@@ -535,7 +531,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   4.  An <dfn for="directive" export>inline check</dfn>, which takes an {{Element}} a
       type string, and a source string as arguments, and is executed during
-      [[#should-block-inline]]. This algorithm returns "`Allowed`" unless
+      [[#should-block-inline]] and during [[#should-block-navigation-request]] for
+      `javascript:` requests. This algorithm returns "`Allowed`" unless
       otherwise specified.
 
   5.  An <dfn for="directive" export>initialization</dfn>, which takes a {{Document}}
@@ -608,7 +605,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
     ; Keywords:
     <dfn>keyword-source</dfn> = "<dfn>'self'</dfn>" / "<dfn>'unsafe-inline'</dfn>" / "<dfn>'unsafe-eval'</dfn>"
-                     / "<dfn>'strict-dynamic'</dfn>" / "<dfn>'unsafe-hashed-attributes'</dfn>" /
+                     / "<dfn>'strict-dynamic'</dfn>" / "<dfn>'unsafe-hashes'</dfn>" /
                      / "<dfn>'report-sample'</dfn>" / "<dfn>'unsafe-allow-redirects'</dfn>"
 
     ISSUE: Bikeshed `unsafe-allow-redirects`.
@@ -1148,7 +1145,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       navigate fetch</a> algorithm, and [[#should-block-navigation-response]]
       is called during the <a>process a navigate response</a> algorithm to
       apply directive's navigation checks, as well as inline checks for
-      navigations to `javascript:`.
+      navigations to `javascript:` URLs.
 
       ISSUE(w3c/html#548): W3C's HTML is not based on Fetch, and does not
       have a <a>process a navigate response</a> algorithm into which to hook.
@@ -1284,8 +1281,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
             2.  Otherwise, let |violation| be the result of executing
                 [[#create-violation-for-global]] on the <a>current settings
                 object</a>'s <a for="environment settings object">global object</a>, |policy|,
-                and "`style-src`" if |type| is "`style`" or "`style-attribute`",
-                or "`script-src`" otherwise.
+                and |directive|'s <a for="directive">name</a>.
 
             3.  Set |violation|'s <a for="violation">resource</a> to "`inline`".
 
@@ -1347,8 +1343,9 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
             1.  For each |directive| in |policy|:
 
                 1.  If |directive|'s <a for="directive">inline check</a>
-                    returns "`Allowed`" when executed upon |navigation request|,
-                    |type|, |source|, and |target|, skip to the next |directive|.
+                    returns "`Allowed`" when executed upon `null`,
+                    "`navigation`" and |navigation request|'s <a for="request">url</a>,
+                    skip to the next |directive|.
 
                 2.  Otherwise, let |violation| be the result of executing
                     [[#create-violation-for-global]] on |source|'s <a>relevant global
@@ -2656,8 +2653,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       Note: If a user agent implements non-standard sinks like `setImmediate()`
       or `execScript()`, they SHOULD also be gated on "`unsafe-eval`".
 
-  5.  Navigation to `javascript:` URLs MUST pass through [[#should-block-inline]]. These navigations
-      will only execute script if every policy allows inline script, as per #3 above.
+  5.  Navigation to `javascript:` URLs MUST pass through [[#script-src-inline]].
 
   <h5 algorithm id="script-src-pre-request">
     `script-src` Pre-request check
@@ -2774,37 +2770,15 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   Given an {{Element}} (|element|), a string (|type|), and a string (|source|):
 
-  1.  If |type| is "`script attribute`" or "`script`":
+  1.  If |type| is "`script`", "`script attribute`" or "`navigation`":
 
-      1.  Assert: |element| is not `null`.
+      1.  Assert: |element| is not `null` or |type| is "`navigation`".
 
       2.  If the result of executing [[#match-element-to-source-list]] on
           |element|, this directive's <a for="directive">value</a>, |type|,
           and |source|, is "`Does Not Match`", return "`Blocked`".
 
-  2.  If |type| is "`navigation`":
-
-      1.  Let |unsafe-inline flag| be `false`.
-
-      2.  For each |expression| in this directive's
-          <a for="directive">value</a>:
-
-          1.  If |expression| matches the <a grammar>`nonce-source`</a> or
-              <a grammar>`hash-source`</a> grammar, return "`Blocked`".
-
-          2.  If |expression| matches the <a grammar>keyword-source</a>
-              "<a grammar>`'strict-dynamic'`</a>", return "`Blocked`".
-
-          3.  If |expression| matches the <a grammar>keyword-source</a>
-              "<a grammar>`'unsafe-inline'`</a>", set |unsafe-inline flag| to `true`.
-
-      3.  If |unsafe-inline flag| is `false`, return "`Blocked`".
-
-      Note: Navigating to a `javascript:` URL is allowed only in the presence
-      of "<a grammar>`'unsafe-inline'`</a>" that isn't overridden by a nonce,
-      hash, or "<a grammar>`'strict-dynamic'`</a>".
-
-  3.  Return "`Allowed`".
+  2.  Return "`Allowed`".
 
   <h4 id="directive-style-src">`style-src`</h4>
 
@@ -4112,19 +4086,13 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   (|type|), and a string (|source|), this algorithm returns "`Matches`" or
   "`Does Not Match`".
 
-  1.  Assert: |source| contains the value of a <{script}> element's
-      {{HTMLScriptElement/text}} IDL attribute, the value of a <{style}>
-      element's {{Node/textContent}} IDL attribute, or the value of one of a
-      <{script}> element's <a>event handler IDL attribute</a>.
+  Note: |source| will be interpreted with the encoding of the page in which it
+  is embedded. See the integration points in [[#html-integration]] for more detail.
 
-      Note: This means that |source| will be interpreted with the encoding
-      of the page in which it is embedded. See the integration points
-      in [[#html-integration]] for more detail.
-
-  2.  If [[#allow-all-inline]] returns "`Allows`" given |list| and |type|,
+  1.  If [[#allow-all-inline]] returns "`Allows`" given |list| and |type|,
       return "`Matches`".
 
-  3.  If |type| is "`script`" or "`style`", and [[#is-element-nonceable]]
+  2.  If |type| is "`script`" or "`style`", and [[#is-element-nonceable]]
       returns "`Nonceable`" when executed upon |element|:
 
       1.  For each |expression| in |list|:
@@ -4135,18 +4103,18 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
               <a grammar>`base64-value`</a> part, return "`Matches`".
 
       Note: Nonces only apply to inline <{script}> and inline <{style}>, not to
-      attributes of either element.
+      attributes of either element or to `javascript:` navigations.
 
-  4.  Let |hashes match attributes| be `false`.
+  3.  Let |unsafe-hashes flag| be `false`.
 
-  5.  For each |expression| in |list|:
+  4.  For each |expression| in |list|:
 
       1.  If |expression| is an <a>ASCII case-insensitive</a> match for the
           <a grammar>`keyword-source`</a>
-          "<a grammar>`'unsafe-hashed-attributes'`</a>",
-          set |hashes match attributes| to `true`. Break out of the loop.
+          "<a grammar>`'unsafe-hashes'`</a>",
+          set |unsafe-hashes flag| to `true`. Break out of the loop.
 
-  6.  If |type| is "`script`" or "`style`", or |hashes match attributes| is
+  5.  If |type| is "`script`" or "`style`", or |unsafe-hashes flag| is
       `true`:
 
       1.  For each |expression| in |list|:
@@ -4183,10 +4151,11 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
                       "`Matches`".
 
       Note: Hashes apply to inline <{script}> and inline <{style}>. If the
-      "<a grammar>`'unsafe-hashed-attributes'`</a>" source expression is present,
-      they will also apply to event handlers and style attributes.
+      "<a grammar>`'unsafe-hashes'`</a>" source expression is present,
+      they will also apply to event handlers, style attributes and `javascript:`
+      navigations.
 
-  7.  Return "`Does Not Match`".
+  6.  Return "`Does Not Match`".
 </section>
 
 <!-- Big text: Security -->
@@ -4240,7 +4209,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   second `src` attribute which is helpfully discarded as duplicate by the parser.
 
   The [[#is-element-nonceable]] algorithm attempts to mitigate this specific
-  attack by walking through <{script}> element attributes, looking for the
+  attack by walking through <{script}> or <{style}> element attributes, looking for the
   string "<code>&lt;script</code>" or "<code>&lt;style</code>" in their names or values.
 
   <h3 id="security-nonce-retargeting">Nonce Retargeting</h3>
@@ -4496,21 +4465,19 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     <{script}> elements which are <a>"parser-inserted"</a>.
   </div>
 
-  <section class="wip">
-    <h3 id="unsafe-hashed-attributes-usage">
-      Usage of "`'unsafe-hashed-attributes'`"
+  <section>
+    <h3 id="unsafe-hashes-usage">
+      Usage of "`'unsafe-hashes'`"
     </h3>
 
     <em>This section is not normative.</em>
-
-    ISSUE(w3c/webappsec-csp#13): Work in progress.
 
     Legacy websites and websites with legacy dependencies might find it difficult
     to entirely externalize event handlers. These sites could enable such handlers
     by allowing `'unsafe-inline'`, but that's a big hammer with a lot of
     associated risk (and cannot be used in conjunction with nonces or hashes).
 
-    The "<a grammar>`'unsafe-hashed-attributes'`</a>" source expression aims to make
+    The "<a grammar>`'unsafe-hashes'`</a>" source expression aims to make
     CSP deployment simpler and safer in these situations by allowing developers
     to enable specific handlers via hashes.
 
@@ -4523,14 +4490,14 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       </pre>
 
       Rather than reducing security by specifying "`'unsafe-inline'`", they decide to use
-      "`'unsafe-hashed-attributes'`" along with a hash source expression, as follows:
+      "`'unsafe-hashes'`" along with a hash source expression, as follows:
 
       <pre>
-        <a>Content-Security-Policy</a>:  <a>script-src</a> <a grammar>'unsafe-hashed-attributes'</a> 'sha256-jzgBGA4UWFFmpOBq0JpdsySukE1FrEN5bUpoK8Z29fY='
+        <a>Content-Security-Policy</a>:  <a>script-src</a> <a grammar>'unsafe-hashes'</a> 'sha256-jzgBGA4UWFFmpOBq0JpdsySukE1FrEN5bUpoK8Z29fY='
       </pre>
     </div>
 
-    The capabilities `'unsafe-hashed-attributes'` provides is useful for legacy sites, but should be
+    The capabilities `'unsafe-hashes'` provides is useful for legacy sites, but should be
     avoided for modern sites. In particular, note that hashes allow a particular script to execute,
     but do not ensure that it executes in the way a developer intends. If an interesting capability
     is exposed as an inline event handler (say `<a onclick="transferAllMyMoney()">Transfer</a>`),
