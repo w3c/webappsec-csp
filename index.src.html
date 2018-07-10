@@ -310,12 +310,11 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
          2, has been undeprecated, but continues to defer to `child-src` if
          not present (which defers to `default-src` in turn).
 
-      2. A `worker-src` directive has been added, deferring to `script-src`
-         if not present (which likewise defers to `default-src` in turn).
+      2. A `worker-src` directive has been added, deferring to `child-src`
+         if not present (which likewise defers to `script-src` and
+         eventually `default-src`).
 
-      3. `child-src` is now deprecated.
-
-      4. Dedicated workers now always inherit their creator's policy.
+      3. Dedicated workers now always inherit their creator's policy.
 
   3.  The URL matching algorithm now treats insecure schemes and ports as
       matching their secure variants. That is, the source expression
@@ -1807,10 +1806,6 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   <h4 id="directive-child-src">`child-src`</h4>
 
-  The <a>`child-src`</a> directive is <em>deprecated</em>. Authors who wish to regulate
-  nested browsing contexts and workers SHOULD use the <a>`frame-src`</a> and
-  <a>`worker-src`</a> directives, respectively.
-
   The <dfn export>`child-src`</dfn> directive governs the creation of <a>nested browsing
   contexts</a> (e.g. <{iframe}> and <{frame}> navigations) and Worker execution
   contexts. The syntax for the directive's name and value is described by the
@@ -1864,10 +1859,10 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
 
-  2.  If |name| is not `frame-src`, return "`Allowed`".
+  2.  If |name| is not `frame-src` or `worker-src`, return "`Allowed`".
 
   3.  If |policy| contains a directive whose <a for="directive">name</a>
-      is |name|, return "`Allowed`"
+      is |name|, return "`Allowed`".
 
   4.  Return the result of executing the <a for="directive">pre-request
       check</a> for the <a>directive</a> whose <a for="directive">name</a>
@@ -1886,7 +1881,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
 
-  2.  If |name| is not `frame-src`, return "`Allowed`".
+  2.  If |name| is not `frame-src` or `worker-src`, return "`Allowed`".
 
   3.  If |policy| contains a directive whose <a for="directive">name</a>
       is |name|, return "`Allowed`"
@@ -2087,7 +2082,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       <a for="directive">name</a> is "`child-src`", return "`Allowed`".
 
   5.  If |name| is "`worker-src`", and |policy| contains a <a>directive</a> whose
-      <a for="directive">name</a> is "`script-src`", return "`Allowed`".
+      <a for="directive">name</a> is "`script-src`" or a <a>directive</a> whose
+      <a for="directive">name</a> is "`child-src`" , return "`Allowed`".
 
   6.  Otherwise, return the result of executing the
       <a for="directive">pre-request check</a> for the <a>directive</a> whose
@@ -2115,7 +2111,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       <a for="directive">name</a> is "`child-src`", return "`Allowed`".
 
   5.  If |name| is "`worker-src`", and |policy| contains a <a>directive</a> whose
-      <a for="directive">name</a> is "`script-src`", return "`Allowed`".
+      <a for="directive">name</a> is "`script-src`" or a <a>directive</a> whose
+      <a for="directive">name</a> is "`child-src`" , return "`Allowed`".
 
   6.  Otherwise, return the result of executing the
       <a for="directive">post-request check</a> for the <a>directive</a> whose
@@ -2665,9 +2662,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   1.  If the result of executing [[#effective-directive-for-a-request]] on |request|
       is "`worker-src`", and |policy| contains a <a>directive</a> whose
-      <a for="directive">name</a> is "`worker-src`", return "`Allowed`".
-
-      Note: If `worker-src` is present, we'll defer to it when handling worker requests.
+      <a for="directive">name</a> is "`worker-src`" or a <a>directive</a> whose
+      <a for="directive">name</a> is "`child-src`", return "`Allowed`".
 
   2.  If |request|'s <a for="request">destination</a> is <a for="request/destination">script-like</a>:
 
@@ -2739,9 +2735,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   1.  If the result of executing [[#effective-directive-for-a-request]] on |request|
       is "`worker-src`", and |policy| contains a <a>directive</a> whose
-      <a for="directive">name</a> is "`worker-src`", return "`Allowed`".
-
-      Note: If `worker-src` is present, we'll defer to it when handling worker requests.
+      <a for="directive">name</a> is "`worker-src`" or a <a>directive</a> whose
+      <a for="directive">name</a> is "`child-src`", return "`Allowed`".
 
   2.  If |request|'s <a for="request">destination</a> is <a for="request/destination">script-like</a>:
 

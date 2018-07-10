@@ -1058,9 +1058,10 @@ Possible extra rowspan handling
 			   comprising the first items of each top-level section. */
 			margin-top: 1.1rem;
 		}
-		#toc .secno {
+		#toc#toc .secno { /* Ugh, need more specificity to override base.css */
 			grid-column: 1;
 			width: auto;
+			margin-left: 0;
 		}
 		#toc .content {
 			grid-column: 2;
@@ -1211,9 +1212,9 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version 6abc9f98f620481a5031cd9b44944d60af9b79b9" name="generator">
+  <meta content="Bikeshed version f168e9e768df676e3c9c49525fc1d754533d7501" name="generator">
   <link href="https://www.w3.org/TR/CSP3/" rel="canonical">
-  <meta content="16e22b394558d5ed9b81d5558a4d36a89f3b283b" name="document-revision">
+  <meta content="f3349bf4cc808ae7f96ac3379286523d5ee3eda3" name="document-revision">
 <style>
   ul.toc ul ul ul {
     margin: 0 0 0 2em;
@@ -1504,7 +1505,7 @@ pre.highlight, pre > code.highlight { display: block; padding: 1em; margin: .5em
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1>Content Security Policy Level 3</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2018-06-22">22 June 2018</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2018-07-10">10 July 2018</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1944,9 +1945,8 @@ of security-relevant policy decisions.</p>
  2, has been undeprecated, but continues to defer to <code>child-src</code> if
  not present (which defers to <code>default-src</code> in turn).</p>
        <li data-md="">
-        <p>A <code>worker-src</code> directive has been added, deferring to <code>script-src</code> if not present (which likewise defers to <code>default-src</code> in turn).</p>
-       <li data-md="">
-        <p><code>child-src</code> is now deprecated.</p>
+        <p>A <code>worker-src</code> directive has been added, deferring to <code>child-src</code> if not present (which likewise defers to <code>script-src</code> and
+ eventually <code>default-src</code>).</p>
        <li data-md="">
         <p>Dedicated workers now always inherit their creator’s policy.</p>
       </ol>
@@ -3171,8 +3171,6 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
   trusted sources of script to execute on a page, while <a data-link-type="dfn" href="#font-src" id="ref-for-font-src">font-src</a> controls the
   sources of web fonts.</p>
     <h4 class="heading settled" data-level="6.1.1" id="directive-child-src"><span class="secno">6.1.1. </span><span class="content"><code>child-src</code></span><a class="self-link" href="#directive-child-src"></a></h4>
-    <p>The <a data-link-type="dfn" href="#child-src" id="ref-for-child-src"><code>child-src</code></a> directive is <em>deprecated</em>. Authors who wish to regulate
-  nested browsing contexts and workers SHOULD use the <a data-link-type="dfn" href="#frame-src" id="ref-for-frame-src"><code>frame-src</code></a> and <a data-link-type="dfn" href="#worker-src" id="ref-for-worker-src"><code>worker-src</code></a> directives, respectively.</p>
     <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="child-src"><code>child-src</code></dfn> directive governs the creation of <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context" id="ref-for-nested-browsing-context">nested browsing
   contexts</a> (e.g. <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-iframe-element" id="ref-for-the-iframe-element">iframe</a></code> and <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/obsolete.html#frame" id="ref-for-frame">frame</a></code> navigations) and Worker execution
   contexts. The syntax for the directive’s name and value is described by the
@@ -3194,7 +3192,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
     </ul>
     <div class="example" id="example-8573cf3a">
      <a class="self-link" href="#example-8573cf3a"></a> Given a page with the following Content Security Policy: 
-<pre>Content-Security-Policy: <a data-link-type="dfn" href="#child-src" id="ref-for-child-src①">child-src</a> https://example.com/
+<pre>Content-Security-Policy: <a data-link-type="dfn" href="#child-src" id="ref-for-child-src">child-src</a> https://example.com/
 </pre>
      <p>Fetches for the following code will all return network errors, as the URLs
     provided do not match <code>child-src</code>'s <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists">source list</a>:</p>
@@ -3211,9 +3209,9 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
      <li data-md="">
       <p>Let <var>name</var> be the result of executing <a href="#effective-directive-for-a-request">§6.6.1.11 Get the effective directive for request</a> on <var>request</var>.</p>
      <li data-md="">
-      <p>If <var>name</var> is not <code>frame-src</code>, return "<code>Allowed</code>".</p>
+      <p>If <var>name</var> is not <code>frame-src</code> or <code>worker-src</code>, return "<code>Allowed</code>".</p>
      <li data-md="">
-      <p>If <var>policy</var> contains a directive whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name①⓪">name</a> is <var>name</var>, return "<code>Allowed</code>"</p>
+      <p>If <var>policy</var> contains a directive whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name①⓪">name</a> is <var>name</var>, return "<code>Allowed</code>".</p>
      <li data-md="">
       <p>Return the result of executing the <a data-link-type="dfn" href="#directive-pre-request-check" id="ref-for-directive-pre-request-check②">pre-request
   check</a> for the <a data-link-type="dfn" href="#directives" id="ref-for-directives①⑤">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name①①">name</a> is <var>name</var> on <var>request</var> and <var>policy</var>, using this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value⑨">value</a> for the comparison.</p>
@@ -3225,7 +3223,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
      <li data-md="">
       <p>Let <var>name</var> be the result of executing <a href="#effective-directive-for-a-request">§6.6.1.11 Get the effective directive for request</a> on <var>request</var>.</p>
      <li data-md="">
-      <p>If <var>name</var> is not <code>frame-src</code>, return "<code>Allowed</code>".</p>
+      <p>If <var>name</var> is not <code>frame-src</code> or <code>worker-src</code>, return "<code>Allowed</code>".</p>
      <li data-md="">
       <p>If <var>policy</var> contains a directive whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name①②">name</a> is <var>name</var>, return "<code>Allowed</code>"</p>
      <li data-md="">
@@ -3322,7 +3320,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
      <p>will have the same behavior as the following header:</p>
 <pre><a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#header-content-security-policy" id="ref-for-header-content-security-policy②">Content-Security-Policy</a>: <a data-link-type="dfn" href="#connect-src" id="ref-for-connect-src①">connect-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self②">'self'</a>;
                          <a data-link-type="dfn" href="#font-src" id="ref-for-font-src①">font-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self③">'self'</a>;
-                         <a data-link-type="dfn" href="#frame-src" id="ref-for-frame-src①">frame-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self④">'self'</a>;
+                         <a data-link-type="dfn" href="#frame-src" id="ref-for-frame-src">frame-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self④">'self'</a>;
                          <a data-link-type="dfn" href="#img-src" id="ref-for-img-src">img-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self⑤">'self'</a>;
                          <a data-link-type="dfn" href="#manifest-src" id="ref-for-manifest-src">manifest-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self⑥">'self'</a>;
                          <a data-link-type="dfn" href="#media-src" id="ref-for-media-src">media-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self⑦">'self'</a>;
@@ -3330,7 +3328,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
                          <a data-link-type="dfn" href="#object-src" id="ref-for-object-src①">object-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self⑨">'self'</a>;
                          <a data-link-type="dfn" href="#script-src" id="ref-for-script-src②">script-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self①⓪">'self'</a>;
                          <a data-link-type="dfn" href="#style-src" id="ref-for-style-src">style-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self①①">'self'</a>;
-                         <a data-link-type="dfn" href="#worker-src" id="ref-for-worker-src①">worker-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self①②">'self'</a>
+                         <a data-link-type="dfn" href="#worker-src" id="ref-for-worker-src">worker-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self①②">'self'</a>
 </pre>
      <p>That is, when <code>default-src</code> is set, every <a data-link-type="dfn" href="#fetch-directives" id="ref-for-fetch-directives①">fetch directive</a> that isn’t
     explicitly set will fall back to the value <code>default-src</code> specifies.</p>
@@ -3344,7 +3342,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
      <p>will have the same behavior as the following header:</p>
 <pre><a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#header-content-security-policy" id="ref-for-header-content-security-policy④">Content-Security-Policy</a>: <a data-link-type="dfn" href="#connect-src" id="ref-for-connect-src②">connect-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self①④">'self'</a>;
                          <a data-link-type="dfn" href="#font-src" id="ref-for-font-src②">font-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self①⑤">'self'</a>;
-                         <a data-link-type="dfn" href="#frame-src" id="ref-for-frame-src②">frame-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self①⑥">'self'</a>;
+                         <a data-link-type="dfn" href="#frame-src" id="ref-for-frame-src①">frame-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self①⑥">'self'</a>;
                          <a data-link-type="dfn" href="#img-src" id="ref-for-img-src①">img-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self①⑦">'self'</a>;
                          <a data-link-type="dfn" href="#manifest-src" id="ref-for-manifest-src①">manifest-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self①⑧">'self'</a>;
                          <a data-link-type="dfn" href="#media-src" id="ref-for-media-src①">media-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self①⑨">'self'</a>;
@@ -3352,7 +3350,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
                          <a data-link-type="dfn" href="#object-src" id="ref-for-object-src②">object-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self②①">'self'</a>;
                          <a data-link-type="dfn" href="#script-src" id="ref-for-script-src④">script-src</a> https://example.com;
                          <a data-link-type="dfn" href="#style-src" id="ref-for-style-src①">style-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self②②">'self'</a>;
-                         <a data-link-type="dfn" href="#worker-src" id="ref-for-worker-src②">worker-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self②③">'self'</a>
+                         <a data-link-type="dfn" href="#worker-src" id="ref-for-worker-src①">worker-src</a> <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self②③">'self'</a>
 </pre>
      <p>Given this behavior, one good way to build a policy for a site would be to
     begin with a <code>default-src</code> of <code>'none'</code>, and to build up a policy from there
@@ -3372,9 +3370,9 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
      <li data-md="">
       <p>If <var>name</var> is "<code>frame-src</code>", and <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives①⑧">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name①⑤">name</a> is "<code>child-src</code>", return "<code>Allowed</code>".</p>
      <li data-md="">
-      <p>If <var>name</var> is "<code>worker-src</code>", and <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives①⑨">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name①⑥">name</a> is "<code>script-src</code>", return "<code>Allowed</code>".</p>
+      <p>If <var>name</var> is "<code>worker-src</code>", and <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives①⑨">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name①⑥">name</a> is "<code>script-src</code>" or a <a data-link-type="dfn" href="#directives" id="ref-for-directives②⓪">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name①⑦">name</a> is "<code>child-src</code>" , return "<code>Allowed</code>".</p>
      <li data-md="">
-      <p>Otherwise, return the result of executing the <a data-link-type="dfn" href="#directive-pre-request-check" id="ref-for-directive-pre-request-check⑤">pre-request check</a> for the <a data-link-type="dfn" href="#directives" id="ref-for-directives②⓪">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name①⑦">name</a> is <var>name</var> on <var>request</var> and <var>policy</var>, using
+      <p>Otherwise, return the result of executing the <a data-link-type="dfn" href="#directive-pre-request-check" id="ref-for-directive-pre-request-check⑤">pre-request check</a> for the <a data-link-type="dfn" href="#directives" id="ref-for-directives②①">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name①⑧">name</a> is <var>name</var> on <var>request</var> and <var>policy</var>, using
   this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value①③">value</a> for the comparison.</p>
     </ol>
     <h5 class="heading settled algorithm" data-algorithm="default-src Post-request check" data-level="6.1.3.2" id="default-src-post-request"><span class="secno">6.1.3.2. </span><span class="content"> <code>default-src</code> Post-request check </span><a class="self-link" href="#default-src-post-request"></a></h5>
@@ -3386,13 +3384,13 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
      <li data-md="">
       <p>If <var>name</var> is <code>null</code>, return "<code>Allowed</code>".</p>
      <li data-md="">
-      <p>If <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives②①">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name①⑧">name</a> is <var>name</var>, return "<code>Allowed</code>".</p>
+      <p>If <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives②②">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name①⑨">name</a> is <var>name</var>, return "<code>Allowed</code>".</p>
      <li data-md="">
-      <p>If <var>name</var> is "<code>frame-src</code>", and <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives②②">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name①⑨">name</a> is "<code>child-src</code>", return "<code>Allowed</code>".</p>
+      <p>If <var>name</var> is "<code>frame-src</code>", and <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives②③">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name②⓪">name</a> is "<code>child-src</code>", return "<code>Allowed</code>".</p>
      <li data-md="">
-      <p>If <var>name</var> is "<code>worker-src</code>", and <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives②③">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name②⓪">name</a> is "<code>script-src</code>", return "<code>Allowed</code>".</p>
+      <p>If <var>name</var> is "<code>worker-src</code>", and <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives②④">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name②①">name</a> is "<code>script-src</code>" or a <a data-link-type="dfn" href="#directives" id="ref-for-directives②⑤">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name②②">name</a> is "<code>child-src</code>" , return "<code>Allowed</code>".</p>
      <li data-md="">
-      <p>Otherwise, return the result of executing the <a data-link-type="dfn" href="#directive-post-request-check" id="ref-for-directive-post-request-check⑥">post-request check</a> for the <a data-link-type="dfn" href="#directives" id="ref-for-directives②④">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name②①">name</a> is <var>name</var> on <var>request</var>, <var>response</var>, and <var>policy</var>, using this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value①④">value</a> for the
+      <p>Otherwise, return the result of executing the <a data-link-type="dfn" href="#directive-post-request-check" id="ref-for-directive-post-request-check⑥">post-request check</a> for the <a data-link-type="dfn" href="#directives" id="ref-for-directives②⑥">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name②③">name</a> is <var>name</var> on <var>request</var>, <var>response</var>, and <var>policy</var>, using this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value①④">value</a> for the
   comparison.</p>
     </ol>
     <h4 class="heading settled" data-level="6.1.4" id="directive-font-src"><span class="secno">6.1.4. </span><span class="content"><code>font-src</code></span><a class="self-link" href="#directive-font-src"></a></h4>
@@ -3459,7 +3457,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 </pre>
     <div class="example" id="example-0aea3777">
      <a class="self-link" href="#example-0aea3777"></a> Given a page with the following Content Security Policy: 
-<pre>Content-Security-Policy: <a data-link-type="dfn" href="#frame-src" id="ref-for-frame-src③">frame-src</a> https://example.com/
+<pre>Content-Security-Policy: <a data-link-type="dfn" href="#frame-src" id="ref-for-frame-src②">frame-src</a> https://example.com/
 </pre>
      <p>Fetches for the following code will return a network errors, as the URL
     provided do not match <code>frame-src</code>'s <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists④">source list</a>:</p>
@@ -3808,8 +3806,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
     <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request④②">request</a> (<var>request</var>) and a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object⑤⓪">policy</a> (<var>policy</var>):</p>
     <ol>
      <li data-md="">
-      <p>If the result of executing <a href="#effective-directive-for-a-request">§6.6.1.11 Get the effective directive for request</a> on <var>request</var> is "<code>worker-src</code>", and <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives②⑤">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name②②">name</a> is "<code>worker-src</code>", return "<code>Allowed</code>".</p>
-      <p class="note" role="note"><span>Note:</span> If <code>worker-src</code> is present, we’ll defer to it when handling worker requests.</p>
+      <p>If the result of executing <a href="#effective-directive-for-a-request">§6.6.1.11 Get the effective directive for request</a> on <var>request</var> is "<code>worker-src</code>", and <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives②⑦">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name②④">name</a> is "<code>worker-src</code>" or a <a data-link-type="dfn" href="#directives" id="ref-for-directives②⑧">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name②⑤">name</a> is "<code>child-src</code>", return "<code>Allowed</code>".</p>
      <li data-md="">
       <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-destination" id="ref-for-concept-request-destination①⑧">destination</a> is <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#request-destination-script-like" id="ref-for-request-destination-script-like">script-like</a>:</p>
       <ol>
@@ -3871,8 +3868,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
     <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request④③">request</a> (<var>request</var>), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response②⑧">response</a> (<var>response</var>), and a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object⑤①">policy</a> (<var>policy</var>):</p>
     <ol>
      <li data-md="">
-      <p>If the result of executing <a href="#effective-directive-for-a-request">§6.6.1.11 Get the effective directive for request</a> on <var>request</var> is "<code>worker-src</code>", and <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives②⑥">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name②③">name</a> is "<code>worker-src</code>", return "<code>Allowed</code>".</p>
-      <p class="note" role="note"><span>Note:</span> If <code>worker-src</code> is present, we’ll defer to it when handling worker requests.</p>
+      <p>If the result of executing <a href="#effective-directive-for-a-request">§6.6.1.11 Get the effective directive for request</a> on <var>request</var> is "<code>worker-src</code>", and <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives②⑨">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name②⑥">name</a> is "<code>worker-src</code>" or a <a data-link-type="dfn" href="#directives" id="ref-for-directives③⓪">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name②⑦">name</a> is "<code>child-src</code>", return "<code>Allowed</code>".</p>
      <li data-md="">
       <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-destination" id="ref-for-concept-request-destination①⑨">destination</a> is <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#request-destination-script-like" id="ref-for-request-destination-script-like①">script-like</a>:</p>
       <ol>
@@ -4020,7 +4016,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 </pre>
     <div class="example" id="example-4dad9e58">
      <a class="self-link" href="#example-4dad9e58"></a> Given a page with the following Content Security Policy: 
-<pre>Content-Security-Policy: <a data-link-type="dfn" href="#worker-src" id="ref-for-worker-src③">worker-src</a> https://example.com/
+<pre>Content-Security-Policy: <a data-link-type="dfn" href="#worker-src" id="ref-for-worker-src②">worker-src</a> https://example.com/
 </pre>
      <p>Fetches for the following code will return a network errors, as the URL
     provided do not match <code>worker-src</code>'s <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists①⓪">source list</a>:</p>
@@ -4086,9 +4082,9 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
        <li data-md="">
         <p>Let <var>source list</var> be <code>null</code>.</p>
        <li data-md="">
-        <p>If a <a data-link-type="dfn" href="#directives" id="ref-for-directives②⑦">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name②④">name</a> is
+        <p>If a <a data-link-type="dfn" href="#directives" id="ref-for-directives③①">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name②⑧">name</a> is
   "<code>base-uri</code>" is present in <var>policy</var>’s <a data-link-type="dfn" href="#policy-directive-set" id="ref-for-policy-directive-set①⓪">directive
-  set</a>, set <var>source list</var> to that <a data-link-type="dfn" href="#directives" id="ref-for-directives②⑧">directive</a>’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value④⑤">value</a>.</p>
+  set</a>, set <var>source list</var> to that <a data-link-type="dfn" href="#directives" id="ref-for-directives③②">directive</a>’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value④⑤">value</a>.</p>
        <li data-md="">
         <p>If <var>source list</var> is <code>null</code>, skip to the next <var>policy</var>.</p>
        <li data-md="">
@@ -4185,7 +4181,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-media-type-list"
       <p>For each <var>policy</var> in <var>plugin element</var>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-node-document" id="ref-for-concept-node-document">node document</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-document-csp-list" id="ref-for-concept-document-csp-list①⓪">CSP list</a>:</p>
       <ol>
        <li data-md="">
-        <p>If <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives②⑨">directive</a> (<var>directive</var>) whose name is <code>plugin-types</code>:</p>
+        <p>If <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives③③">directive</a> (<var>directive</var>) whose name is <code>plugin-types</code>:</p>
         <ol>
          <li data-md="">
           <p>Let <var>type</var> be "<code>application/x-java-applet</code>" if <var>plugin element</var> is an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/obsolete.html#applet" id="ref-for-applet③"><code>applet</code></a> element, or <var>plugin element</var>’s <code>type</code> attribute’s
@@ -4339,10 +4335,10 @@ directive-value = <a data-link-type="grammar" href="#grammardef-ancestor-source-
     <ol class="algorithm">
      <li data-md="">
       <p class="assertion">Assert: <var>request</var>, <var>navigation response</var>, <var>navigation type</var>, <var>source</var>, and <var>policy</var> are unused in this algorithm, as <code>frame-ancestors</code> is concerned only
-  with <var>navigation response</var>’s <a data-link-type="dfn" href="#frame-ancestors" id="ref-for-frame-ancestors①">frame-ancestors</a> <a data-link-type="dfn" href="#directives" id="ref-for-directives③⓪">directive</a>.</p>
+  with <var>navigation response</var>’s <a data-link-type="dfn" href="#frame-ancestors" id="ref-for-frame-ancestors①">frame-ancestors</a> <a data-link-type="dfn" href="#directives" id="ref-for-directives③④">directive</a>.</p>
      <li data-md="">
       <p>If <var>check type</var> is "<code>source</code>", return "<code>Allowed</code>".</p>
-      <p class="note" role="note"><span>Note:</span> The 'frame-ancestors' <a data-link-type="dfn" href="#directives" id="ref-for-directives③①">directive</a> is relevant only to the <var>target</var> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context" id="ref-for-browsing-context⑦">browsing context</a> and it has no impact on the <var>source</var> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context" id="ref-for-browsing-context⑧">browsing context</a>.</p>
+      <p class="note" role="note"><span>Note:</span> The 'frame-ancestors' <a data-link-type="dfn" href="#directives" id="ref-for-directives③⑤">directive</a> is relevant only to the <var>target</var> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context" id="ref-for-browsing-context⑦">browsing context</a> and it has no impact on the <var>source</var> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context" id="ref-for-browsing-context⑧">browsing context</a>.</p>
      <li data-md="">
       <p>If <var>target</var> is not a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context" id="ref-for-nested-browsing-context⑦">nested browsing context</a>, return "<code>Allowed</code>".</p>
      <li data-md="">
@@ -4369,7 +4365,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-ancestor-source-
   the <a data-link-type="dfn" href="#frame-ancestors" id="ref-for-frame-ancestors②"><code>frame-ancestors</code></a> directive checks against each ancestor. If _any_ ancestor doesn’t
   match, the load is cancelled. <a data-link-type="biblio" href="#biblio-rfc7034">[RFC7034]</a></p>
     <p>In order to allow backwards-compatible deployment, the <a data-link-type="dfn" href="#frame-ancestors" id="ref-for-frame-ancestors③"><code>frame-ancestors</code></a> directive
-  _obsoletes_ the <code>X-Frame-Options</code> header. If a resource is delivered with an <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object⑥②">policy</a> that includes a <a data-link-type="dfn" href="#directives" id="ref-for-directives③②">directive</a> named <a data-link-type="dfn" href="#frame-ancestors" id="ref-for-frame-ancestors④"><code>frame-ancestors</code></a> and whose <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition②①">disposition</a> is "<code>enforce</code>", then the <code>X-Frame-Options</code> header MUST be ignored.</p>
+  _obsoletes_ the <code>X-Frame-Options</code> header. If a resource is delivered with an <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object⑥②">policy</a> that includes a <a data-link-type="dfn" href="#directives" id="ref-for-directives③⑥">directive</a> named <a data-link-type="dfn" href="#frame-ancestors" id="ref-for-frame-ancestors④"><code>frame-ancestors</code></a> and whose <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition②①">disposition</a> is "<code>enforce</code>", then the <code>X-Frame-Options</code> header MUST be ignored.</p>
     <p class="issue" id="issue-c6a38617"><a class="self-link" href="#issue-c6a38617"></a> Spell this out in more detail as part of defining <code>X-Frame-Options</code> integration with the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#process-a-navigate-response" id="ref-for-process-a-navigate-response②">process a navigate response</a> algorithm. <a href="https://github.com/whatwg/html/issues/1230">&lt;https://github.com/whatwg/html/issues/1230></a></p>
     <h4 class="heading settled" data-level="6.3.3" id="directive-navigate-to"><span class="secno">6.3.3. </span><span class="content"><code>navigate-to</code></span><a class="self-link" href="#directive-navigate-to"></a></h4>
     <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export="" id="navigate-to">navigate-to</dfn> directive restricts the <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url⑧">URL</a></code>s to which
@@ -4403,7 +4399,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <p class="assertion">Assert: <var>source</var> and <var>target</var> are unused as 'navigate-to'
   is concerned with the details of the request.</p>
      <li data-md="">
-      <p>If <var>navigation type</var> is "<code>form-submission</code>" and <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives③③">directive</a> named "<code>form-action</code>", return "<code>Allowed</code>".</p>
+      <p>If <var>navigation type</var> is "<code>form-submission</code>" and <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives③⑦">directive</a> named "<code>form-action</code>", return "<code>Allowed</code>".</p>
      <li data-md="">
       <p>If this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value⑤②">value</a> contains a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression⑦">source
   expression</a> that is an <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ascii-case-insensitive" id="ref-for-ascii-case-insensitive⑤">ASCII case-insensitive</a> match for
@@ -4425,9 +4421,9 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <p class="assertion">Assert: <var>source</var>, and <var>target</var> are unused.</p>
      <li data-md="">
       <p>If <var>check type</var> is "<code>response</code>", return "<code>Allowed</code>".</p>
-      <p class="note" role="note"><span>Note:</span> The 'navigate-to' <a data-link-type="dfn" href="#directives" id="ref-for-directives③④">directive</a> is relevant only to the <var>source</var> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context" id="ref-for-browsing-context①①">browsing context</a> and it has no impact on the <var>target</var> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context" id="ref-for-browsing-context①②">browsing context</a>.</p>
+      <p class="note" role="note"><span>Note:</span> The 'navigate-to' <a data-link-type="dfn" href="#directives" id="ref-for-directives③⑧">directive</a> is relevant only to the <var>source</var> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context" id="ref-for-browsing-context①①">browsing context</a> and it has no impact on the <var>target</var> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context" id="ref-for-browsing-context①②">browsing context</a>.</p>
      <li data-md="">
-      <p>If <var>navigation type</var> is "<code>form-submission</code>" and <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives③⑤">directive</a> named "<code>form-action</code>", return "<code>Allowed</code>".</p>
+      <p>If <var>navigation type</var> is "<code>form-submission</code>" and <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives③⑨">directive</a> named "<code>form-action</code>", return "<code>Allowed</code>".</p>
      <li data-md="">
       <p>If this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value⑤④">value</a> does not contain a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression⑧">source
   expression</a> that is an <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ascii-case-insensitive" id="ref-for-ascii-case-insensitive⑥">ASCII case-insensitive</a> match for
@@ -4493,7 +4489,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
     <h4 class="heading settled" data-level="6.6.1" id="matching-urls"><span class="secno">6.6.1. </span><span class="content">URL Matching</span><a class="self-link" href="#matching-urls"></a></h4>
     <h5 class="heading settled algorithm" data-algorithm="Does request violate policy?" data-level="6.6.1.1" id="does-request-violate-policy"><span class="secno">6.6.1.1. </span><span class="content"> Does <var>request</var> violate <var>policy</var>? </span><a class="self-link" href="#does-request-violate-policy"></a></h5>
     <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request⑤⑤">request</a> (<var>request</var>) and a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object⑥⑤">policy</a> (<var>policy</var>), this
-  algorithm returns the violated <a data-link-type="dfn" href="#directives" id="ref-for-directives③⑥">directive</a> if the request violates the
+  algorithm returns the violated <a data-link-type="dfn" href="#directives" id="ref-for-directives④⓪">directive</a> if the request violates the
   policy, and "<code>Does Not Violate</code>" otherwise.</p>
     <ol>
      <li data-md="">
@@ -4532,12 +4528,12 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
     <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request⑤⑦">request</a> (<var>request</var>), and a <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists①③">source list</a> (<var>source list</var>),
   this algorithm returns the result of executing <a href="#match-url-to-source-list">§6.6.1.5 Does url match source list in origin with redirect count?</a> on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-current-url" id="ref-for-concept-request-current-url①">current url</a>, <var>source list</var>, <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin" id="ref-for-concept-request-origin①">origin</a>, and <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-redirect-count" id="ref-for-concept-request-redirect-count">redirect
   count</a>.</p>
-    <p class="note" role="note"><span>Note:</span> This is generally used in <a data-link-type="dfn" href="#directives" id="ref-for-directives③⑦">directives</a>' <a data-link-type="dfn" href="#directive-pre-request-check" id="ref-for-directive-pre-request-check①⑧">pre-request check</a> algorithms to verify that a given <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request⑤⑧">request</a> is reasonable.</p>
+    <p class="note" role="note"><span>Note:</span> This is generally used in <a data-link-type="dfn" href="#directives" id="ref-for-directives④①">directives</a>' <a data-link-type="dfn" href="#directive-pre-request-check" id="ref-for-directive-pre-request-check①⑧">pre-request check</a> algorithms to verify that a given <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request⑤⑧">request</a> is reasonable.</p>
     <h5 class="heading settled algorithm" data-algorithm="Does response to request match source list?" data-level="6.6.1.4" id="match-response-to-source-list"><span class="secno">6.6.1.4. </span><span class="content"> Does <var>response</var> to <var>request</var> match <var>source list</var>? </span><a class="self-link" href="#match-response-to-source-list"></a></h5>
     <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request⑤⑨">request</a> (<var>request</var>), and a <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists①④">source list</a> (<var>source list</var>),
   this algorithm returns the result of executing <a href="#match-url-to-source-list">§6.6.1.5 Does url match source list in origin with redirect count?</a> on <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url" id="ref-for-concept-response-url⑥">url</a>, <var>source list</var>, <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin" id="ref-for-concept-request-origin②">origin</a>, and <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-redirect-count" id="ref-for-concept-request-redirect-count①">redirect
   count</a>.</p>
-    <p class="note" role="note"><span>Note:</span> This is generally used in <a data-link-type="dfn" href="#directives" id="ref-for-directives③⑧">directives</a>' <a data-link-type="dfn" href="#directive-post-request-check" id="ref-for-directive-post-request-check①⑨">post-request check</a> algorithms to verify that a given <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response④⓪">response</a> is reasonable.</p>
+    <p class="note" role="note"><span>Note:</span> This is generally used in <a data-link-type="dfn" href="#directives" id="ref-for-directives④②">directives</a>' <a data-link-type="dfn" href="#directive-post-request-check" id="ref-for-directive-post-request-check①⑨">post-request check</a> algorithms to verify that a given <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response④⓪">response</a> is reasonable.</p>
     <h5 class="heading settled algorithm" data-algorithm="Does url match source list in origin with redirect count?" data-level="6.6.1.5" id="match-url-to-source-list"><span class="secno">6.6.1.5. </span><span class="content"> Does <var>url</var> match <var>source list</var> in <var>origin</var> with <var>redirect count</var>? </span><a class="self-link" href="#match-url-to-source-list"></a></h5>
     <p>Given a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url⑨">URL</a></code> (<var>url</var>), a <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists①⑤">source list</a> (<var>source list</var>), an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/origin.html#concept-origin" id="ref-for-concept-origin">origin</a> (<var>origin</var>), and a number (<var>redirect count</var>), this
   algorithm returns "<code>Matches</code>" if the URL matches one or more source
@@ -4778,7 +4774,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
     </ol>
     <h5 class="heading settled algorithm" data-algorithm="Get the effective directive for request" data-level="6.6.1.11" id="effective-directive-for-a-request"><span class="secno">6.6.1.11. </span><span class="content"> Get the effective directive for <var>request</var> </span><a class="self-link" href="#effective-directive-for-a-request"></a></h5>
     <p>Each <a data-link-type="dfn" href="#fetch-directives" id="ref-for-fetch-directives②">fetch directive</a> controls a specific destination of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request⑥⓪">request</a>. Given
-  a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request⑥①">request</a> (<var>request</var>), the following algorithm returns either <code>null</code> or the <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name②⑤">name</a> of the request’s <dfn data-dfn-for="request" data-dfn-type="dfn" data-export="" id="request-effective-directive">effective directive<a class="self-link" href="#request-effective-directive"></a></dfn>:</p>
+  a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request⑥①">request</a> (<var>request</var>), the following algorithm returns either <code>null</code> or the <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name②⑨">name</a> of the request’s <dfn data-dfn-for="request" data-dfn-type="dfn" data-export="" id="request-effective-directive">effective directive<a class="self-link" href="#request-effective-directive"></a></dfn>:</p>
     <ol>
      <li data-md="">
       <p>Switch on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-destination" id="ref-for-concept-request-destination②⑥">destination</a>, and execute
@@ -5307,7 +5303,7 @@ document<span class="p">.</span>write<span class="p">(</span><span class="s1">'&
      <dt data-md=""><a data-link-type="dfn" href="#base-uri" id="ref-for-base-uri②"><code>base-uri</code></a>
      <dd data-md="">
       <p>This document (see <a href="#directive-base-uri">§6.2.1 base-uri</a>)</p>
-     <dt data-md=""><a data-link-type="dfn" href="#child-src" id="ref-for-child-src②"><code>child-src</code></a>
+     <dt data-md=""><a data-link-type="dfn" href="#child-src" id="ref-for-child-src①"><code>child-src</code></a>
      <dd data-md="">
       <p>This document (see <a href="#directive-child-src">§6.1.1 child-src</a>)</p>
      <dt data-md=""><a data-link-type="dfn" href="#connect-src" id="ref-for-connect-src③"><code>connect-src</code></a>
@@ -5328,7 +5324,7 @@ document<span class="p">.</span>write<span class="p">(</span><span class="s1">'&
      <dt data-md=""><a data-link-type="dfn" href="#frame-ancestors" id="ref-for-frame-ancestors⑤"><code>frame-ancestors</code></a>
      <dd data-md="">
       <p>This document (see <a href="#directive-frame-ancestors">§6.3.2 frame-ancestors</a>)</p>
-     <dt data-md=""><a data-link-type="dfn" href="#frame-src" id="ref-for-frame-src④"><code>frame-src</code></a>
+     <dt data-md=""><a data-link-type="dfn" href="#frame-src" id="ref-for-frame-src③"><code>frame-src</code></a>
      <dd data-md="">
       <p>This document (see <a href="#directive-frame-src">§6.1.5 frame-src</a>)</p>
      <dt data-md=""><a data-link-type="dfn" href="#img-src" id="ref-for-img-src④"><code>img-src</code></a>
@@ -5361,7 +5357,7 @@ document<span class="p">.</span>write<span class="p">(</span><span class="s1">'&
      <dt data-md=""><a data-link-type="dfn" href="#style-src" id="ref-for-style-src③"><code>style-src</code></a>
      <dd data-md="">
       <p>This document (see <a href="#directive-style-src">§6.1.12 style-src</a>)</p>
-     <dt data-md=""><a data-link-type="dfn" href="#worker-src" id="ref-for-worker-src④"><code>worker-src</code></a>
+     <dt data-md=""><a data-link-type="dfn" href="#worker-src" id="ref-for-worker-src③"><code>worker-src</code></a>
      <dd data-md="">
       <p>This document (see <a href="#directive-worker-src">§6.1.13 worker-src</a>)</p>
     </dl>
@@ -7826,7 +7822,7 @@ rest of Google’s CSP Cabal.</p>
   <h3 class="no-num no-ref heading settled" id="informative"><span class="content">Informative References</span><a class="self-link" href="#informative"></a></h3>
   <dl>
    <dt id="biblio-appmanifest">[APPMANIFEST]
-   <dd>Marcos Caceres; et al. <a href="https://www.w3.org/TR/appmanifest/">Web App Manifest</a>. 15 June 2018. WD. URL: <a href="https://www.w3.org/TR/appmanifest/">https://www.w3.org/TR/appmanifest/</a>
+   <dd>Marcos Caceres; et al. <a href="https://www.w3.org/TR/appmanifest/">Web App Manifest</a>. 4 July 2018. WD. URL: <a href="https://www.w3.org/TR/appmanifest/">https://www.w3.org/TR/appmanifest/</a>
    <dt id="biblio-beacon">[BEACON]
    <dd>Ilya Grigorik; et al. <a href="https://www.w3.org/TR/beacon/">Beacon</a>. 13 April 2017. CR. URL: <a href="https://www.w3.org/TR/beacon/">https://www.w3.org/TR/beacon/</a>
    <dt id="biblio-csp2">[CSP2]
@@ -8189,31 +8185,31 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-directives①⑥">6.1.1.2. 
     child-src Post-request check </a>
     <li><a href="#ref-for-directives①⑦">6.1.3.1. 
-    default-src Pre-request check </a> <a href="#ref-for-directives①⑧">(2)</a> <a href="#ref-for-directives①⑨">(3)</a> <a href="#ref-for-directives②⓪">(4)</a>
-    <li><a href="#ref-for-directives②①">6.1.3.2. 
-    default-src Post-request check </a> <a href="#ref-for-directives②②">(2)</a> <a href="#ref-for-directives②③">(3)</a> <a href="#ref-for-directives②④">(4)</a>
-    <li><a href="#ref-for-directives②⑤">6.1.11.1. 
-    script-src Pre-request check </a>
-    <li><a href="#ref-for-directives②⑥">6.1.11.2. 
-    script-src Post-request check </a>
-    <li><a href="#ref-for-directives②⑦">6.2.1.1. 
-    Is base allowed for document? </a> <a href="#ref-for-directives②⑧">(2)</a>
-    <li><a href="#ref-for-directives②⑨">6.2.2.2. 
+    default-src Pre-request check </a> <a href="#ref-for-directives①⑧">(2)</a> <a href="#ref-for-directives①⑨">(3)</a> <a href="#ref-for-directives②⓪">(4)</a> <a href="#ref-for-directives②①">(5)</a>
+    <li><a href="#ref-for-directives②②">6.1.3.2. 
+    default-src Post-request check </a> <a href="#ref-for-directives②③">(2)</a> <a href="#ref-for-directives②④">(3)</a> <a href="#ref-for-directives②⑤">(4)</a> <a href="#ref-for-directives②⑥">(5)</a>
+    <li><a href="#ref-for-directives②⑦">6.1.11.1. 
+    script-src Pre-request check </a> <a href="#ref-for-directives②⑧">(2)</a>
+    <li><a href="#ref-for-directives②⑨">6.1.11.2. 
+    script-src Post-request check </a> <a href="#ref-for-directives③⓪">(2)</a>
+    <li><a href="#ref-for-directives③①">6.2.1.1. 
+    Is base allowed for document? </a> <a href="#ref-for-directives③②">(2)</a>
+    <li><a href="#ref-for-directives③③">6.2.2.2. 
     Should plugin element be blocked a priori by Content
     Security Policy?: </a>
-    <li><a href="#ref-for-directives③⓪">6.3.2.1. 
-    frame-ancestors Navigation Response Check </a> <a href="#ref-for-directives③①">(2)</a>
-    <li><a href="#ref-for-directives③②">6.3.2.2. 
+    <li><a href="#ref-for-directives③④">6.3.2.1. 
+    frame-ancestors Navigation Response Check </a> <a href="#ref-for-directives③⑤">(2)</a>
+    <li><a href="#ref-for-directives③⑥">6.3.2.2. 
 		Relation to X-Frame-Options </a>
-    <li><a href="#ref-for-directives③③">6.3.3.1. 
+    <li><a href="#ref-for-directives③⑦">6.3.3.1. 
     navigate-to Pre-Navigation Check </a>
-    <li><a href="#ref-for-directives③④">6.3.3.2. 
-    navigate-to Navigation Response Check </a> <a href="#ref-for-directives③⑤">(2)</a>
-    <li><a href="#ref-for-directives③⑥">6.6.1.1. 
+    <li><a href="#ref-for-directives③⑧">6.3.3.2. 
+    navigate-to Navigation Response Check </a> <a href="#ref-for-directives③⑨">(2)</a>
+    <li><a href="#ref-for-directives④⓪">6.6.1.1. 
     Does request violate policy? </a>
-    <li><a href="#ref-for-directives③⑦">6.6.1.3. 
+    <li><a href="#ref-for-directives④①">6.6.1.3. 
     Does request match source list? </a>
-    <li><a href="#ref-for-directives③⑧">6.6.1.4. 
+    <li><a href="#ref-for-directives④②">6.6.1.4. 
     Does response to request match source list? </a>
    </ul>
   </aside>
@@ -8238,16 +8234,16 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-directive-name①②">6.1.1.2. 
     child-src Post-request check </a> <a href="#ref-for-directive-name①③">(2)</a>
     <li><a href="#ref-for-directive-name①④">6.1.3.1. 
-    default-src Pre-request check </a> <a href="#ref-for-directive-name①⑤">(2)</a> <a href="#ref-for-directive-name①⑥">(3)</a> <a href="#ref-for-directive-name①⑦">(4)</a>
-    <li><a href="#ref-for-directive-name①⑧">6.1.3.2. 
-    default-src Post-request check </a> <a href="#ref-for-directive-name①⑨">(2)</a> <a href="#ref-for-directive-name②⓪">(3)</a> <a href="#ref-for-directive-name②①">(4)</a>
-    <li><a href="#ref-for-directive-name②②">6.1.11.1. 
-    script-src Pre-request check </a>
-    <li><a href="#ref-for-directive-name②③">6.1.11.2. 
-    script-src Post-request check </a>
-    <li><a href="#ref-for-directive-name②④">6.2.1.1. 
+    default-src Pre-request check </a> <a href="#ref-for-directive-name①⑤">(2)</a> <a href="#ref-for-directive-name①⑥">(3)</a> <a href="#ref-for-directive-name①⑦">(4)</a> <a href="#ref-for-directive-name①⑧">(5)</a>
+    <li><a href="#ref-for-directive-name①⑨">6.1.3.2. 
+    default-src Post-request check </a> <a href="#ref-for-directive-name②⓪">(2)</a> <a href="#ref-for-directive-name②①">(3)</a> <a href="#ref-for-directive-name②②">(4)</a> <a href="#ref-for-directive-name②③">(5)</a>
+    <li><a href="#ref-for-directive-name②④">6.1.11.1. 
+    script-src Pre-request check </a> <a href="#ref-for-directive-name②⑤">(2)</a>
+    <li><a href="#ref-for-directive-name②⑥">6.1.11.2. 
+    script-src Post-request check </a> <a href="#ref-for-directive-name②⑦">(2)</a>
+    <li><a href="#ref-for-directive-name②⑧">6.2.1.1. 
     Is base allowed for document? </a>
-    <li><a href="#ref-for-directive-name②⑤">6.6.1.11. 
+    <li><a href="#ref-for-directive-name②⑨">6.6.1.11. 
     Get the effective directive for request </a>
    </ul>
   </aside>
@@ -9179,8 +9175,8 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="child-src">
    <b><a href="#child-src">#child-src</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-child-src">6.1.1. child-src</a> <a href="#ref-for-child-src①">(2)</a>
-    <li><a href="#ref-for-child-src②">10.1. 
+    <li><a href="#ref-for-child-src">6.1.1. child-src</a>
+    <li><a href="#ref-for-child-src①">10.1. 
     Directive Registry </a>
    </ul>
   </aside>
@@ -9219,10 +9215,9 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="frame-src">
    <b><a href="#frame-src">#frame-src</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-frame-src">6.1.1. child-src</a>
-    <li><a href="#ref-for-frame-src①">6.1.3. default-src</a> <a href="#ref-for-frame-src②">(2)</a>
-    <li><a href="#ref-for-frame-src③">6.1.5. frame-src</a>
-    <li><a href="#ref-for-frame-src④">10.1. 
+    <li><a href="#ref-for-frame-src">6.1.3. default-src</a> <a href="#ref-for-frame-src①">(2)</a>
+    <li><a href="#ref-for-frame-src②">6.1.5. frame-src</a>
+    <li><a href="#ref-for-frame-src③">10.1. 
     Directive Registry </a>
    </ul>
   </aside>
@@ -9300,10 +9295,9 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="worker-src">
    <b><a href="#worker-src">#worker-src</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-worker-src">6.1.1. child-src</a>
-    <li><a href="#ref-for-worker-src①">6.1.3. default-src</a> <a href="#ref-for-worker-src②">(2)</a>
-    <li><a href="#ref-for-worker-src③">6.1.13. worker-src</a>
-    <li><a href="#ref-for-worker-src④">10.1. 
+    <li><a href="#ref-for-worker-src">6.1.3. default-src</a> <a href="#ref-for-worker-src①">(2)</a>
+    <li><a href="#ref-for-worker-src②">6.1.13. worker-src</a>
+    <li><a href="#ref-for-worker-src③">10.1. 
     Directive Registry </a>
    </ul>
   </aside>
