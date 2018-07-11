@@ -529,10 +529,10 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       "`Allowed`" unless otherwise specified.
 
   4.  An <dfn for="directive" export>inline check</dfn>, which takes an {{Element}} a
-      type string, and a source string as arguments, and is executed during
-      [[#should-block-inline]] and during [[#should-block-navigation-request]] for
-      `javascript:` requests. This algorithm returns "`Allowed`" unless
-      otherwise specified.
+      type string, a <a for="/">policy</a>, and a source string as arguments,
+      and is executed during [[#should-block-inline]] and during
+      [[#should-block-navigation-request]] for `javascript:` requests. This
+      algorithm returns "`Allowed`" unless otherwise specified.
 
   5.  An <dfn for="directive" export>initialization</dfn>, which takes a {{Document}}
       or <a for="/">global object</a>, a <a>response</a>, and a <a for="/">policy</a>
@@ -1274,7 +1274,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
         1.  For each |directive| in |policy|'s <a for="policy">directive set</a>:
 
             1.  If |directive|'s <a for="directive">inline check</a> returns
-                "`Allowed`" when executed upon |element|, |type|, and |source|,
+                "`Allowed`" when executed upon |element|, |type|, |policy| and |source|,
                 skip to the next |directive|.
 
             2.  Otherwise, let |violation| be the result of executing
@@ -1859,12 +1859,10 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
 
-  2.  If |name| is not `frame-src` or `worker-src`, return "`Allowed`".
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `child-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If |policy| contains a directive whose <a for="directive">name</a>
-      is |name|, return "`Allowed`".
-
-  4.  Return the result of executing the <a for="directive">pre-request
+  3.  Return the result of executing the <a for="directive">pre-request
       check</a> for the <a>directive</a> whose <a for="directive">name</a>
       is |name| on |request| and |policy|, using this directive's
       <a for="directive">value</a> for the comparison.
@@ -1881,12 +1879,10 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
 
-  2.  If |name| is not `frame-src` or `worker-src`, return "`Allowed`".
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `child-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If |policy| contains a directive whose <a for="directive">name</a>
-      is |name|, return "`Allowed`"
-
-  4.  Return the result of executing the <a for="directive">post-request
+  3.  Return the result of executing the <a for="directive">post-request
       check</a> for the <a>directive</a> whose <a for="directive">name</a>
       is |name| on |request|, |response|, and |policy|, using this directive's
       <a for="directive">value</a> for the comparison.
@@ -1955,16 +1951,17 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
 
-  1.  Assert: |policy| is unused.
+  1.  Let |name| be the result of executing
+      [[#effective-directive-for-a-request]] on |request|.
 
-  2.  If |request|'s <a for="request">initiator</a> is "`fetch`" or its
-      <a for="request">destination</a> is "":
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `connect-src` and |policy| is "`No`", return "`Allowed`".
 
-      1.  If the result of executing [[#match-request-to-source-list]] on
-          |request| and this directive's <a for="directive">value</a> is
-          "`Does Not Match`", return "`Blocked`".
+  3.  If the result of executing [[#match-request-to-source-list]] on
+      |request| and this directive's <a for="directive">value</a> is
+      "`Does Not Match`", return "`Blocked`".
 
-  3.  Return "`Allowed`".
+  4.  Return "`Allowed`".
 
   <h5 algorithm id="connect-src-post-request">
     `connect-src` Post-request check
@@ -1975,17 +1972,18 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
   <a for="/">policy</a> (|policy|):
 
-  1.  Assert: |policy| is unused.
+  1.  Let |name| be the result of executing
+      [[#effective-directive-for-a-request]] on |request|.
 
-  2.  If |request|'s <a for="request">initiator</a> is "`fetch`" or its
-      <a for="request">destination</a> is "":
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `connect-src` and |policy| is "`No`", return "`Allowed`".
 
-      1.  If the result of executing [[#match-response-to-source-list]] on
-          |response|, |request|, and this directive's
-          <a for="directive">value</a> is "`Does Not Match`", return
-          "`Blocked`".
+  3.  If the result of executing [[#match-response-to-source-list]] on
+      |response|, |request|, and this directive's
+      <a for="directive">value</a> is "`Does Not Match`", return
+      "`Blocked`".
 
-  3.  Return "`Allowed`".
+  4.  Return "`Allowed`".
 
   <h4 id="directive-default-src">`default-src`</h4>
 
@@ -2023,8 +2021,10 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
                                <a>media-src</a> <a grammar>'self'</a>;
                                <a>prefetch-src</a> <a grammar>'self'</a>;
                                <a>object-src</a> <a grammar>'self'</a>;
-                               <a>script-src</a> <a grammar>'self'</a>;
-                               <a>style-src</a> <a grammar>'self'</a>;
+                               <a>script-src-elem</a> <a grammar>'self'</a>;
+                               <a>script-src-attr</a> <a grammar>'self'</a>;
+                               <a>style-src-elem</a> <a grammar>'self'</a>;
+                               <a>style-src-attr</a> <a grammar>'self'</a>;
                                <a>worker-src</a> <a grammar>'self'</a>
     </pre>
 
@@ -2037,7 +2037,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     script requests. That is, the following header:
 
     <pre>
-      <a>Content-Security-Policy</a>: <a>default-src</a> <a grammar>'self'</a>; <a>script-src</a> https://example.com
+      <a>Content-Security-Policy</a>: <a>default-src</a> <a grammar>'self'</a>; <a>script-src-elem</a> https://example.com
     </pre>
 
     will have the same behavior as the following header:
@@ -2051,8 +2051,10 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
                                <a>media-src</a> <a grammar>'self'</a>;
                                <a>prefetch-src</a> <a grammar>'self'</a>;
                                <a>object-src</a> <a grammar>'self'</a>;
-                               <a>script-src</a> https://example.com;
-                               <a>style-src</a> <a grammar>'self'</a>;
+                               <a>script-src-elem</a> https://example.com;
+                               <a>script-src-attr</a> <a grammar>'self'</a>;
+                               <a>style-src-elem</a> <a grammar>'self'</a>;
+                               <a>style-src-attr</a> <a grammar>'self'</a>;
                                <a>worker-src</a> <a grammar>'self'</a>
     </pre>
 
@@ -2073,19 +2075,10 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
 
-  2.  If |name| is `null`, return "`Allowed`".
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `default-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If |policy| contains a <a>directive</a> whose <a for="directive">name</a>
-      is |name|, return "`Allowed`".
-
-  4.  If |name| is "`frame-src`", and |policy| contains a <a>directive</a> whose
-      <a for="directive">name</a> is "`child-src`", return "`Allowed`".
-
-  5.  If |name| is "`worker-src`", and |policy| contains a <a>directive</a> whose
-      <a for="directive">name</a> is "`script-src`" or a <a>directive</a> whose
-      <a for="directive">name</a> is "`child-src`" , return "`Allowed`".
-
-  6.  Otherwise, return the result of executing the
+  3.  Return the result of executing the
       <a for="directive">pre-request check</a> for the <a>directive</a> whose
       <a for="directive">name</a> is |name| on |request| and |policy|, using
       this directive's <a for="directive">value</a> for the comparison.
@@ -2102,22 +2095,34 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
 
-  2.  If |name| is `null`, return "`Allowed`".
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `default-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If |policy| contains a <a>directive</a> whose <a for="directive">name</a>
-      is |name|, return "`Allowed`".
-
-  4.  If |name| is "`frame-src`", and |policy| contains a <a>directive</a> whose
-      <a for="directive">name</a> is "`child-src`", return "`Allowed`".
-
-  5.  If |name| is "`worker-src`", and |policy| contains a <a>directive</a> whose
-      <a for="directive">name</a> is "`script-src`" or a <a>directive</a> whose
-      <a for="directive">name</a> is "`child-src`" , return "`Allowed`".
-
-  6.  Otherwise, return the result of executing the
+  3.  Return the result of executing the
       <a for="directive">post-request check</a> for the <a>directive</a> whose
       <a for="directive">name</a> is |name| on |request|, |response|, and
       |policy|, using this directive's <a for="directive">value</a> for the
+      comparison.
+
+  <h5 algorithm id="default-src-inline">
+    `default-src` Inline Check
+  </h5>
+
+  This directive's <a for="directive">inline check</a> algorithm is as follows:
+
+  Given an {{Element}} (|element|), a string (|type|), a <a for="/">policy</a>
+  (|policy|) and a string (|source|):
+
+  1.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
+      on |type|.
+
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `default-src` and |policy| is "`No`", return "`Allowed`".
+
+  3.  Otherwise, return the result of executing the
+      <a for="directive">inline check</a> for the <a>directive</a> whose
+      <a for="directive">name</a> is |name| on |element|, |type|, |policy|
+      and |source|, using this directive's <a for="directive">value</a> for the
       comparison.
 
   <h4 id="directive-font-src">`font-src`</h4>
@@ -2161,15 +2166,17 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
 
-  1.  Assert: |policy| is unused.
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
 
-  2.  If |request|'s <a for="request">destination</a> is "`font`":
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `font-src` and |policy| is "`No`", return "`Allowed`".
 
-      1.  If the result of executing [[#match-request-to-source-list]] on
-          |request| and this directive's <a for="directive">value</a> is
-          "`Does Not Match`", return "`Blocked`".
+  3.  If the result of executing [[#match-request-to-source-list]] on
+      |request| and this directive's <a for="directive">value</a> is
+      "`Does Not Match`", return "`Blocked`".
 
-  3.  Return "`Allowed`".
+  4.  Return "`Allowed`".
 
   <h5 algorithm id="font-src-post-request">
     `font-src` Post-request check
@@ -2180,16 +2187,18 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
   <a for="/">policy</a> (|policy|):
 
-  1.  Assert: |policy| is unused.
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
 
-  2.  If |request|'s <a for="request">destination</a> is "`font`":
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `font-src` and |policy| is "`No`", return "`Allowed`".
 
-      1.  If the result of executing [[#match-response-to-source-list]] on
-          |response|, |request|, and this directive's
-          <a for="directive">value</a> is "`Does Not Match`", return
-          "`Blocked`".
+  3.  If the result of executing [[#match-response-to-source-list]] on
+      |response|, |request|, and this directive's
+      <a for="directive">value</a> is "`Does Not Match`", return
+      "`Blocked`".
 
-  3.  Return "`Allowed`".
+  4.  Return "`Allowed`".
 
   <h4 id="directive-frame-src">`frame-src`</h4>
 
@@ -2226,17 +2235,17 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
 
-  1.  Assert: |policy| is unused.
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
 
-  2.  If |request|'s <a for="request">destination</a> is "`document`" and
-      <a for="request">target browsing context</a> is a <a>nested browsing
-      context</a>:
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `frame-src` and |policy| is "`No`", return "`Allowed`".
 
-      1.  If the result of executing [[#match-request-to-source-list]] on
-          |request| and this directive's <a for="directive">value</a> is
-          "`Does Not Match`", return "`Blocked`".
+  3.  If the result of executing [[#match-request-to-source-list]] on
+      |request| and this directive's <a for="directive">value</a> is
+      "`Does Not Match`", return "`Blocked`".
 
-  3.  Return "`Allowed`".
+  4.  Return "`Allowed`".
 
   <h5 algorithm id="frame-src-post-request">
     `frame-src` Post-request check
@@ -2247,18 +2256,18 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
   <a for="/">policy</a> (|policy|):
 
-  1.  Assert: |policy| is unused.
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
 
-  2.  If |request|'s <a for="request">destination</a> is "`document`" and
-      <a for="request">target browsing context</a> is a <a>nested browsing
-      context</a>:
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `frame-src` and |policy| is "`No`", return "`Allowed`".
 
-      1.  If the result of executing [[#match-response-to-source-list]] on
-          |response|, |request|, and this directive's
-          <a for="directive">value</a> is "`Does Not Match`", return
-          "`Blocked`".
+  3.  If the result of executing [[#match-response-to-source-list]] on
+      |response|, |request|, and this directive's
+      <a for="directive">value</a> is "`Does Not Match`", return
+      "`Blocked`".
 
-  3.  Return "`Allowed`".
+  4.  Return "`Allowed`".
 
   <h4 id="directive-img-src">`img-src`</h4>
 
@@ -2298,15 +2307,17 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
 
-  1.  Assert: |policy| is unused.
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
 
-  2.  If |request|'s <a for="request">destination</a> is "`image`":
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `img-src` and |policy| is "`No`", return "`Allowed`".
 
-      1.  If the result of executing [[#match-request-to-source-list]] on
-          |request| and this directive's <a for="directive">value</a> is
-          "`Does Not Match`", return "`Blocked`".
+  3.  If the result of executing [[#match-request-to-source-list]] on
+      |request| and this directive's <a for="directive">value</a> is
+      "`Does Not Match`", return "`Blocked`".
 
-  3.  Return "`Allowed`".
+  4.  Return "`Allowed`".
 
   <h5 algorithm id="img-src-post-request">
     `img-src` Post-request check
@@ -2317,16 +2328,18 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
   <a for="/">policy</a> (|policy|):
 
-  1.  Assert: |policy| is unused.
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
 
-  2.  If |request|'s <a for="request">destination</a> is "`image`":
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `frame-src` and |policy| is "`No`", return "`Allowed`".
 
-      1.  If the result of executing [[#match-response-to-source-list]] on
-          |response|, |request|, and this directive's
-          <a for="directive">value</a> is "`Does Not Match`", return
-          "`Blocked`".
+  3.  If the result of executing [[#match-response-to-source-list]] on
+      |response|, |request|, and this directive's
+      <a for="directive">value</a> is "`Does Not Match`", return
+      "`Blocked`".
 
-  3.  Return "`Allowed`".
+  4.  Return "`Allowed`".
 
   <h4 id="directive-manifest-src">`manifest-src`</h4>
 
@@ -2362,15 +2375,17 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
 
-  1.  Assert: |policy| is unused.
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
 
-  2.  If |request|'s <a for="request">destination</a> is "`manifest`":
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `manifest-src` and |policy| is "`No`", return "`Allowed`".
 
-      1.  If the result of executing [[#match-request-to-source-list]] on
-          |request| and this directive's <a for="directive">value</a> is
-          "`Does Not Match`", return "`Blocked`".
+  3.  If the result of executing [[#match-request-to-source-list]] on
+      |request| and this directive's <a for="directive">value</a> is
+      "`Does Not Match`", return "`Blocked`".
 
-  3.  Return "`Allowed`".
+  4.  Return "`Allowed`".
 
   <h5 algorithm id="manifest-src-post-request">
     `manifest-src` Post-request check
@@ -2381,16 +2396,18 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
   <a for="/">policy</a> (|policy|):
 
-  1.  Assert: |policy| is unused.
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
 
-  2.  If |request|'s <a for="request">destination</a> is "`manifest`":
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `manifest-src` and |policy| is "`No`", return "`Allowed`".
 
-      1.  If the result of executing [[#match-response-to-source-list]] on
-          |response|, |request|, and this directive's
-          <a for="directive">value</a> is "`Does Not Match`", return
-          "`Blocked`".
+  3.  If the result of executing [[#match-response-to-source-list]] on
+      |response|, |request|, and this directive's
+      <a for="directive">value</a> is "`Does Not Match`", return
+      "`Blocked`".
 
-  3.  Return "`Allowed`".
+  4.  Return "`Allowed`".
 
   <h4 id="directive-media-src">`media-src`</h4>
 
@@ -2429,16 +2446,17 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
 
-  1.  Assert: |policy| is unused.
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
 
-  2.  If |request|'s <a for="request">destination</a> is one of "`audio`", "`video`",
-      or "`track`":
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `media-src` and |policy| is "`No`", return "`Allowed`".
 
-      1.  If the result of executing [[#match-request-to-source-list]] on
-          |request| and this directive's <a for="directive">value</a> is
-          "`Does Not Match`", return "`Blocked`".
+  3.  If the result of executing [[#match-request-to-source-list]] on
+      |request| and this directive's <a for="directive">value</a> is
+      "`Does Not Match`", return "`Blocked`".
 
-  3.  Return "`Allowed`".
+  4.  Return "`Allowed`".
 
   <h5 algorithm id="media-src-post-request">
     `media-src` Post-request check
@@ -2449,17 +2467,18 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
   <a for="/">policy</a> (|policy|):
 
-  1.  Assert: |policy| is unused.
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
 
-  2.  If |request|'s <a for="request">destination</a> is one of "`audio`", "`video`",
-      or "`track`":
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `media-src` and |policy| is "`No`", return "`Allowed`".
 
-      1.  If the result of executing [[#match-response-to-source-list]] on
-          |response|, |request|, and this directive's
-          <a for="directive">value</a> is "`Does Not Match`", return
-          "`Blocked`".
+  3.  If the result of executing [[#match-response-to-source-list]] on
+      |response|, |request|, and this directive's
+      <a for="directive">value</a> is "`Does Not Match`", return
+      "`Blocked`".
 
-  3.  Return "`Allowed`".
+  4.  Return "`Allowed`".
 
   <h4 id="directive-prefetch-src">`prefetch-src`</h4>
 
@@ -2496,14 +2515,16 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
 
-  1.  Assert: |policy| is unused.
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
 
-  2.  If |request|'s [=request/initiator=] is "`prefetch`" or "`prerender`":
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `prefetch-src` and |policy| is "`No`", return "`Allowed`".
 
-      1.  If the result of executing [[#match-request-to-source-list]] on |request| and this
-          directive's [=directive/value=] is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of executing [[#match-request-to-source-list]] on |request| and this
+      directive's [=directive/value=] is "`Does Not Match`", return "`Blocked`".
 
-  3.  Return "`Allowed`".
+  4.  Return "`Allowed`".
 
   <h5 algorithm id="prefetch-src-post-request">
     `prefetch-src` Post-request check
@@ -2514,14 +2535,16 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
   <a for="/">policy</a> (|policy|):
 
-  1.  Assert: |policy| is unused.
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
 
-  2.  If |request|'s [=request/initiator=] is "`prefetch`" or "`prerender`":
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `prefetch-src` and |policy| is "`No`", return "`Allowed`".
 
-      1.  If the result of executing [[#match-response-to-source-list]] on |response|, |request|,
-          and this directive's [=directive/value=] is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of executing [[#match-response-to-source-list]] on |response|, |request|,
+      and this directive's [=directive/value=] is "`Does Not Match`", return "`Blocked`".
 
-  3.  Return "`Allowed`".
+  4.  Return "`Allowed`".
 
 
   <h4 id="directive-object-src">`object-src`</h4>
@@ -2583,15 +2606,17 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
 
-  1.  Assert: |policy| is unused.
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
 
-  2.  If |request|'s <a for="request">destination</a> is "`object`" or "`embed`":
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `object-src` and |policy| is "`No`", return "`Allowed`".
 
-      1.  If the result of executing [[#match-request-to-source-list]] on
-          |request| and this directive's <a for="directive">value</a> is
-          "`Does Not Match`", return "`Blocked`".
+  3.  If the result of executing [[#match-request-to-source-list]] on
+      |request| and this directive's <a for="directive">value</a> is
+      "`Does Not Match`", return "`Blocked`".
 
-  3.  Return "`Allowed`".
+  4.  Return "`Allowed`".
 
   <h5 algorithm id="object-src-post-request">
     `object-src` Post-request check
@@ -2602,16 +2627,18 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
   <a for="/">policy</a> (|policy|):
 
-  1.  Assert: |policy| is unused.
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
 
-  2.  If |request|'s <a for="request">destination</a> is "`object`" or "`embed`":
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `object-src` and |policy| is "`No`", return "`Allowed`".
 
-      1.  If the result of executing [[#match-response-to-source-list]] on
-          |response|, |request|, and this directive's
-          <a for="directive">value</a> is "`Does Not Match`", return
-          "`Blocked`".
+  3.  If the result of executing [[#match-response-to-source-list]] on
+      |response|, |request|, and this directive's
+      <a for="directive">value</a> is "`Does Not Match`", return
+      "`Blocked`".
 
-  3.  Return "`Allowed`".
+  4.  Return "`Allowed`".
 
   <h4 id="directive-script-src">`script-src`</h4>
 
@@ -2660,69 +2687,13 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
 
-  1.  If the result of executing [[#effective-directive-for-a-request]] on |request|
-      is "`worker-src`", and |policy| contains a <a>directive</a> whose
-      <a for="directive">name</a> is "`worker-src`" or a <a>directive</a> whose
-      <a for="directive">name</a> is "`child-src`", return "`Allowed`".
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
 
-  2.  If |request|'s <a for="request">destination</a> is <a for="request/destination">script-like</a>:
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `script-src` and |policy| is "`No`", return "`Allowed`".
 
-      1.  If the result of executing [[#match-nonce-to-source-list]] on
-          |request|'s <a for="request">cryptographic nonce metadata</a> and this
-          directive's <a for="directive">value</a> is "`Matches`", return
-          "`Allowed`".
-
-      2.  Let |integrity expressions| be the set of <a>source expressions</a> in
-          this directive's <a for="directive">value</a> that match the
-          <a grammar>hash-source</a> grammar.
-
-      3.  If |integrity expressions| is not empty:
-
-          1.  Let |integrity sources| be the result of executing the algorithm
-              defined in [[SRI#parse-metadata]] on |request|'s
-              <a for="request">integrity metadata</a>. [[!SRI]]
-
-          2.  If |integrity sources| is "`no metadata`" or an empty set, skip
-              the remaining substeps.
-
-          3.  Let |bypass due to integrity match| be `true`.
-
-          4.  For each |source| in |integrity sources|:
-
-              1.  If this directive's <a for="directive">value</a> does not
-                  contain a <a>source expression</a> whose
-                  <a grammar>hash-algorithm</a> is a <a>case-sensitive</a> match
-                  for |source|'s `hash-algo` component, and whose
-                  <a grammar>base64-value</a> is a <a>case-sensitive</a> match
-                  for |source|'s `base64-value`, then set |bypass due to
-                  integrity match| to `false`.
-
-          5.  If |bypass due to integrity match| is `true`, return
-              "`Allowed`".
-
-          Note: Here, we verify only that the |request| contains a set of
-          <a for="request">integrity metadata</a> which is a subset of the
-          <a grammar>hash-source</a> <a>source expressions</a> specified by
-          this directive. We rely on the browser's enforcement of Subresource
-          Integrity [[!SRI]] to block non-matching resources upon response.
-
-      3.  If this directive's <a for="directive">value</a> contains a <a>source
-          expression</a> that is an <a>ASCII case-insensitive</a> match for
-          the "<a grammar>`'strict-dynamic'`</a>" <a grammar>keyword-source</a>:
-
-          1.  If the |request|'s <a for="request">parser metadata</a> is
-              <a>"parser-inserted"</a>, return "`Blocked`".
-
-              Otherwise, return "`Allowed`".
-
-              Note: "<a grammar>`'strict-dynamic'`</a>" is explained in more detail
-              in [[#strict-dynamic-usage]].
-
-      4.  If the result of executing [[#match-request-to-source-list]] on
-          |request| and this directive's <a for="directive">value</a> is
-          "`Does Not Match`", return "`Blocked`".
-
-  3.  Return "`Allowed`".
+  3.  Return the result of executing [[#script-pre-request]] on |request| and this directive.
 
   <h5 algorithm id="script-src-post-request">
     `script-src` Post-request check
@@ -2733,29 +2704,14 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
   <a for="/">policy</a> (|policy|):
 
-  1.  If the result of executing [[#effective-directive-for-a-request]] on |request|
-      is "`worker-src`", and |policy| contains a <a>directive</a> whose
-      <a for="directive">name</a> is "`worker-src`" or a <a>directive</a> whose
-      <a for="directive">name</a> is "`child-src`", return "`Allowed`".
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
 
-  2.  If |request|'s <a for="request">destination</a> is <a for="request/destination">script-like</a>:
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `script-src` and |policy| is "`No`", return "`Allowed`".
 
-      1.  If the result of executing [[#match-nonce-to-source-list]] on
-          |request|'s <a for="request">cryptographic nonce metadata</a> and this
-          directive's <a for="directive">value</a> is "`Matches`", return
-          "`Allowed`".
-
-      2.  If this directive's <a for="directive">value</a> contains
-          "<a grammar>`'strict-dynamic'`</a>", and |request|'s
-          <a for="request">parser metadata</a> is not <a>"parser-inserted"</a>,
-          return "`Allowed`".
-
-      3.  If the result of executing [[#match-response-to-source-list]] on
-          |response|, |request|, and this directive's
-          <a for="directive">value</a> is "`Does Not Match`", return
-          "`Blocked`".
-
-  3.  Return "`Allowed`".
+  3.  Return the result of executing [[#script-post-request]] on |request|,
+      |response| and this directive.
 
   <h5 algorithm id="script-src-inline">
     `script-src` Inline Check
@@ -2763,17 +2719,134 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   This directive's <a for="directive">inline check</a> algorithm is as follows:
 
-  Given an {{Element}} (|element|), a string (|type|), and a string (|source|):
+  Given an {{Element}} (|element|), a string (|type|), a <a for="/">policy</a>
+  (|policy|) and a string (|source|):
 
-  1.  If |type| is "`script`", "`script attribute`" or "`navigation`":
+  1.  Assert: |element| is not `null` or |type| is "`navigation`".
 
-      1.  Assert: |element| is not `null` or |type| is "`navigation`".
+  2.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
+      on |type|.
 
-      2.  If the result of executing [[#match-element-to-source-list]] on
-          |element|, this directive's <a for="directive">value</a>, |type|,
-          and |source|, is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of executing [[#should-directive-execute]] on |name|,
+      `script-src` and |policy| is "`No`", return "`Allowed`".
 
-  2.  Return "`Allowed`".
+  4.  If the result of executing [[#match-element-to-source-list]] on
+      |element|, this directive's <a for="directive">value</a>, |type|,
+      and |source|, is "`Does Not Match`", return "`Blocked`".
+
+  5.  Return "`Allowed`".
+
+  <h4 id="directive-script-src-elem">`script-src-elem`</h4>
+
+  The syntax for the directive's name and value is described by the following ABNF:
+
+  <pre>
+    directive-name  = "script-src-elem"
+    directive-value = <a grammar>serialized-source-list</a>
+  </pre>
+
+  The <dfn export>script-src-elem</dfn> directive applies to all script requests and inline checks
+  except for script attributes.
+
+  As such, the following differences exist when comparing to `script-src`:
+  * `script-src-elem` only applies to "`script`" and "`navigation`" inline checks
+    (and is ignored for "`script attribute`" inline checks).
+  * `script-src-elem`'s <a for="directive">value</a> is not used for JavaScript
+    execution sink checks that are gated on the "`unsafe-eval`" check.
+  * `script-src-elem` is not used as a fallback for the `worker-src` directive.
+    The `worker-src` checks still fall back on the `script-src` directive.
+
+  <h5 algorithm id="script-src-elem-pre-request">
+    `script-src-elem` Pre-request check
+  </h5>
+
+  This directive's <a for="directive">pre-request check</a> is as follows:
+
+  Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
+
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
+
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `script-src-elem` and |policy| is "`No`", return "`Allowed`".
+
+  3.  Return the result of executing [[#script-pre-request]] on |request| and this directive.
+
+  <h5 algorithm id="script-src-elem-post-request">
+    `script-src-elem` Post-request check
+  </h5>
+
+  This directive's <a for="directive">post-request check</a> is as follows:
+
+  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
+  <a for="/">policy</a> (|policy|):
+
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
+
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `script-src-elem` and |policy| is "`No`", return "`Allowed`".
+
+  3.  Return the result of executing [[#script-post-request]] on |request|,
+      |response| and this directive.
+
+  <h5 algorithm id="script-src-elem-inline">
+    `script-src-elem` Inline Check
+  </h5>
+
+  This directive's <a for="directive">inline check</a> algorithm is as follows:
+
+  Given an {{Element}} (|element|), a string (|type|), a <a for="/">policy</a>
+  (|policy|) and a string (|source|):
+
+  1.  Assert: |element| is not `null` or |type| is "`navigation`".
+
+  2.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
+      on |type|.
+
+  3.  If the result of executing [[#should-directive-execute]] on |name|,
+      `script-src-elem` and |policy| is "`No`", return "`Allowed`".
+
+  4.  If the result of executing [[#match-element-to-source-list]] on
+      |element|, this directive's <a for="directive">value</a>, |type|,
+      and |source|, is "`Does Not Match`", return "`Blocked`".
+
+  5.  Return "`Allowed`".
+
+  <h4 id="directive-script-src-attr">`script-src-attr`</h4>
+
+  The syntax for the directive's name and value is described by the following ABNF:
+
+  <pre>
+    directive-name  = "script-src-attr"
+    directive-value = <a grammar>serialized-source-list</a>
+  </pre>
+
+  The <dfn export>script-src-attr</dfn> directive applies to event handlers and, if present,
+  it will superseed the `script-src` directive for relevant checks.
+
+  <h5 algorithm id="script-src-attr-inline">
+    `script-src-attr` Inline Check
+  </h5>
+
+  This directive's <a for="directive">inline check</a> algorithm is as follows:
+
+  Given an {{Element}} (|element|), a string (|type|), a <a for="/">policy</a>
+  (|policy|) and a string (|source|):
+
+  1.  Assert: |element| is not `null` or |type| is "`navigation`".
+
+  2.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
+      on |type|.
+
+  3.  If the result of executing [[#should-directive-execute]] on |name|,
+      `script-src-attr` and |policy| is "`No`", return "`Allowed`".
+
+  4.  If the result of executing [[#match-element-to-source-list]] on
+      |element|, this directive's <a for="directive">value</a>, |type|,
+      and |source|, is "`Does Not Match`", return "`Blocked`".
+
+  5.  Return "`Allowed`".
 
   <h4 id="directive-style-src">`style-src`</h4>
 
@@ -2829,20 +2902,22 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
 
-  1.  Assert: |policy| is unused.
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
 
-  2.  If |request|'s <a for="request">destination</a> is "`style`":
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `style-src` and |policy| is "`No`", return "`Allowed`".
 
-      1.  If the result of executing [[#match-nonce-to-source-list]] on
-          |request|'s <a for="request">cryptographic nonce metadata</a> and this
-          directive's <a for="directive">value</a> is "`Matches`", return
-          "`Allowed`".
+  3.  If the result of executing [[#match-nonce-to-source-list]] on
+      |request|'s <a for="request">cryptographic nonce metadata</a> and this
+      directive's <a for="directive">value</a> is "`Matches`", return
+      "`Allowed`".
 
-      2.  If the result of executing [[#match-request-to-source-list]] on
-          |request| and this directive's <a for="directive">value</a> is
-          "`Does Not Match`", return "`Blocked`".
+  4.  If the result of executing [[#match-request-to-source-list]] on
+      |request| and this directive's <a for="directive">value</a> is
+      "`Does Not Match`", return "`Blocked`".
 
-  3.  Return "`Allowed`".
+  5.  Return "`Allowed`".
 
   <h5 algorithm id="style-src-post-request">
     `style-src` Post-request Check
@@ -2853,21 +2928,23 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
   <a for="/">policy</a> (|policy|):
 
-  1.  Assert: |policy| is unused.
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
 
-  2.  If |request|'s <a for="request">destination</a> is "`style`":
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `style-src` and |policy| is "`No`", return "`Allowed`".
 
-      1.  If the result of executing [[#match-nonce-to-source-list]] on
-          |request|'s <a for="request">cryptographic nonce metadata</a> and this
-          directive's <a for="directive">value</a> is "`Matches`", return
-          "`Allowed`".
+  3.  If the result of executing [[#match-nonce-to-source-list]] on
+      |request|'s <a for="request">cryptographic nonce metadata</a> and this
+      directive's <a for="directive">value</a> is "`Matches`", return
+      "`Allowed`".
 
-      2.  If the result of executing [[#match-response-to-source-list]] on
-          |response|, |request|, and this directive's
-          <a for="directive">value</a> is "`Does Not Match`", return
-          "`Blocked`".
+  4.  If the result of executing [[#match-response-to-source-list]] on
+      |response|, |request|, and this directive's
+      <a for="directive">value</a> is "`Does Not Match`", return
+      "`Blocked`".
 
-  3.  Return "`Allowed`".
+  5.  Return "`Allowed`".
 
   <h5 algorithm id="style-src-inline">
     `style-src` Inline Check
@@ -2875,21 +2952,143 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   This directive's <a for="directive">inline check</a> algorithm is as follows:
 
-  Given an {{Element}} (|element|), a string (|type|), and a string (|source|):
+  Given an {{Element}} (|element|), a string (|type|), a <a for="/">policy</a>
+  (|policy|) and a string (|source|):
 
-  1.  If |type| is "`style`" or "`style attribute`":
+  1.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
+      on |type|.
 
-      1.  If the result of executing [[#match-element-to-source-list]] on
-          |element|, this directive's <a for="directive">value</a>, |type|,
-          and |source|, is "`Does Not Match`", return "`Blocked`".
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `style-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  Return "`Allowed`".
+  3.  If the result of executing [[#match-element-to-source-list]] on
+      |element|, this directive's <a for="directive">value</a>, |type|,
+      and |source|, is "`Does Not Match`", return "`Blocked`".
+
+  4.  Return "`Allowed`".
 
   This directive's <a for="directive">initialization</a> algorithm is as follows:
 
   ISSUE: Do something interesting to the execution context in order to lock down
   interesting CSSOM algorithms. I don't think CSSOM gives us any hooks here, so
   let's work with them to put something reasonable together.
+
+  <h4 id="directive-style-src-elem">`style-src-elem`</h4>
+
+  The syntax for the directive's name and value is described by the following ABNF:
+
+  <pre>
+    directive-name  = "style-src-elem"
+    directive-value = <a grammar>serialized-source-list</a>
+  </pre>
+
+  The <dfn export>style-src-elem</dfn> directive governs the behaviour of styles
+  except for styles defined in inline attributes.
+
+  <h5 algorithm id="style-src-elem-pre-request">
+    `style-src-elem` Pre-request Check
+  </h5>
+
+  This directive's <a for="directive">pre-request check</a> is as follows:
+
+  Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
+
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
+
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `style-src-elem` and |policy| is "`No`", return "`Allowed`".
+
+  3.  If the result of executing [[#match-nonce-to-source-list]] on
+      |request|'s <a for="request">cryptographic nonce metadata</a> and this
+      directive's <a for="directive">value</a> is "`Matches`", return
+      "`Allowed`".
+
+  4.  If the result of executing [[#match-request-to-source-list]] on
+      |request| and this directive's <a for="directive">value</a> is
+      "`Does Not Match`", return "`Blocked`".
+
+  5.  Return "`Allowed`".
+
+  <h5 algorithm id="style-src-elem-post-request">
+    `style-src-elem` Post-request Check
+  </h5>
+
+  This directive's <a for="directive">post-request check</a> is as follows:
+
+  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
+  <a for="/">policy</a> (|policy|):
+
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
+
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `style-src-elem` and |policy| is "`No`", return "`Allowed`".
+
+  3.  If the result of executing [[#match-nonce-to-source-list]] on
+      |request|'s <a for="request">cryptographic nonce metadata</a> and this
+      directive's <a for="directive">value</a> is "`Matches`", return
+      "`Allowed`".
+
+  4.  If the result of executing [[#match-response-to-source-list]] on
+      |response|, |request|, and this directive's
+      <a for="directive">value</a> is "`Does Not Match`", return
+      "`Blocked`".
+
+  5.  Return "`Allowed`".
+
+  <h5 algorithm id="style-src-elem-inline">
+    `style-src-elem` Inline Check
+  </h5>
+
+  This directive's <a for="directive">inline check</a> algorithm is as follows:
+
+  Given an {{Element}} (|element|), a string (|type|), a <a for="/">policy</a>
+  (|policy|) and a string (|source|):
+
+  1.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
+      on |type|.
+
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `style-src-elem` and |policy| is "`No`", return "`Allowed`".
+
+  3.  If the result of executing [[#match-element-to-source-list]] on
+      |element|, this directive's <a for="directive">value</a>, |type|,
+      and |source|, is "`Does Not Match`", return "`Blocked`".
+
+  4.  Return "`Allowed`".
+
+  <h4 id="directive-style-src-attr">`style-src-attr`</h4>
+
+  The syntax for the directive's name and value is described by the following ABNF:
+
+  <pre>
+    directive-name  = "style-src-attr"
+    directive-value = <a grammar>serialized-source-list</a>
+  </pre>
+
+  The <dfn export>style-src-attr</dfn> directive governs the behaviour of style attributes.
+
+  <h5 algorithm id="style-src-attr-inline">
+    `style-src-attr` Inline Check
+  </h5>
+
+  This directive's <a for="directive">inline check</a> algorithm is as follows:
+
+  Given an {{Element}} (|element|), a string (|type|), a <a for="/">policy</a>
+  (|policy|) and a string (|source|):
+
+  1.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
+      on |type|.
+
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `style-src-attr` and |policy| is "`No`", return "`Allowed`".
+
+  3.  If the result of executing [[#match-element-to-source-list]] on
+      |element|, this directive's <a for="directive">value</a>, |type|,
+      and |source|, is "`Does Not Match`", return "`Blocked`".
+
+  4.  Return "`Allowed`".
 
   <h4 id="directive-worker-src">`worker-src`</h4>
 
@@ -2929,16 +3128,17 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
 
-  1.  Assert: |policy| is unused.
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
 
-  2.  If |request|'s <a for="request">destination</a> is one of
-      "`serviceworker`", "`sharedworker`", or "`worker`":
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `worker-src` and |policy| is "`No`", return "`Allowed`".
 
-      4.  If the result of executing [[#match-request-to-source-list]] on
-          |request| and this directive's <a for="directive">value</a> is
-          "`Does Not Match`", return "`Blocked`".
+  3.  If the result of executing [[#match-request-to-source-list]] on
+      |request| and this directive's <a for="directive">value</a> is
+      "`Does Not Match`", return "`Blocked`".
 
-  3.  Return "`Allowed`".
+  4.  Return "`Allowed`".
 
   <h5 algorithm id="worker-src-post-request">
     `worker-src` Post-request Check
@@ -2949,17 +3149,18 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
   <a for="/">policy</a> (|policy|):
 
-  1.  Assert: |policy| is unused.
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
 
-  2.  If |request|'s <a for="request">destination</a> is one of
-      "`serviceworker`", "`sharedworker`", or "`worker`":
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `worker-src` and |policy| is "`No`", return "`Allowed`".
 
-      1.  If the result of executing [[#match-response-to-source-list]] on
-          |response|, |request|, and this directive's
-          <a for="directive">value</a> is "`Does Not Match`", return
-          "`Blocked`".
+  3.  If the result of executing [[#match-response-to-source-list]] on
+      |response|, |request|, and this directive's
+      <a for="directive">value</a> is "`Does Not Match`", return
+      "`Blocked`".
 
-  3.  Return "`Allowed`".
+  4.  Return "`Allowed`".
 
   <h3 id="directives-document">
     Document Directives
@@ -3560,7 +3761,102 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   check</a>, and <a for="directive">initialization</a> hooks in order to
   integrate themselves into Fetch and HTML.
 
-  <h3 id="algorithms">Matching Algorithms</h3>
+  <h3 id="matching-algorithms">Matching Algorithms</h3>
+
+  <h4 id="script-checks">Script directive checks</h4>
+
+  <h5 algorithm id="script-pre-request">
+    Script directives pre-request check
+  </h5>
+
+  Given a <a for="/">request</a> (|request|) and a <a>directive</a> (|directive|):
+
+  1.  If |request|'s <a for="request">destination</a> is <a for="request/destination">script-like</a>:
+
+      1.  If the result of executing [[#match-nonce-to-source-list]] on
+          |request|'s <a for="request">cryptographic nonce metadata</a> and this
+          directive's <a for="directive">value</a> is "`Matches`", return
+          "`Allowed`".
+
+      2.  Let |integrity expressions| be the set of <a>source expressions</a> in
+          |directive|'s <a for="directive">value</a> that match the
+          <a grammar>hash-source</a> grammar.
+
+      3.  If |integrity expressions| is not empty:
+
+          1.  Let |integrity sources| be the result of executing the algorithm
+              defined in [[SRI#parse-metadata]] on |request|'s
+              <a for="request">integrity metadata</a>. [[!SRI]]
+
+          2.  If |integrity sources| is "`no metadata`" or an empty set, skip
+              the remaining substeps.
+
+          3.  Let |bypass due to integrity match| be `true`.
+
+          4.  For each |source| in |integrity sources|:
+
+              1.  If |directive|'s <a for="directive">value</a> does not
+                  contain a <a>source expression</a> whose
+                  <a grammar>hash-algorithm</a> is a <a>case-sensitive</a> match
+                  for |source|'s `hash-algo` component, and whose
+                  <a grammar>base64-value</a> is a <a>case-sensitive</a> match
+                  for |source|'s `base64-value`, then set |bypass due to
+                  integrity match| to `false`.
+
+          5.  If |bypass due to integrity match| is `true`, return
+              "`Allowed`".
+
+          Note: Here, we verify only that the |request| contains a set of
+          <a for="request">integrity metadata</a> which is a subset of the
+          <a grammar>hash-source</a> <a>source expressions</a> specified by
+          |directive|. We rely on the browser's enforcement of Subresource
+          Integrity [[!SRI]] to block non-matching resources upon response.
+
+      3.  If |directive|'s <a for="directive">value</a> contains a <a>source
+          expression</a> that is an <a>ASCII case-insensitive</a> match for
+          the "<a grammar>`'strict-dynamic'`</a>" <a grammar>keyword-source</a>:
+
+          1.  If the |request|'s <a for="request">parser metadata</a> is
+              <a>"parser-inserted"</a>, return "`Blocked`".
+
+              Otherwise, return "`Allowed`".
+
+              Note: "<a grammar>`'strict-dynamic'`</a>" is explained in more detail
+              in [[#strict-dynamic-usage]].
+
+      4.  If the result of executing [[#match-request-to-source-list]] on
+          |request| and |directive|'s <a for="directive">value</a> is
+          "`Does Not Match`", return "`Blocked`".
+
+  2.  Return "`Allowed`".
+
+  <h5 algorithm id="script-post-request">
+    Script directives post-request check
+  </h5>
+
+  This directive's <a for="directive">post-request check</a> is as follows:
+
+  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
+  <a>directive</a> (|directive|):
+
+  1.  If |request|'s <a for="request">destination</a> is <a for="request/destination">script-like</a>:
+
+      1.  If the result of executing [[#match-nonce-to-source-list]] on
+          |request|'s <a for="request">cryptographic nonce metadata</a> and this
+          directive's <a for="directive">value</a> is "`Matches`", return
+          "`Allowed`".
+
+      2.  If |directive|'s <a for="directive">value</a> contains
+          "<a grammar>`'strict-dynamic'`</a>", and |request|'s
+          <a for="request">parser metadata</a> is not <a>"parser-inserted"</a>,
+          return "`Allowed`".
+
+      3.  If the result of executing [[#match-response-to-source-list]] on
+          |response|, |request|, and |directive|'s
+          <a for="directive">value</a> is "`Does Not Match`", return
+          "`Blocked`".
+
+  2.  Return "`Allowed`".
 
   <h4 id="matching-urls">URL Matching</h4>
 
@@ -3903,69 +4199,6 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     9.  Return "`Matches`".
   </ol>
 
-
-  <h5 id="effective-directive-for-a-request" algorithm>
-    Get the effective directive for |request|
-  </h5>
-
-  Each <a>fetch directive</a> controls a specific destination of <a for="/">request</a>. Given
-  a <a for="/">request</a> (|request|), the following algorithm returns either
-  `null` or the <a for="directive">name</a> of the request's
-  <dfn for="request" export>effective directive</dfn>:
-
-  1.  Switch on |request|'s <a for="request">destination</a>, and execute
-      the associated steps:
-
-      : ""
-      ::
-        1.  If the |request|'s <a for="request">initiator</a> is
-            the empty string, return `connect-src`.
-      : "`manifest`"
-      ::
-        1.  Return `manifest-src`.
-      : "`object`"
-      : "`embed`"
-      ::
-        1.  Return `object-src`.
-      : "`prefetch`"
-      : "`prerender`"
-      ::
-        1.  Return `prefetch-src`.
-      : "`document`"
-      ::
-        1.  If the |request|'s <a for="request">target browsing context</a>
-            is a <a>nested browsing context</a>, return `frame-src`.
-
-      : "`audio`"
-      : "`track`"
-      : "`video`"
-      ::
-        1.  Return `media-src`.
-
-      : "`font`"
-      ::
-        1.  Return `font-src`.
-
-      : "`image`"
-      ::
-        1.  Return `img-src`.
-
-      : "`style`"
-      ::
-        1.  Return `style-src`.
-
-      : "`script`"
-      : "`xslt`"
-      ::
-        1. Return `script-src`.
-
-      : "`sharedworker`"
-      : "`worker`"
-      ::
-        1. Return `worker-src`.
-
-  2.  Return `null`.
-
   <h4 id="matching-elements">Element Matching Algorithms</h4>
 
   <h5 id="is-element-nonceable" algorithm>
@@ -4151,6 +4384,190 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       navigations.
 
   6.  Return "`Does Not Match`".
+
+  <h3 id="directive-algorithms">Directive Algorithms</h3>
+
+  <h4 id="effective-directive-for-a-request" algorithm>
+    Get the effective directive for |request|
+  </h4>
+
+  Each <a>fetch directive</a> controls a specific destination of <a for="/">request</a>. Given
+  a <a for="/">request</a> (|request|), the following algorithm returns either
+  `null` or the <a for="directive">name</a> of the request's
+  <dfn for="request" export>effective directive</dfn>:
+
+  1.  If |request|'s <a for="request">initiator</a> is "`fetch`" or its
+      <a for="request">destination</a> is "", return `connect-src`.
+
+  2.  If |request|'s [=request/initiator=] is "`prefetch`" or "`prerender`",
+      return `prefetch-src`.
+
+  2.  Switch on |request|'s <a for="request">destination</a>, and execute
+      the associated steps:
+
+      : "`manifest`"
+      ::
+        1.  Return `manifest-src`.
+      : "`object`"
+      : "`embed`"
+      ::
+        1.  Return `object-src`.
+      : "`document`"
+      ::
+        1.  If the |request|'s <a for="request">target browsing context</a>
+            is a <a>nested browsing context</a>, return `frame-src`.
+
+      : "`audio`"
+      : "`track`"
+      : "`video`"
+      ::
+        1.  Return `media-src`.
+
+
+      : "`font`"
+      ::
+        1.  Return `font-src`.
+
+      : "`image`"
+      ::
+        1.  Return `img-src`.
+
+      : "`style`"
+      ::
+        1.  Return `style-src-elem`.
+
+      : "`script`"
+      : "`xslt`"
+      ::
+        1. Return `script-src-elem`.
+
+      : "`serviceworker`"
+      : "`sharedworker`"
+      : "`worker`"
+      ::
+        1. Return `worker-src`.
+
+  2.  Return `null`.
+
+  <h4 id="effective-directive-for-inline-check" algorithm>
+    Get the effective directive for inline checks
+  </h4>
+
+  Given a string (|type|), this algorithm returns the <a for="directive">name</a>
+  of the effective directive.
+
+  Note: While the <a for="request">effective directive</a> is only defined for
+  <a for="/">requests</a>, in this algorithm it is used similarly to mean
+  the directive that is most relevant to a particular type of inline check.
+
+  1.  Switch on |type|:
+
+      : "`script`"
+      : "`navigation`"
+      ::
+        1.  Return `script-src-elem`.
+      : "`script attribute`"
+      ::
+        1.  Return `script-src-attr`.
+      : "`style`"
+      ::
+        1.  Return `style-src-elem`.
+      : "`style attribute`"
+      ::
+        1.  Return `style-src-attr`.
+  2.  Return `null`.
+
+  <h4 id="directive-fallback-list" algorithm>
+    Get fetch directive fallback list
+  </h4>
+
+  Will return an <a>ordered set</a> of the fallback <a>directives</a> for a specific <a>directive</a>.
+  The returned <a>ordered set</a> is sorted from most relevant to least relevant
+  and it includes the effective directive itself.
+
+  Given a string (|directive name|):
+
+  1.  Switch on |directive name|:
+
+      : "`script-src-elem`"
+      ::
+        1.  `<< "script-src-elem", "script-src", "default-src" >>`.
+
+      : "`script-src-attr`"
+      ::
+        1.  `<< "script-src-attr", "script-src", "default-src" >>`.
+
+      : "`style-src-elem`"
+      ::
+        1.  `<< "style-src-elem", "style-src", "default-src" >>`.
+
+      : "`style-src-attr`"
+      ::
+        1.  `<< "style-src-attr", "style-src", "default-src" >>`.
+
+      : "`worker-src`"
+      ::
+        1.  `<< "worker-src", "child-src", "script-src", "default-src" >>`.
+
+      : "`connect-src`"
+      ::
+        1.  `<< "connect-src", "default-src" >>`.
+
+      : "`manifest-src`"
+      ::
+        1.  `<< "manifest-src", "default-src" >>`.
+
+      : "`prefetch-src`"
+      ::
+        1.  `<< "prefetch-src", "default-src" >>`.
+
+      : "`object-src`"
+      ::
+        1.  `<< "object-src", "default-src" >>`.
+
+      : "`frame-src`"
+      ::
+        1.  `<< "frame-src", "child-src", "default-src" >>`.
+
+      : "`media-src`"
+      ::
+        1.  `<< "media-src", "default-src" >>`.
+
+      : "`font-src`"
+      ::
+        1.  `<< "font-src", "default-src" >>`.
+
+      : "`image-src`"
+      ::
+        1.  `<< "image-src", "default-src" >>`.
+
+  2.  Return `<< >>`.
+
+  <h4 id="should-directive-execute" algorithm>
+    Should fetch directive execute
+  </h4>
+
+  This algorithm is used for <a>fetch directives</a> to decide whether a directive
+  should execute or defer to a different directive that is better suited.
+  For example: if the |effective directive name| is `worker-src` (meaning that
+  we are currently checking a worker request), a `default-src` directive
+  should not execute if a `worker-src` or `script-src` directive exists.
+
+  Given a string (|effective directive name|), a string (|directive name|) and
+  a <a for="/">policy</a> (|policy|):
+
+  1.  Let |directive fallback list| be the result of executing [[#directive-fallback-list]]
+      on |effective directive name|.
+
+  2.  For each |fallback directive| in |directive fallback list|:
+
+      1.  If |directive name| is |fallback directive|, Return "`Yes`".
+
+      2.  If |policy| contains a directive whose <a for="directive">name</a>
+          is |fallback directive|,  Return "`No`".
+
+  3.  Return "`No`".
+
 </section>
 
 <!-- Big text: Security -->
