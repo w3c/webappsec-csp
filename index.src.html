@@ -364,6 +364,11 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   13. Reports generated for inline violations will contain a <a for="violation">sample</a>
       attribute if the relevant directive contains the <a grammar>`'report-sample'`</a>
       expression.
+
+  14. Extra directives are added that provide granularity for script and style
+      attributes and elements. As such these new directives <a>`script-src-elem`</a>,
+      <a>`script-src-attr`</a>, <a>`style-src-elem`</a> and <a>`style-src-attr`</a>
+      are added.
 </section>
 
 <!-- Big Text: Framework -->
@@ -2021,10 +2026,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
                                <a>media-src</a> <a grammar>'self'</a>;
                                <a>prefetch-src</a> <a grammar>'self'</a>;
                                <a>object-src</a> <a grammar>'self'</a>;
-                               <a>script-src-elem</a> <a grammar>'self'</a>;
-                               <a>script-src-attr</a> <a grammar>'self'</a>;
-                               <a>style-src-elem</a> <a grammar>'self'</a>;
-                               <a>style-src-attr</a> <a grammar>'self'</a>;
+                               <a>script-src</a> <a grammar>'self'</a>;
+                               <a>style-src</a> <a grammar>'self'</a>;
                                <a>worker-src</a> <a grammar>'self'</a>
     </pre>
 
@@ -2037,7 +2040,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     script requests. That is, the following header:
 
     <pre>
-      <a>Content-Security-Policy</a>: <a>default-src</a> <a grammar>'self'</a>; <a>script-src-elem</a> https://example.com
+      <a>Content-Security-Policy</a>: <a>default-src</a> <a grammar>'self'</a>; <a>script-src</a> https://example.com
     </pre>
 
     will have the same behavior as the following header:
@@ -2051,10 +2054,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
                                <a>media-src</a> <a grammar>'self'</a>;
                                <a>prefetch-src</a> <a grammar>'self'</a>;
                                <a>object-src</a> <a grammar>'self'</a>;
-                               <a>script-src-elem</a> https://example.com;
-                               <a>script-src-attr</a> <a grammar>'self'</a>;
-                               <a>style-src-elem</a> <a grammar>'self'</a>;
-                               <a>style-src-attr</a> <a grammar>'self'</a>;
+                               <a>script-src</a> https://example.com;
+                               <a>style-src</a> <a grammar>'self'</a>;
                                <a>worker-src</a> <a grammar>'self'</a>
     </pre>
 
@@ -2754,9 +2755,12 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   </pre>
 
   The <dfn export>script-src-elem</dfn> directive applies to all script requests and inline checks
-  except for script attributes.
+  except for script attributes which are covered by `script-src-attr`.
+  While in most cases policy authors will find it easier to simply use `script-src`,
+  there are scenarios in which it it useful to be able to apply a policy that
+  does not apply to event handlers.
 
-  As such, the following differences exist when comparing to `script-src`:
+  The following differences exist when comparing to `script-src`:
   * `script-src-elem` only applies to "`script`" and "`navigation`" inline checks
     (and is ignored for "`script attribute`" inline checks).
   * `script-src-elem`'s <a for="directive">value</a> is not used for JavaScript
@@ -5072,7 +5076,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
         &lt;button id="action" onclick="doSubmit()"&gt;
       </pre>
 
-      Rather than reducing security by specifying "`'unsafe-inline'`", they decide to use
+      Rather than reducing security severly by specifying "`'unsafe-inline'`", they decide to use
       "`'unsafe-hashes'`" along with a hash source expression, as follows:
 
       <pre>
@@ -5088,6 +5092,24 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     `<script>transferAllMyMoney()</script>`. Developers should be careful to balance the risk of
     allowing specific scripts to execute against the deployment advantages that allowing inline
     event handlers might provide.
+
+    Using the new `script-src-elem` and `script-src-attr`, a policy can be written
+    that is compatible with CSP2 or older user agents while keeping the `'unsafe-hashes'`
+    features.
+
+    <div class="example">
+      MegaCorp, Inc. wants to ensure that the above policy does not break the site
+      if user agents don't implement CSP3 features. The presence of a
+      hash source disables inline behaviour in CSP2 so the `onclick` action is blocked.
+
+      In order to achieve this, the following policy is developed:
+      <pre>
+        <a>Content-Security-Policy</a>:
+          <a>script-src</a> <a grammar>'unsafe-inline'</a>;
+          <a>script-src-attr</a> <a grammar>'unsafe-hashes'</a> 'sha256-jzgBGA4UWFFmpOBq0JpdsySukE1FrEN5bUpoK8Z29fY=';
+          <a>script-src-elem</a> 'nonce-abc'; # or some other appropriate reasonable policy.
+      </pre>
+    </div>
   </section>
 
   <section>
