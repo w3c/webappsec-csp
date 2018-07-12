@@ -2021,8 +2021,10 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
                                <a>media-src</a> <a grammar>'self'</a>;
                                <a>prefetch-src</a> <a grammar>'self'</a>;
                                <a>object-src</a> <a grammar>'self'</a>;
-                               <a>script-src</a> <a grammar>'self'</a>;
-                               <a>style-src</a> <a grammar>'self'</a>;
+                               <a>script-src-elem</a> <a grammar>'self'</a>;
+                               <a>script-src-attr</a> <a grammar>'self'</a>;
+                               <a>style-src-elem</a> <a grammar>'self'</a>;
+                               <a>style-src-attr</a> <a grammar>'self'</a>;
                                <a>worker-src</a> <a grammar>'self'</a>
     </pre>
 
@@ -2035,7 +2037,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     script requests. That is, the following header:
 
     <pre>
-      <a>Content-Security-Policy</a>: <a>default-src</a> <a grammar>'self'</a>; <a>script-src</a> https://example.com
+      <a>Content-Security-Policy</a>: <a>default-src</a> <a grammar>'self'</a>; <a>script-src-elem</a> https://example.com
     </pre>
 
     will have the same behavior as the following header:
@@ -2049,8 +2051,10 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
                                <a>media-src</a> <a grammar>'self'</a>;
                                <a>prefetch-src</a> <a grammar>'self'</a>;
                                <a>object-src</a> <a grammar>'self'</a>;
-                               <a>script-src</a> https://example.com;
-                               <a>style-src</a> <a grammar>'self'</a>;
+                               <a>script-src-elem</a> https://example.com;
+                               <a>script-src-attr</a> <a grammar>'self'</a>;
+                               <a>style-src-elem</a> <a grammar>'self'</a>;
+                               <a>style-src-attr</a> <a grammar>'self'</a>;
                                <a>worker-src</a> <a grammar>'self'</a>
     </pre>
 
@@ -2732,6 +2736,118 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   5.  Return "`Allowed`".
 
+  <h4 id="directive-script-src-elem">`script-src-elem`</h4>
+
+  The syntax for the directive's name and value is described by the following ABNF:
+
+  <pre>
+    directive-name  = "script-src-elem"
+    directive-value = <a grammar>serialized-source-list</a>
+  </pre>
+
+  The <dfn export>script-src-elem</dfn> directive applies to all script requests and inline checks
+  except for script attributes.
+
+  As such, the following differences exist when comparing to `script-src`:
+  * `script-src-elem` only applies to "`script`" and "`navigation`" inline checks
+    (and is ignored for "`script attribute`" inline checks).
+  * `script-src-elem`'s <a for="directive">value</a> is not used for JavaScript
+    execution sink checks that are gated on the "`unsafe-eval`" check.
+  * `script-src-elem` is not used as a fallback for the `worker-src` directive.
+    The `worker-src` checks still fall back on the `script-src` directive.
+
+  <h5 algorithm id="script-src-elem-pre-request">
+    `script-src-elem` Pre-request check
+  </h5>
+
+  This directive's <a for="directive">pre-request check</a> is as follows:
+
+  Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
+
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
+
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `script-src-elem` and |policy| is "`No`", return "`Allowed`".
+
+  3.  Return the result of executing [[#script-pre-request]] on |request| and this directive.
+
+  <h5 algorithm id="script-src-elem-post-request">
+    `script-src-elem` Post-request check
+  </h5>
+
+  This directive's <a for="directive">post-request check</a> is as follows:
+
+  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
+  <a for="/">policy</a> (|policy|):
+
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
+
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `script-src-elem` and |policy| is "`No`", return "`Allowed`".
+
+  3.  Return the result of executing [[#script-post-request]] on |request|,
+      |response| and this directive.
+
+  <h5 algorithm id="script-src-elem-inline">
+    `script-src-elem` Inline Check
+  </h5>
+
+  This directive's <a for="directive">inline check</a> algorithm is as follows:
+
+  Given an {{Element}} (|element|), a string (|type|), a <a for="/">policy</a>
+  (|policy|) and a string (|source|):
+
+  1.  Assert: |element| is not `null` or |type| is "`navigation`".
+
+  2.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
+      on |type|.
+
+  3.  If the result of executing [[#should-directive-execute]] on |name|,
+      `script-src-elem` and |policy| is "`No`", return "`Allowed`".
+
+  4.  If the result of executing [[#match-element-to-source-list]] on
+      |element|, this directive's <a for="directive">value</a>, |type|,
+      and |source|, is "`Does Not Match`", return "`Blocked`".
+
+  5.  Return "`Allowed`".
+
+  <h4 id="directive-script-src-attr">`script-src-attr`</h4>
+
+  The syntax for the directive's name and value is described by the following ABNF:
+
+  <pre>
+    directive-name  = "script-src-attr"
+    directive-value = <a grammar>serialized-source-list</a>
+  </pre>
+
+  The <dfn export>script-src-attr</dfn> directive applies to event handlers and, if present,
+  it will superseed the `script-src` directive for relevant checks.
+
+  <h5 algorithm id="script-src-attr-inline">
+    `script-src-attr` Inline Check
+  </h5>
+
+  This directive's <a for="directive">inline check</a> algorithm is as follows:
+
+  Given an {{Element}} (|element|), a string (|type|), a <a for="/">policy</a>
+  (|policy|) and a string (|source|):
+
+  1.  Assert: |element| is not `null` or |type| is "`navigation`".
+
+  2.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
+      on |type|.
+
+  3.  If the result of executing [[#should-directive-execute]] on |name|,
+      `script-src-attr` and |policy| is "`No`", return "`Allowed`".
+
+  4.  If the result of executing [[#match-element-to-source-list]] on
+      |element|, this directive's <a for="directive">value</a>, |type|,
+      and |source|, is "`Does Not Match`", return "`Blocked`".
+
+  5.  Return "`Allowed`".
+
   <h4 id="directive-style-src">`style-src`</h4>
 
   The <dfn export>style-src</dfn> directive restricts the locations from which style
@@ -2856,6 +2972,123 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   ISSUE: Do something interesting to the execution context in order to lock down
   interesting CSSOM algorithms. I don't think CSSOM gives us any hooks here, so
   let's work with them to put something reasonable together.
+
+  <h4 id="directive-style-src-elem">`style-src-elem`</h4>
+
+  The syntax for the directive's name and value is described by the following ABNF:
+
+  <pre>
+    directive-name  = "style-src-elem"
+    directive-value = <a grammar>serialized-source-list</a>
+  </pre>
+
+  The <dfn export>style-src-elem</dfn> directive governs the behaviour of styles
+  except for styles defined in inline attributes.
+
+  <h5 algorithm id="style-src-elem-pre-request">
+    `style-src-elem` Pre-request Check
+  </h5>
+
+  This directive's <a for="directive">pre-request check</a> is as follows:
+
+  Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
+
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
+
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `style-src-elem` and |policy| is "`No`", return "`Allowed`".
+
+  3.  If the result of executing [[#match-nonce-to-source-list]] on
+      |request|'s <a for="request">cryptographic nonce metadata</a> and this
+      directive's <a for="directive">value</a> is "`Matches`", return
+      "`Allowed`".
+
+  4.  If the result of executing [[#match-request-to-source-list]] on
+      |request| and this directive's <a for="directive">value</a> is
+      "`Does Not Match`", return "`Blocked`".
+
+  5.  Return "`Allowed`".
+
+  <h5 algorithm id="style-src-elem-post-request">
+    `style-src-elem` Post-request Check
+  </h5>
+
+  This directive's <a for="directive">post-request check</a> is as follows:
+
+  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
+  <a for="/">policy</a> (|policy|):
+
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
+
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `style-src-elem` and |policy| is "`No`", return "`Allowed`".
+
+  3.  If the result of executing [[#match-nonce-to-source-list]] on
+      |request|'s <a for="request">cryptographic nonce metadata</a> and this
+      directive's <a for="directive">value</a> is "`Matches`", return
+      "`Allowed`".
+
+  4.  If the result of executing [[#match-response-to-source-list]] on
+      |response|, |request|, and this directive's
+      <a for="directive">value</a> is "`Does Not Match`", return
+      "`Blocked`".
+
+  5.  Return "`Allowed`".
+
+  <h5 algorithm id="style-src-elem-inline">
+    `style-src-elem` Inline Check
+  </h5>
+
+  This directive's <a for="directive">inline check</a> algorithm is as follows:
+
+  Given an {{Element}} (|element|), a string (|type|), a <a for="/">policy</a>
+  (|policy|) and a string (|source|):
+
+  1.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
+      on |type|.
+
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `style-src-elem` and |policy| is "`No`", return "`Allowed`".
+
+  3.  If the result of executing [[#match-element-to-source-list]] on
+      |element|, this directive's <a for="directive">value</a>, |type|,
+      and |source|, is "`Does Not Match`", return "`Blocked`".
+
+  4.  Return "`Allowed`".
+
+  <h4 id="directive-style-src-attr">`style-src-attr`</h4>
+
+  The syntax for the directive's name and value is described by the following ABNF:
+
+  <pre>
+    directive-name  = "style-src-attr"
+    directive-value = <a grammar>serialized-source-list</a>
+  </pre>
+
+  The <dfn export>style-src-attr</dfn> directive governs the behaviour of style attributes.
+
+  <h5 algorithm id="style-src-attr-inline">
+    `style-src-attr` Inline Check
+  </h5>
+
+  This directive's <a for="directive">inline check</a> algorithm is as follows:
+
+  Given an {{Element}} (|element|), a string (|type|), a <a for="/">policy</a>
+  (|policy|) and a string (|source|):
+
+  1.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
+      on |type|.
+
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `style-src-attr` and |policy| is "`No`", return "`Allowed`".
+
+  3.  If the result of executing [[#match-element-to-source-list]] on
+      |element|, this directive's <a for="directive">value</a>, |type|,
+      and |source|, is "`Does Not Match`", return "`Blocked`".
+
+  4.  Return "`Allowed`".
 
   <h4 id="directive-worker-src">`worker-src`</h4>
 
@@ -4201,12 +4434,12 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
       : "`style`"
       ::
-        1.  Return `style-src`.
+        1.  Return `style-src-elem`.
 
       : "`script`"
       : "`xslt`"
       ::
-        1. Return `script-src`.
+        1. Return `script-src-elem`.
 
       : "`serviceworker`"
       : "`sharedworker`"
@@ -4231,15 +4464,17 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
       : "`script`"
       : "`navigation`"
+      ::
+        1.  Return `script-src-elem`.
       : "`script attribute`"
       ::
-        1.  Return `script-src`.
-
+        1.  Return `script-src-attr`.
       : "`style`"
+      ::
+        1.  Return `style-src-elem`.
       : "`style attribute`"
       ::
-        1.  Return `style-src`.
-
+        1.  Return `style-src-attr`.
   2.  Return `null`.
 
   <h4 id="directive-fallback-list" algorithm>
@@ -4254,13 +4489,21 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   1.  Switch on |directive name|:
 
-      : "`script-src`"
+      : "`script-src-elem`"
       ::
-        1.  `<< script-src", "default-src" >>`.
+        1.  `<< "script-src-elem", "script-src", "default-src" >>`.
 
-      : "`style-src`"
+      : "`script-src-attr`"
       ::
-        1.  `<< "style-src", "default-src" >>`.
+        1.  `<< "script-src-attr", "script-src", "default-src" >>`.
+
+      : "`style-src-elem`"
+      ::
+        1.  `<< "style-src-elem", "style-src", "default-src" >>`.
+
+      : "`style-src-attr`"
+      ::
+        1.  `<< "style-src-attr", "style-src", "default-src" >>`.
 
       : "`worker-src`"
       ::
