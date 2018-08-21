@@ -2648,6 +2648,12 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   [[XSLT]] which can trigger script execution. The syntax for the directive's
   name and value is described by the following ABNF:
 
+  The `script-src` directive acts as a default fallback for all <a for="request/destination">script-like</a>
+  destinations. Unless granularity is desired `script-src` should
+  be used in favor of <a>`script-src-attr`</a> and <a>`script-src-elem`</a>
+  as in most situations there is no particular reason to have separate lists of
+  permissions for inline event handlers and <{script}> elements.
+
   <pre>
     directive-name  = "script-src"
     directive-value = <a grammar>serialized-source-list</a>
@@ -2676,6 +2682,9 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
       Note: If a user agent implements non-standard sinks like `setImmediate()`
       or `execScript()`, they SHOULD also be gated on "`unsafe-eval`".
+      Note: Since "`unsafe-eval`" acts as a global page flag, <a>`script-src-attr`</a>
+      and <a>`script-src-elem`</a> are not used when performing this check, instead
+      `script-src` (or it's fallback directive) is always used.
 
   5.  Navigation to `javascript:` URLs MUST pass through [[#script-src-inline]].
 
@@ -2745,12 +2754,13 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     directive-value = <a grammar>serialized-source-list</a>
   </pre>
 
-  The <dfn export>script-src-elem</dfn> directive applies to all script requests and inline checks
-  except for script attributes.
+  The <dfn export>script-src-elem</dfn> directive applies to all script requests and
+  script blocks. Attributes that execute script (inline event handlers) are
+  controlled via <a>`script-src-attr`</a>.
 
   As such, the following differences exist when comparing to `script-src`:
-  * `script-src-elem` only applies to "`script`" and "`navigation`" inline checks
-    (and is ignored for "`script attribute`" inline checks).
+  * `script-src-elem` applies to inline checks whose `|type|` is "`script`" and
+    "`navigation`" (and is ignored for inline checks whose `|type|` is "`script attribute`").
   * `script-src-elem`'s <a for="directive">value</a> is not used for JavaScript
     execution sink checks that are gated on the "`unsafe-eval`" check.
   * `script-src-elem` is not used as a fallback for the `worker-src` directive.
@@ -2805,11 +2815,11 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       on |type|.
 
   3.  If the result of executing [[#should-directive-execute]] on |name|,
-      `script-src-elem` and |policy| is "`No`", return "`Allowed`".
+      `script-src-elem`, and |policy| is "`No`", return "`Allowed`".
 
   4.  If the result of executing [[#match-element-to-source-list]] on
       |element|, this directive's <a for="directive">value</a>, |type|,
-      and |source|, is "`Does Not Match`", return "`Blocked`".
+      and |source| is "`Does Not Match`", return "`Blocked`".
 
   5.  Return "`Allowed`".
 
@@ -2823,7 +2833,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   </pre>
 
   The <dfn export>script-src-attr</dfn> directive applies to event handlers and, if present,
-  it will superseed the `script-src` directive for relevant checks.
+  it will override the `script-src` directive for relevant checks.
 
   <h5 algorithm id="script-src-attr-inline">
     `script-src-attr` Inline Check

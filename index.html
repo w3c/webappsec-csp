@@ -1214,7 +1214,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version a816d78e14132d4d4d2ee44ccaf1b8bc90ac75d5" name="generator">
   <link href="https://www.w3.org/TR/CSP3/" rel="canonical">
-  <meta content="83823d1906d9181ae6b5eaed71f0078739adc999" name="document-revision">
+  <meta content="04d86cf10d8ac56f0e96f814883cbcfff596312c" name="document-revision">
 <style>
   ul.toc ul ul ul {
     margin: 0 0 0 2em;
@@ -1505,7 +1505,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1>Content Security Policy Level 3</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2018-08-17">17 August 2018</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2018-08-21">21 August 2018</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -3771,6 +3771,9 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
     <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="script-src">script-src</dfn> directive restricts the locations from which scripts
   may be executed. This includes not only URLs loaded directly into <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script③">script</a></code> elements, but also things like inline script blocks and XSLT stylesheets <a data-link-type="biblio" href="#biblio-xslt">[XSLT]</a> which can trigger script execution. The syntax for the directive’s
   name and value is described by the following ABNF:</p>
+    <p>The <code>script-src</code> directive acts as a default fallback for all <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#request-destination-script-like" id="ref-for-request-destination-script-like">script-like</a> destinations. Unless granularity is desired <code>script-src</code> should
+  be used in favor of <a data-link-type="dfn" href="#script-src-attr" id="ref-for-script-src-attr②"><code>script-src-attr</code></a> and <a data-link-type="dfn" href="#script-src-elem" id="ref-for-script-src-elem③"><code>script-src-elem</code></a> as in most situations there is no particular reason to have separate lists of
+  permissions for inline event handlers and <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script④">script</a></code> elements.</p>
 <pre>directive-name  = "script-src"
 directive-value = <a data-link-type="grammar" href="#grammardef-serialized-source-list" id="ref-for-grammardef-serialized-source-list①⓪">serialized-source-list</a>
 </pre>
@@ -3782,7 +3785,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <p>Script <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response②⑦">responses</a> MUST pass through <a href="#should-block-response">§4.1.4 Should response to request be blocked by Content
     Security Policy?</a>.</p>
      <li data-md>
-      <p>Inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script④">script</a></code> blocks MUST pass through <a href="#should-block-inline">§4.2.4 Should element’s inline type behavior be blocked by Content Security Policy?</a>. Their
+      <p>Inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script⑤">script</a></code> blocks MUST pass through <a href="#should-block-inline">§4.2.4 Should element’s inline type behavior be blocked by Content Security Policy?</a>. Their
   behavior will be blocked unless every policy allows inline script, either
   implicitly by not specifying a <code>script-src</code> (or <code>default-src</code>) directive,
   or explicitly, by specifying "<code>unsafe-inline</code>", a <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source②">nonce-source</a> or a <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source②">hash-source</a> that matches
@@ -3800,7 +3803,8 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
        <li data-md>
         <p><code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/timers-and-user-prompts.html#dom-setinterval" id="ref-for-dom-setinterval">setInterval()</a></code> with an initial argument which is not callable.</p>
       </ul>
-      <p class="note" role="note"><span>Note:</span> If a user agent implements non-standard sinks like <code>setImmediate()</code> or <code>execScript()</code>, they SHOULD also be gated on "<code>unsafe-eval</code>".</p>
+      <p class="note" role="note"><span>Note:</span> If a user agent implements non-standard sinks like <code>setImmediate()</code> or <code>execScript()</code>, they SHOULD also be gated on "<code>unsafe-eval</code>".
+  Note: Since "<code>unsafe-eval</code>" acts as a global page flag, <a data-link-type="dfn" href="#script-src-attr" id="ref-for-script-src-attr③"><code>script-src-attr</code></a> and <a data-link-type="dfn" href="#script-src-elem" id="ref-for-script-src-elem④"><code>script-src-elem</code></a> are not used when performing this check, instead <code>script-src</code> (or it’s fallback directive) is always used.</p>
      <li data-md>
       <p>Navigation to <code>javascript:</code> URLs MUST pass through <a href="#script-src-inline">§6.1.11.3 script-src Inline Check</a>.</p>
     </ol>
@@ -3847,13 +3851,14 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 <pre>directive-name  = "script-src-elem"
 directive-value = <a data-link-type="grammar" href="#grammardef-serialized-source-list" id="ref-for-grammardef-serialized-source-list①①">serialized-source-list</a>
 </pre>
-    <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="script-src-elem">script-src-elem</dfn> directive applies to all script requests and inline checks
-  except for script attributes.</p>
+    <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="script-src-elem">script-src-elem</dfn> directive applies to all script requests and
+  script blocks. Attributes that execute script (inline event handlers) are
+  controlled via <a data-link-type="dfn" href="#script-src-attr" id="ref-for-script-src-attr④"><code>script-src-attr</code></a>.</p>
     <p>As such, the following differences exist when comparing to <code>script-src</code>:</p>
     <ul>
      <li data-md>
-      <p><code>script-src-elem</code> only applies to "<code>script</code>" and "<code>navigation</code>" inline checks
-(and is ignored for "<code>script attribute</code>" inline checks).</p>
+      <p><code>script-src-elem</code> applies to inline checks whose <code>|type|</code> is "<code>script</code>" and
+"<code>navigation</code>" (and is ignored for inline checks whose <code>|type|</code> is "<code>script attribute</code>").</p>
      <li data-md>
       <p><code>script-src-elem</code>'s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value③①">value</a> is not used for JavaScript
 execution sink checks that are gated on the "<code>unsafe-eval</code>" check.</p>
@@ -3892,10 +3897,10 @@ The <code>worker-src</code> checks still fall back on the <code>script-src</code
      <li data-md>
       <p>Let <var>name</var> be the result of executing <a href="#effective-directive-for-inline-check">§6.7.2 Get the effective directive for inline checks</a> on <var>type</var>.</p>
      <li data-md>
-      <p>If the result of executing <a href="#should-directive-execute">§6.7.4 Should fetch directive execute</a> on <var>name</var>, <code>script-src-elem</code> and <var>policy</var> is "<code>No</code>", return "<code>Allowed</code>".</p>
+      <p>If the result of executing <a href="#should-directive-execute">§6.7.4 Should fetch directive execute</a> on <var>name</var>, <code>script-src-elem</code>, and <var>policy</var> is "<code>No</code>", return "<code>Allowed</code>".</p>
      <li data-md>
       <p>If the result of executing <a href="#match-element-to-source-list">§6.6.3.3 Does element match source list for type and source?</a> on <var>element</var>, this directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value③②">value</a>, <var>type</var>,
-  and <var>source</var>, is "<code>Does Not Match</code>", return "<code>Blocked</code>".</p>
+  and <var>source</var> is "<code>Does Not Match</code>", return "<code>Blocked</code>".</p>
      <li data-md>
       <p>Return "<code>Allowed</code>".</p>
     </ol>
@@ -3905,7 +3910,7 @@ The <code>worker-src</code> checks still fall back on the <code>script-src</code
 directive-value = <a data-link-type="grammar" href="#grammardef-serialized-source-list" id="ref-for-grammardef-serialized-source-list①②">serialized-source-list</a>
 </pre>
     <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="script-src-attr">script-src-attr</dfn> directive applies to event handlers and, if present,
-  it will superseed the <code>script-src</code> directive for relevant checks.</p>
+  it will override the <code>script-src</code> directive for relevant checks.</p>
     <h5 class="heading settled algorithm" data-algorithm="script-src-attr Inline Check" data-level="6.1.13.1" id="script-src-attr-inline"><span class="secno">6.1.13.1. </span><span class="content"> <code>script-src-attr</code> Inline Check </span><a class="self-link" href="#script-src-attr-inline"></a></h5>
     <p>This directive’s <a data-link-type="dfn" href="#directive-inline-check" id="ref-for-directive-inline-check⑥">inline check</a> algorithm is as follows:</p>
     <p>Given an <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element⑤">Element</a></code> (<var>element</var>), a string (<var>type</var>), a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object⑤⑧">policy</a> (<var>policy</var>) and a string (<var>source</var>):</p>
@@ -4577,7 +4582,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
     <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request⑤⑨">request</a> (<var>request</var>) and a <a data-link-type="dfn" href="#directives" id="ref-for-directives②⑨">directive</a> (<var>directive</var>):</p>
     <ol>
      <li data-md>
-      <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-destination" id="ref-for-concept-request-destination⑥">destination</a> is <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#request-destination-script-like" id="ref-for-request-destination-script-like">script-like</a>:</p>
+      <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-destination" id="ref-for-concept-request-destination⑥">destination</a> is <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#request-destination-script-like" id="ref-for-request-destination-script-like①">script-like</a>:</p>
       <ol>
        <li data-md>
         <p>If the result of executing <a href="#match-nonce-to-source-list">§6.6.2.2 Does nonce match source list?</a> on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-nonce-metadata" id="ref-for-concept-request-nonce-metadata⑤">cryptographic nonce metadata</a> and this
@@ -4635,7 +4640,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
     <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request⑥⓪">request</a> (<var>request</var>), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response④②">response</a> (<var>response</var>), and a <a data-link-type="dfn" href="#directives" id="ref-for-directives③⓪">directive</a> (<var>directive</var>):</p>
     <ol>
      <li data-md>
-      <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-destination" id="ref-for-concept-request-destination⑦">destination</a> is <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#request-destination-script-like" id="ref-for-request-destination-script-like①">script-like</a>:</p>
+      <p>If <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-destination" id="ref-for-concept-request-destination⑦">destination</a> is <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#request-destination-script-like" id="ref-for-request-destination-script-like②">script-like</a>:</p>
       <ol>
        <li data-md>
         <p>If the result of executing <a href="#match-nonce-to-source-list">§6.6.2.2 Does nonce match source list?</a> on <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-nonce-metadata" id="ref-for-concept-request-nonce-metadata⑥">cryptographic nonce metadata</a> and this
@@ -4948,7 +4953,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
      <li data-md>
       <p>If <var>element</var> does not have an attribute named "<code>nonce</code>", return "<code>Not Nonceable</code>".</p>
      <li data-md>
-      <p>If <var>element</var> is a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script⑤">script</a></code> element, then for each <var>attribute</var> in <var>element</var>:</p>
+      <p>If <var>element</var> is a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script⑥">script</a></code> element, then for each <var>attribute</var> in <var>element</var>:</p>
       <ol>
        <li data-md>
         <p>If <var>attribute</var>’s name is an <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ascii-case-insensitive" id="ref-for-ascii-case-insensitive①⑧">ASCII case-insensitive</a> match for
@@ -4972,7 +4977,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
   in order to load injected script. It is fairly expensive, however, as it
   requires that we walk through all attributes and their values in order to
   determine whether the script should execute. Here, we try to minimize the
-  impact by doing this check only for <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script⑥">script</a></code> elements when a nonce is
+  impact by doing this check only for <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script⑦">script</a></code> elements when a nonce is
   present, but we should probably consider this algorithm as "at risk" until
   we know its impact. <a href="https://github.com/w3c/webappsec-csp/issues/98">&lt;https://github.com/w3c/webappsec-csp/issues/98></a></p>
     <h5 class="heading settled algorithm" data-algorithm="Does a source list allow all inline behavior for type?" data-level="6.6.3.2" id="allow-all-inline"><span class="secno">6.6.3.2. </span><span class="content"> Does a source list allow all inline behavior for <var>type</var>? </span><a class="self-link" href="#allow-all-inline"></a></h5>
@@ -5040,7 +5045,7 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
   and <var>element</var> has a <code class="idl"><a data-link-type="idl">nonce</a></code> attribute whose value is a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#case-sensitive" id="ref-for-case-sensitive⑤">case-sensitive</a> match for <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-base64-value" id="ref-for-grammardef-base64-value⑥"><code>base64-value</code></a> part, return "<code>Matches</code>".</p>
         </ol>
       </ol>
-      <p class="note" role="note"><span>Note:</span> Nonces only apply to inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script⑦">script</a></code> and inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-style-element" id="ref-for-the-style-element①">style</a></code>, not to
+      <p class="note" role="note"><span>Note:</span> Nonces only apply to inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script⑧">script</a></code> and inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-style-element" id="ref-for-the-style-element①">style</a></code>, not to
   attributes of either element or to <code>javascript:</code> navigations.</p>
      <li data-md>
       <p>Let <var>unsafe-hashes flag</var> be <code>false</code>.</p>
@@ -5087,7 +5092,7 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
           </ol>
         </ol>
       </ol>
-      <p class="note" role="note"><span>Note:</span> Hashes apply to inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script⑧">script</a></code> and inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-style-element" id="ref-for-the-style-element②">style</a></code>. If the
+      <p class="note" role="note"><span>Note:</span> Hashes apply to inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script⑨">script</a></code> and inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-style-element" id="ref-for-the-style-element②">style</a></code>. If the
   "<a data-link-type="grammar" href="#grammardef-unsafe-hashes" id="ref-for-grammardef-unsafe-hashes①"><code>'unsafe-hashes'</code></a>" source expression is present,
   they will also apply to event handlers, style attributes and <code>javascript:</code> navigations.</p>
      <li data-md>
@@ -5221,79 +5226,79 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
        <dd data-md>
         <ol>
          <li data-md>
-          <p><code>&lt;&lt; "script-src-elem", "script-src", "default-src" >></code>.</p>
+          <p>Return <code>&lt;&lt; "script-src-elem", "script-src", "default-src" >></code>.</p>
         </ol>
        <dt data-md>"<code>script-src-attr</code>"
        <dd data-md>
         <ol>
          <li data-md>
-          <p><code>&lt;&lt; "script-src-attr", "script-src", "default-src" >></code>.</p>
+          <p>Return <code>&lt;&lt; "script-src-attr", "script-src", "default-src" >></code>.</p>
         </ol>
        <dt data-md>"<code>style-src-elem</code>"
        <dd data-md>
         <ol>
          <li data-md>
-          <p><code>&lt;&lt; "style-src-elem", "style-src", "default-src" >></code>.</p>
+          <p>Return <code>&lt;&lt; "style-src-elem", "style-src", "default-src" >></code>.</p>
         </ol>
        <dt data-md>"<code>style-src-attr</code>"
        <dd data-md>
         <ol>
          <li data-md>
-          <p><code>&lt;&lt; "style-src-attr", "style-src", "default-src" >></code>.</p>
+          <p>Return <code>&lt;&lt; "style-src-attr", "style-src", "default-src" >></code>.</p>
         </ol>
        <dt data-md>"<code>worker-src</code>"
        <dd data-md>
         <ol>
          <li data-md>
-          <p><code>&lt;&lt; "worker-src", "child-src", "script-src", "default-src" >></code>.</p>
+          <p>Return <code>&lt;&lt; "worker-src", "child-src", "script-src", "default-src" >></code>.</p>
         </ol>
        <dt data-md>"<code>connect-src</code>"
        <dd data-md>
         <ol>
          <li data-md>
-          <p><code>&lt;&lt; "connect-src", "default-src" >></code>.</p>
+          <p>Return <code>&lt;&lt; "connect-src", "default-src" >></code>.</p>
         </ol>
        <dt data-md>"<code>manifest-src</code>"
        <dd data-md>
         <ol>
          <li data-md>
-          <p><code>&lt;&lt; "manifest-src", "default-src" >></code>.</p>
+          <p>Return <code>&lt;&lt; "manifest-src", "default-src" >></code>.</p>
         </ol>
        <dt data-md>"<code>prefetch-src</code>"
        <dd data-md>
         <ol>
          <li data-md>
-          <p><code>&lt;&lt; "prefetch-src", "default-src" >></code>.</p>
+          <p>Return <code>&lt;&lt; "prefetch-src", "default-src" >></code>.</p>
         </ol>
        <dt data-md>"<code>object-src</code>"
        <dd data-md>
         <ol>
          <li data-md>
-          <p><code>&lt;&lt; "object-src", "default-src" >></code>.</p>
+          <p>Return <code>&lt;&lt; "object-src", "default-src" >></code>.</p>
         </ol>
        <dt data-md>"<code>frame-src</code>"
        <dd data-md>
         <ol>
          <li data-md>
-          <p><code>&lt;&lt; "frame-src", "child-src", "default-src" >></code>.</p>
+          <p>Return <code>&lt;&lt; "frame-src", "child-src", "default-src" >></code>.</p>
         </ol>
        <dt data-md>"<code>media-src</code>"
        <dd data-md>
         <ol>
          <li data-md>
-          <p><code>&lt;&lt; "media-src", "default-src" >></code>.</p>
+          <p>Return <code>&lt;&lt; "media-src", "default-src" >></code>.</p>
         </ol>
        <dt data-md>"<code>font-src</code>"
        <dd data-md>
         <ol>
          <li data-md>
-          <p><code>&lt;&lt; "font-src", "default-src" >></code>.</p>
+          <p>Return <code>&lt;&lt; "font-src", "default-src" >></code>.</p>
         </ol>
        <dt data-md>"<code>image-src</code>"
        <dd data-md>
         <ol>
          <li data-md>
-          <p><code>&lt;&lt; "image-src", "default-src" >></code>.</p>
+          <p>Return <code>&lt;&lt; "image-src", "default-src" >></code>.</p>
         </ol>
       </dl>
      <li data-md>
@@ -5342,7 +5347,7 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
   (or hashes) instead.</p>
     <h3 class="heading settled" data-level="7.2" id="security-nonce-stealing"><span class="secno">7.2. </span><span class="content">Nonce Stealing</span><a class="self-link" href="#security-nonce-stealing"></a></h3>
     <p>Dangling markup attacks such as those discussed in <a data-link-type="biblio" href="#biblio-filedescriptor-2015">[FILEDESCRIPTOR-2015]</a> can be used to repurpose a page’s legitimate nonces for injections. For
-  example, given an injection point before a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script⑨">script</a></code> element:</p>
+  example, given an injection point before a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⓪">script</a></code> element:</p>
 <pre class="highlight"><c- p>&lt;</c-><c- f>p</c-><c- p>></c->Hello, [INJECTION POINT]<c- p>&lt;/</c-><c- f>p</c-><c- p>></c->
 <c- p>&lt;</c-><c- f>script</c-> <c- e>nonce</c-><c- o>=</c-><c- s>abc</c-> <c- e>src</c-><c- o>=</c-><c- s>/good.js</c-><c- p>>&lt;/</c-><c- f>script</c-><c- p>></c->
 </pre>
@@ -5351,11 +5356,11 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
 <pre class="highlight"><c- p>&lt;</c-><c- f>p</c-><c- p>></c->Hello, <c- p>&lt;</c-><c- f>script</c-> <c- e>src</c-><c- o>=</c-><c- s>'https://evil.com/evil.js'</c-> &lt;/<c- e>p</c-><c- p>></c->
 <c- o>&lt;</c->script nonce<c- o>=</c->abc src<c- o>=</c->/good.js><c- p>&lt;/</c-><c- f>script</c-><c- p>></c->
 </pre>
-    <p>It will then parse that code, ending up with a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⓪">script</a></code> element with a <code>src</code> attribute pointing to a malicious payload, an attribute named <code>&lt;/p></code>,
+    <p>It will then parse that code, ending up with a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①①">script</a></code> element with a <code>src</code> attribute pointing to a malicious payload, an attribute named <code>&lt;/p></code>,
   an attribute named "<code>&lt;script</code>", a <code>nonce</code> attribute, and a
   second <code>src</code> attribute which is helpfully discarded as duplicate by the parser.</p>
     <p>The <a href="#is-element-nonceable">§6.6.3.1 Is element nonceable?</a> algorithm attempts to mitigate this specific
-  attack by walking through <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①①">script</a></code> or <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-style-element" id="ref-for-the-style-element③">style</a></code> element attributes, looking for the
+  attack by walking through <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①②">script</a></code> or <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-style-element" id="ref-for-the-style-element③">style</a></code> element attributes, looking for the
   string "<code>&lt;script</code>" or "<code>&lt;style</code>" in their names or values.</p>
     <h3 class="heading settled" data-level="7.3" id="security-nonce-retargeting"><span class="secno">7.3. </span><span class="content">Nonce Retargeting</span><a class="self-link" href="#security-nonce-retargeting"></a></h3>
     <p>Nonces bypass <a data-link-type="grammar" href="#grammardef-host-source" id="ref-for-grammardef-host-source⑤">host-source</a> expressions, enabling developers to load code from any
@@ -5492,7 +5497,7 @@ Content-Security-Policy: connect-src http://example.com/;
       <p><a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source⑧">hash-source</a> and <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source⑨">nonce-source</a> expressions
   will be honored.</p>
      <li data-md>
-      <p>Script requests which are triggered by non-<a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted" id="ref-for-parser-inserted③">"parser-inserted"</a> <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①②">script</a></code> elements are allowed.</p>
+      <p>Script requests which are triggered by non-<a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted" id="ref-for-parser-inserted③">"parser-inserted"</a> <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①③">script</a></code> elements are allowed.</p>
     </ol>
     <p>The first change allows you to deploy "<a data-link-type="grammar" href="#grammardef-strict-dynamic" id="ref-for-grammardef-strict-dynamic⑤"><code>'strict-dynamic'</code></a> in a
   backwards compatible way, without requiring user-agent sniffing: the policy <code>'unsafe-inline' https: 'nonce-abcdefg' 'strict-dynamic'</code> will act like <code>'unsafe-inline' https:</code> in browsers that support CSP1, <code>https: 'nonce-DhcnhD3khTMePgXwdayK9BsMqXjhguVV'</code> in browsers that support CSP2, and <code>'nonce-DhcnhD3khTMePgXwdayK9BsMqXjhguVV' 'strict-dynamic'</code> in browsers that
@@ -5518,8 +5523,8 @@ document<c- p>.</c->head<c- p>.</c->appendChild<c- p>(</c->s<c- p>);</c->
 
 document<c- p>.</c->write<c- p>(</c-><c- t>'&lt;scr'</c-> <c- o>+</c-> <c- t>'ipt src="/sadness.js">&lt;/scr'</c-> <c- o>+</c-> <c- t>'ipt>'</c-><c- p>);</c->
 </pre>
-     <p><code>dependency.js</code> will load, as the <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①③">script</a></code> element created by <code>createElement()</code> is not <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted" id="ref-for-parser-inserted④">"parser-inserted"</a>.</p>
-     <p><code>sadness.js</code> will <em>not</em> load, however, as <code>document.write()</code> produces <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①④">script</a></code> elements which are <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted" id="ref-for-parser-inserted⑤">"parser-inserted"</a>.</p>
+     <p><code>dependency.js</code> will load, as the <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①④">script</a></code> element created by <code>createElement()</code> is not <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted" id="ref-for-parser-inserted④">"parser-inserted"</a>.</p>
+     <p><code>sadness.js</code> will <em>not</em> load, however, as <code>document.write()</code> produces <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑤">script</a></code> elements which are <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted" id="ref-for-parser-inserted⑤">"parser-inserted"</a>.</p>
     </div>
     <section>
      <h3 class="heading settled" data-level="8.3" id="unsafe-hashes-usage"><span class="secno">8.3. </span><span class="content"> Usage of "<code>'unsafe-hashes'</code>" </span><a class="self-link" href="#unsafe-hashes-usage"></a></h3>
@@ -5554,22 +5559,22 @@ document<c- p>.</c->write<c- p>(</c-><c- t>'&lt;scr'</c-> <c- o>+</c-> <c- t>'ip
      <p>In <a data-link-type="biblio" href="#biblio-csp2">[CSP2]</a>, hash <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression①⓪">source expressions</a> could only match inlined
     script, but now that Subresource Integrity is widely deployed, we can expand
     the scope to enable externalized JavaScript as well.</p>
-     <p>If multiple sets of integrity metadata are specified for a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑤">script</a></code>, the
-    request will match a policy’s <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source⑨">hash-source</a>s if and only if <em>each</em> item in a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑥">script</a></code>'s integrity metadata matches the policy.</p>
+     <p>If multiple sets of integrity metadata are specified for a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑥">script</a></code>, the
+    request will match a policy’s <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source⑨">hash-source</a>s if and only if <em>each</em> item in a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑦">script</a></code>'s integrity metadata matches the policy.</p>
      <div class="example" id="example-af80f2fd">
       <a class="self-link" href="#example-af80f2fd"></a> MegaCorp, Inc. wishes to allow two specific scripts on a page in a way
       that ensures that the content matches their expectations. They do so by
       setting the following policy: 
 <pre>Content-Security-Policy: script-src 'sha256-abc123' 'sha512-321cba'
 </pre>
-      <p>In the presence of that policy, the following <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑦">script</a></code> elements would be
+      <p>In the presence of that policy, the following <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑧">script</a></code> elements would be
       allowed to execute because they contain only integrity metadata that matches
       the policy:</p>
 <pre class="highlight"><c- p>&lt;</c-><c- f>script</c-> <c- e>integrity</c-><c- o>=</c-><c- s>"sha256-abc123"</c-> ...<c- p>>&lt;/</c-><c- f>script</c-><c- p>></c->
 <c- p>&lt;</c-><c- f>script</c-> <c- e>integrity</c-><c- o>=</c-><c- s>"sha512-321cba"</c-> ...<c- p>>&lt;/</c-><c- f>script</c-><c- p>></c->
 <c- p>&lt;</c-><c- f>script</c-> <c- e>integrity</c-><c- o>=</c-><c- s>"sha256-abc123 sha512-321cba"</c-> ...<c- p>>&lt;/</c-><c- f>script</c-><c- p>></c->
 </pre>
-      <p>While the following <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑧">script</a></code> elements would not execute because they
+      <p>While the following <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑨">script</a></code> elements would not execute because they
       contain valid metadata that does not match the policy (even though other
       metadata does match):</p>
 <pre class="highlight"><c- p>&lt;</c-><c- f>script</c-> <c- e>integrity</c-><c- o>=</c-><c- s>"</c-><b><c- s>sha384-xyz789</c-></b><c- s>"</c-> ...<c- p>>&lt;/</c-><c- f>script</c-><c- p>></c->
@@ -6624,9 +6629,10 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="term-for-request-destination-script-like">
    <a href="https://fetch.spec.whatwg.org/#request-destination-script-like">https://fetch.spec.whatwg.org/#request-destination-script-like</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-request-destination-script-like">6.6.1.1. 
+    <li><a href="#ref-for-request-destination-script-like">6.1.11. script-src</a>
+    <li><a href="#ref-for-request-destination-script-like①">6.6.1.1. 
     Script directives pre-request check </a>
-    <li><a href="#ref-for-request-destination-script-like①">6.6.1.2. 
+    <li><a href="#ref-for-request-destination-script-like②">6.6.1.2. 
     Script directives post-request check </a>
    </ul>
   </aside>
@@ -7208,16 +7214,16 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-script">1.3. Changes from Level 2</a> <a href="#ref-for-script①">(2)</a>
     <li><a href="#ref-for-script②">3.3. 
     The &lt;meta> element </a>
-    <li><a href="#ref-for-script③">6.1.11. script-src</a> <a href="#ref-for-script④">(2)</a>
-    <li><a href="#ref-for-script⑤">6.6.3.1. 
-    Is element nonceable? </a> <a href="#ref-for-script⑥">(2)</a>
-    <li><a href="#ref-for-script⑦">6.6.3.3. 
-    Does element match source list for type and source? </a> <a href="#ref-for-script⑧">(2)</a>
-    <li><a href="#ref-for-script⑨">7.2. Nonce Stealing</a> <a href="#ref-for-script①⓪">(2)</a> <a href="#ref-for-script①①">(3)</a>
-    <li><a href="#ref-for-script①②">8.2. 
-    Usage of "'strict-dynamic'" </a> <a href="#ref-for-script①③">(2)</a> <a href="#ref-for-script①④">(3)</a>
-    <li><a href="#ref-for-script①⑤">8.4. 
-      Allowing external JavaScript via hashes </a> <a href="#ref-for-script①⑥">(2)</a> <a href="#ref-for-script①⑦">(3)</a> <a href="#ref-for-script①⑧">(4)</a>
+    <li><a href="#ref-for-script③">6.1.11. script-src</a> <a href="#ref-for-script④">(2)</a> <a href="#ref-for-script⑤">(3)</a>
+    <li><a href="#ref-for-script⑥">6.6.3.1. 
+    Is element nonceable? </a> <a href="#ref-for-script⑦">(2)</a>
+    <li><a href="#ref-for-script⑧">6.6.3.3. 
+    Does element match source list for type and source? </a> <a href="#ref-for-script⑨">(2)</a>
+    <li><a href="#ref-for-script①⓪">7.2. Nonce Stealing</a> <a href="#ref-for-script①①">(2)</a> <a href="#ref-for-script①②">(3)</a>
+    <li><a href="#ref-for-script①③">8.2. 
+    Usage of "'strict-dynamic'" </a> <a href="#ref-for-script①④">(2)</a> <a href="#ref-for-script①⑤">(3)</a>
+    <li><a href="#ref-for-script①⑥">8.4. 
+      Allowing external JavaScript via hashes </a> <a href="#ref-for-script①⑦">(2)</a> <a href="#ref-for-script①⑧">(3)</a> <a href="#ref-for-script①⑨">(4)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-set-the-frozen-base-url">
@@ -9662,12 +9668,15 @@ rest of Google’s CSP Cabal.</p>
    <b><a href="#script-src-elem">#script-src-elem</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-script-src-elem">6.1.3. default-src</a> <a href="#ref-for-script-src-elem①">(2)</a> <a href="#ref-for-script-src-elem②">(3)</a>
+    <li><a href="#ref-for-script-src-elem③">6.1.11. script-src</a> <a href="#ref-for-script-src-elem④">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="script-src-attr">
    <b><a href="#script-src-attr">#script-src-attr</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-script-src-attr">6.1.3. default-src</a> <a href="#ref-for-script-src-attr①">(2)</a>
+    <li><a href="#ref-for-script-src-attr②">6.1.11. script-src</a> <a href="#ref-for-script-src-attr③">(2)</a>
+    <li><a href="#ref-for-script-src-attr④">6.1.12. script-src-elem</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="style-src">
