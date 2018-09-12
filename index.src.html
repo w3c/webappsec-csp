@@ -351,17 +351,10 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       metadata which is listed in the current policy. Details in
       [[#external-hash]].
 
-  11. <div class="wip">
-        The <a>`disown-opener`</a> directive ensures that a resource can't be opened
-        in such a way as to give another browsing context control over its contents.
-
-        ISSUE(w3c/webappsec-csp#194): `disown-opener` is a work in progress.
-      </div>
-
-  12. The <a>`navigate-to`</a> directive gives a resource control over the endpoints
+  11. The <a>`navigate-to`</a> directive gives a resource control over the endpoints
       to which it can initiate navigation.
 
-  13. Reports generated for inline violations will contain a <a for="violation">sample</a>
+  12. Reports generated for inline violations will contain a <a for="violation">sample</a>
       attribute if the relevant directive contains the <a grammar>`'report-sample'`</a>
       expression.
 </section>
@@ -3421,46 +3414,6 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       <a for="directive">value</a> as the input, and |context|'s <a>forced
       sandboxing flag set</a> as the output.
 
-  <section class="wip">
-    <h4 id="directive-disown-opener">`disown-opener`</h4>
-
-    The <dfn export>`disown-opener`</dfn> directive ensures that a resource
-    will <a>disown its opener</a> when navigated to. The directive's syntax is
-    described by the following ABNF grammar:
-
-    <pre dfn-type="grammar" link-type="grammar">
-      directive-name  = "disown-opener"
-      directive-value = ""
-    </pre>
-
-    This directive has no reporting requirements; it will be ignored entirely when
-    delivered in a <a http-header>`Content-Security-Policy-Report-Only`</a> header, or within
-    a <{meta}> element.
-
-    ISSUE: Not sure this is the right model. We need to ensure that we take care
-    of <a href="https://github.com/w3c/webappsec/issues/139">the inverse</a> as
-    well, and there might be a cleverer syntax that could encompass both a
-    document's opener, and a document's openees. `disown-openee` is weird.
-    Maybe `disown 'opener' 'openee'`? Do we need origin restrictions on either/both?
-  </section>
-
-  <h5 algorithm id="disown-opener-init">
-    `disown-opener` Initialization
-  </h5>
-
-  This directive's <a for="directive">initialization</a> algorithm is as
-  follows:
-
-  Given a {{Document}} or <a for="/">global object</a> (|context|), a <a>response</a>
-  (|response|), and a <a for="/">policy</a> (|policy|):
-
-  1.  Assert: |response| and |policy| are unused.
-
-  2.  If |context|'s <a>responsible browsing context</a> has an <a>opener browsing
-      context</a>, <a>disown its opener</a>.
-
-  ISSUE: What should this do in an <{iframe}>? Anything?
-
   <h3 id="directives-navigation">
     Navigation Directives
   </h3>
@@ -5025,8 +4978,6 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   ::  This document (see [[#directive-connect-src]])
   :   <a>`default-src`</a>
   ::  This document (see [[#directive-default-src]])
-  :   <a>`disown-opener`</a>
-  ::  This document (see [[#directive-disown-opener]])
   :   <a>`font-src`</a>
   ::  This document (see [[#directive-font-src]])
   :   <a>`form-action`</a>
