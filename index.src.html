@@ -375,8 +375,9 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   <h3 id="framework-policy">Policies</h3>
 
   A <dfn export lt="content security policy object" local-lt="policy">policy</dfn> defines allowed
-  and restricted behaviors, and may be applied to a {{Window}}, {{WorkerGlobalScope}}, or
-  {{WorkletGlobalScope}} as described in [[#initialize-global-object-csp]].
+  and restricted behaviors, and may be applied to a {{Document}}, {{WorkerGlobalScope}}, or
+  {{WorkletGlobalScope}} as described in [[#initialize-global-object-csp]] and in
+  [[#initialize-document-csp]].
 
   Each policy has an associated <dfn for="policy" export>directive set</dfn>, which is an <a>ordered
   set</a> of <a>directives</a> that define the policy's implications when applied.
@@ -1079,7 +1080,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   1.  The {{Document}}, {{WorkerGlobalScope}}, and {{WorkletGlobalScope}} objects have a
       `CSP list`, which holds all the <a for="/">policy</a> objects which are
       active for a given context. This list is empty unless otherwise specified,
-      and is populated via the [[#initialize-global-object-csp]] algorithm.
+      and is populated via the [[#initialize-global-object-csp]] and
+      [[#initialize-document-csp]] algorithms.
 
       ISSUE(w3c/html#187): This concept is missing from W3C's Workers.
 
@@ -1091,27 +1093,30 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       <a for="/">global object</a> by inserting it into the <a for="/">global object</a>'s
       <a for="global object">CSP list</a>.
 
-  4.  [[#initialize-global-object-csp]] is called during the <a>initializing a
-      new `Document` object</a> and <a>run a worker</a> algorithms in order to
-      bind a set of <a for="/">policy</a> objects associated with a <a>response</a>
-      to a newly created {{Document}}, {{WorkerGlobalScope}} or {{WorkletGlobalScope}}.
+  4.  [[#initialize-global-object-csp]] is called during the <a>run a worker</a>
+      algorithm in order to bind a set of <a for="/">policy</a> objects associated
+      with a <a>response</a> {{WorkerGlobalScope}} or {{WorkletGlobalScope}}.
 
-  5.  [[#should-block-inline]] is called during the <a>prepare a script</a> and
+  5.  [[#initialize-document-csp]] is called during the <a>initializing a
+      new `Document` object</a> algorithm in order to bind a set of <a for="/">policy</a>
+      objects associated with a <a>response</a> to a newly created {{Document}}.
+
+  6.  [[#should-block-inline]] is called during the <a>prepare a script</a> and
       <a>update a `style` block</a> algorithms in order to determine whether or
       not an inline script or style block is allowed to execute/render.
 
-  6.  [[#should-block-inline]] is called during handling of inline event
+  7.  [[#should-block-inline]] is called during handling of inline event
       handlers (like `onclick`) and inline `style` attributes in order to
       determine whether or not they ought to be allowed to execute/render.
 
-  7.  <a for="/">policy</a> is <a>enforced</a> during processing of the <{meta}>
+  8.  <a for="/">policy</a> is <a>enforced</a> during processing of the <{meta}>
       element's <{meta/http-equiv}>.
 
-  8.  A {{Document}}'s <dfn>embedding document</dfn> is the {{Document}}
+  9.  A {{Document}}'s <dfn>embedding document</dfn> is the {{Document}}
       <a lt="nested through">through which</a> the {{Document}}'s
       <a>browsing context</a> is nested.
 
-  9.  HTML populates each <a for="/">request</a>'s <a for="request">cryptographic nonce
+  10. HTML populates each <a for="/">request</a>'s <a for="request">cryptographic nonce
       metadata</a> and <a>parser metadata</a> with relevant data from the
       elements responsible for resource loading.
 
@@ -1121,11 +1126,11 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       ISSUE(whatwg/html#968): Stylesheet loading is not yet integrated with
       Fetch in WHATWG's HTML.
 
-  10. [[#allow-base-for-document]] is called during <{base}>'s <a>set the frozen
+  11. [[#allow-base-for-document]] is called during <{base}>'s <a>set the frozen
       base URL</a> algorithm to ensure that the <{base/href}> attribute's value
       is valid.
 
-  11. [[#should-plugin-element-be-blocked-a-priori-by-content-security-policy]]
+  12. [[#should-plugin-element-be-blocked-a-priori-by-content-security-policy]]
       is called during the processing of <{object}>, <{embed}>, and <a>`applet`</a>
       elements to determine whether they may trigger a fetch.
 
@@ -1133,7 +1138,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
       ISSUE(w3c/html#547): This hook is missing from W3C's HTML.
 
-  12. [[#should-block-navigation-request]] is called during the <a>process a
+  13. [[#should-block-navigation-request]] is called during the <a>process a
       navigate fetch</a> algorithm, and [[#should-block-navigation-response]]
       is called during the <a>process a navigate response</a> algorithm to
       apply directive's navigation checks, as well as inline checks for
