@@ -732,26 +732,29 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   5.  Return |violation|.
 
   <h4 id="create-violation-for-request" algorithm>
-    Create a violation object for |request|, |policy|, and |directive|
+    Create a violation object for |request|, and |policy|.
   </h4>
 
-  Given a <a for="/">request</a> (|request|), a <a for="/">policy</a> (|policy|), and a string
-  (|directive|), the following algorithm creates a new <a>violation</a> object,
+  Given a <a for="/">request</a> (|request|), a <a for="/">policy</a> (|policy|),
+  the following algorithm creates a new <a>violation</a> object,
   and populates it with an initial set of data:
 
-  1.  Let |violation| be the result of executing
+  1.  Let |directive| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
+
+  2.  Let |violation| be the result of executing
       [[#create-violation-for-global]] on |request|'s
       <a for="request">client</a>'s <a for="environment settings object">global object</a>,
       |policy|, and |directive|.
 
-  2.  Set |violation|'s <a for="violation">resource</a> to |request|'s
+  3.  Set |violation|'s <a for="violation">resource</a> to |request|'s
       <a for="request">url</a>.
 
       Note: We use |request|'s <a for="request">url</a>, and <em>not</em> its
       <a for="request">current url</a>, as the latter might contain information
       about redirect targets to which the page MUST NOT be given access.
 
-  3.  Return |violation|.
+  4.  Return |violation|.
 </section>
 
 <!-- Big Text: Delivery -->
@@ -981,8 +984,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
       3.  If |violates| is not "`Does Not Violate`", then execute
           [[#report-violation]] on the result of executing
-          [[#create-violation-for-request]] on |request|, |policy|, and
-          |violates|.
+          [[#create-violation-for-request]] on |request|, and |policy|.
 
   <h4 id="should-block-request" algorithm>
     Should |request| be blocked by Content Security Policy?
@@ -1009,8 +1011,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
       3.  If |violates| is not "`Does Not Violate`", then:
 
           1.  Execute [[#report-violation]] on the result of executing
-              [[#create-violation-for-request]] on |request|, |policy|, and
-              |violates|.
+              [[#create-violation-for-request]] on |request|, and |policy|.
 
           2.  Set |result| to "`Blocked`".
 
@@ -1040,8 +1041,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
               <a for="directive">post-request check</a> is "`Blocked`", then:
 
               1.  Execute [[#report-violation]] on the result of executing
-                  [[#create-violation-for-request]] on |request|, |policy|, and
-                  |directive|.
+                  [[#create-violation-for-request]] on |request|, and |policy|.
 
               2.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
                   then set |result| to "`Blocked`".
@@ -1059,8 +1059,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
               and |policy| is "`Blocked`", then:
 
               1.  Execute [[#report-violation]] on the result of executing
-                  [[#create-violation-for-request]] on |request|, |policy|, and
-                  |directive|.
+                  [[#create-violation-for-request]] on |request|, and |policy|.
 
               2.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
                   then set |result| to "`Blocked`".
@@ -1273,23 +1272,26 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
                 "`Allowed`" when executed upon |element|, |type|, |policy| and |source|,
                 skip to the next |directive|.
 
-            2.  Otherwise, let |violation| be the result of executing
+            2.  Let |directive-name| be the result of executing
+                [[#effective-directive-for-inline-check]] on |type|.
+
+            3.  Otherwise, let |violation| be the result of executing
                 [[#create-violation-for-global]] on the <a>current settings
                 object</a>'s <a for="environment settings object">global object</a>, |policy|,
-                and |directive|'s <a for="directive">name</a>.
+                and |directive-name|.
 
-            3.  Set |violation|'s <a for="violation">resource</a> to "`inline`".
+            4.  Set |violation|'s <a for="violation">resource</a> to "`inline`".
 
-            4.  Set |violation|'s <a for="violation">element</a> to |element|.
+            5.  Set |violation|'s <a for="violation">element</a> to |element|.
 
-            5.  If |directive|'s <a for="directive">value</a> <a for="list">contains</a> the
+            6.  If |directive|'s <a for="directive">value</a> <a for="list">contains</a> the
                 expression "<a grammar>`'report-sample'`</a>", then set |violation|'s
                 <a for="violation">sample</a> to the substring of |source| containing its first 40
                 characters.
 
-            6.  Execute [[#report-violation]] on |violation|.
+            7.  Execute [[#report-violation]] on |violation|.
 
-            7.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
+            8.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
                 set |result| to "`Blocked`".
 
     4.  Return |result|.
@@ -1342,16 +1344,19 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
                     "`navigation`" and |navigation request|'s <a for="request">url</a>,
                     skip to the next |directive|.
 
-                2.  Otherwise, let |violation| be the result of executing
-                    [[#create-violation-for-global]] on |source|'s <a>relevant global
-                    object</a>, |policy|, and |directive|'s <a for="directive">name</a>.
+                2.  Let |directive-name| be the result of executing
+                    [[#effective-directive-for-inline-check]] on |type|.
 
-                3.  Set |violation|'s <a for="violation">resource</a> to |navigation
+                3.  Otherwise, let |violation| be the result of executing
+                    [[#create-violation-for-global]] on |source|'s <a>relevant global
+                    object</a>, |policy|, and |directive-name|.
+
+                4.  Set |violation|'s <a for="violation">resource</a> to |navigation
                     request|'s <a for="response">URL</a>.
 
-                4.  Execute [[#report-violation]] on |violation|.
+                5.  Execute [[#report-violation]] on |violation|.
 
-                5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
+                6.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
                     set |result| to "`Blocked`".
 
     4.  Return |result|.
