@@ -140,6 +140,10 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   type: dfn
     for: WorkerGlobalScope
       text: owner set; url: concept-WorkerGlobalScope-owner-set
+
+spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
+  type: dfn
+    text: javascript-string-convert; url: javascript-string-convert
 </pre>
 <pre class="biblio">
 {
@@ -4288,8 +4292,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   (|type|), and a string (|source|), this algorithm returns "`Matches`" or
   "`Does Not Match`".
 
-  Note: |source| will be interpreted with the encoding of the page in which it
-  is embedded. See the integration points in [[#html-integration]] for more detail.
+  Note: Regardless of the encoding of the page, |source| will be converted to `UTF-8`
+  before applying any hashing algorithms.
 
   1.  If [[#allow-all-inline]] returns "`Allows`" given |list| and |type|,
       return "`Matches`".
@@ -4319,7 +4323,11 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   5.  If |type| is "`script`" or "`style`", or |unsafe-hashes flag| is
       `true`:
 
-      1.  For each |expression| in |list|:
+      1.  Let |source| be the result of executing <a>UTF-8 encode</a>
+          on the result of executing <a>javascript-string-convert</a>
+          on |source|.
+
+      2.  For each |expression| in |list|:
 
           1.  If |expression| matches the <a grammar>`hash-source`</a> grammar:
 
@@ -4349,7 +4357,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
                       Note: This replacement normalizes hashes expressed in [=base64url
                       encoding=] into [=base64 encoding=] for matching.
 
-                  2.  If |actual| is a <a>case-sensitive</a> match for |expected|, return
+                  3.  If |actual| is a <a>case-sensitive</a> match for |expected|, return
                       "`Matches`".
 
       Note: Hashes apply to inline <{script}> and inline <{style}>. If the
