@@ -1,7 +1,7 @@
 Content Security Policy
 =======================
 
-CSP 3 is being specified in `index.src.html`.
+CSP 3 is being specified in `index.src.html` (published at <https://www.w3.org/TR/CSP3/>)
 
 CSP 2 is published as a CR at <http://w3c.org/TR/CSP2>.
 
