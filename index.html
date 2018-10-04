@@ -1212,9 +1212,9 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-<<<<<<< HEAD
   <meta content="Bikeshed version dff342f4b23fb230b71436fb31b55f5f169715bd" name="generator">
   <link href="https://www.w3.org/TR/CSP3/" rel="canonical">
+<<<<<<< HEAD
 <<<<<<< HEAD
   <meta content="6ee5a338b8c7262e5f7b4a894a196c642b6213c7" name="document-revision">
 =======
@@ -1225,6 +1225,9 @@ Possible extra rowspan handling
   <meta content="5668a60a0b983bc32c42d4891af42d5c1a00ffbe" name="document-revision">
 >>>>>>> Fixing whitespace issues
 >>>>>>> Fixing whitespace issues
+=======
+  <meta content="4196a15cf24c9eff6b2e74c0dd09aff460bd2d1c" name="document-revision">
+>>>>>>> Review changes
 <style>
   ul.toc ul ul ul {
     margin: 0 0 0 2em;
@@ -1515,11 +1518,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1>Content Security Policy Level 3</h1>
-<<<<<<< HEAD
    <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2018-10-04">4 October 2018</time></span></h2>
-=======
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2018-09-26">26 September 2018</time></span></h2>
->>>>>>> Fixing whitespace issues
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -2036,13 +2035,20 @@ of security-relevant policy decisions.</p>
     <h2 class="heading settled" data-level="2" id="framework"><span class="secno">2. </span><span class="content">Framework</span><a class="self-link" href="#framework"></a></h2>
     <h3 class="heading settled" data-level="2.1" id="framework-infrastructure"><span class="secno">2.1. </span><span class="content">Infrastructure</span><a class="self-link" href="#framework-infrastructure"></a></h3>
     <p>This document uses ABNF grammar to specify syntax, as defined in <a data-link-type="biblio" href="#biblio-rfc5234">[RFC5234]</a>. It also relies on
-  the <code>#rule</code> ABNF extension defined in <a href="https://tools.ietf.org/html/rfc7230#section-7">Section 7</a> of <a data-link-type="biblio" href="#biblio-rfc7230">[RFC7230]</a>.</p>
+  the <code>#rule</code> ABNF extension defined in <a href="https://tools.ietf.org/html/rfc7230#section-7">Section 7</a> of <a data-link-type="biblio" href="#biblio-rfc7230">[RFC7230]</a>,
+  with the modification that <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc7230#section-3.2.3" id="ref-for-section-3.2.3">OWS</a> is replaced with <a data-link-type="grammar" href="#grammardef-optional-ascii-whitespace" id="ref-for-grammardef-optional-ascii-whitespace">optional-ascii-whitespace</a>. That is, the <code>#rule</code> used in this
+  document is defined as:</p>
+<pre>1#element => element *( <a data-link-type="grammar" href="#grammardef-optional-ascii-whitespace" id="ref-for-grammardef-optional-ascii-whitespace①">optional-ascii-whitespace</a> "," <a data-link-type="grammar" href="#grammardef-optional-ascii-whitespace" id="ref-for-grammardef-optional-ascii-whitespace②">optional-ascii-whitespace</a> element )
+</pre>
+    <p>and for n >= 1 and m > 1:</p>
+<pre>&lt;n>#&lt;m>element => element &lt;n-1>*&lt;m-1>( <a data-link-type="grammar" href="#grammardef-optional-ascii-whitespace" id="ref-for-grammardef-optional-ascii-whitespace③">optional-ascii-whitespace</a> "," <a data-link-type="grammar" href="#grammardef-optional-ascii-whitespace" id="ref-for-grammardef-optional-ascii-whitespace④">optional-ascii-whitespace</a> element )
+</pre>
     <p>This document depends on the Infra Standard for a number of foundational concepts used in its
   algorithms and prose <a data-link-type="biblio" href="#biblio-infra">[INFRA]</a>.</p>
     <p>The following definitions are used to improve readability of other definitions in this document.</p>
-<pre><dfn class="dfn-paneled" data-dfn-type="grammar" data-export id="grammardef-optional-ascii-whitespace">Optional ASCII whitespace</dfn> = *(<a data-link-type="grammar" href="https://infra.spec.whatwg.org/#ascii-whitespace" id="ref-for-ascii-whitespace">ASCII whitespace</a>)
-<dfn class="dfn-paneled" data-dfn-type="grammar" data-export id="grammardef-required-ascii-whitespace">Required ASCII whitespace</dfn> = 1*(<a data-link-type="grammar" href="https://infra.spec.whatwg.org/#ascii-whitespace" id="ref-for-ascii-whitespace①">ASCII whitespace</a>)
-; <a data-link-type="grammar" href="https://infra.spec.whatwg.org/#ascii-whitespace" id="ref-for-ascii-whitespace②">ASCII whitespace</a> is defined in the <a data-link-type="grammar" href="https://infra.spec.whatwg.org/#" id="termref-for-">INFRA</a> standard.
+<pre><dfn class="dfn-paneled" data-dfn-type="grammar" data-export id="grammardef-optional-ascii-whitespace">optional-ascii-whitespace</dfn> = *( %x09 / %x0A / %x0C / %x0D / %x20 )
+<dfn class="dfn-paneled" data-dfn-type="grammar" data-export id="grammardef-required-ascii-whitespace">required-ascii-whitespace</dfn> = 1*( %x09 / %x0A / %x0C / %x0D / %x20 )
+; These productions match the definition of <a data-link-type="grammar" href="https://infra.spec.whatwg.org/#ascii-whitespace" id="ref-for-ascii-whitespace">ASCII whitespace</a> from the <a data-link-type="grammar" href="https://infra.spec.whatwg.org/#" id="termref-for-">INFRA</a> standard.
 </pre>
     <h3 class="heading settled" data-level="2.2" id="framework-policy"><span class="secno">2.2. </span><span class="content">Policies</span><a class="self-link" href="#framework-policy"></a></h3>
     <p>A <dfn class="dfn-paneled" data-dfn-type="dfn" data-export data-local-lt="policy" data-lt="content security policy object" id="content-security-policy-object">policy</dfn> defines allowed
@@ -2057,16 +2063,15 @@ of security-relevant policy decisions.</p>
     <p>A <a data-link-type="dfn" href="#csp-list" id="ref-for-csp-list">CSP list</a> <dfn data-dfn-type="dfn" data-export id="contains-a-header-delivered-content-security-policy">contains a header-delivered Content Security Policy<a class="self-link" href="#contains-a-header-delivered-content-security-policy"></a></dfn> if it <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-contain" id="ref-for-list-contain">contains</a> a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object②">policy</a> whose <a data-link-type="dfn" href="#policy-source" id="ref-for-policy-source">source</a> is "<code>header</code>".</p>
     <p>A <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="serialized-csp">serialized CSP</dfn> is an <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ascii-string" id="ref-for-ascii-string">ASCII string</a> consisting of a semicolon-delimited
   series of <a data-link-type="dfn" href="#serialized-directive" id="ref-for-serialized-directive">serialized directives</a>, adhering to the following ABNF grammar <a data-link-type="biblio" href="#biblio-rfc5234">[RFC5234]</a>:</p>
-<pre><dfn class="dfn-paneled" data-dfn-type="grammar" data-export id="grammardef-serialized-policy">serialized-policy</dfn> = 1#<a data-link-type="grammar" href="#grammardef-serialized-directive" id="ref-for-grammardef-serialized-directive">serialized-directive</a>
-                    ; The '#' rule is the one defined in section 7 of RFC 7230
-                    ; but with <a data-link-type="grammar" href="#grammardef-optional-ascii-whitespace" id="ref-for-grammardef-optional-ascii-whitespace">Optional ASCII whitespace</a> replacing <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc7230#section-3.2.3" id="ref-for-section-3.2.3">OWS</a>
-                    ; and with ";" replacing ","
+<pre><dfn class="dfn-paneled" data-dfn-type="grammar" data-export id="grammardef-serialized-policy">serialized-policy</dfn> =
+    <a data-link-type="grammar" href="#grammardef-serialized-directive" id="ref-for-grammardef-serialized-directive">serialized-directive</a> *( <a data-link-type="grammar" href="#grammardef-optional-ascii-whitespace" id="ref-for-grammardef-optional-ascii-whitespace⑤">optional-ascii-whitespace</a> ";" [ <a data-link-type="grammar" href="#grammardef-optional-ascii-whitespace" id="ref-for-grammardef-optional-ascii-whitespace⑥">optional-ascii-whitespace</a> <a data-link-type="grammar" href="#grammardef-serialized-directive" id="ref-for-grammardef-serialized-directive①">serialized-directive</a> ] )
 </pre>
     <p>A <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="serialized-csp-list">serialized CSP list</dfn> is an <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ascii-string" id="ref-for-ascii-string①">ASCII string</a> consisting of a comma-delimited
   series of <a data-link-type="dfn" href="#serialized-csp" id="ref-for-serialized-csp">serialized CSPs</a>, adhering to the following ABNF grammar <a data-link-type="biblio" href="#biblio-rfc5234">[RFC5234]</a>:</p>
 <pre><dfn data-dfn-type="grammar" data-export id="grammardef-serialized-policy-list">serialized-policy-list<a class="self-link" href="#grammardef-serialized-policy-list"></a></dfn> = 1#<a data-link-type="grammar" href="#grammardef-serialized-policy" id="ref-for-grammardef-serialized-policy">serialized-policy</a>
                     ; The '#' rule is the one defined in section 7 of RFC 7230
-                    ; but with <a data-link-type="grammar" href="#grammardef-optional-ascii-whitespace" id="ref-for-grammardef-optional-ascii-whitespace①">Optional ASCII whitespace</a> replacing <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc7230#section-3.2.3" id="ref-for-section-3.2.3①">OWS</a>
+                    ; but it incorporates the modifications specified
+                    ; in section 2.1 of this document.
 </pre>
     <h4 class="heading settled algorithm" data-algorithm="Parse a serialized CSP" data-level="2.2.1" id="parse-serialized-policy"><span class="secno">2.2.1. </span><span class="content"> Parse a serialized CSP </span><a class="self-link" href="#parse-serialized-policy"></a></h4>
     <p>To <dfn class="dfn-paneled" data-dfn-type="abstract-op" data-export id="abstract-opdef-parse-a-serialized-csp">parse a serialized CSP</dfn>, given a <a data-link-type="dfn" href="#serialized-csp" id="ref-for-serialized-csp①">serialized CSP</a> (<var>serialized</var>), a <a data-link-type="dfn" href="#policy-source" id="ref-for-policy-source①">source</a> (<var>source</var>), and a <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition">disposition</a> (<var>disposition</var>), execute the
@@ -2085,7 +2090,7 @@ of security-relevant policy decisions.</p>
        <li data-md>
         <p>If <var>token</var> is an empty string, <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue">continue</a>.</p>
        <li data-md>
-        <p>Let <var>directive name</var> be the result of <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#collect-a-sequence-of-code-points" id="ref-for-collect-a-sequence-of-code-points">collecting a sequence of code points</a> from <var>token</var> which are not <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ascii-whitespace" id="ref-for-ascii-whitespace③">ASCII whitespace</a>.</p>
+        <p>Let <var>directive name</var> be the result of <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#collect-a-sequence-of-code-points" id="ref-for-collect-a-sequence-of-code-points">collecting a sequence of code points</a> from <var>token</var> which are not <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ascii-whitespace" id="ref-for-ascii-whitespace①">ASCII whitespace</a>.</p>
        <li data-md>
         <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-directive-set" id="ref-for-policy-directive-set②">directive set</a> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives①">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name">name</a> is <var>directive name</var>, <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue①">continue</a>.</p>
         <p>In this case, the user agent SHOULD notify developers that a duplicate directive was
@@ -2129,9 +2134,9 @@ of security-relevant policy decisions.</p>
   non-empty <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string">string</a>, and the <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value①">value</a> is a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-set" id="ref-for-ordered-set②">set</a> of non-empty <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string①">strings</a>. The <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value②">value</a> MAY be <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-is-empty" id="ref-for-list-is-empty">empty</a>.</p>
     <p>A <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="serialized-directive">serialized directive</dfn> is an <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ascii-string" id="ref-for-ascii-string②">ASCII string</a>, consisting of one or more
   whitespace-delimited tokens, and adhering to the following ABNF <a data-link-type="biblio" href="#biblio-rfc5234">[RFC5234]</a>:</p>
-<pre><dfn class="dfn-paneled" data-dfn-type="grammar" data-export id="grammardef-serialized-directive">serialized-directive</dfn> = <a data-link-type="grammar" href="#grammardef-directive-name" id="ref-for-grammardef-directive-name">directive-name</a> [ <a data-link-type="grammar" href="#grammardef-required-ascii-whitespace" id="ref-for-grammardef-required-ascii-whitespace">Required ASCII whitespace</a> <a data-link-type="grammar" href="#grammardef-directive-value" id="ref-for-grammardef-directive-value">directive-value</a> ]
+<pre><dfn class="dfn-paneled" data-dfn-type="grammar" data-export id="grammardef-serialized-directive">serialized-directive</dfn> = <a data-link-type="grammar" href="#grammardef-directive-name" id="ref-for-grammardef-directive-name">directive-name</a> [ <a data-link-type="grammar" href="#grammardef-required-ascii-whitespace" id="ref-for-grammardef-required-ascii-whitespace">required-ascii-whitespace</a> <a data-link-type="grammar" href="#grammardef-directive-value" id="ref-for-grammardef-directive-value">directive-value</a> ]
 <dfn class="dfn-paneled" data-dfn-type="grammar" data-export id="grammardef-directive-name">directive-name</dfn>       = 1*( <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc5234#appendix-B.1" id="ref-for-appendix-B.1">ALPHA</a> / <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc5234#appendix-B.1" id="ref-for-appendix-B.1①">DIGIT</a> / "-" )
-<dfn class="dfn-paneled" data-dfn-type="grammar" data-export id="grammardef-directive-value">directive-value</dfn>      = *( <a data-link-type="grammar" href="https://infra.spec.whatwg.org/#ascii-whitespace" id="ref-for-ascii-whitespace④">ASCII whitespace</a> / ( %x21-%x2B / %x2D-%x3A / %x3C-%x7E ) )
+<dfn class="dfn-paneled" data-dfn-type="grammar" data-export id="grammardef-directive-value">directive-value</dfn>      = *( <a data-link-type="grammar" href="https://infra.spec.whatwg.org/#ascii-whitespace" id="ref-for-ascii-whitespace②">ASCII whitespace</a> / ( %x21-%x2B / %x2D-%x3A / %x3C-%x7E ) )
                        ; Directive values may contain whitespace and <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc5234#appendix-B.1" id="ref-for-appendix-B.1②">VCHAR</a> characters,
                        ; excluding ";" and ",". The second half of the definition
                        ; above represents all <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc5234#appendix-B.1" id="ref-for-appendix-B.1③">VCHAR</a> characters (%x21-%x7E)
@@ -2203,7 +2208,7 @@ of security-relevant policy decisions.</p>
     </ol>
     <p>A <dfn data-dfn-type="dfn" data-export id="serialized-source-list">serialized source list<a class="self-link" href="#serialized-source-list"></a></dfn> is an <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ascii-string" id="ref-for-ascii-string③">ASCII string</a>, consisting of a
   whitespace-delimited series of <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression①">source expressions</a>, adhering to the following ABNF grammar <a data-link-type="biblio" href="#biblio-rfc5234">[RFC5234]</a>:</p>
-<pre><dfn class="dfn-paneled" data-dfn-type="grammar" data-export id="grammardef-serialized-source-list">serialized-source-list</dfn> = ( <a data-link-type="grammar" href="#grammardef-source-expression" id="ref-for-grammardef-source-expression">source-expression</a> *( <a data-link-type="grammar" href="#grammardef-required-ascii-whitespace" id="ref-for-grammardef-required-ascii-whitespace①">Required ASCII whitespace</a> <a data-link-type="grammar" href="#grammardef-source-expression" id="ref-for-grammardef-source-expression①">source-expression</a> ) ) / "<dfn class="dfn-paneled" data-dfn-type="grammar" data-export id="grammardef-none">'none'</dfn>"
+<pre><dfn class="dfn-paneled" data-dfn-type="grammar" data-export id="grammardef-serialized-source-list">serialized-source-list</dfn> = ( <a data-link-type="grammar" href="#grammardef-source-expression" id="ref-for-grammardef-source-expression">source-expression</a> *( <a data-link-type="grammar" href="#grammardef-required-ascii-whitespace" id="ref-for-grammardef-required-ascii-whitespace①">required-ascii-whitespace</a> <a data-link-type="grammar" href="#grammardef-source-expression" id="ref-for-grammardef-source-expression①">source-expression</a> ) ) / "<dfn class="dfn-paneled" data-dfn-type="grammar" data-export id="grammardef-none">'none'</dfn>"
 <dfn class="dfn-paneled" data-dfn-type="grammar" data-export id="grammardef-source-expression">source-expression</dfn>      = <a data-link-type="grammar" href="#grammardef-scheme-source" id="ref-for-grammardef-scheme-source">scheme-source</a> / <a data-link-type="grammar" href="#grammardef-host-source" id="ref-for-grammardef-host-source">host-source</a> / <a data-link-type="grammar" href="#grammardef-keyword-source" id="ref-for-grammardef-keyword-source">keyword-source</a>
                          / <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source">nonce-source</a> / <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source">hash-source</a>
 
@@ -2331,7 +2336,8 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
   client. The header’s value is represented by the following ABNF <a data-link-type="biblio" href="#biblio-rfc5234">[RFC5234]</a>:</p>
 <pre>Content-Security-Policy = 1#<a data-link-type="grammar" href="#grammardef-serialized-policy" id="ref-for-grammardef-serialized-policy①">serialized-policy</a>
                     ; The '#' rule is the one defined in section 7 of RFC 7230
-                    ; but with <a data-link-type="grammar" href="#grammardef-optional-ascii-whitespace" id="ref-for-grammardef-optional-ascii-whitespace②">Optional ASCII whitespace</a> replacing <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc7230#section-3.2.3" id="ref-for-section-3.2.3②">OWS</a>
+                    ; but it incorporates the modifications specified
+                    ; in section 2.1 of this document.
 </pre>
     <div class="example" id="example-b2d2c295">
      <a class="self-link" href="#example-b2d2c295"></a> 
@@ -2351,7 +2357,8 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
   not enforcing) their effects. The header’s value is represented by the following ABNF <a data-link-type="biblio" href="#biblio-rfc5234">[RFC5234]</a>:</p>
 <pre>Content-Security-Policy-Report-Only = 1#<a data-link-type="grammar" href="#grammardef-serialized-policy" id="ref-for-grammardef-serialized-policy②">serialized-policy</a>
                     ; The '#' rule is the one defined in section 7 of RFC 7230
-                    ; but with <a data-link-type="grammar" href="#grammardef-optional-ascii-whitespace" id="ref-for-grammardef-optional-ascii-whitespace③">Optional ASCII whitespace</a> replacing <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc7230#section-3.2.3" id="ref-for-section-3.2.3③">OWS</a>
+                    ; but it incorporates the modifications specified
+                    ; in section 2.1 of this document.
 </pre>
     <p>This header field allows developers to piece together their security policy in
   an iterative fashion, deploying a report-only policy based on their best
@@ -4229,7 +4236,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 <pre>directive-name  = "plugin-types"
 directive-value = <a data-link-type="grammar" href="#grammardef-media-type-list" id="ref-for-grammardef-media-type-list">media-type-list</a>
 
-<dfn class="dfn-paneled" data-dfn-type="grammar" data-export id="grammardef-media-type-list">media-type-list</dfn> = <a data-link-type="grammar" href="#grammardef-media-type" id="ref-for-grammardef-media-type">media-type</a> *( <a data-link-type="grammar" href="#grammardef-required-ascii-whitespace" id="ref-for-grammardef-required-ascii-whitespace②">Required ASCII whitespace</a> <a data-link-type="grammar" href="#grammardef-media-type" id="ref-for-grammardef-media-type①">media-type</a> )
+<dfn class="dfn-paneled" data-dfn-type="grammar" data-export id="grammardef-media-type-list">media-type-list</dfn> = <a data-link-type="grammar" href="#grammardef-media-type" id="ref-for-grammardef-media-type">media-type</a> *( <a data-link-type="grammar" href="#grammardef-required-ascii-whitespace" id="ref-for-grammardef-required-ascii-whitespace②">required-ascii-whitespace</a> <a data-link-type="grammar" href="#grammardef-media-type" id="ref-for-grammardef-media-type①">media-type</a> )
 <dfn class="dfn-paneled" data-dfn-type="grammar" data-export id="grammardef-media-type">media-type</dfn> = <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc2045#section-5.1" id="ref-for-section-5.1">type</a> "/" <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc2045#section-5.1" id="ref-for-section-5.1①">subtype</a>
 ; <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc2045#section-5.1" id="ref-for-section-5.1②">type</a> and <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc2045#section-5.1" id="ref-for-section-5.1③">subtype</a> are defined in RFC 2045
 </pre>
@@ -4326,7 +4333,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-media-type-list"
   the additional requirement that each token value MUST be one of the
   keywords defined by HTML specification as allowed values for the <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-iframe-element" id="ref-for-the-iframe-element③">iframe</a></code> <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#attr-iframe-sandbox" id="ref-for-attr-iframe-sandbox①">sandbox</a></code> attribute <a data-link-type="biblio" href="#biblio-html">[HTML]</a>.</p>
 <pre>directive-name  = "sandbox"
-directive-value = "" / <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc7230#section-3.2.6" id="ref-for-section-3.2.6">token</a> *( <a data-link-type="grammar" href="#grammardef-required-ascii-whitespace" id="ref-for-grammardef-required-ascii-whitespace③">Required ASCII whitespace</a> <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc7230#section-3.2.6" id="ref-for-section-3.2.6①">token</a> )
+directive-value = "" / <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc7230#section-3.2.6" id="ref-for-section-3.2.6">token</a> *( <a data-link-type="grammar" href="#grammardef-required-ascii-whitespace" id="ref-for-grammardef-required-ascii-whitespace③">required-ascii-whitespace</a> <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc7230#section-3.2.6" id="ref-for-section-3.2.6①">token</a> )
 </pre>
     <p>This directive has no reporting requirements; it will be ignored entirely when
   delivered in a <a data-link-type="http-header" href="#header-content-security-policy-report-only" id="ref-for-header-content-security-policy-report-only③"><code>Content-Security-Policy-Report-Only</code></a> header, or within
@@ -4408,7 +4415,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 <pre>directive-name  = "frame-ancestors"
 directive-value = <a data-link-type="grammar" href="#grammardef-ancestor-source-list" id="ref-for-grammardef-ancestor-source-list">ancestor-source-list</a>
 
-<dfn class="dfn-paneled" data-dfn-type="grammar" data-export id="grammardef-ancestor-source-list">ancestor-source-list</dfn> = ( <a data-link-type="grammar" href="#grammardef-ancestor-source" id="ref-for-grammardef-ancestor-source">ancestor-source</a> *( <a data-link-type="grammar" href="#grammardef-required-ascii-whitespace" id="ref-for-grammardef-required-ascii-whitespace④">Required ASCII whitespace</a> <a data-link-type="grammar" href="#grammardef-ancestor-source" id="ref-for-grammardef-ancestor-source①">ancestor-source</a>) ) / "<a data-link-type="grammar" href="#grammardef-none" id="ref-for-grammardef-none①">'none'</a>"
+<dfn class="dfn-paneled" data-dfn-type="grammar" data-export id="grammardef-ancestor-source-list">ancestor-source-list</dfn> = ( <a data-link-type="grammar" href="#grammardef-ancestor-source" id="ref-for-grammardef-ancestor-source">ancestor-source</a> *( <a data-link-type="grammar" href="#grammardef-required-ascii-whitespace" id="ref-for-grammardef-required-ascii-whitespace④">required-ascii-whitespace</a> <a data-link-type="grammar" href="#grammardef-ancestor-source" id="ref-for-grammardef-ancestor-source①">ancestor-source</a>) ) / "<a data-link-type="grammar" href="#grammardef-none" id="ref-for-grammardef-none①">'none'</a>"
 <dfn class="dfn-paneled" data-dfn-type="grammar" data-export id="grammardef-ancestor-source">ancestor-source</dfn>      = <a data-link-type="grammar" href="#grammardef-scheme-source" id="ref-for-grammardef-scheme-source①">scheme-source</a> / <a data-link-type="grammar" href="#grammardef-host-source" id="ref-for-grammardef-host-source①">host-source</a> / "<a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self②⑧">'self'</a>"
 </pre>
     <p>The <code>frame-ancestors</code> directive MUST be ignored when contained in a policy
@@ -4541,7 +4548,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
     </div>
     <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="report-uri"><code>report-uri</code></dfn> directive defines a set of endpoints to which <a data-link-type="dfn" href="#violation-report" id="ref-for-violation-report">violation reports</a> will be sent when particular behaviors are prevented.</p>
 <pre>directive-name  = "report-uri"
-directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc3986#section-4.1" id="ref-for-section-4.1">uri-reference</a> *( <a data-link-type="grammar" href="#grammardef-required-ascii-whitespace" id="ref-for-grammardef-required-ascii-whitespace⑤">Required ASCII whitespace</a> <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc3986#section-4.1" id="ref-for-section-4.1①">uri-reference</a> )
+directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc3986#section-4.1" id="ref-for-section-4.1">uri-reference</a> *( <a data-link-type="grammar" href="#grammardef-required-ascii-whitespace" id="ref-for-grammardef-required-ascii-whitespace⑤">required-ascii-whitespace</a> <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc3986#section-4.1" id="ref-for-section-4.1①">uri-reference</a> )
 
 ; The <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc3986#section-4.1" id="ref-for-section-4.1②">uri-reference</a> grammar is defined in Section 4.1 of RFC 3986.
 </pre>
@@ -5861,7 +5868,7 @@ rest of Google’s CSP Cabal.</p>
    <li><a href="#grammardef-nonce-source">nonce-source</a><span>, in §2.3.1</span>
    <li><a href="#grammardef-none">'none'</a><span>, in §2.3.1</span>
    <li><a href="#object-src">object-src</a><span>, in §6.1.10</span>
-   <li><a href="#grammardef-optional-ascii-whitespace">Optional ASCII whitespace</a><span>, in §2.1</span>
+   <li><a href="#grammardef-optional-ascii-whitespace">optional-ascii-whitespace</a><span>, in §2.1</span>
    <li>
     originalPolicy
     <ul>
@@ -5897,7 +5904,7 @@ rest of Google’s CSP Cabal.</p>
    <li><a href="#grammardef-report-sample">'report-sample'</a><span>, in §2.3.1</span>
    <li><a href="#report-to">report-to</a><span>, in §6.4.2</span>
    <li><a href="#report-uri">report-uri</a><span>, in §6.4.1</span>
-   <li><a href="#grammardef-required-ascii-whitespace">Required ASCII whitespace</a><span>, in §2.1</span>
+   <li><a href="#grammardef-required-ascii-whitespace">required-ascii-whitespace</a><span>, in §2.1</span>
    <li><a href="#violation-resource">resource</a><span>, in §2.4</span>
    <li><a href="#directive-response-check">response check</a><span>, in §2.3</span>
    <li>
@@ -7348,10 +7355,10 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="term-for-ascii-whitespace">
    <a href="https://infra.spec.whatwg.org/#ascii-whitespace">https://infra.spec.whatwg.org/#ascii-whitespace</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-ascii-whitespace">2.1. Infrastructure</a> <a href="#ref-for-ascii-whitespace①">(2)</a> <a href="#ref-for-ascii-whitespace②">(3)</a>
-    <li><a href="#ref-for-ascii-whitespace③">2.2.1. 
+    <li><a href="#ref-for-ascii-whitespace">2.1. Infrastructure</a>
+    <li><a href="#ref-for-ascii-whitespace①">2.2.1. 
     Parse a serialized CSP </a>
-    <li><a href="#ref-for-ascii-whitespace④">2.3. Directives</a>
+    <li><a href="#ref-for-ascii-whitespace②">2.3. Directives</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-collect-a-sequence-of-code-points">
@@ -7568,11 +7575,7 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="term-for-section-3.2.3">
    <a href="https://tools.ietf.org/html/rfc7230#section-3.2.3">https://tools.ietf.org/html/rfc7230#section-3.2.3</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-section-3.2.3">2.2. Policies</a> <a href="#ref-for-section-3.2.3①">(2)</a>
-    <li><a href="#ref-for-section-3.2.3②">3.1. 
-    The Content-Security-Policy HTTP Response Header Field </a>
-    <li><a href="#ref-for-section-3.2.3③">3.2. 
-    The Content-Security-Policy-Report-Only HTTP Response Header Field </a>
+    <li><a href="#ref-for-section-3.2.3">2.1. Infrastructure</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-section-3.2.6">
@@ -8266,11 +8269,8 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="grammardef-optional-ascii-whitespace">
    <b><a href="#grammardef-optional-ascii-whitespace">#grammardef-optional-ascii-whitespace</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-grammardef-optional-ascii-whitespace">2.2. Policies</a> <a href="#ref-for-grammardef-optional-ascii-whitespace①">(2)</a>
-    <li><a href="#ref-for-grammardef-optional-ascii-whitespace②">3.1. 
-    The Content-Security-Policy HTTP Response Header Field </a>
-    <li><a href="#ref-for-grammardef-optional-ascii-whitespace③">3.2. 
-    The Content-Security-Policy-Report-Only HTTP Response Header Field </a>
+    <li><a href="#ref-for-grammardef-optional-ascii-whitespace">2.1. Infrastructure</a> <a href="#ref-for-grammardef-optional-ascii-whitespace①">(2)</a> <a href="#ref-for-grammardef-optional-ascii-whitespace②">(3)</a> <a href="#ref-for-grammardef-optional-ascii-whitespace③">(4)</a> <a href="#ref-for-grammardef-optional-ascii-whitespace④">(5)</a>
+    <li><a href="#ref-for-grammardef-optional-ascii-whitespace⑤">2.2. Policies</a> <a href="#ref-for-grammardef-optional-ascii-whitespace⑥">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="grammardef-required-ascii-whitespace">
@@ -8734,7 +8734,7 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="grammardef-serialized-directive">
    <b><a href="#grammardef-serialized-directive">#grammardef-serialized-directive</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-grammardef-serialized-directive">2.2. Policies</a>
+    <li><a href="#ref-for-grammardef-serialized-directive">2.2. Policies</a> <a href="#ref-for-grammardef-serialized-directive①">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="grammardef-directive-name">
