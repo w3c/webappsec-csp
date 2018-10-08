@@ -460,20 +460,26 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
         3.  Let |directive name| be the result of [=collecting a sequence of code points=] from
             |token| which are not [=ASCII whitespace=].
 
-        4.  If |policy|'s [=policy/directive set=] contains a [=directive=] whose [=directive/name=]
+        4.  Set |directive name| to be the result of running <a>ASCII lowercase</a>
+            on |directive name|.
+
+            Note: Directive names are case-insensitive, that is: `script-SRC 'none'` and
+            `ScRiPt-sRc 'none'` are equivalent.
+
+        5.  If |policy|'s [=policy/directive set=] contains a [=directive=] whose [=directive/name=]
             is |directive name|, [=iteration/continue=].
 
-            In this case, the user agent SHOULD notify developers that a duplicate directive was
-            ignored. A console warning might be appropriate, for example.
+            Note: In this case, the user agent SHOULD notify developers that a duplicate
+            directive was ignored. A console warning might be appropriate, for example.
 
-        5.  Let |directive value| be the result of
+        6.  Let |directive value| be the result of
             <a lt="split a string on ASCII whitespace">splitting |token| on
             ASCII whitespace</a>.
 
-        6.  Let |directive| be a new [=directive=] whose [=directive/name=] is |directive name|, and
+        7.  Let |directive| be a new [=directive=] whose [=directive/name=] is |directive name|, and
             [=directive/value=] is |directive value|.
 
-        7.  [=set/append|Append=] |directive| to |policy|'s [=policy/directive set=].
+        8.  [=set/append|Append=] |directive| to |policy|'s [=policy/directive set=].
 
     3.  Return |policy|.
   </ol>
