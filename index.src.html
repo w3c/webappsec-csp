@@ -140,6 +140,11 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   type: dfn
     for: WorkerGlobalScope
       text: owner set; url: concept-WorkerGlobalScope-owner-set
+
+spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
+  type: grammar
+    text: ASCII whitespace; url: ascii-whitespace
+    text: INFRA; url: #
 </pre>
 <pre class="biblio">
 {
@@ -365,10 +370,30 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   This document uses ABNF grammar to specify syntax, as defined in [[!RFC5234]]. It also relies on
   the `#rule` ABNF extension defined in
-  <a href="https://tools.ietf.org/html/rfc7230#section-7">Section 7</a> of [[!RFC7230]].
+  <a href="https://tools.ietf.org/html/rfc7230#section-7">Section 7</a> of [[!RFC7230]],
+  with the modification that <a grammar>OWS</a> is replaced with
+  <a grammar>optional-ascii-whitespace</a>. That is, the `#rule` used in this
+  document is defined as:
+
+  <pre>
+    1#element => element *( <a grammar>optional-ascii-whitespace</a> "," <a grammar>optional-ascii-whitespace</a> element )
+  </pre>
+
+  and for n >= 1 and m > 1:
+
+  <pre>
+    &lt;n&gt;#&lt;m&gt;element => element &lt;n-1&gt;*&lt;m-1&gt;( <a grammar>optional-ascii-whitespace</a> "," <a grammar>optional-ascii-whitespace</a> element )
+  </pre>
 
   This document depends on the Infra Standard for a number of foundational concepts used in its
   algorithms and prose [[!INFRA]].
+
+  The following definitions are used to improve readability of other definitions in this document.
+  <pre dfn-type="grammar" link-type="grammar">
+    <dfn>optional-ascii-whitespace</dfn> = *( %x09 / %x0A / %x0C / %x0D / %x20 )
+    <dfn>required-ascii-whitespace</dfn> = 1*( %x09 / %x0A / %x0C / %x0D / %x20 )
+    ; These productions match the definition of <a>ASCII whitespace</a> from the <a>INFRA</a> standard.
+  </pre>
 
   <h3 id="framework-policy">Policies</h3>
 
@@ -396,8 +421,8 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   series of <a>serialized directives</a>, adhering to the following ABNF grammar [[!RFC5234]]:
 
   <pre dfn-type="grammar" link-type="grammar">
-    <dfn>serialized-policy</dfn> = <a>serialized-directive</a> *( <a>OWS</a> ";" [ <a>OWS</a> <a>serialized-directive</a> ] )
-                        ; <a>OWS</a> is defined in section 3.2.3 of RFC 7230
+    <dfn>serialized-policy</dfn> =
+        <a>serialized-directive</a> *( <a>optional-ascii-whitespace</a> ";" [ <a>optional-ascii-whitespace</a> <a>serialized-directive</a> ] )
   </pre>
 
   A <dfn export>serialized CSP list</dfn> is an [=ASCII string=] consisting of a comma-delimited
@@ -405,7 +430,9 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   <pre dfn-type="grammar" link-type="grammar">
     <dfn>serialized-policy-list</dfn> = 1#<a>serialized-policy</a>
-                        ; The '#' rule is defined in section 7 of RFC 7230
+                        ; The '#' rule is the one defined in section 7 of RFC 7230
+                        ; but it incorporates the modifications specified
+                        ; in section 2.1 of this document.
   </pre>
 
   <h4 id="parse-serialized-policy" algorithm>
@@ -493,14 +520,15 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   whitespace-delimited tokens, and adhering to the following ABNF [[!RFC5234]]:
 
   <pre dfn-type="grammar" link-type="grammar">
-    <dfn>serialized-directive</dfn> = <a>directive-name</a> [ <a>RWS</a> <a>directive-value</a> ]
+    <dfn>serialized-directive</dfn> = <a>directive-name</a> [ <a>required-ascii-whitespace</a> <a>directive-value</a> ]
     <dfn>directive-name</dfn>       = 1*( <a>ALPHA</a> / <a>DIGIT</a> / "-" )
-    <dfn>directive-value</dfn>      = *( %x09 / %x20-%x2B / %x2D-%x3A / %x3C-%7E )
+    <dfn>directive-value</dfn>      = *( <a>required-ascii-whitespace</a> / ( %x21-%x2B / %x2D-%x3A / %x3C-%x7E ) )
                            ; Directive values may contain whitespace and <a>VCHAR</a> characters,
-                           ; excluding ";" and ","
+                           ; excluding ";" and ",". The second half of the definition
+                           ; above represents all <a>VCHAR</a> characters (%x21-%x7E)
+                           ; without ";" and "," (%x3B and %x2C respectively)
 
-    ; <a>RWS</a> is defined in section 3.2.3 of RFC7230. <a>ALPHA</a>, <a>DIGIT</a>, and
-    ; <a>VCHAR</a> are defined in Appendix B.1 of RFC 5234.
+    ; <a>ALPHA</a>, <a>DIGIT</a>, and <a>VCHAR</a> are defined in Appendix B.1 of RFC 5234.
   </pre>
 
   <a>Directives</a> have a number of associated algorithms:
@@ -577,7 +605,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   [[!RFC5234]]:
 
   <pre dfn-type="grammar" link-type="grammar">
-    <dfn>serialized-source-list</dfn> = ( <a>source-expression</a> *( <a>RWS</a> <a>source-expression</a> ) ) / "<dfn>'none'</dfn>"
+    <dfn>serialized-source-list</dfn> = ( <a>source-expression</a> *( <a>required-ascii-whitespace</a> <a>source-expression</a> ) ) / "<dfn>'none'</dfn>"
     <dfn>source-expression</dfn>      = <a>scheme-source</a> / <a>host-source</a> / <a>keyword-source</a>
                              / <a>nonce-source</a> / <a>hash-source</a>
 
@@ -591,7 +619,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     <dfn>host-part</dfn>   = "*" / [ "*." ] 1*<a>host-char</a> *( "." 1*<a>host-char</a> )
     <dfn>host-char</dfn>   = <a>ALPHA</a> / <a>DIGIT</a> / "-"
     <dfn>port-part</dfn>   = 1*<a>DIGIT</a> / "*"
-    <dfn>path-part</dfn>   = <a>path-absolute</a>
+    <dfn>path-part</dfn>   = <a>path-absolute</a> (but not including ";" or ",")
                   ; <a>path-absolute</a> is defined in section 3.3 of RFC 3986.
 
     ; Keywords:
@@ -783,6 +811,9 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   <pre>
     Content-Security-Policy = 1#<a grammar>serialized-policy</a>
+                        ; The '#' rule is the one defined in section 7 of RFC 7230
+                        ; but it incorporates the modifications specified
+                        ; in section 2.1 of this document.
   </pre>
 
   <div class="example">
@@ -815,6 +846,9 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   <pre>
     Content-Security-Policy-Report-Only = 1#<a grammar>serialized-policy</a>
+                        ; The '#' rule is the one defined in section 7 of RFC 7230
+                        ; but it incorporates the modifications specified
+                        ; in section 2.1 of this document.
   </pre>
 
   This header field allows developers to piece together their security policy in
@@ -3246,7 +3280,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     directive-name  = "plugin-types"
     directive-value = <a>media-type-list</a>
 
-    <dfn>media-type-list</dfn> = <a>media-type</a> *( <a>RWS</a> <a>media-type</a> )
+    <dfn>media-type-list</dfn> = <a>media-type</a> *( <a>required-ascii-whitespace</a> <a>media-type</a> )
     <dfn>media-type</dfn> = <a>type</a> "/" <a>subtype</a>
     ; <a>type</a> and <a>subtype</a> are defined in RFC 2045
   </pre>
@@ -3364,7 +3398,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   <pre dfn-type="grammar" link-type="grammar">
     directive-name  = "sandbox"
-    directive-value = "" / <a>token</a> *( <a>RWS</a> <a>token</a> )
+    directive-value = "" / <a>token</a> *( <a>required-ascii-whitespace</a> <a>token</a> )
   </pre>
 
   This directive has no reporting requirements; it will be ignored entirely when
@@ -3477,7 +3511,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     directive-name  = "frame-ancestors"
     directive-value = <a>ancestor-source-list</a>
 
-    <dfn>ancestor-source-list</dfn> = ( <a>ancestor-source</a> *( <a>RWS</a> <a>ancestor-source</a>) ) / "<a>'none'</a>"
+    <dfn>ancestor-source-list</dfn> = ( <a>ancestor-source</a> *( <a>required-ascii-whitespace</a> <a>ancestor-source</a>) ) / "<a>'none'</a>"
     <dfn>ancestor-source</dfn>      = <a>scheme-source</a> / <a>host-source</a> / "<a>'self'</a>"
   </pre>
 
@@ -3693,7 +3727,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 
   <pre link-type="grammar">
     directive-name  = "report-uri"
-    directive-value = <a>uri-reference</a> *( <a>RWS</a> <a>uri-reference</a> )
+    directive-value = <a>uri-reference</a> *( <a>required-ascii-whitespace</a> <a>uri-reference</a> )
 
     ; The <a>uri-reference</a> grammar is defined in Section 4.1 of RFC 3986.
   </pre>
