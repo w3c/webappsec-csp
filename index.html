@@ -1214,7 +1214,7 @@ Possible extra rowspan handling
 </style>
   <meta content="Bikeshed version 47cb5324cd11789aef12f220cf86d1780f94ab9c" name="generator">
   <link href="https://www.w3.org/TR/CSP3/" rel="canonical">
-  <meta content="ace2178960fb1e5d9381d715107b6b1306273b4b" name="document-revision">
+  <meta content="7c675fc237e300c574f41101f502f51c6398c71a" name="document-revision">
 <style>
   ul.toc ul ul ul {
     margin: 0 0 0 2em;
@@ -5549,24 +5549,30 @@ document<c- p>.</c->write<c- p>(</c-><c- t>'&lt;scr'</c-> <c- o>+</c-> <c- t>'ip
     <section>
      <h3 class="heading settled" data-level="8.4" id="external-hash"><span class="secno">8.4. </span><span class="content"> Allowing external JavaScript via hashes </span><a class="self-link" href="#external-hash"></a></h3>
      <p>In <a data-link-type="biblio" href="#biblio-csp2">[CSP2]</a>, hash <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression①⓪">source expressions</a> could only match inlined
-    script, but now that Subresource Integrity is widely deployed, we can expand
-    the scope to enable externalized JavaScript as well.</p>
+    script, but now that Subresource Integrity <a data-link-type="biblio" href="#biblio-sri">[SRI]</a> is widely deployed,
+    we can expand the scope to enable externalized JavaScript as well.</p>
      <p>If multiple sets of integrity metadata are specified for a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑥">script</a></code>, the
     request will match a policy’s <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source⑨">hash-source</a>s if and only if <em>each</em> item in a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑦">script</a></code>'s integrity metadata matches the policy.</p>
+     <p class="note" role="note"><span>Note:</span> The CSP spec specifies that the contents of an inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑧">script</a></code> element
+    or event handler needs to be encoded using <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#utf-8-encode" id="ref-for-utf-8-encode①">UTF-8 encode</a> before computing
+    its hash. <a data-link-type="biblio" href="#biblio-sri">[SRI]</a> computes the hash on the raw resource that is being
+    fetched instead. This means that it is possible for the hash needed to whitelist
+    an inline script block to be different that the hash needed to whitelist an
+    external script even if they have identical contents.</p>
      <div class="example" id="example-af80f2fd">
       <a class="self-link" href="#example-af80f2fd"></a> MegaCorp, Inc. wishes to allow two specific scripts on a page in a way
       that ensures that the content matches their expectations. They do so by
       setting the following policy: 
 <pre>Content-Security-Policy: script-src 'sha256-abc123' 'sha512-321cba'
 </pre>
-      <p>In the presence of that policy, the following <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑧">script</a></code> elements would be
+      <p>In the presence of that policy, the following <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑨">script</a></code> elements would be
       allowed to execute because they contain only integrity metadata that matches
       the policy:</p>
 <pre class="highlight"><c- p>&lt;</c-><c- f>script</c-> <c- e>integrity</c-><c- o>=</c-><c- s>"sha256-abc123"</c-> ...<c- p>>&lt;/</c-><c- f>script</c-><c- p>></c->
 <c- p>&lt;</c-><c- f>script</c-> <c- e>integrity</c-><c- o>=</c-><c- s>"sha512-321cba"</c-> ...<c- p>>&lt;/</c-><c- f>script</c-><c- p>></c->
 <c- p>&lt;</c-><c- f>script</c-> <c- e>integrity</c-><c- o>=</c-><c- s>"sha256-abc123 sha512-321cba"</c-> ...<c- p>>&lt;/</c-><c- f>script</c-><c- p>></c->
 </pre>
-      <p>While the following <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑨">script</a></code> elements would not execute because they
+      <p>While the following <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script②⓪">script</a></code> elements would not execute because they
       contain valid metadata that does not match the policy (even though other
       metadata does match):</p>
 <pre class="highlight"><c- p>&lt;</c-><c- f>script</c-> <c- e>integrity</c-><c- o>=</c-><c- s>"</c-><b><c- s>sha384-xyz789</c-></b><c- s>"</c-> ...<c- p>>&lt;/</c-><c- f>script</c-><c- p>></c->
@@ -6180,6 +6186,8 @@ rest of Google’s CSP Cabal.</p>
    <ul>
     <li><a href="#ref-for-utf-8-encode">6.6.3.3. 
     Does element match source list for type and source? </a>
+    <li><a href="#ref-for-utf-8-encode①">8.4. 
+      Allowing external JavaScript via hashes </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-request-body">
@@ -7231,7 +7239,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-script①③">8.2. 
     Usage of "'strict-dynamic'" </a> <a href="#ref-for-script①④">(2)</a> <a href="#ref-for-script①⑤">(3)</a>
     <li><a href="#ref-for-script①⑥">8.4. 
-      Allowing external JavaScript via hashes </a> <a href="#ref-for-script①⑦">(2)</a> <a href="#ref-for-script①⑧">(3)</a> <a href="#ref-for-script①⑨">(4)</a>
+      Allowing external JavaScript via hashes </a> <a href="#ref-for-script①⑦">(2)</a> <a href="#ref-for-script①⑧">(3)</a> <a href="#ref-for-script①⑨">(4)</a> <a href="#ref-for-script②⓪">(5)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-set-the-frozen-base-url">
