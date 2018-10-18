@@ -1551,8 +1551,10 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
      Exposed=(Window,Worker)]
     interface SecurityPolicyViolationEvent : Event {
         readonly    attribute USVString      documentURL;
+        readonly    attribute USVString      documentURI;         // historical
         readonly    attribute USVString      referrer;
         readonly    attribute USVString      blockedURL;
+        readonly    attribute USVString      blockedURI;          // historical
         readonly    attribute DOMString      violatedDirective;
         readonly    attribute DOMString      effectiveDirective;
         readonly    attribute DOMString      originalPolicy;
@@ -1561,13 +1563,17 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
         readonly    attribute SecurityPolicyViolationEventDisposition      disposition;
         readonly    attribute unsigned short statusCode;
         readonly    attribute unsigned long  lineno;
+        readonly    attribute unsigned long  lineNumber;          // historical
         readonly    attribute unsigned long  colno;
+        readonly    attribute unsigned long  columnNumber;        // historical
     };
 
     dictionary SecurityPolicyViolationEventInit : EventInit {
         required USVString      documentURL;
+        required USVString      documentURI;                      // historical
                  USVString      referrer = "";
                  USVString      blockedURL = "";
+                 USVString      blockedURI = "";                  // historical
         required DOMString      violatedDirective;
         required DOMString      effectiveDirective;
         required DOMString      originalPolicy;
@@ -1576,7 +1582,9 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
         required SecurityPolicyViolationEventDisposition disposition;
         required unsigned short statusCode;
                  unsigned long  lineno = 0;
+                 unsigned long  lineNumber = 0;                   // historical
                  unsigned long  colno = 0;
+                 unsigned long  columnNumber = 0;                 // historical
     };
   </pre>
 
@@ -1591,15 +1599,19 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   1.  Let |object| be a new JavaScript object with properties initialized as
       follows:
 
-      :   "`document-uri`"
+      :   "`document-url`"
       ::  The result of executing the <a>URL serializer</a> on |violation|'s
           <a for="violation">url</a>, with the `exclude fragment` flag set.
+      :   "`document-uri`"
+      ::  A copy of the "`document-url`" property, kept for historical reasons
       :   "`referrer`"
       ::  The result of executing the <a>URL serializer</a> on |violation|'s
           <a for="violation">referrer</a>, with the `exclude fragment` flag set.
-      :   "`blocked-uri`"
+      :   "`blocked-url`"
       ::  The result of executing the <a>URL serializer</a> on |violation|'s
           <a for="violation">resource</a>, with the `exclude fragment` flag set.
+      :   "`blocked-uri`"
+      ::  A copy of the "`blocked-url`" property, kept for historical reasons
       :   "`effective-directive`"
       ::  |violation|'s <a for="violation">effective directive</a>
       :   "`violated-directive`"
@@ -1628,13 +1640,23 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
           the <a>URL serializer</a> on |violation|'s <a for="violation">source
           file</a>, with the `exclude fragment` flag set.
 
-      2.  Set |object|'s "`line-number`" property to |violation|'s
+      2.  Set |object|'s "`lineno`" property to |violation|'s
           <a for="violation">line number</a>.
 
-      3.  Set |object|'s "`column-number`" property to |violation|'s
+      3.  Set |object|'s "`line-number`" property to |violation|'s
+          <a for="violation">line number</a>.
+
+      4.  Set |object|'s "`colno`" property to |violation|'s
           <a for="violation">column number</a>.
 
-  3.  Assert: If |object|'s "`blocked-uri`" property is not "`inline`", then its "`sample`"
+      5.  Set |object|'s "`column-number`" property to |violation|'s
+          <a for="violation">column number</a>.
+
+          Note: the "`line-number`" and "`column-number`" properties are
+          maintained for historical reasons and are duplicates of "`lineno`"
+          and "`colno`" respectively.
+
+  3.  Assert: If |object|'s "`blocked-url`" property is not "`inline`", then its "`sample`"
       property is the empty string.
 
   4.  Return the result of executing {{JSON.stringify()}} on |object|.
@@ -1680,12 +1702,18 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
           that uses the {{SecurityPolicyViolationEvent}} interface at |target| with
           its attributes initialized as follows:
 
+          :  {{SecurityPolicyViolationEvent/documentURL}}
+          ::  The result of executing the <a>URL serializer</a> on |violation|'s
+              <a for="violation">url</a>, with the `exclude fragment` flag set.
           :  {{SecurityPolicyViolationEvent/documentURI}}
           ::  The result of executing the <a>URL serializer</a> on |violation|'s
               <a for="violation">url</a>, with the `exclude fragment` flag set.
           :  {{SecurityPolicyViolationEvent/referrer}}
           ::  The result of executing the <a>URL serializer</a> on |violation|'s
               <a for="violation">referrer</a>, with the `exclude fragment` flag set.
+          :  {{SecurityPolicyViolationEvent/blockedURL}}
+          ::  The result of executing the <a>URL serializer</a> on |violation|'s
+              <a for="violation">resource</a>, with the `exclude fragment` flag set.
           :  {{SecurityPolicyViolationEvent/blockedURI}}
           ::  The result of executing the <a>URL serializer</a> on |violation|'s
               <a for="violation">resource</a>, with the `exclude fragment` flag set.
@@ -1705,8 +1733,12 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
              it not `null` and the empty string otherwise.
           :  {{SecurityPolicyViolationEvent/statusCode}}
           :: |violation|'s <a for="violation">status</a>
+          :  {{SecurityPolicyViolationEvent/lineno}}
+          :: |violation|'s <a for="violation">line number</a>
           :  {{SecurityPolicyViolationEvent/lineNumber}}
           :: |violation|'s <a for="violation">line number</a>
+          :  {{SecurityPolicyViolationEvent/colno}}
+          :: |violation|'s <a for="violation">column number</a>
           :  {{SecurityPolicyViolationEvent/columnNumber}}
           :: |violation|'s <a for="violation">column number</a>
           :  {{SecurityPolicyViolationEvent/sample}}
@@ -1716,9 +1748,14 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
           :  {{Event/composed}}
           :: `true`
 
-          Note: Both {{SecurityPolicyViolationEvent/effectiveDirective}} and
-          {{SecurityPolicyViolationEvent/violatedDirective}} are the same value.
-          This is intentional to maintain backwards compatibility.
+          Note: A number of these attributes have the same value and are maintained
+          for historical reasons. As such the following pairs of attributes
+          have the same values:
+          * {{SecurityPolicyViolationEvent/documentURL}} and {{SecurityPolicyViolationEvent/documentURI}}
+          * {{SecurityPolicyViolationEvent/blockedURL}} and {{SecurityPolicyViolationEvent/blockedURI}}
+          * {{SecurityPolicyViolationEvent/effectiveDirective}} and {{SecurityPolicyViolationEvent/violatedDirective}}
+          * {{SecurityPolicyViolationEvent/lineno}} and {{SecurityPolicyViolationEvent/lineNumber}}
+          * {{SecurityPolicyViolationEvent/colno}} and {{SecurityPolicyViolationEvent/columnNumber}}
 
           Note: We set the {{Event/composed}} attribute, which means that this event
           can be captured on its way into, and will bubble its way out of a shadow
