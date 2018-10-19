@@ -1551,30 +1551,27 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
      Exposed=(Window,Worker)]
     interface SecurityPolicyViolationEvent : Event {
         readonly    attribute USVString      documentURL;
-        readonly    attribute USVString      documentURI;         // historical
+        readonly    attribute USVString      documentURI;
         readonly    attribute USVString      referrer;
         readonly    attribute USVString      blockedURL;
-        readonly    attribute USVString      blockedURI;          // historical
-        readonly    attribute DOMString      violatedDirective;
+        readonly    attribute USVString      blockedURI;
         readonly    attribute DOMString      effectiveDirective;
+        readonly    attribute DOMString      violatedDirective;
         readonly    attribute DOMString      originalPolicy;
         readonly    attribute USVString      sourceFile;
         readonly    attribute DOMString      sample;
         readonly    attribute SecurityPolicyViolationEventDisposition      disposition;
         readonly    attribute unsigned short statusCode;
         readonly    attribute unsigned long  lineno;
-        readonly    attribute unsigned long  lineNumber;          // historical
+        readonly    attribute unsigned long  lineNumber;
         readonly    attribute unsigned long  colno;
-        readonly    attribute unsigned long  columnNumber;        // historical
+        readonly    attribute unsigned long  columnNumber;
     };
 
     dictionary SecurityPolicyViolationEventInit : EventInit {
         required USVString      documentURL;
-        required USVString      documentURI;                      // historical
                  USVString      referrer = "";
                  USVString      blockedURL = "";
-                 USVString      blockedURI = "";                  // historical
-        required DOMString      violatedDirective;
         required DOMString      effectiveDirective;
         required DOMString      originalPolicy;
                  USVString      sourceFile = "";
@@ -1582,11 +1579,24 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
         required SecurityPolicyViolationEventDisposition disposition;
         required unsigned short statusCode;
                  unsigned long  lineno = 0;
-                 unsigned long  lineNumber = 0;                   // historical
                  unsigned long  colno = 0;
-                 unsigned long  columnNumber = 0;                 // historical
     };
   </pre>
+
+  The <dfn for="SecurityPolicyViolationEvent" attribute export>documentURI</dfn> attribute's
+  getter must return the value of the object's {{SecurityPolicyViolationEvent/documentURL}} property.
+
+  The <dfn for="SecurityPolicyViolationEvent" attribute export>blockedURI</dfn> attribute's
+  getter must return the value of the object's {{SecurityPolicyViolationEvent/blockedURL}} property.
+
+  The <dfn for="SecurityPolicyViolationEvent" attribute export>violatedDirective</dfn> attribute's
+  getter must return the value of the object's {{SecurityPolicyViolationEvent/effectiveDirective}} property.
+
+  The <dfn for="SecurityPolicyViolationEvent" attribute export>lineNumber</dfn> attribute's
+  getter must return the value of the object's {{SecurityPolicyViolationEvent/lineno}} property.
+
+  The <dfn for="SecurityPolicyViolationEvent" attribute export>columnNumber</dfn> attribute's
+  getter must return the value of the object's {{SecurityPolicyViolationEvent/colno}} property.
 
   <h3 id="deprecated-serialize-violation">
     Obtain the deprecated serialization of |violation|
@@ -1615,7 +1625,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       :   "`effective-directive`"
       ::  |violation|'s <a for="violation">effective directive</a>
       :   "`violated-directive`"
-      ::  |violation|'s <a for="violation">effective directive</a>
+      ::  A copy of the "`effective-directive`" property, kept for historical reasons
       :   "`original-policy`"
       ::  The <a lt="serialized CSP">serialization</a> of |violation|'s
           <a for="violation">policy</a>
@@ -1705,21 +1715,13 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
           :  {{SecurityPolicyViolationEvent/documentURL}}
           ::  The result of executing the <a>URL serializer</a> on |violation|'s
               <a for="violation">url</a>, with the `exclude fragment` flag set.
-          :  {{SecurityPolicyViolationEvent/documentURI}}
-          ::  The result of executing the <a>URL serializer</a> on |violation|'s
-              <a for="violation">url</a>, with the `exclude fragment` flag set.
           :  {{SecurityPolicyViolationEvent/referrer}}
           ::  The result of executing the <a>URL serializer</a> on |violation|'s
               <a for="violation">referrer</a>, with the `exclude fragment` flag set.
           :  {{SecurityPolicyViolationEvent/blockedURL}}
           ::  The result of executing the <a>URL serializer</a> on |violation|'s
               <a for="violation">resource</a>, with the `exclude fragment` flag set.
-          :  {{SecurityPolicyViolationEvent/blockedURI}}
-          ::  The result of executing the <a>URL serializer</a> on |violation|'s
-              <a for="violation">resource</a>, with the `exclude fragment` flag set.
           :  {{SecurityPolicyViolationEvent/effectiveDirective}}
-          :: |violation|'s <a for="violation">effective directive</a>
-          :  {{SecurityPolicyViolationEvent/violatedDirective}}
           :: |violation|'s <a for="violation">effective directive</a>
           :  {{SecurityPolicyViolationEvent/originalPolicy}}
           ::  The <a lt="serialized CSP">serialization</a> of |violation|'s
@@ -1735,11 +1737,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
           :: |violation|'s <a for="violation">status</a>
           :  {{SecurityPolicyViolationEvent/lineno}}
           :: |violation|'s <a for="violation">line number</a>
-          :  {{SecurityPolicyViolationEvent/lineNumber}}
-          :: |violation|'s <a for="violation">line number</a>
           :  {{SecurityPolicyViolationEvent/colno}}
-          :: |violation|'s <a for="violation">column number</a>
-          :  {{SecurityPolicyViolationEvent/columnNumber}}
           :: |violation|'s <a for="violation">column number</a>
           :  {{SecurityPolicyViolationEvent/sample}}
           :: |violation|'s <a for="violation">sample</a>
@@ -1747,15 +1745,6 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
           :: `true`
           :  {{Event/composed}}
           :: `true`
-
-          Note: A number of these attributes have the same value and are maintained
-          for historical reasons. As such the following pairs of attributes
-          have the same values:
-          * {{SecurityPolicyViolationEvent/documentURL}} and {{SecurityPolicyViolationEvent/documentURI}}
-          * {{SecurityPolicyViolationEvent/blockedURL}} and {{SecurityPolicyViolationEvent/blockedURI}}
-          * {{SecurityPolicyViolationEvent/effectiveDirective}} and {{SecurityPolicyViolationEvent/violatedDirective}}
-          * {{SecurityPolicyViolationEvent/lineno}} and {{SecurityPolicyViolationEvent/lineNumber}}
-          * {{SecurityPolicyViolationEvent/colno}} and {{SecurityPolicyViolationEvent/columnNumber}}
 
           Note: We set the {{Event/composed}} attribute, which means that this event
           can be captured on its way into, and will bubble its way out of a shadow
