@@ -4863,7 +4863,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     Suppose MegaCorp, Inc. deploys the following policy:
 
     <pre>
-      <a http-header>Content-Security-Policy</a>: <a>script-src</a> 'nonce-DhcnhD3khTMePgXwdayK9BsMqXjhguVV' <a grammar>'strict-dynamic'</a>
+      <a http-header>Content-Security-Policy</a>: <a>script-src</a> 'nonce-DhcnhD3khTMePgXwdayK9BsMqXjhguV' <a grammar>'strict-dynamic'</a>
     </pre>
 
     And serves the following HTML with that policy active:
@@ -4893,6 +4893,14 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     `sadness.js` will <em>not</em> load, however, as `document.write()` produces
     <{script}> elements which are <a>"parser-inserted"</a>.
   </div>
+
+  Note: With <a grammar>'strict-dynamic'</a>, scripts created at runtime will be
+  allowed to execute. If the location of such a script can be controlled by an
+  attacker, the policy will then allow the loading of arbitrary scripts. Developers
+  that use <a grammar>'strict-dynamic'</a> in their policy should audit the uses
+  of non-parser-inserted APIs and ensure that they are not invoked with potentially
+  untrusted data. This includes applications or frameworks that tend to determine
+  script locations at runtime.
 
   <section>
     <h3 id="unsafe-hashes-usage">
