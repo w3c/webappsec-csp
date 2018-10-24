@@ -1193,32 +1193,21 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     Initialize a `Document`'s `CSP list`
   </h4>
 
-  Given a {{Document}} (|document|), and a <a>response</a> (|response|), the
-  user agent performs the following steps in order to initialize |document|'s
-  <a for="Document">CSP list</a>:
+  Given a {{Document}} (|document|), a <a>response</a> (|response|), and a
+  <a>browsing context</a> (|source|) the user agent performs the following
+  steps in order to initialize |document|'s <a for="Document">CSP list</a>:
 
   1.  If |response|'s <a for="response">url</a>'s <a for="url">scheme</a> is a
       <a>local scheme</a>:
 
-      1.  Let |documents| be an empty list.
+      1.  For each |policy| in |source|'s <a>active document</a>'s
+          <a for="Document">CSP list</a>:
 
-      2.  If |document| has an <a>embedding document</a> (|embedding|), then add
-          |embedding| to |documents|.
-
-      3.  If |document| has an <a>opener browsing context</a>, then add its
-          <a>active document</a> to |documents|.
-
-      4.  For each |doc| in |documents|:
-
-          1.  For each |policy| in |doc|'s <a for="Document">CSP list</a>:
-
-              1.  Insert a copy of |policy| into |document|'s
-                  <a for="Document">CSP list</a>.
-
+          1.  Insert a copy of |policy| into |document|'s
+              <a for="Document">CSP list</a>.
 
       Note: <a>local scheme</a> includes `about:`, and this algorithm will
-      therefore copy the <a>embedding document</a>'s policies for <a>an iframe
-      `srcdoc` `Document`</a>.
+      therefore copy the <a>source browsing context</a>'s policies for <a>an iframe `srcdoc` `Document`</a>.
 
       Note: We do all this to ensure that a page cannot bypass its <a for="/">policy</a>
       by embedding a frame or popping up a new window containing content it
@@ -4771,8 +4760,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   As described in [[#initialize-document-csp]] and [[#initialize-global-object-csp]],
   documents loaded from <a>local schemes</a> will inherit a copy of the
-  policies in the <a for="global object">CSP list</a> of the <a>embedding document</a>
-  or <a>opener browsing context</a>. The goal is to ensure that a page can't
+  policies in the <a>source browsing context</a>. The goal is to ensure that a page can't
   bypass its policy by embedding a frame or opening a new window containing
   content that is entirely under its control (`srcdoc` documents, `blob:` or `data:`
   URLs, `about:blank` documents that can be manipulated via `document.write()`, etc).
@@ -4790,8 +4778,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   means that the new {{Document}}'s <a for="global object">CSP list</a> is a
   snapshot of the relevant policies at its creation time. Modifications in the
   <a for="global object">CSP list</a> of the new {{Document}} won't affect the
-  <a>embedding document</a> or <a>opener browsing context</a>'s
-  <a for="global object">CSP list</a> or vice-versa.
+  <a>source browsing context</a>'s <a for="global object">CSP list</a> or vice-versa.
 
   <div class="example">
     In the example below the image inside the iframe will not load because it is
