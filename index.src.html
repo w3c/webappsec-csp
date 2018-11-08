@@ -411,6 +411,12 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   Each policy has an associated <dfn for="policy" export>source</dfn>, which is either "`header`"
   or "`meta`".
 
+  Each policy has an associated <dfn for="policy" export>self-origin</dfn>, which
+  is an <a>origin</a> that is used when doing <a grammar>`'self'`</a> matching. This is
+  needed to facilitate the <a grammar>`'self'`</a> checks of <a>local scheme</a>
+  documents/workers that have inherited their policy but have an <a>opaque origin</a>.
+  [[#initialize-document-csp]] describes situations when a policy is inherited.
+
   Multiple [=/policies=] can be applied to a single resource, and are collected into a [=list=] of
   [=/policies=] known as a <dfn export>CSP list</dfn>.
 
@@ -1005,7 +1011,10 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
     4.  For each |policy| in |policies|:
 
-        1.  Insert |policy| into |response|'s <a for="response">CSP list</a>.
+        1.  Set |policy|'s [=policy/self-origin=] to |response|'s [=response/url=]'s
+            [=url/origin=].
+
+        2.  Insert |policy| into |response|'s <a for="response">CSP list</a>.
   </ol>
 
   <h4 id="report-for-request" algorithm>
@@ -2027,8 +2036,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       `connect-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  If the result of executing [[#match-request-to-source-list]] on
-      |request| and this directive's <a for="directive">value</a> is
-      "`Does Not Match`", return "`Blocked`".
+      |request|, this directive's <a for="directive">value</a>, and
+      |policy|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2048,9 +2057,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       `connect-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, and this directive's
-      <a for="directive">value</a> is "`Does Not Match`", return
-      "`Blocked`".
+      |response|, |request|, this directive's <a for="directive">value</a>,
+      and |policy|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2242,8 +2250,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       `font-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  If the result of executing [[#match-request-to-source-list]] on
-      |request| and this directive's <a for="directive">value</a> is
-      "`Does Not Match`", return "`Blocked`".
+      |request|, this directive's <a for="directive">value</a>, and
+      |policy|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2263,9 +2271,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       `font-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, and this directive's
-      <a for="directive">value</a> is "`Does Not Match`", return
-      "`Blocked`".
+      |response|, |request|, this directive's <a for="directive">value</a>,
+      and |policy|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2311,8 +2318,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       `frame-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  If the result of executing [[#match-request-to-source-list]] on
-      |request| and this directive's <a for="directive">value</a> is
-      "`Does Not Match`", return "`Blocked`".
+      |request|, this directive's <a for="directive">value</a>, and
+      |policy|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2332,9 +2339,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       `frame-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, and this directive's
-      <a for="directive">value</a> is "`Does Not Match`", return
-      "`Blocked`".
+      |response|, |request|, this directive's <a for="directive">value</a>,
+      and |policy|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2383,8 +2389,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       `img-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  If the result of executing [[#match-request-to-source-list]] on
-      |request| and this directive's <a for="directive">value</a> is
-      "`Does Not Match`", return "`Blocked`".
+      |request|, this directive's <a for="directive">value</a>, and |policy|,
+      is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2404,9 +2410,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       `frame-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, and this directive's
-      <a for="directive">value</a> is "`Does Not Match`", return
-      "`Blocked`".
+      |response|, |request|, this directive's <a for="directive">value</a>,
+      and |policy|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2451,8 +2456,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       `manifest-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  If the result of executing [[#match-request-to-source-list]] on
-      |request| and this directive's <a for="directive">value</a> is
-      "`Does Not Match`", return "`Blocked`".
+      |request|, this directive's <a for="directive">value</a>, and |policy|,
+      is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2472,9 +2477,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       `manifest-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, and this directive's
-      <a for="directive">value</a> is "`Does Not Match`", return
-      "`Blocked`".
+      |response|, |request|, this directive's <a for="directive">value</a>,
+      and |policy|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2522,8 +2526,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       `media-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  If the result of executing [[#match-request-to-source-list]] on
-      |request| and this directive's <a for="directive">value</a> is
-      "`Does Not Match`", return "`Blocked`".
+      |request|, this directive's <a for="directive">value</a>, and |policy|,
+      is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2543,9 +2547,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       `media-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, and this directive's
-      <a for="directive">value</a> is "`Does Not Match`", return
-      "`Blocked`".
+      |response|, |request|, this directive's <a for="directive">value</a>,
+      and |policy|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2590,8 +2593,9 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   2.  If the result of executing [[#should-directive-execute]] on |name|,
       `prefetch-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-request-to-source-list]] on |request| and this
-      directive's [=directive/value=] is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of executing [[#match-request-to-source-list]] on |request|,
+      this directive's [=directive/value=], and |policy|,
+      is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2610,8 +2614,9 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   2.  If the result of executing [[#should-directive-execute]] on |name|,
       `prefetch-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-response-to-source-list]] on |response|, |request|,
-      and this directive's [=directive/value=] is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of executing [[#match-response-to-source-list]] on |response|,
+      |request|, this directive's [=directive/value=], and |policy|,
+      is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2682,8 +2687,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       `object-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  If the result of executing [[#match-request-to-source-list]] on
-      |request| and this directive's <a for="directive">value</a> is
-      "`Does Not Match`", return "`Blocked`".
+      |request|, this directive's <a for="directive">value</a>, and |policy|,
+      is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2703,9 +2708,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       `object-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, and this directive's
-      <a for="directive">value</a> is "`Does Not Match`", return
-      "`Blocked`".
+      |response|, |request|, this directive's <a for="directive">value</a>,
+      and |policy|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2772,7 +2776,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   2.  If the result of executing [[#should-directive-execute]] on |name|,
       `script-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  Return the result of executing [[#script-pre-request]] on |request| and this directive.
+  3.  Return the result of executing [[#script-pre-request]] on |request|,
+      this directive, and |policy|.
 
   <h5 algorithm id="script-src-post-request">
     `script-src` Post-request check
@@ -2790,7 +2795,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       `script-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  Return the result of executing [[#script-post-request]] on |request|,
-      |response| and this directive.
+      |response|, this directive, and |policy|.
 
   <h5 algorithm id="script-src-inline">
     `script-src` Inline Check
@@ -2850,7 +2855,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   2.  If the result of executing [[#should-directive-execute]] on |name|,
       `script-src-elem` and |policy| is "`No`", return "`Allowed`".
 
-  3.  Return the result of executing [[#script-pre-request]] on |request| and this directive.
+  3.  Return the result of executing [[#script-pre-request]] on |request|,
+      this directive, and |policy|.
 
   <h5 algorithm id="script-src-elem-post-request">
     `script-src-elem` Post-request check
@@ -2868,7 +2874,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       `script-src-elem` and |policy| is "`No`", return "`Allowed`".
 
   3.  Return the result of executing [[#script-post-request]] on |request|,
-      |response| and this directive.
+      |response|, this directive, and |policy|.
 
   <h5 algorithm id="script-src-elem-inline">
     `script-src-elem` Inline Check
@@ -2994,8 +3000,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       "`Allowed`".
 
   4.  If the result of executing [[#match-request-to-source-list]] on
-      |request| and this directive's <a for="directive">value</a> is
-      "`Does Not Match`", return "`Blocked`".
+      |request|, this directive's <a for="directive">value</a>, and |policy|,
+      is "`Does Not Match`", return "`Blocked`".
 
   5.  Return "`Allowed`".
 
@@ -3020,9 +3026,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       "`Allowed`".
 
   4.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, and this directive's
-      <a for="directive">value</a> is "`Does Not Match`", return
-      "`Blocked`".
+      |response|, |request|, this directive's <a for="directive">value</a>,
+      and |policy|, is "`Does Not Match`", return "`Blocked`".
 
   5.  Return "`Allowed`".
 
@@ -3085,8 +3090,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       "`Allowed`".
 
   4.  If the result of executing [[#match-request-to-source-list]] on
-      |request| and this directive's <a for="directive">value</a> is
-      "`Does Not Match`", return "`Blocked`".
+      |request|, this directive's <a for="directive">value</a>, and |policy|,
+      is "`Does Not Match`", return "`Blocked`".
 
   5.  Return "`Allowed`".
 
@@ -3111,9 +3116,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       "`Allowed`".
 
   4.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, and this directive's
-      <a for="directive">value</a> is "`Does Not Match`", return
-      "`Blocked`".
+      |response|, |request|, this directive's <a for="directive">value</a>,
+      and |policy|, is "`Does Not Match`", return "`Blocked`".
 
   5.  Return "`Allowed`".
 
@@ -3215,8 +3219,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       `worker-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  If the result of executing [[#match-request-to-source-list]] on
-      |request| and this directive's <a for="directive">value</a> is
-      "`Does Not Match`", return "`Blocked`".
+      |request|, this directive's <a for="directive">value</a>, and |policy|,
+      is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -3236,9 +3240,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       `worker-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, and this directive's
-      <a for="directive">value</a> is "`Does Not Match`", return
-      "`Blocked`".
+      |response|, |request|, this directive's <a for="directive">value</a>,
+      and |policy|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -3284,8 +3287,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       3.  If |source list| is `null`, skip to the next |policy|.
 
       4.  If the result of executing [[#match-url-to-source-list]] on |base|, |source list|,
-          |document|'s <a>fallback base URL</a>'s <a for="url">origin</a>, and `0` is "`Does
-          Not Match`":
+          |policy|'s [=policy/self-origin=], and `0` is "`Does Not Match`":
 
           1.  Let |violation| be the result of executing
               [[#create-violation-for-global]] on |document|'s <a for="/">global
@@ -3521,8 +3523,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     2.  If |navigation type| is "`form-submission`":
 
         1.  If the result of executing [[#match-request-to-source-list]] on
-            |request| and this directive's <a for="directive">value</a> is
-            "`Does Not Match`", return "`Blocked`".
+            |request|, this directive's <a for="directive">value</a>, and a
+            |policy|, is "`Does Not Match`", return "`Blocked`".
 
     3.  Return "`Allowed`".
   </ol>
@@ -3567,8 +3569,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   `frame-ancestors` directive's <a>navigation response check</a>:
 
   <ol class="algorithm">
-    1.  Assert: |request|, |navigation response|, |navigation type|, and
-        |policy| are unused in this algorithm, as `frame-ancestors` is concerned only
+    1.  Assert: |request|, |navigation response|, and |navigation type|, are
+        unused in this algorithm, as `frame-ancestors` is concerned only
         with |navigation response|'s <a>frame-ancestors</a> <a>directive</a>.
 
     2.  If |check type| is "`source`", return "`Allowed`".
@@ -3591,8 +3593,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
         3.  If [[#match-url-to-source-list]] returns `Does Not Match` when
             executed upon |origin|, this directive's <a for="directive">value</a>,
-            |navigation response|'s <a for="response">url</a>'s
-            <a for="url">origin</a>, and `0`, return "`Blocked`".
+            |policy|'s [=policy/self-origin=], and `0`, return "`Blocked`".
 
         4.  Set |current| to |document|'s <a>browsing context</a>.
 
@@ -3676,8 +3677,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
         <a for="response">status</a> in [[#navigate-to-navigation-response]].
 
     3.  If the result of executing [[#match-request-to-source-list]] on
-        |request| and this directive's <a for="directive">value</a> is
-        "`Does Not Match`", return "`Blocked`".
+        |request|, this directive's <a for="directive">value</a>, and |policy|,
+        is "`Does Not Match`", return "`Blocked`".
 
     4.  Return "`Allowed`".
   </ol>
@@ -3717,8 +3718,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
         <a>redirect status</a>, return "`Allowed`".
 
     6.  If the result of executing [[#match-request-to-source-list]] on
-        |request| and this directive's <a for="directive">value</a> is
-        "`Does Not Match`", return "`Blocked`".
+        |request|, this directive's <a for="directive">value</a>, and |policy|,
+        is "`Does Not Match`", return "`Blocked`".
 
     7.  Return "`Allowed`".
   </ol>
@@ -3801,7 +3802,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     Script directives pre-request check
   </h5>
 
-  Given a <a for="/">request</a> (|request|) and a <a>directive</a> (|directive|):
+  Given a <a for="/">request</a> (|request|), a <a>directive</a> (|directive|),
+  and a <a for="/">policy</a> (|policy|):
 
   1.  If |request|'s <a for="request">destination</a> is <a for="request/destination">script-like</a>:
 
@@ -3857,8 +3859,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
               in [[#strict-dynamic-usage]].
 
       4.  If the result of executing [[#match-request-to-source-list]] on
-          |request| and |directive|'s <a for="directive">value</a> is
-          "`Does Not Match`", return "`Blocked`".
+          |request|, |directive|'s <a for="directive">value</a>, and |policy|,
+          is "`Does Not Match`", return "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -3868,8 +3870,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
-  <a>directive</a> (|directive|):
+  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|),
+  a <a>directive</a> (|directive|), and a <a for="/">policy</a> (|policy|):
 
   1.  If |request|'s <a for="request">destination</a> is <a for="request/destination">script-like</a>:
 
@@ -3884,9 +3886,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
           return "`Allowed`".
 
       3.  If the result of executing [[#match-response-to-source-list]] on
-          |response|, |request|, and |directive|'s
-          <a for="directive">value</a> is "`Does Not Match`", return
-          "`Blocked`".
+          |response|, |request|, |directive|'s <a for="directive">value</a>,
+          and |policy|, is "`Does Not Match`", return "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -3936,11 +3937,11 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     Does |request| match |source list|?
   </h5>
 
-  Given a <a for="/">request</a> (|request|), and a <a>source list</a> (|source list|),
-  this algorithm returns the result of executing [[#match-url-to-source-list]]
-  on |request|'s <a for="request">current url</a>, |source list|, |request|'s
-  <a for="request">origin</a>, and |request|'s <a for="request">redirect
-  count</a>.
+  Given a <a for="/">request</a> (|request|), a <a>source list</a> (|source list|),
+  and a <a for="/">policy</a> (|policy|), this algorithm returns the result of executing
+  [[#match-url-to-source-list]] on |request|'s <a for="request">current url</a>,
+  |source list|, |policy|'s [=policy/self-origin=], and |request|'s
+  <a for="request">redirect count</a>.
 
   Note: This is generally used in <a>directives</a>' <a>pre-request check</a>
   algorithms to verify that a given <a for="/">request</a> is reasonable.
@@ -3950,10 +3951,10 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   </h5>
 
   Given a <a for="/">request</a> (|request|), and a <a>source list</a> (|source list|),
-  this algorithm returns the result of executing [[#match-url-to-source-list]]
-  on |response|'s <a for="response">url</a>, |source list|, |request|'s
-  <a for="request">origin</a>, and |request|'s <a for="request">redirect
-  count</a>.
+  and a <a for="/">policy</a> (|policy|), this algorithm returns the result of executing
+  [[#match-url-to-source-list]] on |response|'s <a for="response">url</a>,
+  |source list|, |policy|'s [=policy/self-origin=], and |request|'s
+  <a for="request">redirect count</a>.
 
   Note: This is generally used in <a>directives</a>' <a>post-request check</a>
   algorithms to verify that a given <a>response</a> is reasonable.
