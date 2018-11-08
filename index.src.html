@@ -412,10 +412,14 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   or "`meta`".
 
   Each policy has an associated <dfn for="policy" export>self-origin</dfn>, which
-  is an <a>origin</a> that is used when doing <a grammar>`'self'`</a> matching. This is
-  needed to facilitate the <a grammar>`'self'`</a> checks of <a>local scheme</a>
-  documents/workers that have inherited their policy but have an <a>opaque origin</a>.
-  [[#initialize-document-csp]] describes situations when a policy is inherited.
+  is an <a>origin</a> that is used when matching the <a grammar>`'self'`</a> keyword.
+
+  Note: This is needed to facilitate the <a grammar>`'self'`</a> checks of
+  <a>local scheme</a> documents/workers that have inherited their policy but
+  have an <a>opaque origin</a>. Most of the time this will simply be the
+  <a>environment settings object</a>'s [=environment settings object/origin=].
+  The [[#initialize-document-csp]] algorithm describes situations in which
+  a policy is inherited.
 
   Multiple [=/policies=] can be applied to a single resource, and are collected into a [=list=] of
   [=/policies=] known as a <dfn export>CSP list</dfn>.
@@ -1216,7 +1220,14 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
               <a for="Document">CSP list</a>.
 
       Note: <a>local scheme</a> includes `about:`, and this algorithm will
-      therefore copy the <a>source browsing context</a>'s policies for <a>an iframe `srcdoc` `Document`</a>.
+      therefore copy the <a>source browsing context</a>'s policies for
+      <a>an iframe `srcdoc` `Document`</a>.
+
+      Note: Since [=policy/self-origin=] is also copied, any <a grammar>`'self'`</a>
+      checks will be using the <a>source browsing context</a>'s origin. This is
+      done for the purpose of making <a grammar>`'self'`</a> make sense in documents
+      with <a>opaque origins</a>. The <a grammar>`'self'`</a> keyword is used
+      in the [[#match-url-to-source-expression]] algorithm.
 
       Note: We do all this to ensure that a page cannot bypass its <a for="/">policy</a>
       by embedding a frame or popping up a new window containing content it
