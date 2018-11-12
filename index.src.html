@@ -566,14 +566,14 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       and has no effect unless otherwise specified.
 
   6.  A <dfn for="directive" export>pre-navigation check</dfn>, which takes a
-      <a for="/">request</a>, a navigation type string ("`form-submission`" or "`other`"),
-      two <a>browsing contexts</a>, and a <a for="/">policy</a> as arguments, and
+      <a for="/">request</a>, a navigation type string ("`form-submission`"
+      or "`other`"), and a <a for="/">policy</a> as arguments, and
       is executed during [[#should-block-navigation-request]]. It returns
       "`Allowed`" unless otherwise specified.
 
   7.  A <dfn for="directive" export>navigation response check</dfn>, which takes a
       <a for="/">request</a>, a navigation type string ("`form-submission`" or "`other`"),
-      a <a>response</a>, two <a>browsing contexts</a>, a check type string ("`source`"
+      a <a>response</a>, a <a>browsing context</a>, a check type string ("`source`"
       or "`response`"), and a <a for="/">policy</a> as arguments, and is executed during
       [[#should-block-navigation-response]]. It returns "`Allowed`" unless otherwise specified.
 
@@ -1063,8 +1063,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   4.  Return |result|.
 
   <h4 id="should-block-response" algorithm>
-    Should |response| to |request| be blocked by Content
-    Security Policy?
+    Should |response| to |request| be blocked by Content Security Policy?
   </h4>
 
   Given a <a>response</a> (|response|) and a <a for="/">request</a>
@@ -1194,16 +1193,15 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   </h4>
 
   Given a {{Document}} (|document|), a <a>response</a> (|response|), and a
-  <a>browsing context</a> (|source|) the user agent performs the following
+  <a for="/">request</a> (|request|) the user agent performs the following
   steps in order to initialize |document|'s <a for="Document">CSP list</a>:
 
   1.  If |response|'s <a for="response">url</a>'s <a for="url">scheme</a> is a
       <a>local scheme</a>:
 
-      1.  For each |policy| in |source|'s <a>active document</a>'s
-          <a for="Document">CSP list</a>:
-
-          ISSUE(w3c/webappsec-csp#360): |source|'s active document is incorrect here.
+      1.  For each |policy| in |request|'s <a for="request">client</a>'s
+          <a for="environment settings object">global object</a>'s
+          <a for="global object">CSP list</a>:
 
           1.  Insert a copy of |policy| into |document|'s
               <a for="Document">CSP list</a>.
@@ -1346,18 +1344,20 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   <ol class="algorithm">
     1.  Let |result| be "`Allowed`".
 
-    2.  For each |policy| in |source|'s <a>active document</a>'s
-        <a for="Document">CSP list</a>:
+    2.  For each |policy| in |navigation request|'s <a for="request">client</a>'s
+        <a for="environment settings object">global object</a>'s
+        <a for="global object">CSP list</a>:
 
         1.  For each |directive| in |policy|:
 
             1.  If |directive|'s <a for="directive">pre-navigation check</a>
                 returns "`Allowed`" when executed upon |navigation request|,
-                |type|, |source|, |target|, and |policy| skip to the next |directive|.
+                |type|, and |policy| skip to the next |directive|.
 
             2.  Otherwise, let |violation| be the result of executing
-                [[#create-violation-for-global]] on |source|'s <a>relevant global
-                object</a>, |policy|, and |directive|'s <a for="directive">name</a>.
+                [[#create-violation-for-global]] on |navigation request|'s
+                <a for="request">client</a>'s <a for="environment settings object">global object</a>,
+                |policy|, and |directive|'s <a for="directive">name</a>.
 
             3.  Set |violation|'s <a for="violation">resource</a> to |navigation
                 request|'s <a for="request">URL</a>.
@@ -1370,22 +1370,24 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     3.  If |result| is "`Allowed`", and if |navigation request|'s
         <a for="request">current URL</a>'s <a for="url">scheme</a> is `javascript`:
 
-        1.  For each |policy| in |source|'s <a>active document</a>'s
-            <a for="Document">CSP List</a>:
+        1.  For each |policy| in |navigation request|'s <a for="request">client</a>'s
+            <a for="environment settings object">global object</a>'s
+            <a for="global object">CSP list</a>:
 
             1.  For each |directive| in |policy|:
 
-                1.  If |directive|'s <a for="directive">inline check</a>
+                1.  Let |directive-name| be the result of executing
+                    [[#effective-directive-for-inline-check]] on |type|.
+
+                2.  If |directive|'s <a for="directive">inline check</a>
                     returns "`Allowed`" when executed upon `null`,
                     "`navigation`" and |navigation request|'s <a for="request">current URL</a>,
                     skip to the next |directive|.
 
-                2.  Let |directive-name| be the result of executing
-                    [[#effective-directive-for-inline-check]] on |type|.
-
                 3.  Otherwise, let |violation| be the result of executing
-                    [[#create-violation-for-global]] on |source|'s <a>relevant global
-                    object</a>, |policy|, and |directive-name|.
+                    [[#create-violation-for-global]] on |navigation request|'s
+                    <a for="request">client</a>'s <a for="environment settings object">global object</a>,
+                    |policy|, and |directive-name|.
 
                 4.  Set |violation|'s <a for="violation">resource</a> to |navigation
                     request|'s <a for="request">URL</a>.
@@ -1422,7 +1424,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
             1.  If |directive|'s <a for="directive">navigation response check</a>
                 returns "`Allowed`" when executed upon |navigation request|, |type|,
-                |navigation response|, |source|, |target|, "`response`", and |policy|
+                |navigation response|, |target|, "`response`", and |policy|
                 skip to the next |directive|.
 
             2.  Otherwise, let |violation| be the result of executing
@@ -1440,21 +1442,24 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
             5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
                 set |result| to "`Blocked`".
 
-    3.  For each |policy| in |source|'s <a>active document</a>'s <a for="Document">CSP List</a>:
+    3.  For each |policy| in |navigation request|'s <a for="request">client</a>'s
+        <a for="environment settings object">global object</a>'s
+        <a for="global object">CSP list</a>:
 
-        Note: Some directives in the |source| context (like <a>navigate-to</a>)
+        Note: Some directives in the |navigation request|'s context (like <a>navigate-to</a>)
         need the |response| before acting on the navigation.
 
         1.  For each |directive| in |policy|:
 
             1.  If |directive|'s <a for="directive">navigation response check</a>
                 returns "`Allowed`" when executed upon |navigation request|, |type|,
-                |navigation response|, |source|, |target|, "`source`", and |policy|
+                |navigation response|, |target|, "`source`", and |policy|
                 skip to the next |directive|.
 
             2.  Otherwise, let |violation| be the result of executing
-                [[#create-violation-for-global]] on |source|'s <a>relevant global
-                object</a>, |policy|, and |directive|'s <a for="directive">name</a>.
+                [[#create-violation-for-global]] on |navigation request|'s
+                <a for="request">client</a>'s <a for="environment settings object">global object</a>,
+                |policy|, and |directive|'s <a for="directive">name</a>.
 
             3.  Set |violation|'s <a for="violation">resource</a> to |navigation
                 request|'s <a for="request">URL</a>.
@@ -3506,14 +3511,12 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   </h5>
 
   Given a <a for="/">request</a> (|request|), a string |navigation type| ("`form-submission`" or
-  "`other`"), two <a>browsing contexts</a> (|source| and |target|), and a
-  <a for="/">policy</a> (|policy|) this algorithm returns "`Blocked`" if a form
+  "`other`"), and a <a for="/">policy</a> (|policy|) this algorithm returns "`Blocked`" if a form
   submission violates the `form-action` directive's constraints, and "`Allowed`"
   otherwise. This constitutes the `form-action` directive's <a>pre-navigation check</a>:
 
   <ol class="algorithm">
-    1.  Assert: |source|, |target|, and |policy| are unused in this algorithm, as
-        `form-action` is concerned only with details of the outgoing request.
+    1.  Assert: |policy| is unused in this algorithm.
 
     2.  If |navigation type| is "`form-submission`":
 
@@ -3556,42 +3559,42 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   Given a <a for="/">request</a> (|request|), a string |navigation type|
   ("`form-submission`" or "`other`"), a
-  <a>response</a> (|navigation response|) two <a>browsing contexts</a> (|source|
-  and |target|), a string |check type| ("`source`" or "`response`"), and a
+  <a>response</a> (|navigation response|) a <a>browsing context</a> (|target|),
+  a string |check type| ("`source`" or "`response`"), and a
   <a for="/">policy</a> (|policy|) this algorithm returns "`Blocked`" if one or
   more of the ancestors of |target| violate the `frame-ancestors` directive
   delivered with the response, and "`Allowed`" otherwise. This constitutes the
   `frame-ancestors` directive's <a>navigation response check</a>:
 
   <ol class="algorithm">
-    1.  Assert: |request|, |navigation response|, |navigation type|, |source|, and
+    1.  Assert: |request|, |navigation response|, |navigation type|, and
         |policy| are unused in this algorithm, as `frame-ancestors` is concerned only
         with |navigation response|'s <a>frame-ancestors</a> <a>directive</a>.
 
     2.  If |check type| is "`source`", return "`Allowed`".
 
         Note: The 'frame-ancestors' <a>directive</a> is relevant only to the
-        |target| <a>browsing context</a> and it has no impact on the |source|
-        <a>browsing context</a>.
+        |target| <a>browsing context</a> and it has no impact on the |request|'s
+        context.
 
     2.  If |target| is not a <a>nested browsing context</a>, return "`Allowed`".
 
     3.  Let |current| be |target|.
 
-    4.  While |current| has a <a>parent browsing context</a> (|parent|):
+    4.  While |current| is a <a>nested browsing context</a>:
 
-        1.  Set |current| to |parent|.
+        1.  Let |document| be the {{Document}} that |current| is <a>nested through</a>.
 
         2.  Let |origin| be the result of executing the <a>URL parser</a> on the
             <a lt="ASCII serialization of an origin">ASCII serialization</a>
-            of |parent|'s <a>active document</a>'s <a>relevant settings
-            object</a>'s <a for="environment settings object">origin</a>.
+            of |document|'s {{Document/origin}}.
 
         3.  If [[#match-url-to-source-list]] returns `Does Not Match` when
-            executed upon |origin|, this directive's
-            <a for="directive">value</a>, |navigation response|'s
-            <a for="response">url</a>'s <a for="url">origin</a>, and `0`, return
-            "`Blocked`".
+            executed upon |origin|, this directive's <a for="directive">value</a>,
+            |navigation response|'s <a for="response">url</a>'s
+            <a for="url">origin</a>, and `0`, return "`Blocked`".
+
+        4.  Set |current| to |document|'s <a>browsing context</a>.
 
     5.  Return "`Allowed`".
   </ol>
@@ -3655,19 +3658,15 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   </h5>
 
   Given a <a for="/">request</a> (|request|), a string |navigation type| ("`form-submission`" or
-  "`other`"), two <a>browsing contexts</a> (|source| and |target|),
-  and a <a for="/">policy</a> (|policy|), this algorithm returns "`Blocked`"
+  "`other`"), and a <a for="/">policy</a> (|policy|), this algorithm returns "`Blocked`"
   if the navigation violates the `navigate-to` directive's constraints, and
   "`Allowed`" otherwise. This constitutes the `navigate-to`' directive's <a>pre-navigation check</a>:
 
   <ol class="algorithm">
-    1.  Assert: |source| and |target| are unused as 'navigate-to'
-        is concerned with the details of the request.
-
-    2.  If |navigation type| is "`form-submission`" and |policy| contains a
+    1.  If |navigation type| is "`form-submission`" and |policy| contains a
         <a>directive</a> named "`form-action`", return "`Allowed`".
 
-    3.  If this directive's <a for="directive">value</a> contains a <a>source
+    2.  If this directive's <a for="directive">value</a> contains a <a>source
         expression</a> that is an <a>ASCII case-insensitive</a> match for
         the "<a grammar>`'unsafe-allow-redirects'`</a>"
         <a grammar>keyword-source</a>, return "`Allowed`".
@@ -3676,11 +3675,11 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
         wait for the <a>response</a> and take into account the <a>response</a>'s
         <a for="response">status</a> in [[#navigate-to-navigation-response]].
 
-    4.  If the result of executing [[#match-request-to-source-list]] on
+    3.  If the result of executing [[#match-request-to-source-list]] on
         |request| and this directive's <a for="directive">value</a> is
         "`Does Not Match`", return "`Blocked`".
 
-    5.  Return "`Allowed`".
+    4.  Return "`Allowed`".
   </ol>
 
   <h5 algorithm id="navigate-to-navigation-response">
@@ -3688,21 +3687,20 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   </h5>
 
   Given a <a for="/">request</a> (|request|), a string |navigation type|
-  ("`form-submission`" or "`other`"),  a <a>response</a> (|navigation response|)
-  two <a>browsing contexts</a> (|source| and |target|), a string |check type|
+  ("`form-submission`" or "`other`"), a <a>response</a> (|navigation response|)
+  a <a>browsing context</a> (|target|), a string |check type|
   ("`source`" or "`response`"), and a <a for="/">policy</a> (|policy|), this
   algorithm returns "`Blocked`" if the navigation violates the `navigate-to`
   directive's constraints, and "`Allowed`" otherwise. This constitutes the
   `navigate-to` directive's <a>navigation response check</a>:
 
   <ol class="algorithm">
-    1.  Assert: |source|, and |target| are unused.
+    1.  Assert: |target| is unused.
 
     2.  If |check type| is "`response`", return "`Allowed`".
 
         Note: The 'navigate-to' <a>directive</a> is relevant only to the
-        |source| <a>browsing context</a> and it has no impact on the |target|
-        <a>browsing context</a>.
+        |request|'s context and it has no impact on the |target| <a>browsing context</a>.
 
     3.  If |navigation type| is "`form-submission`" and |policy| contains a
         <a>directive</a> named "`form-action`", return "`Allowed`".
