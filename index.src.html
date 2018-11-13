@@ -493,22 +493,80 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   steps.
 
   This algorithm returns a [=list=] of [=Content Security Policy objects=]. If |list| cannot be
-  parsed, the returned list will be empty.
+  parsed, the returned list will contain a <a>malformed policy placeholder</a>
+  for every [=/policy=] in the |list| that cannot be parsed.
 
   <ol class="algorithm">
     1.  Let |policies| be an empty [=list=].
 
     2.  For each |token| returned by <a lt="split a string on commas">splitting |list| on commas</a>:
 
-        1.  Let |policy| be the result of <a abstract-op lt="parse a serialized CSP">parsing</a>
-            |token|, with a [=policy/source=] of |source|, and [=policy/disposition=] of
-            |disposition|.
+        1.  [=Strip leading and trailing ASCII whitespace=] from |token|.
 
-        2.  If |policy|'s [=policy/directive set=] is empty, [=iteration/continue=].
+        2.  If |token| does not match the <a grammar>serialized-policy</a> grammar,
+            let |policy| be the result of executing [[#malformed-default-csp-replacement]]
+            on |source|, and |disposition|.
 
-        3.  [=list/append|Append=] |policy| to |policies|.
+            Note: In this case the user agent SHOULD notify developers that the
+            policy they are using is invalid. A console warning might be appropriate.
+
+        3.  Otherwise, let |policy| be the result of
+            <a abstract-op lt="parse a serialized CSP">parsing</a> |token|, with
+            a [=policy/source=] of |source|, and [=policy/disposition=] of |disposition|.
+
+        4.  If |policy|'s [=policy/directive set=] is empty, [=iteration/continue=].
+
+        5.  [=list/append|Append=] |policy| to |policies|.
 
     3.  Return |policies|.
+  </ol>
+
+  <h4 id="malformed-default-csp-replacement" algorithm>
+    Return a malformed policy placeholder
+  </h4>
+
+  In the situation where a malformed [=/policy=] is used, it will be replaced with
+  the |policy| returned by this algorithm. This is done to ensure that mistakes
+  in the [=/policy=] are not silently ignored which would lead to security issues.
+  Instead the following very restrictive policy is used:
+
+  <pre>
+    default-src 'none'; base-uri 'none'; form-action 'none'; navigate-to 'none'; sandbox; plugin-types;
+  </pre>
+
+  To return a <dfn>malformed policy placeholder</dfn> given a [=policy/source=]
+  (|source|), and a [=policy/disposition=] (|disposition|), execute the following
+  steps:
+
+  <ol class="algorithm">
+    1.  Let |policy| be a new [=/policy=] with an empty [=policy/directive set=],
+        a [=policy/source=] of |source|, and a [=policy/disposition=] of |disposition|.
+
+    2.  [=list/append|Append=] a new [=directive=] whose [=directive/name=] is
+        `"default-src"`, and [=directive/value=] is `"'none'"`,
+        to |policy|'s [=policy/directive set=].
+
+    3.  [=list/append|Append=] a new [=directive=] whose [=directive/name=] is
+        `"base-uri"`, and [=directive/value=] is `"'none'"`,
+        to |policy|'s [=policy/directive set=].
+
+    4.  [=list/append|Append=] a new [=directive=] whose [=directive/name=] is
+        `"form-action"`, and [=directive/value=] is `"'none'"`,
+        to |policy|'s [=policy/directive set=].
+
+    5.  [=list/append|Append=] a new [=directive=] whose [=directive/name=] is
+        `"navigate-to"`, and [=directive/value=] is `"'none'"`,
+        to |policy|'s [=policy/directive set=].
+
+    6.  [=list/append|Append=] a new [=directive=] whose [=directive/name=] is
+        `"sandbox"`, and [=directive/value=] is `""`,
+        to |policy|'s [=policy/directive set=].
+
+    7.  [=list/append|Append=] a new [=directive=] whose [=directive/name=] is
+        `"plugin-types"`, and [=directive/value=] is `""`,
+        to |policy|'s [=policy/directive set=].
+
+    8.  Return |policy|.
   </ol>
 
   <h3 id="framework-directives">Directives</h3>
