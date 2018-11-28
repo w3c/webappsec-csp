@@ -140,6 +140,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   type: dfn
     for: WorkerGlobalScope
       text: owner set; url: concept-WorkerGlobalScope-owner-set
+    text: process the iframe attributes; url: process-the-iframe-attributes
 
 spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   type: grammar
@@ -1196,11 +1197,11 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   </h4>
 
   Given a {{Document}} (|document|), a <a>response</a> (|response|), and a
-  <a for="/">request</a> (|request|) the user agent performs the following
+  <a for="/">request</a> or `null` (|request|) the user agent performs the following
   steps in order to initialize |document|'s <a for="Document">CSP list</a>:
 
   1.  If |response|'s <a for="response">url</a>'s <a for="url">scheme</a> is a
-      <a>local scheme</a>:
+      <a>local scheme</a> and |request| is not `null`:
 
       1.  For each |policy| in |request|'s <a for="request">client</a>'s
           <a for="environment settings object">global object</a>'s
@@ -1209,9 +1210,12 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
           1.  Insert a copy of |policy| into |document|'s
               <a for="Document">CSP list</a>.
 
-      Note: <a>local scheme</a> includes `about:`, and this algorithm will
-      therefore copy the <a>source browsing context</a>'s policies for
-      <a>an iframe `srcdoc` `Document`</a>.
+      Note: For <a data-lt="an iframe srcdoc Document">iframe srcdoc Documents</a>,
+      |request| will be `null`, but |response| will contain a copy of the
+      <a>embedding document</a>'s <a for="Document">CSP list</a> in its
+      <a for="response">CSP list</a>, as specified in <a>process the iframe attributes</a>.
+      As such <a data-lt="an iframe srcdoc Document">iframe srcdoc Documents</a>
+      also inherit their <a>embedding document</a>'s <a for="Document">CSP list</a>.
 
       Note: Since [=policy/self-origin=] is also copied, any <a grammar>`'self'`</a>
       checks will be using the <a>source browsing context</a>'s origin. This is
