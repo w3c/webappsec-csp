@@ -1212,9 +1212,9 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version f9fa604b61e5fc96edf5cdebd2c04e0e69b33a7b" name="generator">
+  <meta content="Bikeshed version a417ab651526c465cf0395da21ea73b0ffc2784e" name="generator">
   <link href="https://www.w3.org/TR/CSP3/" rel="canonical">
-  <meta content="c9b3a0160993beef5604d7ee07c4ae6d33f57266" name="document-revision">
+  <meta content="0ca85b6d105c77a885427ddb4ee750af3a455955" name="document-revision">
 <style>
   ul.toc ul ul ul {
     margin: 0 0 0 2em;
@@ -1505,7 +1505,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1>Content Security Policy Level 3</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2018-12-04">4 December 2018</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2018-12-13">13 December 2018</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -4958,7 +4958,10 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
      <li data-md>
       <p>If <var>element</var> does not have an attribute named "<code>nonce</code>", return "<code>Not Nonceable</code>".</p>
      <li data-md>
-      <p>If <var>element</var> is a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script⑥">script</a></code> element, then for each <var>attribute</var> in <var>element</var>:</p>
+      <p>If <var>element</var> is a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script⑥">script</a></code> element and <var>element</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/#concept-script-duplicate-attribute" id="ref-for-concept-script-duplicate-attribute">duplicate attribute flag</a>,
+  then return "<code>Not Nonceable</code>".</p>
+     <li data-md>
+      <p>If <var>element</var> is a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script⑦">script</a></code> element, then for each <var>attribute</var> in <var>element</var>:</p>
       <ol>
        <li data-md>
         <p>If <var>attribute</var>’s name is an <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ascii-case-insensitive" id="ref-for-ascii-case-insensitive①⑧">ASCII case-insensitive</a> match for
@@ -4970,11 +4973,6 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
   "<code>&lt;style</code>", return "<code>Not Nonceable</code>".</p>
       </ol>
      <li data-md>
-      <p>If <var>element</var> had a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/parsing.html#parse-error-duplicate-attribute" id="ref-for-parse-error-duplicate-attribute">duplicate-attribute</a> <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script-parse-error" id="ref-for-concept-script-parse-error">parse error</a> during tokenization, return
-  "<code>Not Nonceable</code>".</p>
-      <p class="issue" id="issue-820579ab"><a class="self-link" href="#issue-820579ab"></a> We need some sort of hook in HTML to record this error if we’re
-  planning on using it here. <a href="https://github.com/whatwg/html/issues/3257">&lt;https://github.com/whatwg/html/issues/3257></a></p>
-     <li data-md>
       <p>Return "<code>Nonceable</code>".</p>
     </ol>
     <p class="issue" id="issue-4592ac7e"><a class="self-link" href="#issue-4592ac7e"></a> This processing is meant to mitigate the risk
@@ -4982,7 +4980,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
   in order to load injected script. It is fairly expensive, however, as it
   requires that we walk through all attributes and their values in order to
   determine whether the script should execute. Here, we try to minimize the
-  impact by doing this check only for <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script⑦">script</a></code> elements when a nonce is
+  impact by doing this check only for <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script⑧">script</a></code> elements when a nonce is
   present, but we should probably consider this algorithm as "at risk" until
   we know its impact. <a href="https://github.com/w3c/webappsec-csp/issues/98">&lt;https://github.com/w3c/webappsec-csp/issues/98></a></p>
     <h5 class="heading settled algorithm" data-algorithm="Does a source list allow all inline behavior for type?" data-level="6.6.3.2" id="allow-all-inline"><span class="secno">6.6.3.2. </span><span class="content"> Does a source list allow all inline behavior for <var>type</var>? </span><a class="self-link" href="#allow-all-inline"></a></h5>
@@ -5050,7 +5048,7 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
   and <var>element</var> has a <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/multipage/urls-and-fetching.html#attr-nonce" id="ref-for-attr-nonce">nonce</a></code> attribute whose value is a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#case-sensitive" id="ref-for-case-sensitive⑤">case-sensitive</a> match for <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-base64-value" id="ref-for-grammardef-base64-value⑥"><code>base64-value</code></a> part, return "<code>Matches</code>".</p>
         </ol>
       </ol>
-      <p class="note" role="note"><span>Note:</span> Nonces only apply to inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script⑧">script</a></code> and inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-style-element" id="ref-for-the-style-element①">style</a></code>, not to
+      <p class="note" role="note"><span>Note:</span> Nonces only apply to inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script⑨">script</a></code> and inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-style-element" id="ref-for-the-style-element①">style</a></code>, not to
   attributes of either element or to <code>javascript:</code> navigations.</p>
      <li data-md>
       <p>Let <var>unsafe-hashes flag</var> be <code>false</code>.</p>
@@ -5099,7 +5097,7 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
           </ol>
         </ol>
       </ol>
-      <p class="note" role="note"><span>Note:</span> Hashes apply to inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script⑨">script</a></code> and inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-style-element" id="ref-for-the-style-element②">style</a></code>. If the
+      <p class="note" role="note"><span>Note:</span> Hashes apply to inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⓪">script</a></code> and inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-style-element" id="ref-for-the-style-element②">style</a></code>. If the
   "<a data-link-type="grammar" href="#grammardef-unsafe-hashes" id="ref-for-grammardef-unsafe-hashes①"><code>'unsafe-hashes'</code></a>" source expression is present,
   they will also apply to event handlers, style attributes and <code>javascript:</code> navigations.</p>
      <li data-md>
@@ -5355,7 +5353,7 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
     <h3 class="heading settled" data-level="7.2" id="security-nonce-hijacking"><span class="secno">7.2. </span><span class="content">Nonce Hijacking</span><a class="self-link" href="#security-nonce-hijacking"></a></h3>
     <h4 class="heading settled" data-level="7.2.1" id="dangling-markup-attacks"><span class="secno">7.2.1. </span><span class="content">Dangling markup attacks</span><a class="self-link" href="#dangling-markup-attacks"></a></h4>
     <p>Dangling markup attacks such as those discussed in <a data-link-type="biblio" href="#biblio-filedescriptor-2015">[FILEDESCRIPTOR-2015]</a> can be used to repurpose a page’s legitimate nonces for injections. For
-  example, given an injection point before a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⓪">script</a></code> element:</p>
+  example, given an injection point before a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①①">script</a></code> element:</p>
 <pre class="highlight"><c- p>&lt;</c-><c- f>p</c-><c- p>></c->Hello, [INJECTION POINT]<c- p>&lt;/</c-><c- f>p</c-><c- p>></c->
 <c- p>&lt;</c-><c- f>script</c-> <c- e>nonce</c-><c- o>=</c-><c- s>abc</c-> <c- e>src</c-><c- o>=</c-><c- s>/good.js</c-><c- p>>&lt;/</c-><c- f>script</c-><c- p>></c->
 </pre>
@@ -5364,19 +5362,16 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
 <pre class="highlight"><c- p>&lt;</c-><c- f>p</c-><c- p>></c->Hello, <c- p>&lt;</c-><c- f>script</c-> <c- e>src</c-><c- o>=</c-><c- s>'https://evil.com/evil.js'</c-> &lt;/<c- e>p</c-><c- p>></c->
 <c- o>&lt;</c->script nonce<c- o>=</c->abc src<c- o>=</c->/good.js><c- p>&lt;/</c-><c- f>script</c-><c- p>></c->
 </pre>
-    <p>It will then parse that code, ending up with a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①①">script</a></code> element with a <code>src</code> attribute pointing to a malicious payload, an attribute named <code>&lt;/p></code>,
+    <p>It will then parse that code, ending up with a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①②">script</a></code> element with a <code>src</code> attribute pointing to a malicious payload, an attribute named <code>&lt;/p></code>,
   an attribute named "<code>&lt;script</code>", a <code>nonce</code> attribute, and a
   second <code>src</code> attribute which is helpfully discarded as duplicate by the parser.</p>
     <p>The <a href="#is-element-nonceable">§6.6.3.1 Is element nonceable?</a> algorithm attempts to mitigate this specific
-  attack by walking through <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①②">script</a></code> or <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-style-element" id="ref-for-the-style-element③">style</a></code> element attributes, looking for the
+  attack by walking through <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①③">script</a></code> or <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-style-element" id="ref-for-the-style-element③">style</a></code> element attributes, looking for the
   string "<code>&lt;script</code>" or "<code>&lt;style</code>" in their names or values.</p>
     <p>User-agents must pay particular attention when implementing this algorithm to
   not ignore duplicate attributes. If an element has a duplicate attribute any
   instance of the attribute after the first one is ignored but in the <a href="#is-element-nonceable">§6.6.3.1 Is element nonceable?</a> algorithm, all attributes including the
   duplicate ones need to be checked.</p>
-    <p class="issue" id="issue-74cb0fbd"><a class="self-link" href="#issue-74cb0fbd"></a> Currently the HTML spec’s parsing algorithm removes this information
-  before the <a href="#is-element-nonceable">§6.6.3.1 Is element nonceable?</a> algorithm can be run which makes it
-  impossible to actually detect duplicate attributes. <a href="https://github.com/whatwg/html/issues/3257">&lt;https://github.com/whatwg/html/issues/3257></a></p>
     <p>For the following example page:</p>
 <pre class="highlight">Hello, [INJECTION POINT]
 <c- p>&lt;</c-><c- f>script</c-> <c- e>nonce</c-><c- o>=</c-><c- s>abc</c-> <c- e>src</c-><c- o>=</c-><c- s>/good.js</c-><c- p>>&lt;/</c-><c- f>script</c-><c- p>></c->
@@ -5532,7 +5527,7 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
       <p><a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source⑧">hash-source</a> and <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source⑨">nonce-source</a> expressions
   will be honored.</p>
      <li data-md>
-      <p>Script requests which are triggered by non-<a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted" id="ref-for-parser-inserted③">"parser-inserted"</a> <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①③">script</a></code> elements are allowed.</p>
+      <p>Script requests which are triggered by non-<a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted" id="ref-for-parser-inserted③">"parser-inserted"</a> <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①④">script</a></code> elements are allowed.</p>
     </ol>
     <p>The first change allows you to deploy "<a data-link-type="grammar" href="#grammardef-strict-dynamic" id="ref-for-grammardef-strict-dynamic⑤"><code>'strict-dynamic'</code></a> in a
   backwards compatible way, without requiring user-agent sniffing: the policy <code>'unsafe-inline' https: 'nonce-abcdefg' 'strict-dynamic'</code> will act like <code>'unsafe-inline' https:</code> in browsers that support CSP1, <code>https: 'nonce-DhcnhD3khTMePgXwdayK9BsMqXjhguVV'</code> in browsers that support CSP2, and <code>'nonce-DhcnhD3khTMePgXwdayK9BsMqXjhguVV' 'strict-dynamic'</code> in browsers that
@@ -5558,8 +5553,8 @@ document<c- p>.</c->head<c- p>.</c->appendChild<c- p>(</c->s<c- p>);</c->
 
 document<c- p>.</c->write<c- p>(</c-><c- t>'&lt;scr'</c-> <c- o>+</c-> <c- t>'ipt src="/sadness.js">&lt;/scr'</c-> <c- o>+</c-> <c- t>'ipt>'</c-><c- p>);</c->
 </pre>
-     <p><code>dependency.js</code> will load, as the <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①④">script</a></code> element created by <code>createElement()</code> is not <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted" id="ref-for-parser-inserted④">"parser-inserted"</a>.</p>
-     <p><code>sadness.js</code> will <em>not</em> load, however, as <code>document.write()</code> produces <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑤">script</a></code> elements which are <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted" id="ref-for-parser-inserted⑤">"parser-inserted"</a>.</p>
+     <p><code>dependency.js</code> will load, as the <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑤">script</a></code> element created by <code>createElement()</code> is not <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted" id="ref-for-parser-inserted④">"parser-inserted"</a>.</p>
+     <p><code>sadness.js</code> will <em>not</em> load, however, as <code>document.write()</code> produces <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑥">script</a></code> elements which are <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted" id="ref-for-parser-inserted⑤">"parser-inserted"</a>.</p>
     </div>
     <p class="note" role="note"><span>Note:</span> With <a data-link-type="grammar" href="#grammardef-strict-dynamic" id="ref-for-grammardef-strict-dynamic⑦">'strict-dynamic'</a>, scripts created at runtime will be
   allowed to execute. If the location of such a script can be controlled by an
@@ -5601,9 +5596,9 @@ document<c- p>.</c->write<c- p>(</c-><c- t>'&lt;scr'</c-> <c- o>+</c-> <c- t>'ip
      <p>In <a data-link-type="biblio" href="#biblio-csp2">[CSP2]</a>, hash <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression①⓪">source expressions</a> could only match inlined
     script, but now that Subresource Integrity <a data-link-type="biblio" href="#biblio-sri">[SRI]</a> is widely deployed,
     we can expand the scope to enable externalized JavaScript as well.</p>
-     <p>If multiple sets of integrity metadata are specified for a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑥">script</a></code>, the
-    request will match a policy’s <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source⑨">hash-source</a>s if and only if <em>each</em> item in a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑦">script</a></code>'s integrity metadata matches the policy.</p>
-     <p class="note" role="note"><span>Note:</span> The CSP spec specifies that the contents of an inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑧">script</a></code> element
+     <p>If multiple sets of integrity metadata are specified for a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑦">script</a></code>, the
+    request will match a policy’s <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source⑨">hash-source</a>s if and only if <em>each</em> item in a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑧">script</a></code>'s integrity metadata matches the policy.</p>
+     <p class="note" role="note"><span>Note:</span> The CSP spec specifies that the contents of an inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑨">script</a></code> element
     or event handler needs to be encoded using <a data-link-type="dfn" href="https://encoding.spec.whatwg.org/#utf-8-encode" id="ref-for-utf-8-encode①">UTF-8 encode</a> before computing
     its hash. <a data-link-type="biblio" href="#biblio-sri">[SRI]</a> computes the hash on the raw resource that is being
     fetched instead. This means that it is possible for the hash needed to whitelist
@@ -5615,14 +5610,14 @@ document<c- p>.</c->write<c- p>(</c-><c- t>'&lt;scr'</c-> <c- o>+</c-> <c- t>'ip
       setting the following policy: 
 <pre><a data-link-type="http-header" href="#header-content-security-policy" id="ref-for-header-content-security-policy②⑥">Content-Security-Policy</a>: script-src 'sha256-abc123' 'sha512-321cba'
 </pre>
-      <p>In the presence of that policy, the following <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑨">script</a></code> elements would be
+      <p>In the presence of that policy, the following <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script②⓪">script</a></code> elements would be
       allowed to execute because they contain only integrity metadata that matches
       the policy:</p>
 <pre class="highlight"><c- p>&lt;</c-><c- f>script</c-> <c- e>integrity</c-><c- o>=</c-><c- s>"sha256-abc123"</c-> ...<c- p>>&lt;/</c-><c- f>script</c-><c- p>></c->
 <c- p>&lt;</c-><c- f>script</c-> <c- e>integrity</c-><c- o>=</c-><c- s>"sha512-321cba"</c-> ...<c- p>>&lt;/</c-><c- f>script</c-><c- p>></c->
 <c- p>&lt;</c-><c- f>script</c-> <c- e>integrity</c-><c- o>=</c-><c- s>"sha256-abc123 sha512-321cba"</c-> ...<c- p>>&lt;/</c-><c- f>script</c-><c- p>></c->
 </pre>
-      <p>While the following <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script②⓪">script</a></code> elements would not execute because they
+      <p>While the following <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script②①">script</a></code> elements would not execute because they
       contain valid metadata that does not match the policy (even though other
       metadata does match):</p>
 <pre class="highlight"><c- p>&lt;</c-><c- f>script</c-> <c- e>integrity</c-><c- o>=</c-><c- s>"</c-><b><c- s>sha384-xyz789</c-></b><c- s>"</c-> ...<c- p>>&lt;/</c-><c- f>script</c-><c- p>></c->
@@ -6931,10 +6926,10 @@ rest of Google’s CSP Cabal.</p>
     Create a violation object for global, policy, and directive </a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="term-for-parse-error-duplicate-attribute">
-   <a href="https://html.spec.whatwg.org/multipage/parsing.html#parse-error-duplicate-attribute">https://html.spec.whatwg.org/multipage/parsing.html#parse-error-duplicate-attribute</a><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="term-for-concept-script-duplicate-attribute">
+   <a href="https://html.spec.whatwg.org/#concept-script-duplicate-attribute">https://html.spec.whatwg.org/#concept-script-duplicate-attribute</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-parse-error-duplicate-attribute">6.6.3.1. 
+    <li><a href="#ref-for-concept-script-duplicate-attribute">6.6.3.1. 
     Is element nonceable? </a>
    </ul>
   </aside>
@@ -7128,13 +7123,6 @@ rest of Google’s CSP Cabal.</p>
     sandbox Initialization </a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="term-for-concept-script-parse-error">
-   <a href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-script-parse-error">https://html.spec.whatwg.org/multipage/webappapis.html#concept-script-parse-error</a><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-concept-script-parse-error">6.6.3.1. 
-    Is element nonceable? </a>
-   </ul>
-  </aside>
   <aside class="dfn-panel" data-for="term-for-dom-a-ping">
    <a href="https://html.spec.whatwg.org/multipage/text-level-semantics.html#dom-a-ping">https://html.spec.whatwg.org/multipage/text-level-semantics.html#dom-a-ping</a><b>Referenced in:</b>
    <ul>
@@ -7241,14 +7229,14 @@ rest of Google’s CSP Cabal.</p>
     The &lt;meta> element </a>
     <li><a href="#ref-for-script③">6.1.11. script-src</a> <a href="#ref-for-script④">(2)</a> <a href="#ref-for-script⑤">(3)</a>
     <li><a href="#ref-for-script⑥">6.6.3.1. 
-    Is element nonceable? </a> <a href="#ref-for-script⑦">(2)</a>
-    <li><a href="#ref-for-script⑧">6.6.3.3. 
-    Does element match source list for type and source? </a> <a href="#ref-for-script⑨">(2)</a>
-    <li><a href="#ref-for-script①⓪">7.2.1. Dangling markup attacks</a> <a href="#ref-for-script①①">(2)</a> <a href="#ref-for-script①②">(3)</a>
-    <li><a href="#ref-for-script①③">8.2. 
-    Usage of "'strict-dynamic'" </a> <a href="#ref-for-script①④">(2)</a> <a href="#ref-for-script①⑤">(3)</a>
-    <li><a href="#ref-for-script①⑥">8.4. 
-      Allowing external JavaScript via hashes </a> <a href="#ref-for-script①⑦">(2)</a> <a href="#ref-for-script①⑧">(3)</a> <a href="#ref-for-script①⑨">(4)</a> <a href="#ref-for-script②⓪">(5)</a>
+    Is element nonceable? </a> <a href="#ref-for-script⑦">(2)</a> <a href="#ref-for-script⑧">(3)</a>
+    <li><a href="#ref-for-script⑨">6.6.3.3. 
+    Does element match source list for type and source? </a> <a href="#ref-for-script①⓪">(2)</a>
+    <li><a href="#ref-for-script①①">7.2.1. Dangling markup attacks</a> <a href="#ref-for-script①②">(2)</a> <a href="#ref-for-script①③">(3)</a>
+    <li><a href="#ref-for-script①④">8.2. 
+    Usage of "'strict-dynamic'" </a> <a href="#ref-for-script①⑤">(2)</a> <a href="#ref-for-script①⑥">(3)</a>
+    <li><a href="#ref-for-script①⑦">8.4. 
+      Allowing external JavaScript via hashes </a> <a href="#ref-for-script①⑧">(2)</a> <a href="#ref-for-script①⑨">(3)</a> <a href="#ref-for-script②⓪">(4)</a> <a href="#ref-for-script②①">(5)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-set-the-frozen-base-url">
@@ -7938,7 +7926,7 @@ rest of Google’s CSP Cabal.</p>
      <li><span class="dfn-paneled" id="term-for-current-settings-object" style="color:initial">current settings object</span>
      <li><span class="dfn-paneled" id="term-for-attr-object-data" style="color:initial">data</span>
      <li><span class="dfn-paneled" id="term-for-dom-document-2" style="color:initial">document</span>
-     <li><span class="dfn-paneled" id="term-for-parse-error-duplicate-attribute" style="color:initial">duplicate-attribute</span>
+     <li><span class="dfn-paneled" id="term-for-concept-script-duplicate-attribute" style="color:initial">duplicate attribute flag</span>
      <li><span class="dfn-paneled" id="term-for-the-embed-element" style="color:initial">embed</span>
      <li><span class="dfn-paneled" id="term-for-environment-settings-object" style="color:initial">environment settings object</span>
      <li><span class="dfn-paneled" id="term-for-forced-sandboxing-flag-set" style="color:initial">forced sandboxing flag set</span>
@@ -7959,7 +7947,6 @@ rest of Google’s CSP Cabal.</p>
      <li><span class="dfn-paneled" id="term-for-concept-settings-object-origin" style="color:initial">origin <small>(for environment settings object)</small></span>
      <li><span class="dfn-paneled" id="term-for-concept-WorkerGlobalScope-owner-set" style="color:initial">owner set</span>
      <li><span class="dfn-paneled" id="term-for-parse-a-sandboxing-directive" style="color:initial">parse a sandboxing directive</span>
-     <li><span class="dfn-paneled" id="term-for-concept-script-parse-error" style="color:initial">parse error</span>
      <li><span class="dfn-paneled" id="term-for-dom-a-ping" style="color:initial">ping</span>
      <li><span class="dfn-paneled" id="term-for-plugin-document" style="color:initial">plugin document</span>
      <li><span class="dfn-paneled" id="term-for-prepare-a-script" style="color:initial">prepare a script</span>
@@ -8163,7 +8150,7 @@ rest of Google’s CSP Cabal.</p>
   <h3 class="no-num no-ref heading settled" id="informative"><span class="content">Informative References</span><a class="self-link" href="#informative"></a></h3>
   <dl>
    <dt id="biblio-appmanifest">[APPMANIFEST]
-   <dd>Marcos Caceres; et al. <a href="https://www.w3.org/TR/appmanifest/">Web App Manifest</a>. 13 November 2018. WD. URL: <a href="https://www.w3.org/TR/appmanifest/">https://www.w3.org/TR/appmanifest/</a>
+   <dd>Marcos Caceres; et al. <a href="https://www.w3.org/TR/appmanifest/">Web App Manifest</a>. 12 December 2018. WD. URL: <a href="https://www.w3.org/TR/appmanifest/">https://www.w3.org/TR/appmanifest/</a>
    <dt id="biblio-beacon">[BEACON]
    <dd>Ilya Grigorik; et al. <a href="https://www.w3.org/TR/beacon/">Beacon</a>. 13 April 2017. CR. URL: <a href="https://www.w3.org/TR/beacon/">https://www.w3.org/TR/beacon/</a>
    <dt id="biblio-csp2">[CSP2]
@@ -8250,8 +8237,6 @@ rest of Google’s CSP Cabal.</p>
   interesting CSSOM algorithms. I don’t think CSSOM gives us any hooks here, so
   let’s work with them to put something reasonable together.<a href="#issue-6fa220c3"> ↵ </a></div>
    <div class="issue"> Spell this out in more detail as part of defining <code>X-Frame-Options</code> integration with the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#process-a-navigate-response">process a navigate response</a> algorithm. <a href="https://github.com/whatwg/html/issues/1230">&lt;https://github.com/whatwg/html/issues/1230></a><a href="#issue-c6a38617"> ↵ </a></div>
-   <div class="issue"> We need some sort of hook in HTML to record this error if we’re
-  planning on using it here. <a href="https://github.com/whatwg/html/issues/3257">&lt;https://github.com/whatwg/html/issues/3257></a><a href="#issue-820579ab"> ↵ </a></div>
    <div class="issue"> This processing is meant to mitigate the risk
   of dangling markup attacks that steal the nonce from an existing element
   in order to load injected script. It is fairly expensive, however, as it
@@ -8260,9 +8245,6 @@ rest of Google’s CSP Cabal.</p>
   impact by doing this check only for <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script">script</a></code> elements when a nonce is
   present, but we should probably consider this algorithm as "at risk" until
   we know its impact. <a href="https://github.com/w3c/webappsec-csp/issues/98">&lt;https://github.com/w3c/webappsec-csp/issues/98></a><a href="#issue-4592ac7e"> ↵ </a></div>
-   <div class="issue"> Currently the HTML spec’s parsing algorithm removes this information
-  before the <a href="#is-element-nonceable">§6.6.3.1 Is element nonceable?</a> algorithm can be run which makes it
-  impossible to actually detect duplicate attributes. <a href="https://github.com/whatwg/html/issues/3257">&lt;https://github.com/whatwg/html/issues/3257></a><a href="#issue-74cb0fbd"> ↵ </a></div>
   </div>
   <aside class="dfn-panel" data-for="content-security-policy">
    <b><a href="#content-security-policy">#content-security-policy</a></b><b>Referenced in:</b>

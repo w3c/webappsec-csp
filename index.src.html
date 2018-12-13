@@ -141,6 +141,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     for: WorkerGlobalScope
       text: owner set; url: concept-WorkerGlobalScope-owner-set
     text: process the iframe attributes; url: process-the-iframe-attributes
+    text: duplicate attribute flag; url: concept-script-duplicate-attribute
 
 spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   type: grammar
@@ -4255,7 +4256,10 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   1.  If |element| does not have an attribute named "`nonce`", return "`Not
       Nonceable`".
 
-  2.  If |element| is a <{script}> element, then for each |attribute| in
+  2.  If |element| is a <{script}> element and |element|'s <a>duplicate attribute flag</a>,
+      then return "`Not Nonceable`".
+
+  3.  If |element| is a <{script}> element, then for each |attribute| in
       |element|:
 
       1.  If |attribute|'s name is an <a>ASCII case-insensitive</a> match for
@@ -4265,12 +4269,6 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       2.  If |attribute|'s value contains an <a>ASCII case-insensitive</a> match
           the string "<code>&lt;script</code>" or the string
           "<code>&lt;style</code>", return "`Not Nonceable`".
-
-  3.  If |element| had a [=duplicate-attribute=] [=parse error=] during tokenization, return
-      "`Not Nonceable`".
-
-      ISSUE(whatwg/html#3257): We need some sort of hook in HTML to record this error if we're
-      planning on using it here.
 
   4.  Return "`Nonceable`".
 
@@ -4677,10 +4675,6 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   instance of the attribute after the first one is ignored but in the
   [[#is-element-nonceable]] algorithm, all attributes including the
   duplicate ones need to be checked.
-
-  ISSUE(whatwg/html#3257): Currently the HTML spec's parsing algorithm removes this information
-  before the [[#is-element-nonceable]] algorithm can be run which makes it
-  impossible to actually detect duplicate attributes.
 
   For the following example page:
 
