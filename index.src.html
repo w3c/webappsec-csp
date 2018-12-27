@@ -2557,76 +2557,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   4.  Return "`Allowed`".
 
-  <h4 id="directive-prefetch-src">`prefetch-src`</h4>
-
-  The <dfn export>prefetch-src</dfn> directive restricts the URLs from which resources may be
-  prefetched or prerendered. The syntax for the directive's name and value is described by the
-  following ABNF:
-
-  <pre>
-    directive-name  = "prefetch-src"
-    directive-value = <a grammar>serialized-source-list</a>
-  </pre>
-
-  <div class="example">
-    Given a page with the following Content Security Policy:
-
-    <pre>
-      <a http-header>Content-Security-Policy</a>: <a>prefetch-src</a> https://example.com/
-    </pre>
-
-    Fetches for the following code will return network errors, as the URLs provided do not match
-    `prefetch-src`'s <a>source list</a>:
-
-    <pre highlight="html">
-      &lt;link rel="prefetch" src="https://example.org/"&gt;&lt;/link&gt;
-      &lt;link rel="prerender" src="https://example.org/"&gt;&lt;/link&gt;
-    </pre>
-  </div>
-
-  <h5 algorithm id="prefetch-src-pre-request">
-    `prefetch-src` Pre-request check
-  </h5>
-
-  This directive's <a for="directive">pre-request check</a> is as follows:
-
-  Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `prefetch-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-request-to-source-list]] on |request|,
-      this directive's [=directive/value=], and |policy|,
-      is "`Does Not Match`", return "`Blocked`".
-
-  4.  Return "`Allowed`".
-
-  <h5 algorithm id="prefetch-src-post-request">
-    `prefetch-src` Post-request check
-  </h5>
-
-  This directive's <a for="directive">post-request check</a> is as follows:
-
-  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
-  <a for="/">policy</a> (|policy|):
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `prefetch-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-response-to-source-list]] on |response|,
-      |request|, this directive's [=directive/value=], and |policy|,
-      is "`Does Not Match`", return "`Blocked`".
-
-  4.  Return "`Allowed`".
-
-
-  <h4 id="directive-object-src">`object-src`</h4>
+<h4 id="directive-object-src">`object-src`</h4>
 
   The <dfn export>object-src</dfn> directive restricts the URLs from which plugin
   content may be loaded. The syntax for the directive's name and value is
@@ -2715,6 +2646,74 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   3.  If the result of executing [[#match-response-to-source-list]] on
       |response|, |request|, this directive's <a for="directive">value</a>,
       and |policy|, is "`Does Not Match`", return "`Blocked`".
+
+  4.  Return "`Allowed`".
+
+  <h4 id="directive-prefetch-src">`prefetch-src`</h4>
+
+  The <dfn export>prefetch-src</dfn> directive restricts the URLs from which resources may be
+  prefetched or prerendered. The syntax for the directive's name and value is described by the
+  following ABNF:
+
+  <pre>
+    directive-name  = "prefetch-src"
+    directive-value = <a grammar>serialized-source-list</a>
+  </pre>
+
+  <div class="example">
+    Given a page with the following Content Security Policy:
+
+    <pre>
+      <a http-header>Content-Security-Policy</a>: <a>prefetch-src</a> https://example.com/
+    </pre>
+
+    Fetches for the following code will return network errors, as the URLs provided do not match
+    `prefetch-src`'s <a>source list</a>:
+
+    <pre highlight="html">
+      &lt;link rel="prefetch" src="https://example.org/"&gt;&lt;/link&gt;
+      &lt;link rel="prerender" src="https://example.org/"&gt;&lt;/link&gt;
+    </pre>
+  </div>
+
+  <h5 algorithm id="prefetch-src-pre-request">
+    `prefetch-src` Pre-request check
+  </h5>
+
+  This directive's <a for="directive">pre-request check</a> is as follows:
+
+  Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
+
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
+
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `prefetch-src` and |policy| is "`No`", return "`Allowed`".
+
+  3.  If the result of executing [[#match-request-to-source-list]] on |request|,
+      this directive's [=directive/value=], and |policy|,
+      is "`Does Not Match`", return "`Blocked`".
+
+  4.  Return "`Allowed`".
+
+  <h5 algorithm id="prefetch-src-post-request">
+    `prefetch-src` Post-request check
+  </h5>
+
+  This directive's <a for="directive">post-request check</a> is as follows:
+
+  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
+  <a for="/">policy</a> (|policy|):
+
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
+
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `prefetch-src` and |policy| is "`No`", return "`Allowed`".
+
+  3.  If the result of executing [[#match-response-to-source-list]] on |response|,
+      |request|, this directive's [=directive/value=], and |policy|,
+      is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
