@@ -129,6 +129,8 @@ spec: REPORTING; urlPrefix: https://w3c.github.io/reporting/
   type: dfn
     text: group
     text: queue report; url: queue-report
+    text: report type
+    text: visible to reportingobservers
 
 spec: SHA2; urlPrefix: https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
   type: dfn
@@ -1549,9 +1551,31 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     Reporting
   </h2>
 
-  When one or more of a <a for="/">policy</a>'s directives is violated, a <dfn export>violation
-  report</dfn> may be generated and sent out to a reporting endpoint associated
-  with the <a for="/">policy</a>.
+  When one or more of a <a for="/">policy</a>'s directives is violated,
+  a <dfn export>csp violation report</dfn> may be generated and sent out to a
+  reporting endpoint associated with the <a for="/">policy</a>.
+
+  <p><a>csp violation reports</a> have the <a>report type</a>
+  "csp-violation".</p>
+
+  <p><a>csp violation reports</a> are <a>visible to
+  <code>ReportingObserver</code>s</a>.
+
+  <pre class="idl">
+    interface CSPViolationReportBody : ReportBody {
+      readonly attribute USVString documentURL;
+      readonly attribute USVString? referrer;
+      readonly attribute USVString? blockedURL;
+      readonly attribute DOMString effectiveDirective;
+      readonly attribute DOMString originalPolicy;
+      readonly attribute USVString? sourceFile;
+      readonly attribute DOMString? sample;
+      readonly attribute SecurityPolicyViolationEventDisposition disposition;
+      readonly attribute unsigned short statusCode;
+      readonly attribute unsigned long? lineNumber;
+      readonly attribute unsigned long? columnNumber;
+    };
+  </pre>
 
   <h3 id="violation-events">
     Violation DOM Events
@@ -1831,7 +1855,53 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
           set</a> contains a <a>directive</a> named "<a>`report-to`</a>"
           (|directive|):
 
-          1.  Let |group| be |directive|'s <a for="directive">value</a>.
+          1.  Let |body| be a new {{CSPViolationReportBody}}, initialized as
+              follows:
+
+              :   {{CSPViolationReportBody/documentURL}}
+              ::  The result of executing the <a>URL serializer</a> on |violation|'s
+                  <a for="violation">url</a>, with the `exclude fragment` flag set.
+                  
+              :   {{CSPViolationReportBody/referrer}}
+              ::  The result of executing the <a>URL serializer</a> on |violation|'s
+                  <a for="violation">referrer</a>, with the `exclude fragment` flag set.
+                  
+              :   {{CSPViolationReportBody/blockedURL}}
+              ::  The result of executing the <a>URL serializer</a> on |violation|'s
+                  <a for="violation">resource</a>, with the `exclude fragment` flag set.
+                  
+              :   {{CSPViolationReportBody/effectiveDirective}}
+              ::  |violation|'s <a for="violation">effective directive</a>.
+                  
+              :   {{CSPViolationReportBody/originalPolicy}}
+              ::  The <a lt="serialized CSP">serialization</a> of |violation|'s
+                  <a for="violation">policy</a>.
+                  
+              :   {{CSPViolationReportBody/sourceFile}}
+              ::  The result of executing the <a>URL serializer</a> on
+                  |violation|'s <a for="violation">source file</a>, with the
+                  `exclude fragment` flag set, if |violation|'s
+                  <a for="violation">source file</a> is not null, or null
+                  otherwise.
+
+              :   {{CSPViolationReportBody/sample}}
+              ::  |violation|'s <a for="violation">sample</a>.
+
+              :   {{CSPViolationReportBody/disposition}}
+              ::  |violation|'s <a for="violation">disposition</a>.
+
+              :   {{CSPViolationReportBody/statusCode}}
+              ::  |violation|'s <a for="violation">status</a>.
+
+              :   {{CSPViolationReportBody/lineNumber}}
+              ::  |violation|'s <a for="violation">line number</a>, if
+                  |violation|'s <a for="violation">source file</a> is not null,
+                  or null otherwise.
+
+              :   {{CSPViolationReportBody/columnNumber}}
+              ::  |violation|'s <a for="violation">column number</a>, if
+                  |violation|'s <a for="violation">source file</a> is not null,
+                  or null otherwise.
 
           2.  Let |settings object| be |violation|'s <a for="violation">global
               object</a>'s <a>relevant settings object</a>.
@@ -1841,11 +1911,11 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
               following arguments:
 
               :   |data|
-              ::  |violation|
+              ::  |body|
               :   |type|
-              ::  "CSP"
+              ::  "csp-violation"
               :   |endpoint group|
-              ::  |group|
+              ::  |directive|'s <a for="directive">value</a>.
               :   |settings|
               ::  |settings object|
 </section>
