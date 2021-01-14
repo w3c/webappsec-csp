@@ -1644,7 +1644,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   string representation of the violation, suitable for submission to a reporting
   endpoint associated with the deprecated <a>`report-uri`</a> directive.
 
-  1.  Let |object| be a new JavaScript object with properties initialized as
+  1.  Let |body| be a new JavaScript object with properties initialized as
       follows:
 
       :   "`document-url`"
@@ -1684,30 +1684,36 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   2.  If |violation|'s <a for="violation">source file</a> is not `null`:
 
-      1.  Set |object|'s "`source-file`" property to the result of executing
+      1.  Set |body|'s "`source-file`" property to the result of executing
           the <a>URL serializer</a> on |violation|'s <a for="violation">source
           file</a>, with the `exclude fragment` flag set.
 
-      2.  Set |object|'s "`lineno`" property to |violation|'s
+      2.  Set |body|'s "`lineno`" property to |violation|'s
           <a for="violation">line number</a>.
 
-      3.  Set |object|'s "`line-number`" property to |violation|'s
+      3.  Set |body|'s "`line-number`" property to |violation|'s
           <a for="violation">line number</a>.
 
-      4.  Set |object|'s "`colno`" property to |violation|'s
+      4.  Set |body|'s "`colno`" property to |violation|'s
           <a for="violation">column number</a>.
 
-      5.  Set |object|'s "`column-number`" property to |violation|'s
+      5.  Set |body|'s "`column-number`" property to |violation|'s
           <a for="violation">column number</a>.
 
           Note: the "`line-number`" and "`column-number`" properties are
           maintained for historical reasons and are duplicates of "`lineno`"
           and "`colno`" respectively.
 
-  3.  Assert: If |object|'s "`blocked-url`" property is not "`inline`", then its "`sample`"
+  3.  Assert: If |body|'s "`blocked-url`" property is not "`inline`", then its "`sample`"
       property is the empty string.
 
-  4.  Return the result of executing {{JSON.stringify()}} on |object|.
+  4.  Let |object| be a new JavaScript object with properties initialized as
+      follows:
+
+      :   "`csp-report`"
+      ::  |body|
+
+  5.  Return the result of executing {{JSON.stringify()}} on |object|.
 
   <h3 id="report-violation" algorithm>
     Report a |violation|
