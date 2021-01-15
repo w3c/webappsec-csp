@@ -87,8 +87,6 @@ spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
       text: target browsing context; url: concept-request-target-browsing-context
 spec: MIX; urlPrefix: https://www.w3.org/TR/mixed-content/
   type: dfn; text: block-all-mixed-content
-spec: MIMESNIFF; urlPrefix: https://mimesniff.spec.whatwg.org/
-  type: dfn; text: valid MIME type
 spec: RFC2045; urlPrefix: https://tools.ietf.org/html/rfc2045
   type: grammar
     text: type; url: section-5.1
@@ -1181,13 +1179,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       base URL</a> algorithm to ensure that the <{base/href}> attribute's value
       is valid.
 
-  12. [[#should-plugin-element-be-blocked-a-priori-by-content-security-policy]]
-      is called during the processing of <{object}>, <{embed}>, and <a>`applet`</a>
-      elements to determine whether they may trigger a fetch.
-
-      Note: Fetched plugin resources are handled in [[#should-block-response]].
-
-  13. [[#should-block-navigation-request]] is called during the <a>process a
+  12. [[#should-block-navigation-request]] is called during the <a>process a
       navigate fetch</a> algorithm, and [[#should-block-navigation-response]]
       is called during the <a>process a navigate response</a> algorithm to
       apply directive's navigation checks, as well as inline checks for
@@ -3384,124 +3376,6 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   2.  Return "`Allowed`".
 
-  <h4 id="directive-plugin-types">`plugin-types`</h4>
-
-  The <dfn export>plugin-types</dfn> directive restricts the set of plugins that
-  can be embedded into a document by limiting the types of resources which can
-  be loaded. The directive's syntax is described by the following ABNF grammar:
-
-  <pre dfn-type="grammar" link-type="grammar">
-    directive-name  = "plugin-types"
-    directive-value = <a>media-type-list</a>
-
-    <dfn>media-type-list</dfn> = "" / <a>media-type</a> *( <a>required-ascii-whitespace</a> <a>media-type</a> )
-    <dfn>media-type</dfn> = <a>type</a> "/" <a>subtype</a>
-    ; <a>type</a> and <a>subtype</a> are defined in RFC 2045
-  </pre>
-
-  If a `plugin-types` directive is present, instantiation of an <{embed}> or
-  <{object}> element will fail if any of the following conditions hold:
-
-  1.  The element does not explicitly declare a <a>valid MIME type</a> via a
-      <{embed/type}> attribute.
-
-  2.  The declared type does not match one of the items in the directive's
-      value.
-
-  3.  The fetched resource does not match the declared type.
-
-  Note: The `plugin-types` grammar allows for an empty directive value in which
-  case all instantions of <{embed}> and <{object}> will fail.
-
-  <div class="example">
-    Given a page with the following Content Security Policy:
-
-    <pre>
-      <a http-header>Content-Security-Policy</a>: <a>plugin-types</a> application/pdf
-    </pre>
-
-    Fetches for the following code will all return network errors:
-
-    <pre highlight="html">
-      &lt;!-- No 'type' declaration --&gt;
-      &lt;object data="https://example.com/flash"&gt;&lt;/object&gt;
-
-      &lt;!-- Non-matching 'type' declaration --&gt;
-      &lt;object data="https://example.com/flash" type="application/x-shockwave-flash"&gt;&lt;/object&gt;
-
-      &lt;!-- Non-matching resource --&gt;
-      &lt;object data="https://example.com/flash" type="application/pdf"&gt;&lt;/object&gt;
-    </pre>
-
-    If the page allowed Flash content by sending the following header:
-
-    <pre>
-      <a http-header>Content-Security-Policy</a>: <a>plugin-types</a> application/x-shockwave-flash
-    </pre>
-
-    Then the second item above would load successfully:
-
-    <pre highlight="html">
-      &lt;!-- Matching 'type' declaration and resource --&gt;
-      &lt;object data="https://example.com/flash" type="application/x-shockwave-flash"&gt;&lt;/object&gt;
-    </pre>
-  </div>
-
-  <h5 algorithm dfn>
-    `plugin-types` Post-Request Check
-  </h5>
-
-  This directive's <a for="directive">post-request check</a> algorithm is as
-  follows:
-
-  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
-  <a for="/">policy</a> (|policy|):
-
-  1.  Assert: |policy| is unused.
-
-  2.  If |request|'s <a for="request">destination</a> is either "`object`"
-      or "`embed`":
-
-      1.  Let |type| be the result of <a lt="extract a MIME type">extracting a
-          MIME type</a> from |response|'s <a for="response">header list</a>.
-
-      2.  If |type| is not an <a>ASCII case-insensitive</a> match for any item
-          in this directive's <a for="directive">value</a>, return "`Blocked`".
-
-  3.  Return "`Allowed`".
-
-  <h5 algorithm dfn export>
-    Should |plugin element| be blocked <i lang="la">a priori</i> by Content
-    Security Policy?:
-  </h5>
-
-  Given an {{Element}} (|plugin element|), this algorithm returns "`Blocked`"
-  or "`Allowed`" based on the element's `type` attribute and the policy applied to
-  its document:
-
-  <ol class="algorithm">
-    1.  For each |policy| in |plugin element|'s <a>node document</a>'s
-        <a for="Document">CSP list</a>:
-
-        1.  If |policy| contains a <a>directive</a> (|directive|) whose name is
-            `plugin-types`:
-
-            1.  Let |type| be "`application/x-java-applet`" if |plugin element|
-                is an <a>`applet`</a> element, or |plugin element|'s `type` attribute's
-                value if present, or "`null`" otherwise.
-
-            2.  Return "`Blocked`" if any of the following are true:
-
-                1.  |type| is `null`.
-
-                2.  |type| is not a <a>valid MIME type</a>.
-
-                3.  |type| is not an <a>ASCII case-insensitive</a> match for any
-                    item in |directive|'s <a for="directive">value</a>.
-
-    2.  Return "`Allowed`".
-  </ol>
-
   <h4 id="directive-sandbox">`sandbox`</h4>
 
   The <dfn export>sandbox</dfn> directive specifies an HTML sandbox policy which the
@@ -5207,8 +5081,6 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   ::  This document (see [[#directive-media-src]])
   :   <a>`object-src`</a>
   ::  This document (see [[#directive-object-src]])
-  :   <a>`plugin-types`</a>
-  ::  This document (see [[#directive-plugin-types]])
   :   <a>`report-uri`</a>
   ::  This document (see [[#directive-report-uri]])
   :   <a>`report-to`</a>
