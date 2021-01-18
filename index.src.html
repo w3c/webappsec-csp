@@ -589,9 +589,9 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       or "`response`"), and a <a for="/">policy</a> as arguments, and is executed during
       [[#should-block-navigation-response]]. It returns "`Allowed`" unless otherwise specified.
 
-  8.  A <dfn for="directive" export>pre-connect check</dfn>, which takes a [=/host=], a [=/policy=], and
-      an [=origin=], and is executed during [[#should-block-rtc-connection]]. It returns "`Allowed`"
-      unless otherwise specified.
+  8.  A <dfn for="directive" export>pre-connect check</dfn>, which takes a [=/policy=], and
+      is executed during [[#should-block-rtc-connection]]. It returns "`Allowed`" unless
+      otherwise specified.
 
   <h4 id="framework-directive-source-list">Source Lists</h4>
 
@@ -1500,8 +1500,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     Should an RTC connection to (|host|,|port|) be blocked for |global|?
   </h4>
 
-  Given a [=/host=] (|host|), a port (|port|), and a [=/global object=] (|global|), this algorithm returns "`Blocked`"
-  if the active policy for |global| blocks a connection to |host|, and "`Allowed`" otherwise:
+  Given a [=/global object=] (|global|), this algorithm returns "`Blocked`"
+  if the active policy for |global| blocks RTC connections, and "`Allowed`" otherwise:
 
   <ol class="algorithm">
     1.  Let |result| be "`Allowed`".
@@ -1520,8 +1520,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
               "`default-src`", then set |directive| to that directive.
 
           3.  If |directive| is not `null`, and the result of executing |directive|'s
-              [=pre-connect check=] on |host|, |policy|, and |global|'s [=/origin=] is
-              "`Blocked`":
+              [=pre-connect check=] is "`Blocked`":
 
               1.  Let |violation| be the result of executing [[#create-violation-for-global]] on
                   |global|, |policy|, and |directive|'s [=directive/name=].
@@ -2198,16 +2197,15 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   This directive's <a for="directive">pre-connect check</a> is as follows:
 
-  Given a [=/host=] (|host|), a port (|port|), an [=/origin=] (|origin|) and a [=/policy=]
-  (|policy|):
+  Given a [=/policy=] (|policy|):
 
   1.  Assert: |policy| is unused.
 
   2.  Let |url| be a [=/url=] whose [=url/scheme=] is |origin|'s [=origin/scheme=], [=url/host=]
       is |host|, and [=url/port=] is |port|.
 
-  3.  If the result of executing [[#match-url-to-source-list]] on |url|, this directive's
-      [=directive/value=], and |origin| is "`Matches`", return "`Allowed`".
+  3.  If this directive's [=directive/value=] contains a single item is an
+      <a>ASCII case-insensitive</a> match for the string "*", return "Allowed"
 
   4.  Return "`Blocked`".
 
@@ -2357,16 +2355,15 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   This directive's <a for="directive">pre-connect check</a> is as follows:
 
-  Given a [=/host=] (|host|), a port (|port|), an [=/origin=] (|origin|) and a [=/policy=]
-  (|policy|):
+  Given a [=/policy=] (|policy|):
 
   1.  Assert: |policy| is unused.
 
   2.  Let |url| be a [=/url=] whose [=url/scheme=] is |origin|'s [=origin/scheme=], [=url/host=]
       is |host|, and [=url/port=] is |port|.
 
-  3.  If the result of executing [[#match-url-to-source-list]] on |url|, this directive's
-      [=directive/value=], and |origin| is "`Matches`", return "`Allowed`".
+  3.  If this directive's [=directive/value=] contains a single item is an
+      <a>ASCII case-insensitive</a> match for the string "*", return "Allowed"
 
   4.  Return "`Blocked`".
 
@@ -3382,16 +3379,15 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   This directive's <a for="directive">pre-connect check</a> is as follows:
 
-  Given a [=/host=] (|host|), a port (|port|), an [=/origin=] (|origin|) and a [=/policy=]
-  (|policy|):
+  Given a [=/policy=] (|policy|):
 
   1.  Assert: |policy| is unused.
 
   2.  Let |url| be a [=/url=] whose [=url/scheme=] is |origin|'s [=origin/scheme=], [=url/host=]
       is |host|, and [=url/port=] is |port|.
 
-  3.  If the result of executing [[#match-url-to-source-list]] on |url|, this directive's
-      [=directive/value=], and |origin| is "`Matches`", return "`Allowed`".
+  3.  If this directive's [=directive/value=] contains a single item is an
+      <a>ASCII case-insensitive</a> match for the string "*", return "Allowed"
 
   4.  Return "`Blocked`".
 
