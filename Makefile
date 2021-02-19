@@ -26,9 +26,6 @@ cookies/index.html: cookies/index.src.html
 pinning/index.html: pinning/index.src.html
 	bikeshed -f spec ./pinning/index.src.html
 
-publish:
-	git push origin master
-
 ci: out/index.html
 
 out/index.html: index.src.html
@@ -47,3 +44,4 @@ out/index.html: index.src.html
 
 clean:
 	$(RM) -r out
+	$(RM) index.html
