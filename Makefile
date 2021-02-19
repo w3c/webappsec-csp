@@ -1,3 +1,5 @@
+SHELL=/bin/bash
+
 all: index.html ./api/index.html ./cookies/index.html ./pinning/index.html
 
 force:
@@ -26,3 +28,22 @@ pinning/index.html: pinning/index.src.html
 
 publish:
 	git push origin master
+
+ci: out/index.html
+
+out/index.html: index.src.html
+	mkdir -p out
+	@ (HTTP_STATUS=$$(curl https://api.csswg.org/bikeshed/ \
+	                       --output $@ \
+	                       --write-out "%{http_code}" \
+	                       --header "Accept: text/plain, text/html" \
+	                       -F die-on=nothing \
+	                       -F file=@$<) && \
+	[[ "$$HTTP_STATUS" -eq "200" ]]) || ( \
+		echo ""; cat $@; echo ""; \
+		$(RM) -r out; \
+		exit 22 \
+	);
+
+clean:
+	$(RM) -r out
