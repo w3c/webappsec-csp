@@ -80,7 +80,6 @@ spec: ECMA262; urlPrefix: https://tc39.github.io/ecma262
     text: HostEnsureCanCompileStrings(); url: sec-hostensurecancompilestrings
     text: eval(); url: sec-eval-x
     text: Function(); url: sec-function-objects
-    text: JSON.stringify(); url: sec-json.stringify
 spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   type: dfn
     for: request
@@ -1632,7 +1631,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   string representation of the violation, suitable for submission to a reporting
   endpoint associated with the deprecated <a>`report-uri`</a> directive.
 
-  1.  Let |body| be a new JavaScript object with properties initialized as
+  1.  Let |body| be a <a lt="ordered map">map</a> with its keys initialized as
       follows:
 
       :   "`document-url`"
@@ -1672,36 +1671,31 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   2.  If |violation|'s <a for="violation">source file</a> is not `null`:
 
-      1.  Set |body|'s "`source-file`" property to the result of executing
+      1.  Set |body|["`source-file`"] to the result of executing
           the <a>URL serializer</a> on |violation|'s <a for="violation">source
           file</a>, with the `exclude fragment` flag set.
 
-      2.  Set |body|'s "`lineno`" property to |violation|'s
+      2.  Set |body|["`lineno`"] to |violation|'s
           <a for="violation">line number</a>.
 
-      3.  Set |body|'s "`line-number`" property to |violation|'s
+      3.  Set |body|["`line-number`"] to |violation|'s
           <a for="violation">line number</a>.
 
-      4.  Set |body|'s "`colno`" property to |violation|'s
+      4.  Set |body|["`colno`"] to |violation|'s
           <a for="violation">column number</a>.
 
-      5.  Set |body|'s "`column-number`" property to |violation|'s
+      5.  Set |body|["`column-number`"] to |violation|'s
           <a for="violation">column number</a>.
 
-          Note: the "`line-number`" and "`column-number`" properties are
+          Note: the "`line-number`" and "`column-number`" keys are
           maintained for historical reasons and are duplicates of "`lineno`"
           and "`colno`" respectively.
 
-  3.  Assert: If |body|'s "`blocked-url`" property is not "`inline`", then its "`sample`"
-      property is the empty string.
+  3.  Assert: If |body|["`blocked-url`"] is not "`inline`", then |body|["`sample`"]
+      is the empty string.
 
-  4.  Let |object| be a new JavaScript object with properties initialized as
-      follows:
-
-      :   "`csp-report`"
-      ::  |body|
-
-  5.  Return the result of executing {{JSON.stringify()}} on |object|.
+  4.  Return the result of <a>serialize an infra value to JSON bytes</a> given
+      «[ "csp-report" → body ]».
 
   <h3 id="report-violation" algorithm>
     Report a |violation|
