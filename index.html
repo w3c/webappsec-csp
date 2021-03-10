@@ -7,7 +7,7 @@
   <link href="https://www.w3.org/StyleSheets/TR/2016/W3C-WD" rel="stylesheet" type="text/css">
   <meta content="Bikeshed version b94c7e755, updated Fri Feb 19 16:28:59 2021 -0800" name="generator">
   <link href="https://www.w3.org/TR/CSP3/" rel="canonical">
-  <meta content="a3b7b50bd2848ed49a01937427d5db0219595f4a" name="document-revision">
+  <meta content="78d0908123c1a1792c5fec0a82dccea874407d67" name="document-revision">
 <style>
   ul.toc ul ul ul {
     margin: 0 0 0 2em;
@@ -1796,7 +1796,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
   endpoint associated with the deprecated <a data-link-type="dfn" href="#report-uri" id="ref-for-report-uri"><code>report-uri</code></a> directive.</p>
     <ol>
      <li data-md>
-      <p>Let <var>body</var> be a new JavaScript object with properties initialized as
+      <p>Let <var>body</var> be a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-map" id="ref-for-ordered-map">map</a> with its keys initialized as
   follows:</p>
       <dl>
        <dt data-md>"<code>document-url</code>"
@@ -1842,34 +1842,27 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
       <p>If <var>violation</var>’s <a data-link-type="dfn" href="#violation-source-file" id="ref-for-violation-source-file②">source file</a> is not <code>null</code>:</p>
       <ol>
        <li data-md>
-        <p>Set <var>body</var>’s "<code>source-file</code>" property to the result of executing
+        <p>Set <var>body</var>["<code>source-file</code>"] to the result of executing
   the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer③">URL serializer</a> on <var>violation</var>’s <a data-link-type="dfn" href="#violation-source-file" id="ref-for-violation-source-file③">source
   file</a>, with the <code>exclude fragment</code> flag set.</p>
        <li data-md>
-        <p>Set <var>body</var>’s "<code>lineno</code>" property to <var>violation</var>’s <a data-link-type="dfn" href="#violation-line-number" id="ref-for-violation-line-number①">line number</a>.</p>
+        <p>Set <var>body</var>["<code>lineno</code>"] to <var>violation</var>’s <a data-link-type="dfn" href="#violation-line-number" id="ref-for-violation-line-number①">line number</a>.</p>
        <li data-md>
-        <p>Set <var>body</var>’s "<code>line-number</code>" property to <var>violation</var>’s <a data-link-type="dfn" href="#violation-line-number" id="ref-for-violation-line-number②">line number</a>.</p>
+        <p>Set <var>body</var>["<code>line-number</code>"] to <var>violation</var>’s <a data-link-type="dfn" href="#violation-line-number" id="ref-for-violation-line-number②">line number</a>.</p>
        <li data-md>
-        <p>Set <var>body</var>’s "<code>colno</code>" property to <var>violation</var>’s <a data-link-type="dfn" href="#violation-column-number" id="ref-for-violation-column-number①">column number</a>.</p>
+        <p>Set <var>body</var>["<code>colno</code>"] to <var>violation</var>’s <a data-link-type="dfn" href="#violation-column-number" id="ref-for-violation-column-number①">column number</a>.</p>
        <li data-md>
-        <p>Set <var>body</var>’s "<code>column-number</code>" property to <var>violation</var>’s <a data-link-type="dfn" href="#violation-column-number" id="ref-for-violation-column-number②">column number</a>.</p>
-        <p class="note" role="note"><span>Note:</span> the "<code>line-number</code>" and "<code>column-number</code>" properties are
+        <p>Set <var>body</var>["<code>column-number</code>"] to <var>violation</var>’s <a data-link-type="dfn" href="#violation-column-number" id="ref-for-violation-column-number②">column number</a>.</p>
+        <p class="note" role="note"><span>Note:</span> the "<code>line-number</code>" and "<code>column-number</code>" keys are
   maintained for historical reasons and are duplicates of "<code>lineno</code>"
   and "<code>colno</code>" respectively.</p>
       </ol>
      <li data-md>
-      <p class="assertion">Assert: If <var>body</var>’s "<code>blocked-url</code>" property is not "<code>inline</code>", then its "<code>sample</code>"
-  property is the empty string.</p>
+      <p class="assertion">Assert: If <var>body</var>["<code>blocked-url</code>"] is not "<code>inline</code>", then <var>body</var>["<code>sample</code>"]
+  is the empty string.</p>
      <li data-md>
-      <p>Let <var>object</var> be a new JavaScript object with properties initialized as
-  follows:</p>
-      <dl>
-       <dt data-md>"<code>csp-report</code>"
-       <dd data-md>
-        <p><var>body</var></p>
-      </dl>
-     <li data-md>
-      <p>Return the result of executing <code class="idl"><a data-link-type="idl" href="https://tc39.github.io/ecma262#sec-json.stringify" id="ref-for-sec-json.stringify">JSON.stringify()</a></code> on <var>object</var>.</p>
+      <p>Return the result of <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#serialize-an-infra-value-to-json-bytes" id="ref-for-serialize-an-infra-value-to-json-bytes">serialize an infra value to JSON bytes</a> given
+  «[ "csp-report" → body ]».</p>
     </ol>
     <h3 class="heading settled algorithm" data-algorithm="Report a violation" data-level="5.3" id="report-violation"><span class="secno">5.3. </span><span class="content"> Report a <var>violation</var> </span><a class="self-link" href="#report-violation"></a></h3>
     <p>Given a <a data-link-type="dfn" href="#violation" id="ref-for-violation①⑧">violation</a> (<var>violation</var>), this algorithm reports it to the endpoint specified in <var>violation</var>’s <a data-link-type="dfn" href="#violation-policy" id="ref-for-violation-policy③">policy</a>, and fires a <code class="idl"><a data-link-type="idl" href="#securitypolicyviolationevent" id="ref-for-securitypolicyviolationevent①">SecurityPolicyViolationEvent</a></code> at <var>violation</var>’s <a data-link-type="dfn" href="#violation-element" id="ref-for-violation-element①">element</a>, or at <var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object③">global object</a> as described below:</p>
@@ -4970,13 +4963,6 @@ rest of Google’s CSP Cabal.</p>
     EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="term-for-sec-json.stringify">
-   <a href="https://tc39.github.io/ecma262#sec-json.stringify">https://tc39.github.io/ecma262#sec-json.stringify</a><b>Referenced in:</b>
-   <ul>
-    <li><a href="#ref-for-sec-json.stringify">5.2. 
-    Obtain the deprecated serialization of violation </a>
-   </ul>
-  </aside>
   <aside class="dfn-panel" data-for="term-for-sec-eval-x">
    <a href="https://tc39.github.io/ecma262#sec-eval-x">https://tc39.github.io/ecma262#sec-eval-x</a><b>Referenced in:</b>
    <ul>
@@ -6103,6 +6089,13 @@ rest of Google’s CSP Cabal.</p>
     Parse a serialized CSP list </a> <a href="#ref-for-list②">(2)</a>
    </ul>
   </aside>
+  <aside class="dfn-panel" data-for="term-for-ordered-map">
+   <a href="https://infra.spec.whatwg.org/#ordered-map">https://infra.spec.whatwg.org/#ordered-map</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-ordered-map">5.2. 
+    Obtain the deprecated serialization of violation </a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="term-for-ordered-set">
    <a href="https://infra.spec.whatwg.org/#ordered-set">https://infra.spec.whatwg.org/#ordered-set</a><b>Referenced in:</b>
    <ul>
@@ -6111,6 +6104,13 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-ordered-set③">2.3.1. Source Lists</a>
     <li><a href="#ref-for-ordered-set④">6.7.3. 
     Get fetch directive fallback list </a> <a href="#ref-for-ordered-set⑤">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-serialize-an-infra-value-to-json-bytes">
+   <a href="https://infra.spec.whatwg.org/#serialize-an-infra-value-to-json-bytes">https://infra.spec.whatwg.org/#serialize-an-infra-value-to-json-bytes</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-serialize-an-infra-value-to-json-bytes">5.2. 
+    Obtain the deprecated serialization of violation </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-ordered-set">
@@ -6533,7 +6533,6 @@ rest of Google’s CSP Cabal.</p>
     <ul>
      <li><span class="dfn-paneled" id="term-for-sec-function-objects">Function()</span>
      <li><span class="dfn-paneled" id="term-for-sec-hostensurecancompilestrings">HostEnsureCanCompileStrings()</span>
-     <li><span class="dfn-paneled" id="term-for-sec-json.stringify">JSON.stringify()</span>
      <li><span class="dfn-paneled" id="term-for-sec-eval-x">eval()</span>
      <li><span class="dfn-paneled" id="term-for-realm">realm</span>
     </ul>
@@ -6656,7 +6655,9 @@ rest of Google’s CSP Cabal.</p>
      <li><span class="dfn-paneled" id="term-for-">infra</span>
      <li><span class="dfn-paneled" id="term-for-list-is-empty">is empty</span>
      <li><span class="dfn-paneled" id="term-for-list">list</span>
+     <li><span class="dfn-paneled" id="term-for-ordered-map">ordered map</span>
      <li><span class="dfn-paneled" id="term-for-ordered-set">ordered set</span>
+     <li><span class="dfn-paneled" id="term-for-serialize-an-infra-value-to-json-bytes">serialize an infra value to json bytes</span>
      <li><span class="dfn-paneled" id="term-for-ordered-set①">set</span>
      <li><span class="dfn-paneled" id="term-for-split-on-ascii-whitespace">split a string on ascii whitespace</span>
      <li><span class="dfn-paneled" id="term-for-split-on-commas">split a string on commas</span>
