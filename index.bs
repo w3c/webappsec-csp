@@ -128,15 +128,13 @@ spec: SHA2; urlPrefix: https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pd
 
 spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   type: dfn
-    for: WorkerGlobalScope
-      text: owner set; url: concept-WorkerGlobalScope-owner-set
-    text: process the iframe attributes; url: process-the-iframe-attributes
     for: script
       text: "parser-inserted"
     text: origin; url: concept-origin
     text: browsing context; url: browsing-context
     text: content security policy state; url: attr-meta-http-equiv-content-security-policy
     text: create and initialize a new document object; url: initialise-the-document-object
+    text: initializing a new Document object; url: initialise-the-document-object
 
 spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   type: grammar
@@ -396,8 +394,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   A <dfn export lt="content security policy object" local-lt="policy">policy</dfn> defines allowed
   and restricted behaviors, and may be applied to a {{Document}}, {{WorkerGlobalScope}}, or
-  {{WorkletGlobalScope}} as described in [[#initialize-global-object-csp]] and in
-  [[#initialize-document-csp]].
+  {{WorkletGlobalScope}}.
 
   Each policy has an associated <dfn for="policy" export>directive set</dfn>, which is an <a>ordered
   set</a> of <a>directives</a> that define the policy's implications when applied.
@@ -415,8 +412,6 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   <a>local scheme</a> documents/workers that have inherited their policy but
   have an <a>opaque origin</a>. Most of the time this will simply be the
   <a>environment settings object</a>'s [=environment settings object/origin=].
-  The [[#initialize-document-csp]] algorithm describes situations in which
-  a policy is inherited.
 
   Multiple [=/policies=] can be applied to a single resource, and are collected into a [=list=] of
   [=/policies=] known as a <dfn export>CSP list</dfn>.
@@ -521,6 +516,33 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     4.  Return |policies|.
   </ol>
 
+  <h4 id="parse-response-csp" algorithm dfn export>
+    Parse |response|'s Content Security Policies
+  </h4>
+
+  To <dfn abstract-op>parse a response's Content Security Policies</dfn> given a <a>response</a>
+  (|response|):
+
+  <ol class="algorithm">
+    1.  Let |policies| be the result of <a abstract-op lt="parse a serialized CSP list">parsing</a>
+        the result of [=extracting header list values=] given `Content-Security-Policy` and
+        |response|'s [=response/header list=], with a [=policy/source=] of "`header`", and a
+        [=policy/disposition=] of "`enforce`".
+
+    2.  Append to |policies| the result of
+        <a abstract-op lt="parse a serialized CSP list">parsing</a> the result of
+        [=extracting header list values=] given `Content-Security-Policy-Report-Only` and
+        |response|'s [=response/header list=], with a [=policy/source=] of "`header`", and a
+        [=policy/disposition=] of "`report`".
+
+    3.  For each |policy| in |policies|:
+
+        1.  Set |policy|'s [=policy/self-origin=] to |response|'s [=response/url=]'s
+            [=url/origin=].
+
+    4.  Return |policies|.
+  </ol>
+
   <h3 id="framework-directives">Directives</h3>
 
   Each <a for="/">policy</a> contains an <a>ordered set</a> of <dfn export>directives</dfn> (its
@@ -571,9 +593,9 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       algorithm returns "`Allowed`" unless otherwise specified.
 
   5.  An <dfn for="directive" export>initialization</dfn>, which takes a {{Document}}
-      or <a for="/">global object</a>, a <a>response</a>, and a <a for="/">policy</a>
-      as arguments. This algorithm is executed during [[#initialize-document-csp]],
-      and has no effect unless otherwise specified.
+      or <a for="/">global object</a> and a <a for="/">policy</a> as arguments. This
+      algorithm is executed during [[#initialize-document-csp]], and has no effect unless
+      otherwise specified.
 
   6.  A <dfn for="directive" export>pre-navigation check</dfn>, which takes a
       <a for="/">request</a>, a navigation type string ("`form-submission`"
@@ -1000,25 +1022,9 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   populates its <a for="response">CSP list</a> accordingly:
 
   <ol class="algorithm">
-    1.  Set |response|'s [=response/CSP list=] to the empty list.
-
-    2.  Let |policies| be the result of <a abstract-op lt="parse a serialized CSP list">parsing</a>
-        the result of [=extracting header list values=] given `Content-Security-Policy` and
-        |response|'s [=response/header list=], with a [=policy/source=] of "`header`", and a
-        [=policy/disposition=] of "`enforce`".
-
-    3.  Append to |policies| the result of
-        <a abstract-op lt="parse a serialized CSP list">parsing</a> the result of
-        [=extracting header list values=] given `Content-Security-Policy-Report-Only` and
-        |response|'s [=response/header list=], with a [=policy/source=] of "`header`", and a
-        [=policy/disposition=] of "`report`".
-
-    4.  For each |policy| in |policies|:
-
-        1.  Set |policy|'s [=policy/self-origin=] to |response|'s [=response/url=]'s
-            [=url/origin=].
-
-        2.  Insert |policy| into |response|'s <a for="response">CSP list</a>.
+    1.  Set |response|'s [=response/CSP list=] to the result of <a abstract-op
+        lt="parse a response's Content Security Policies">parsing</a> |response|'s
+        Content Security Policies.
   </ol>
 
   <h4 id="report-for-request" algorithm dfn export>
@@ -1131,11 +1137,11 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     Integration with HTML
   </h3>
 
-  1.  The {{Document}}, {{WorkerGlobalScope}}, and {{WorkletGlobalScope}} objects have a
-      `CSP list`, which holds all the <a for="/">policy</a> objects which are
-      active for a given context. This list is empty unless otherwise specified,
-      and is populated via the [[#initialize-global-object-csp]] and
-      [[#initialize-document-csp]] algorithms.
+  1.  The [=policy container=] has a <a for="policy container">CSP list</a>, which holds
+      all the <a for="/">policy</a> objects which are active for a given context. This
+      list is empty unless otherwise specified, and is populated from the <a>response</a> by <a
+      abstract-op lt="parse a response's Content Security Policies">parsing</a> <a>response</a>'s
+      Content Security Policies or inherited following the rules of the [=policy container=].
 
   2.  A <a for="/">global object</a>'s <dfn for="global object" id="global-object-csp-list">CSP list</dfn>
       is the result of executing [[#get-csp-of-object]] with the <a for="/">global object</a>
@@ -1145,129 +1151,51 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       <a for="/">global object</a> by inserting it into the <a for="/">global object</a>'s
       <a for="global object">CSP list</a>.
 
-  4.  [[#initialize-global-object-csp]] is called during the <a>run a worker</a>
-      algorithm in order to bind a set of <a for="/">policy</a> objects associated
-      with a <a>response</a> {{WorkerGlobalScope}} or {{WorkletGlobalScope}}.
+  4.  [[#initialize-document-csp]] is called during the <a>create and initialize a
+      new `Document` object</a> algorithm.
 
-  5.  [[#initialize-document-csp]] is called during the <a>create and initialize a
-      new `Document` object</a> algorithm in order to bind a set of <a for="/">policy</a>
-      objects associated with a <a>response</a> to a newly created {{Document}}.
-
-  6.  [[#should-block-inline]] is called during the <a>prepare a script</a> and
+  5.  [[#should-block-inline]] is called during the <a>prepare a script</a> and
       <a>update a `style` block</a> algorithms in order to determine whether or
       not an inline script or style block is allowed to execute/render.
 
-  7.  [[#should-block-inline]] is called during handling of inline event
+  6.  [[#should-block-inline]] is called during handling of inline event
       handlers (like `onclick`) and inline `style` attributes in order to
       determine whether or not they ought to be allowed to execute/render.
 
-  8.  <a for="/">policy</a> is <a>enforced</a> during processing of the <{meta}>
+  7.  <a for="/">policy</a> is <a>enforced</a> during processing of the <{meta}>
       element's <{meta/http-equiv}>.
 
-  9.  A {{Document}}'s <dfn>embedding document</dfn> is the {{Document}}'s
-      <a>browsing context</a>'s [=browsing context/container document=].
-
-  10. HTML populates each <a for="/">request</a>'s <a for="request">cryptographic nonce
+  9.  HTML populates each <a for="/">request</a>'s <a for="request">cryptographic nonce
       metadata</a> and <a>parser metadata</a> with relevant data from the
       elements responsible for resource loading.
 
       ISSUE(whatwg/html#968): Stylesheet loading is not yet integrated with
       Fetch in WHATWG's HTML.
 
-  11. [[#allow-base-for-document]] is called during <{base}>'s <a>set the frozen
+  9.  [[#allow-base-for-document]] is called during <{base}>'s <a>set the frozen
       base URL</a> algorithm to ensure that the <{base/href}> attribute's value
       is valid.
 
-  12. [[#should-block-navigation-request]] is called during the <a>process a
+  10. [[#should-block-navigation-request]] is called during the <a>process a
       navigate fetch</a> algorithm, and [[#should-block-navigation-response]]
       is called during the <a>process a navigate response</a> algorithm to
       apply directive's navigation checks, as well as inline checks for
       navigations to `javascript:` URLs.
 
   <h4 id="initialize-document-csp" algorithm dfn export>
-    Initialize a `Document`'s `CSP list`
+    Initialize a `Document`'s `CSP`
   </h4>
 
-  Given a {{Document}} (|document|), a <a>response</a> (|response|), and a
-  <a for="/">request</a> or `null` (|request|) the user agent performs the following
-  steps in order to initialize |document|'s <a for="Document">CSP list</a>:
+  Given a {{Document}} (|document|), the user agent performs the following
+  steps in order to initialize |document|'s CSP:
 
-  1.  If |request| is not `null` and |response|'s <a for="response">url</a>'s
-      <a for="url">scheme</a> is either a <a>local scheme</a> or `javascript`:
-
-      1.  For each |policy| in |request|'s <a for="request">client</a>'s
-          <a for="environment settings object">global object</a>'s
-          <a for="global object">CSP list</a>:
-
-          1.  Insert a copy of |policy| into |document|'s
-              <a for="Document">CSP list</a>.
-
-      Note: For <a data-lt="an iframe srcdoc Document">iframe srcdoc Documents</a>,
-      |request| will be `null`, but |response| will contain a copy of the
-      <a>embedding document</a>'s <a for="Document">CSP list</a> in its
-      <a for="response">CSP list</a>, as specified in <a>process the iframe attributes</a>.
-      As such <a data-lt="an iframe srcdoc Document">iframe srcdoc Documents</a>
-      inherit their <a>embedding document</a>'s <a for="Document">CSP list</a>.
-
-      Note: Since [=policy/self-origin=] is also copied, any <a grammar>`'self'`</a>
-      checks will be using the <a>source browsing context</a>'s origin. This is
-      done for the purpose of making <a grammar>`'self'`</a> make sense in documents
-      with <a>opaque origins</a>. The <a grammar>`'self'`</a> keyword is used
-      in the [[#match-url-to-source-expression]] algorithm.
-
-      Note: We do all this to ensure that a page cannot bypass its <a for="/">policy</a>
-      by embedding a frame or popping up a new window containing content it
-      controls (`blob:` resources, or `document.write()`).
-
-  2.  For each |policy| in |response|'s <a for="response">CSP list</a>, insert
-      |policy| into |document|'s <a for="Document">CSP list</a>.
-
-  3.  For each |policy| in |document|'s <a for="Document">CSP list</a>:
+  1. For each |policy| in |document|'s [=document/policy-container=]'s
+     [=policy container/CSP list=]:
 
       1.  For each |directive| in |policy|:
 
           1.  Execute |directive|'s <a for="directive">initialization</a>
-              algorithm on |document| and |response|.
-
-  <h4 id="initialize-global-object-csp" algorithm dfn export>
-    Initialize a global object's `CSP list`
-  </h4>
-
-  Given a <a for="/">global object</a> (|global|), and a <a>response</a>
-  (|response|), the user agent performs the following steps in order
-  to initialize |global|'s <a for="global object">CSP list</a>:
-
-  1.  If |response|'s <a for="response">url</a>'s <a for="url">scheme</a> is a
-      <a>local scheme</a>, or if |global| is a {{DedicatedWorkerGlobalScope}}:
-
-      1.  Let |owners| be an empty list.
-
-      2.  Add each of the items in |global|'s [=WorkerGlobalScope/owner set=] to |owners|.
-
-      4.  For each |owner| in |owners|:
-
-          1.  For each |policy| in |owner|'s <a for="global object">CSP list</a>:
-
-              1.  Insert a copy of |policy| into |global|'s
-                  <a for="global object">CSP list</a>.
-
-      Note: <a>local scheme</a> includes `about:`, and this algorithm will
-      therefore copy the <a>embedding document</a>'s policies for <a>an iframe
-      `srcdoc` `Document`</a>.
-
-  2.  If |global| is a {{SharedWorkerGlobalScope}} or {{ServiceWorkerGlobalScope}}:
-
-      1.  For each |policy| in |response|'s
-          <a for="response">CSP list</a>, insert |policy| into
-          |global|'s <a for="global object">CSP list</a>.
-
-  3. If |global| is a {{WorkletGlobalScope}}:
-
-      1. Let |owner| be |global|'s [=WorkletGlobalScope/owner document=].
-
-      2. For each |policy| in |owner|'s <a for="global object">CSP list</a>:
-
-          1.  Insert a copy of |policy| into |global|'s <a for="global object">CSP list</a>.
+              algorithm on |document|.
 
   <h4 id="get-csp-of-object" algorithm>
     Retrieve the <a for="global object">CSP list</a> of an |object|
@@ -1275,16 +1203,14 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   To obtain |object|'s <a for="global object">CSP list</a>:
 
-  1.  If |object| is a {{Document}} return |object|'s <a for="Document">CSP list</a>.
+  1.  If |object| is a {{Document}} return |object|'s [=document/policy container=]'s
+      [=policy container/CSP list=].
 
-  2.  If |object| is a {{Window}} return |object|'s <a>associated `Document`</a>'s
-      <a for="Document">CSP list</a>.
+  2.  If |object| is a {{Window}} or a {{WorkerGlobalScope}} or a {{WorkletGlobalScope}},
+      return <a>environment settings object</a>'s [=environment settings object/policy
+      container=]'s [=policy container/CSP list=].
 
-  3.  If |object| is a {{WorkerGlobalScope}}, return |object|'s <a for="global object">CSP list</a>.
-
-  4.  If |object| is a {{WorkletGlobalScope}}, return |object|'s <a for="global object">CSP list</a>.
-
-  5.  Return `null`.
+  3.  Return `null`.
 
   <h4 id="should-block-inline" algorithm dfn export>
     Should |element|'s inline |type| behavior be blocked by Content Security Policy?
@@ -3427,18 +3353,16 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   according to the <a>`sandbox`</a> values present in its policies, as
   follows:
 
-  Given a {{Document}} or <a for="/">global object</a> (|context|), a <a>response</a>
-  (|response|), and a <a for="/">policy</a> (|policy|):
+  Given a {{Document}} or <a for="/">global object</a> (|context|) and a <a for="/">policy</a>
+  (|policy|):
 
-  1.  Assert: |response| is unused.
-
-  2.  If |policy|'s <a for="policy">disposition</a> is not "`enforce`", or
+  1.  If |policy|'s <a for="policy">disposition</a> is not "`enforce`", or
       |context| is not a {{Document}}, then abort this algorithm.
 
       Note: This will need to change if we allow Workers to be sandboxed,
       which seems like a pretty reasonable thing to do.
 
-  3.  <a>Parse a sandboxing directive</a> using this directive's
+  2.  <a>Parse a sandboxing directive</a> using this directive's
       <a for="directive">value</a> as the input, and |context|'s <a>forced
       sandboxing flag set</a> as the output.
 
@@ -4751,8 +4675,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     CSP Inheriting to avoid bypasses
   </h3>
 
-  As described in [[#initialize-document-csp]] and [[#initialize-global-object-csp]],
-  documents loaded from <a>local schemes</a> will inherit a copy of the
+  Documents loaded from <a>local schemes</a> will inherit a copy of the
   policies in the <a>source browsing context</a>. The goal is to ensure that a page can't
   bypass its policy by embedding a frame or opening a new window containing
   content that is entirely under its control (`srcdoc` documents, `blob:` or `data:`
