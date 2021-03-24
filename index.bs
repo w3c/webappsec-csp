@@ -442,7 +442,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     Parse a serialized CSP
   </h4>
 
-  To <dfn abstract-op>parse a serialized CSP</dfn>, given a [=serialized CSP=] (|serialized|), a
+  To <dfn abstract-op>parse a serialized CSP</dfn>, given a [=string=] (|serialized|), a
   [=policy/source=] (|source|), and a [=policy/disposition=] (|disposition|), execute the
   following steps.
 
@@ -458,7 +458,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
         1.  [=Strip leading and trailing ASCII whitespace=] from |token|.
 
-        2.  If |token| is an empty string, [=iteration/continue=].
+        2.  If |token| is an empty string, or if |token| is not an [=ASCII string=], [=iteration/continue=].
 
         3.  Let |directive name| be the result of [=collecting a sequence of code points=] from
             |token| which are not [=ASCII whitespace=].
@@ -491,17 +491,20 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     Parse a serialized CSP list
   </h4>
 
-  To <dfn abstract-op>parse a serialized CSP list</dfn>, given a [=serialized CSP list=] (|list|), a
-  [=policy/source=] (|source|), and a [=policy/disposition=] (|disposition|), execute the following
-  steps.
+  To <dfn abstract-op>parse a serialized CSP list</dfn>, given a [=byte sequence=] or [=string=]
+  (|list|), a [=policy/source=] (|source|), and a [=policy/disposition=] (|disposition|), execute
+  the following steps.
 
   This algorithm returns a [=list=] of [=Content Security Policy objects=]. If |list| cannot be
   parsed, the returned list will be empty.
 
   <ol class="algorithm">
-    1.  Let |policies| be an empty [=list=].
+    1.  If |list| is a [=byte sequence=], then set |list| to be the result of <a
+        lt="isomorphic decode">isomorphic decoding</a> |list|.
 
-    2.  For each |token| returned by <a lt="split a string on commas">splitting |list| on commas</a>:
+    2.  Let |policies| be an empty [=list=].
+
+    3.  [=list/For each=] |token| returned by <a lt="split a string on commas">splitting |list| on commas</a>:
 
         1.  Let |policy| be the result of <a abstract-op lt="parse a serialized CSP">parsing</a>
             |token|, with a [=policy/source=] of |source|, and [=policy/disposition=] of
@@ -511,7 +514,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
         3.  [=list/append|Append=] |policy| to |policies|.
 
-    3.  Return |policies|.
+    4.  Return |policies|.
   </ol>
 
   <h3 id="framework-directives">Directives</h3>
