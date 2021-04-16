@@ -1336,17 +1336,16 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     in |target| be blocked by Content Security Policy?
   </h4>
 
-  Given a <a for="/">request</a> (|navigation request|), a string (|type|, either
-  "`form-submission`" or "`other`"), a <a>response</a> |navigation
-  response|, and a <a>browsing context</a> |target|, this algorithm
+  Given a <a for="/">request</a> (|navigation request|), a <a>response</a> |navigation
+  response|, a [=/CSP list=] |response CSP list|, a string (|type|, either
+  "`form-submission`" or "`other`"),  and a <a>browsing context</a> |target|, this algorithm
   returns "`Blocked`" if the active policy blocks the navigation, and "`Allowed`"
   otherwise:
 
   <ol class="algorithm">
     1.  Let |result| be "`Allowed`".
 
-    2.  For each |policy| in |navigation response|'s
-        <a for="response">CSP list</a>:
+    2.  For each |policy| in |response CSP list|:
 
         Note: Some directives (like <a>frame-ancestors</a>) allow a |response|'s
         <a>Content Security Policy</a> to act on the navigation.
@@ -3441,21 +3440,23 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   `frame-ancestors` directive's <a>navigation response check</a>:
 
   <ol class="algorithm">
-    1.  Assert: |request|, |navigation response|, and |navigation type|, are
-        unused in this algorithm, as `frame-ancestors` is concerned only
+    1.  If |navigation response|'s [=response/URL=] [=is local=], return "`Allowed`". 
+
+    2.  Assert: |request|, |navigation response|, and |navigation type|, are unused
+        from this point forward in this algorithm, as `frame-ancestors` is concerned only
         with |navigation response|'s <a>frame-ancestors</a> <a>directive</a>.
 
-    2.  If |check type| is "`source`", return "`Allowed`".
+    3.  If |check type| is "`source`", return "`Allowed`".
 
         Note: The 'frame-ancestors' <a>directive</a> is relevant only to the
         |target| <a>browsing context</a> and it has no impact on the |request|'s
         context.
 
-    2.  If |target| is not a <a>nested browsing context</a>, return "`Allowed`".
+    4.  If |target| is not a <a>nested browsing context</a>, return "`Allowed`".
 
-    3.  Let |current| be |target|.
+    5.  Let |current| be |target|.
 
-    4.  While |current| is a <a>nested browsing context</a>:
+    6.  While |current| is a <a>nested browsing context</a>:
 
         1.  Let |document| be |current|'s [=browsing context/container document=].
 
@@ -3469,7 +3470,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
         4.  Set |current| to |document|'s <a>browsing context</a>.
 
-    5.  Return "`Allowed`".
+    7.  Return "`Allowed`".
   </ol>
 
 	<h5 id="frame-ancestors-and-frame-options">
