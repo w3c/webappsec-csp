@@ -543,6 +543,11 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     4.  Return |policies|.
   </ol>
 
+  Note: When <a abstract-op lt="parse a response's Content Security Policies">parsing a response's
+  Content Security Policies</a>, if the resulting |policies| end up containing at least one item,
+  user agents can hold a flag on |policies| and use it to optimize away the [=/contains a
+  header-delivered Content Security Policy=] algorithm.
+
   <h3 id="framework-directives">Directives</h3>
 
   Each <a for="/">policy</a> contains an <a>ordered set</a> of <dfn export>directives</dfn> (its
@@ -594,8 +599,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   5.  An <dfn for="directive" export>initialization</dfn>, which takes a {{Document}}
       or <a for="/">global object</a> and a <a for="/">policy</a> as arguments. This
-      algorithm is executed during [[#initialize-document-csp]], and has no effect unless
-      otherwise specified.
+      algorithm is executed during [[#run-document-csp-initialization]], and has no
+      effect unless otherwise specified.
 
   6.  A <dfn for="directive" export>pre-navigation check</dfn>, which takes a
       <a for="/">request</a>, a navigation type string ("`form-submission`"
@@ -1137,11 +1142,11 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     Integration with HTML
   </h3>
 
-  1.  The [=policy container=] has a <a for="policy container">CSP list</a>, which holds
+  1.  The [=/policy container=] has a [=policy container/CSP list=], which holds
       all the <a for="/">policy</a> objects which are active for a given context. This
       list is empty unless otherwise specified, and is populated from the <a>response</a> by <a
       abstract-op lt="parse a response's Content Security Policies">parsing</a> <a>response</a>'s
-      Content Security Policies or inherited following the rules of the [=policy container=].
+      Content Security Policies or inherited following the rules of the [=/policy container=].
 
   2.  A <a for="/">global object</a>'s <dfn for="global object" id="global-object-csp-list">CSP list</dfn>
       is the result of executing [[#get-csp-of-object]] with the <a for="/">global object</a>
@@ -1151,7 +1156,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       <a for="/">global object</a> by inserting it into the <a for="/">global object</a>'s
       <a for="global object">CSP list</a>.
 
-  4.  [[#initialize-document-csp]] is called during the <a>create and initialize a
+  4.  [[#run-document-csp-initialization]] is called during the <a>create and initialize a
       new `Document` object</a> algorithm.
 
   5.  [[#should-block-inline]] is called during the <a>prepare a script</a> and
@@ -1182,14 +1187,14 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       apply directive's navigation checks, as well as inline checks for
       navigations to `javascript:` URLs.
 
-  <h4 id="initialize-document-csp" algorithm dfn export>
-    Initialize a `Document`'s `CSP`
+  <h4 id="run-document-csp-initialization" algorithm dfn export>
+    Run `CSP` initialization for a `Document`
   </h4>
 
   Given a {{Document}} (|document|), the user agent performs the following
-  steps in order to initialize |document|'s CSP:
+  steps in order to initialize CSP for |document|:
 
-  1. For each |policy| in |document|'s [=document/policy-container=]'s
+  1. For each |policy| in |document|'s [=Document/policy container=]'s
      [=policy container/CSP list=]:
 
       1.  For each |directive| in |policy|:
@@ -1203,7 +1208,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   To obtain |object|'s <a for="global object">CSP list</a>:
 
-  1.  If |object| is a {{Document}} return |object|'s [=document/policy container=]'s
+  1.  If |object| is a {{Document}} return |object|'s [=Document/policy container=]'s
       [=policy container/CSP list=].
 
   2.  If |object| is a {{Window}} or a {{WorkerGlobalScope}} or a {{WorkletGlobalScope}},
