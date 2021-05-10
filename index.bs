@@ -586,29 +586,25 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       and is executed during [[#should-block-response]]. This algorithm returns
       "`Allowed`" unless otherwise specified.
 
-  3.  A <dfn for="directive" export>response check</dfn>, which takes a
-      <a for="/">request</a>, a <a>response</a>, and a <a for="/">policy</a> as arguments,
-      and is executed during [[#should-block-response]]. This algorithm returns
-      "`Allowed`" unless otherwise specified.
-
-  4.  An <dfn for="directive" export>inline check</dfn>, which takes an {{Element}}, a
+  3.  An <dfn for="directive" export>inline check</dfn>, which takes an {{Element}}, a
       type string, a <a for="/">policy</a>, and a source string as arguments,
       and is executed during [[#should-block-inline]] and during
       [[#should-block-navigation-request]] for `javascript:` requests. This
       algorithm returns "`Allowed`" unless otherwise specified.
 
-  5.  An <dfn for="directive" export>initialization</dfn>, which takes a {{Document}}
+  4.  An <dfn for="directive" export>initialization</dfn>, which takes a {{Document}}
       or <a for="/">global object</a> and a <a for="/">policy</a> as arguments. This
-      algorithm is executed during [[#run-document-csp-initialization]], and has no
-      effect unless otherwise specified.
+      algorithm is executed during [[#run-document-csp-initialization]] and
+      [[#run-global-object-csp-initialization]]. Unless otherwise specified, it has no
+      effect and it returns "`Allowed`".
 
-  6.  A <dfn for="directive" export>pre-navigation check</dfn>, which takes a
+  5.  A <dfn for="directive" export>pre-navigation check</dfn>, which takes a
       <a for="/">request</a>, a navigation type string ("`form-submission`"
       or "`other`"), and a <a for="/">policy</a> as arguments, and
       is executed during [[#should-block-navigation-request]]. It returns
       "`Allowed`" unless otherwise specified.
 
-  7.  A <dfn for="directive" export>navigation response check</dfn>, which takes a
+  6.  A <dfn for="directive" export>navigation response check</dfn>, which takes a
       <a for="/">request</a>, a navigation type string ("`form-submission`" or "`other`"),
       a <a>response</a>, a <a>browsing context</a>, a check type string ("`source`"
       or "`response`"), and a <a for="/">policy</a> as arguments, and is executed during
@@ -989,48 +985,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   2.  [[#should-block-response]] is called as part of step 11 of the <a>Main
       Fetch</a> algorithm. This allows directives' <a>post-request checks</a>
-      and <a>response checks</a> to be executed on the <a>response</a> delivered
-      from the network or from a Service Worker.
-
-  A <a for="/">policy</a> is generally enforced upon a <a for="/">global object</a>, but the
-  user agent needs to <a abstract-op lt="parse a serialized CSP">parse</a> any policy
-  delivered via an HTTP response header field before any <a for="/">global object</a>
-  is created in order to handle directives that require knowledge of a
-  <a>response</a>'s details. To that end:
-
-  1.  A <a>response</a> has an associated <a for="response">CSP list</a> which
-      contains any policy objects delivered in the <a>response</a>'s
-      <a for="response">header list</a>.
-
-  2.  [[#set-response-csp-list]] is called in the <a>HTTP fetch</a> and
-      <a>HTTP-network fetch</a> algorithms.
-
-      Note: These two calls should ensure that a <a>response</a>'s
-      <a for="response">CSP list</a> is set, regardless of how the
-      <a>response</a> is created. If we hit the network (via <a>HTTP-network
-      fetch</a>, then we parse the policy before we handle the `Set-Cookie`
-      header. If we get a response from a Service Worker (via <a>HTTP fetch</a>,
-      we'll process its <a for="response">CSP list</a> before handing the
-      response back to our caller.
-
-      Note: A fetch request abides by the <a for="/">global object</a>'s
-      <a for="global object">CSP list</a> including any redirects it might follow.
-      Any <a http-header>Content-Security-Policy</a> headers found in a redirect
-      response are ignored.
-
-  <h4 id="set-response-csp-list" algorithm dfn export>
-    Set |response|'s CSP list
-  </h4>
-
-  Given a <a>response</a> (|response|), this algorithm evaluates its
-  <a for="response">header list</a> for <a>serialized CSP</a> values, and
-  populates its <a for="response">CSP list</a> accordingly:
-
-  <ol class="algorithm">
-    1.  Set |response|'s [=response/CSP list=] to the result of <a abstract-op
-        lt="parse a response's Content Security Policies">parsing</a> |response|'s
-        Content Security Policies.
-  </ol>
+      to be executed on the <a>response</a> delivered from the network
+      or from a Service Worker.
 
   <h4 id="report-for-request" algorithm dfn export>
     Report Content Security Policy violations for |request|
@@ -1118,24 +1074,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       response. That is, that a Service Worker hasn't substituted a file which
       would violate the page's CSP.
 
-  4.  For each |policy| in |response|'s <a for="response">CSP list</a>:
-
-      1.  For each |directive| in |policy|:
-
-          1.  If the result of executing |directive|'s
-              <a for="directive">response check</a> on |request|, |response|,
-              and |policy| is "`Blocked`", then:
-
-              1.  Execute [[#report-violation]] on the result of executing
-                  [[#create-violation-for-request]] on |request|, and |policy|.
-
-              2.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
-                  then set |result| to "`Blocked`".
-
-      Note: This portion of the check allows policies delivered with the
-      response to determine whether the response is allowed to be delivered.
-
-  5.  Return |result|.
+  4.  Return |result|.
 
 
   <h3 id="html-integration">
@@ -1187,6 +1126,9 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       apply directive's navigation checks, as well as inline checks for
       navigations to `javascript:` URLs.
 
+  11. [[#run-global-object-csp-initialization]] is called during the <a>run a worker</a>
+      algorithm.
+
   <h4 id="run-document-csp-initialization" algorithm dfn export>
     Run `CSP` initialization for a `Document`
   </h4>
@@ -1200,7 +1142,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       1.  For each |directive| in |policy|:
 
           1.  Execute |directive|'s <a for="directive">initialization</a>
-              algorithm on |document|.
+              algorithm on |document|, and assert: its returned value is
+              "`Allowed`".
 
   <h4 id="get-csp-of-object" algorithm>
     Retrieve the <a for="global object">CSP list</a> of an |object|
@@ -1405,6 +1348,28 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
                 set |result| to "`Blocked`".
 
     4.  Return |result|.
+  </ol>
+
+  <h4 id="run-global-object-csp-initialization" algorithm dfn export>
+    Run `CSP` initialization for a global object.
+  </h4>
+
+  Given a <a for="/">global object</a> (|global|), the user agent performs the
+  following steps in order to initialize CSP for |global|. This algorithm
+  returns "`Allowed`" if |global| is allowed, and "`Blocked`" otherwise:
+
+  <ol class="algorithm">
+    1.  Let |result| be "`Allowed`".
+
+    2.  For each |policy| in |global|'s [=global object/CSP list=]:
+
+        1.  For each |directive| in |policy|:
+
+            1. Execute |directive|'s <a for="directive">initialization</a> algorithm on
+               |global|. If its returned value is "`Blocked`", then set |result| to
+               "`Blocked`".
+
+    3.  Return |result|.
   </ol>
 
   <h3 id="ecma-integration">Integration with ECMAScript</h3>
@@ -3319,56 +3284,40 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   delivered in a <a http-header>`Content-Security-Policy-Report-Only`</a> header, or within
   a <{meta}> element.
 
-  <h5 algorithm id="sandbox-response">
-    `sandbox` Response Check
-  </h5>
-
-  This directive's <a for="directive">response check</a> algorithm is as
-  follows:
-
-  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
-  <a for="/">policy</a> (|policy|):
-
-  1.  Assert: |response| is unused.
-
-  2.  If |policy|'s <a for="policy">disposition</a> is not "`enforce`", then
-      return "`Allowed`".
-
-  3.  If |request|'s <a for="request">destination</a> is one of
-      "`serviceworker`", "`sharedworker`", or "`worker`":
-
-      1.  If the result of the <a>Parse a sandboxing directive</a> algorithm
-          using this directive's <a for="directive">value</a> as the input
-          contains either the <a>sandboxed scripts browsing context flag</a> or
-          the <a>sandboxed origin browsing context flag</a> flags, return
-          "`Blocked`".
-
-          Note: This will need to change if we allow Workers to be sandboxed into
-          unique origins, which seems like a pretty reasonable thing to do.
-
-  4.  Return "`Allowed`".
-
   <h5 algorithm id="sandbox-init">
     `sandbox` Initialization
   </h5>
 
   This directive's <a for="directive">initialization</a> algorithm is
   responsible for adjusting a {{Document}}'s <a>forced sandboxing flag set</a>
-  according to the <a>`sandbox`</a> values present in its policies, as
-  follows:
+  and for checking whether a worker is allowed to run according to the <a>`sandbox`</a>
+  values present in its policies as follows:
 
   Given a {{Document}} or <a for="/">global object</a> (|context|) and a <a for="/">policy</a>
   (|policy|):
 
   1.  If |policy|'s <a for="policy">disposition</a> is not "`enforce`", or
-      |context| is not a {{Document}}, then abort this algorithm.
+      |context| is a {{WorkletGlobalScope}}, then abort this algorithm.
 
-      Note: This will need to change if we allow Workers to be sandboxed,
-      which seems like a pretty reasonable thing to do.
+  2.  Let |sandboxing flag set| be a new [=/sandboxing flag set=].
 
-  2.  <a>Parse a sandboxing directive</a> using this directive's
-      <a for="directive">value</a> as the input, and |context|'s <a>forced
-      sandboxing flag set</a> as the output.
+  3.  <a>Parse a sandboxing directive</a> using this directive's <a
+      for="directive">value</a> as the input, and |sandboxing flag set| as the output.
+
+  4.  If |context| is a {{WorkerGlobalScope}}:
+
+      1.  If |sandboxing flag set| contains either the <a>sandboxed scripts browsing
+          context flag</a> or the <a>sandboxed origin browsing context flag</a> flags,
+          return "`Blocked`".
+
+          Note: This will need to change if we allow Workers to be sandboxed into unique
+          origins, which seems like a pretty reasonable thing to do.
+
+  5.  If |context| is a {{Document}}:
+
+      1.  Set |context|'s <a>forced sandboxing flag set</a> to |sandboxing flag set|.
+
+  6.  Return "`Allowed`".
 
   <h3 id="directives-navigation">
     Navigation Directives
@@ -3667,9 +3616,9 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   that document.
 
   New directives SHOULD use the <a for="directive">pre-request check</a>,
-  <a for="directive">post-request check</a>, <a for="directive">response
-  check</a>, and <a for="directive">initialization</a> hooks in order to
-  integrate themselves into Fetch and HTML.
+  <a for="directive">post-request check</a>, and
+  <a for="directive">initialization</a> hooks in order to integrate themselves
+  into Fetch and HTML.
 
   <h3 id="matching-algorithms">Matching Algorithms</h3>
 
