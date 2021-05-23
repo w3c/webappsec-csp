@@ -1369,12 +1369,11 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   <h3 id="webrtc-integration">Integration with WebRTC</h3>
 
-  Mostly TODO. The general idea is that WebRTC should call into [[#should-block-rtc-connection]],
-  passing in enough detail for CSP to return a "`Blocked`"/"`Allowed`" decision, and react
-  accordingly.
+  Mostly TODO. The general idea is that new RTCPeerConnection() should call into
+  [[#should-block-rtc-connection]].
 
   <h4 id="should-block-rtc-connection">
-    Should an RTC connection to (|host|,|port|) be blocked for |global|?
+    Should RTC connections be blocked for |global|?
   </h4>
 
   Given a [=/global object=] (|global|), this algorithm returns "`Blocked`"
@@ -1395,7 +1394,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
               1.  Let |violation| be the result of executing [[#create-violation-for-global]] on
                   |global|, |policy|, and |directive|'s [=directive/name=].
 
-              2.  Set |violation|'s <a for="violation">resource</a> to |host|.
+              2.  Set |violation|'s <a for="violation">resource</a> to null.
 
               3.  Execute [[#report-violation]] on |violation|.
 
@@ -3174,7 +3173,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   <pre>
     directive-name  = "webrtc"
-    directive-value = <a grammar>serialized-source-list</a>
+    directive-value = "<dfn>*</dfn>" / "<dfn>'none'</dfn>"
   </pre>
 
   <div class="example">
@@ -3184,19 +3183,12 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       Content-Security-Policy: <a>webrtc</a> 'none'
     </pre>
 
-    Connections for the following code will fail, `webrtc` does not allow
-    connections:
+    In the following code, creating an RTCPeerConnection with throw; `webrtc`
+    does not allow connections:
 
     <pre highlight="html">
       &lt;script&gt;
-        var pc = new RTCPeerConnection({
-          "iceServers":[
-            {
-              "urls": ["turn:not-example.com:19305?transport=udp"],"username":"","credential":""
-            }
-          ]
-        });
-        pc.createOffer().then((sdp) => pc.setLocalDescription(sdp);
+        const pc = new RTCPeerConnection();
       &lt;/script&gt;
     </pre>
   </div>
