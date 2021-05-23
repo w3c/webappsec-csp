@@ -1,11 +1,11 @@
 <h1>Content Security Policy Level 3</h1>
 <pre class="metadata">
-Status: ED
+Status: WD
 ED: https://w3c.github.io/webappsec-csp/
 TR: https://www.w3.org/TR/CSP3/
-Previous Version: https://www.w3.org/TR/2016/WD-CSP3-20181015/
 Shortname: CSP3
 Level: None
+Issue Tracking: Github https://github.com/w3c/webappsec-csp/issues/new
 Editor: Mike West 56384, Google Inc., mkwst@google.com
 Group: webappsec
 Abstract:
@@ -13,8 +13,9 @@ Abstract:
   resources which a particular page can fetch or execute, as well as a number
   of security-relevant policy decisions.
 Indent: 2
-Version History: https://github.com/w3c/webappsec-csp/commits/master/index.src.html
-Boilerplate: omit conformance, omit feedback-header
+Version History: https://github.com/w3c/webappsec-csp/commits/main/index.src.html
+Boilerplate: feedback-header off
+Local Boilerplate: bs-extensions yes
 !Participate: <a href="https://github.com/w3c/webappsec-csp/issues/new">File an issue</a> (<a href="https://github.com/w3c/webappsec-csp/issues">open issues</a>)
 !Tests: <a href=https://github.com/web-platform-tests/wpt/tree/master/content-security-policy>web-platform-tests content-security-policy/</a> (<a href=https://github.com/web-platform-tests/wpt/labels/content-security-policy>ongoing work</a>)
 Markup Shorthands: css off, markdown on
@@ -24,13 +25,9 @@ At Risk: The [[#is-element-nonceable]] algorithm.
 spec:dom; type:interface; text:Document
 spec:html
   type: dfn
-    text: applet
-    text: case-sensitive
-    text: browsing context; for: /
     text: plugin document
     text: fallback base url
     text: duplicate-attribute
-    text: origin; for: /
   type: element
     text: a
     text: link
@@ -43,7 +40,6 @@ spec:fetch
     text: main fetch
     text: http-network fetch
     text: http fetch
-    text: keepalive flag
     text: response; for: /
 spec:url
   type: dfn
@@ -80,19 +76,12 @@ spec: ECMA262; urlPrefix: https://tc39.github.io/ecma262
     text: HostEnsureCanCompileStrings(); url: sec-hostensurecancompilestrings
     text: eval(); url: sec-eval-x
     text: Function(); url: sec-function-objects
-    text: JSON.stringify(); url: sec-json.stringify
 spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
   type: dfn
     for: request
       text: target browsing context; url: concept-request-target-browsing-context
 spec: MIX; urlPrefix: https://www.w3.org/TR/mixed-content/
   type: dfn; text: block-all-mixed-content
-spec: MIMESNIFF; urlPrefix: https://mimesniff.spec.whatwg.org/
-  type: dfn; text: valid MIME type
-spec: RFC2045; urlPrefix: https://tools.ietf.org/html/rfc2045
-  type: grammar
-    text: type; url: section-5.1
-    text: subtype; url: section-5.1
 spec: RFC3986; urlPrefix: https://tools.ietf.org/html/rfc3986
   type: grammar
     text: path-absolute; url: section-3.3
@@ -139,9 +128,13 @@ spec: SHA2; urlPrefix: https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pd
 
 spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   type: dfn
-    for: WorkerGlobalScope
-      text: owner set; url: concept-WorkerGlobalScope-owner-set
-    text: process the iframe attributes; url: process-the-iframe-attributes
+    for: script
+      text: "parser-inserted"
+    text: origin; url: concept-origin
+    text: browsing context; url: browsing-context
+    text: content security policy state; url: attr-meta-http-equiv-content-security-policy
+    text: create and initialize a new document object; url: initialise-the-document-object
+    text: initializing a new Document object; url: initialise-the-document-object
 
 spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   type: grammar
@@ -347,8 +340,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       hashes. Details in [[#unsafe-hashes-usage]].
 
   9.  The <a>source expression</a> matching has been changed to require explicit presence
-      of any non-<a>network scheme</a>, rather than <a>local scheme</a>,
-      unless that non-<a>network scheme</a> is the same as the scheme of protected resource,
+      of any non-<a>HTTP(S) scheme</a>, rather than <a>local scheme</a>,
+      unless that non-<a>HTTP(S) scheme</a> is the same as the scheme of protected resource,
       as described in [[#match-url-to-source-expression]].
 
   10. Hash-based source expressions may now match external scripts if the
@@ -401,8 +394,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   A <dfn export lt="content security policy object" local-lt="policy">policy</dfn> defines allowed
   and restricted behaviors, and may be applied to a {{Document}}, {{WorkerGlobalScope}}, or
-  {{WorkletGlobalScope}} as described in [[#initialize-global-object-csp]] and in
-  [[#initialize-document-csp]].
+  {{WorkletGlobalScope}}.
 
   Each policy has an associated <dfn for="policy" export>directive set</dfn>, which is an <a>ordered
   set</a> of <a>directives</a> that define the policy's implications when applied.
@@ -420,8 +412,6 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   <a>local scheme</a> documents/workers that have inherited their policy but
   have an <a>opaque origin</a>. Most of the time this will simply be the
   <a>environment settings object</a>'s [=environment settings object/origin=].
-  The [[#initialize-document-csp]] algorithm describes situations in which
-  a policy is inherited.
 
   Multiple [=/policies=] can be applied to a single resource, and are collected into a [=list=] of
   [=/policies=] known as a <dfn export>CSP list</dfn>.
@@ -451,7 +441,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     Parse a serialized CSP
   </h4>
 
-  To <dfn abstract-op>parse a serialized CSP</dfn>, given a [=serialized CSP=] (|serialized|), a
+  To <dfn abstract-op>parse a serialized CSP</dfn>, given a [=string=] (|serialized|), a
   [=policy/source=] (|source|), and a [=policy/disposition=] (|disposition|), execute the
   following steps.
 
@@ -467,7 +457,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
         1.  [=Strip leading and trailing ASCII whitespace=] from |token|.
 
-        2.  If |token| is an empty string, [=iteration/continue=].
+        2.  If |token| is an empty string, or if |token| is not an [=ASCII string=], [=iteration/continue=].
 
         3.  Let |directive name| be the result of [=collecting a sequence of code points=] from
             |token| which are not [=ASCII whitespace=].
@@ -500,17 +490,20 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     Parse a serialized CSP list
   </h4>
 
-  To <dfn abstract-op>parse a serialized CSP list</dfn>, given a [=serialized CSP list=] (|list|), a
-  [=policy/source=] (|source|), and a [=policy/disposition=] (|disposition|), execute the following
-  steps.
+  To <dfn abstract-op>parse a serialized CSP list</dfn>, given a [=byte sequence=] or [=string=]
+  (|list|), a [=policy/source=] (|source|), and a [=policy/disposition=] (|disposition|), execute
+  the following steps.
 
   This algorithm returns a [=list=] of [=Content Security Policy objects=]. If |list| cannot be
   parsed, the returned list will be empty.
 
   <ol class="algorithm">
-    1.  Let |policies| be an empty [=list=].
+    1.  If |list| is a [=byte sequence=], then set |list| to be the result of <a
+        lt="isomorphic decode">isomorphic decoding</a> |list|.
 
-    2.  For each |token| returned by <a lt="split a string on commas">splitting |list| on commas</a>:
+    2.  Let |policies| be an empty [=list=].
+
+    3.  [=list/For each=] |token| returned by <a lt="split a string on commas">splitting |list| on commas</a>:
 
         1.  Let |policy| be the result of <a abstract-op lt="parse a serialized CSP">parsing</a>
             |token|, with a [=policy/source=] of |source|, and [=policy/disposition=] of
@@ -520,8 +513,40 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
         3.  [=list/append|Append=] |policy| to |policies|.
 
-    3.  Return |policies|.
+    4.  Return |policies|.
   </ol>
+
+  <h4 id="parse-response-csp" algorithm dfn export>
+    Parse |response|'s Content Security Policies
+  </h4>
+
+  To <dfn abstract-op>parse a response's Content Security Policies</dfn> given a <a>response</a>
+  (|response|):
+
+  <ol class="algorithm">
+    1.  Let |policies| be the result of <a abstract-op lt="parse a serialized CSP list">parsing</a>
+        the result of [=extracting header list values=] given `Content-Security-Policy` and
+        |response|'s [=response/header list=], with a [=policy/source=] of "`header`", and a
+        [=policy/disposition=] of "`enforce`".
+
+    2.  Append to |policies| the result of
+        <a abstract-op lt="parse a serialized CSP list">parsing</a> the result of
+        [=extracting header list values=] given `Content-Security-Policy-Report-Only` and
+        |response|'s [=response/header list=], with a [=policy/source=] of "`header`", and a
+        [=policy/disposition=] of "`report`".
+
+    3.  For each |policy| in |policies|:
+
+        1.  Set |policy|'s [=policy/self-origin=] to |response|'s [=response/url=]'s
+            [=url/origin=].
+
+    4.  Return |policies|.
+  </ol>
+
+  Note: When <a abstract-op lt="parse a response's Content Security Policies">parsing a response's
+  Content Security Policies</a>, if the resulting |policies| end up containing at least one item,
+  user agents can hold a flag on |policies| and use it to optimize away the [=/contains a
+  header-delivered Content Security Policy=] algorithm.
 
   <h3 id="framework-directives">Directives</h3>
 
@@ -561,29 +586,25 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       and is executed during [[#should-block-response]]. This algorithm returns
       "`Allowed`" unless otherwise specified.
 
-  3.  A <dfn for="directive" export>response check</dfn>, which takes a
-      <a for="/">request</a>, a <a>response</a>, and a <a for="/">policy</a> as arguments,
-      and is executed during [[#should-block-response]]. This algorithm returns
-      "`Allowed`" unless otherwise specified.
-
-  4.  An <dfn for="directive" export>inline check</dfn>, which takes an {{Element}}, a
+  3.  An <dfn for="directive" export>inline check</dfn>, which takes an {{Element}}, a
       type string, a <a for="/">policy</a>, and a source string as arguments,
       and is executed during [[#should-block-inline]] and during
       [[#should-block-navigation-request]] for `javascript:` requests. This
       algorithm returns "`Allowed`" unless otherwise specified.
 
-  5.  An <dfn for="directive" export>initialization</dfn>, which takes a {{Document}}
-      or <a for="/">global object</a>, a <a>response</a>, and a <a for="/">policy</a>
-      as arguments. This algorithm is executed during [[#initialize-document-csp]],
-      and has no effect unless otherwise specified.
+  4.  An <dfn for="directive" export>initialization</dfn>, which takes a {{Document}}
+      or <a for="/">global object</a> and a <a for="/">policy</a> as arguments. This
+      algorithm is executed during [[#run-document-csp-initialization]] and
+      [[#run-global-object-csp-initialization]]. Unless otherwise specified, it has no
+      effect and it returns "`Allowed`".
 
-  6.  A <dfn for="directive" export>pre-navigation check</dfn>, which takes a
+  5.  A <dfn for="directive" export>pre-navigation check</dfn>, which takes a
       <a for="/">request</a>, a navigation type string ("`form-submission`"
       or "`other`"), and a <a for="/">policy</a> as arguments, and
       is executed during [[#should-block-navigation-request]]. It returns
       "`Allowed`" unless otherwise specified.
 
-  7.  A <dfn for="directive" export>navigation response check</dfn>, which takes a
+  6.  A <dfn for="directive" export>navigation response check</dfn>, which takes a
       <a for="/">request</a>, a navigation type string ("`form-submission`" or "`other`"),
       a <a>response</a>, a <a>browsing context</a>, a check type string ("`source`"
       or "`response`"), and a <a for="/">policy</a> as arguments, and is executed during
@@ -968,75 +989,17 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   2.  [[#should-block-response]] is called as part of step 11 of the <a>Main
       Fetch</a> algorithm. This allows directives' <a>post-request checks</a>
-      and <a>response checks</a> to be executed on the <a>response</a> delivered
-      from the network or from a Service Worker.
-
-  A <a for="/">policy</a> is generally enforced upon a <a for="/">global object</a>, but the
-  user agent needs to <a abstract-op lt="parse a serialized CSP">parse</a> any policy
-  delivered via an HTTP response header field before any <a for="/">global object</a>
-  is created in order to handle directives that require knowledge of a
-  <a>response</a>'s details. To that end:
-
-  1.  A <a>response</a> has an associated <a for="response">CSP list</a> which
-      contains any policy objects delivered in the <a>response</a>'s
-      <a for="response">header list</a>.
-
-  2.  [[#set-response-csp-list]] is called in the <a>HTTP fetch</a> and
-      <a>HTTP-network fetch</a> algorithms.
-
-      Note: These two calls should ensure that a <a>response</a>'s
-      <a for="response">CSP list</a> is set, regardless of how the
-      <a>response</a> is created. If we hit the network (via <a>HTTP-network
-      fetch</a>, then we parse the policy before we handle the `Set-Cookie`
-      header. If we get a response from a Service Worker (via <a>HTTP fetch</a>,
-      we'll process its <a for="response">CSP list</a> before handing the
-      response back to our caller.
-
-      Note: A fetch request abides by the <a for="/">global object</a>'s
-      <a for="global object">CSP list</a> including any redirects it might follow.
-      Any <a http-header>Content-Security-Policy</a> headers found in a redirect
-      response are ignored.
-
-  <h4 id="set-response-csp-list" algorithm dfn export>
-    Set |response|'s CSP list
-  </h4>
-
-  Given a <a>response</a> (|response|), this algorithm evaluates its
-  <a for="response">header list</a> for <a>serialized CSP</a> values, and
-  populates its <a for="response">CSP list</a> accordingly:
-
-  <ol class="algorithm">
-    1.  Set |response|'s [=response/CSP list=] to the empty list.
-
-    2.  Let |policies| be the result of <a abstract-op lt="parse a serialized CSP list">parsing</a>
-        the result of [=extracting header list values=] given `Content-Security-Policy` and
-        |response|'s [=response/header list=], with a [=policy/source=] of "`header`", and a
-        [=policy/disposition=] of "`enforce`".
-
-    3.  Append to |policies| the result of
-        <a abstract-op lt="parse a serialized CSP list">parsing</a> the result of
-        [=extracting header list values=] given `Content-Security-Policy-Report-Only` and
-        |response|'s [=response/header list=], with a [=policy/source=] of "`header`", and a
-        [=policy/disposition=] of "`report`".
-
-    4.  For each |policy| in |policies|:
-
-        1.  Set |policy|'s [=policy/self-origin=] to |response|'s [=response/url=]'s
-            [=url/origin=].
-
-        2.  Insert |policy| into |response|'s <a for="response">CSP list</a>.
-  </ol>
+      to be executed on the <a>response</a> delivered from the network
+      or from a Service Worker.
 
   <h4 id="report-for-request" algorithm dfn export>
     Report Content Security Policy violations for |request|
   </h4>
 
   Given a <a for="/">request</a> (|request|), this algorithm reports violations based
-  on <a for="request">client</a>'s "report only" policies.
+  on [=request/policy container=]'s [=policy container/CSP list=] "report only" policies.
 
-  1.  Let |CSP list| be |request|'s
-      <a for="request">client</a>'s <a for="environment settings object">global object</a>'s
-      <a for="global object">CSP list</a>.
+  1.  Let |CSP list| be |request|'s [=request/policy container=]'s [=policy container/CSP list=].
 
   2.  For each |policy| in |CSP list|:
 
@@ -1054,13 +1017,11 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     Should |request| be blocked by Content Security Policy?
   </h4>
 
-  Given a <a for="/">request</a> (|request|), this algorithm returns
-  `Blocked` or `Allowed` and reports violations based on |request|'s
-  <a for="request">client</a>'s Content Security Policy.
+  Given a <a for="/">request</a> (|request|), this algorithm returns `Blocked` or `Allowed` and
+  reports violations based on |request|'s [=request/policy container=]'s
+  [=policy container/CSP list=].
 
-  1.  Let |CSP list| be |request|'s
-      <a for="request">client</a>'s <a for="environment settings object">global object</a>'s
-      <a for="global object">CSP list</a>.
+  1.  Let |CSP list| be |request|'s [=request/policy container=]'s [=policy container/CSP list=].
 
   2.  Let |result| be "`Allowed`".
 
@@ -1085,14 +1046,11 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     Should |response| to |request| be blocked by Content Security Policy?
   </h4>
 
-  Given a <a>response</a> (|response|) and a <a for="/">request</a>
-  (|request|), this algorithm returns `Blocked` or
-  `Allowed`, and reports violations based on |request|'s
-  <a for="request">client</a>'s Content Security Policy.
+  Given a <a>response</a> (|response|) and a <a for="/">request</a> (|request|), this algorithm
+  returns `Blocked` or `Allowed`, and reports violations based on |request|'s
+  [=request/policy container=]'s [=policy container/CSP list=].
 
-  1.  Let |CSP list| be |request|'s
-      <a for="request">client</a>'s <a for="environment settings object">global object</a>'s
-      <a for="global object">CSP list</a>.
+  1.  Let |CSP list| be |request|'s [=request/policy container=]'s [=policy container/CSP list=].
 
   2.  Let |result| be "`Allowed`".
 
@@ -1113,35 +1071,18 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       response. That is, that a Service Worker hasn't substituted a file which
       would violate the page's CSP.
 
-  4.  For each |policy| in |response|'s <a for="response">CSP list</a>:
-
-      1.  For each |directive| in |policy|:
-
-          1.  If the result of executing |directive|'s
-              <a for="directive">response check</a> on |request|, |response|,
-              and |policy| is "`Blocked`", then:
-
-              1.  Execute [[#report-violation]] on the result of executing
-                  [[#create-violation-for-request]] on |request|, and |policy|.
-
-              2.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
-                  then set |result| to "`Blocked`".
-
-      Note: This portion of the check allows policies delivered with the
-      response to determine whether the response is allowed to be delivered.
-
-  5.  Return |result|.
+  4.  Return |result|.
 
 
   <h3 id="html-integration">
     Integration with HTML
   </h3>
 
-  1.  The {{Document}}, {{WorkerGlobalScope}}, and {{WorkletGlobalScope}} objects have a
-      `CSP list`, which holds all the <a for="/">policy</a> objects which are
-      active for a given context. This list is empty unless otherwise specified,
-      and is populated via the [[#initialize-global-object-csp]] and
-      [[#initialize-document-csp]] algorithms.
+  1.  The [=/policy container=] has a [=policy container/CSP list=], which holds
+      all the <a for="/">policy</a> objects which are active for a given context. This
+      list is empty unless otherwise specified, and is populated from the <a>response</a> by <a
+      abstract-op lt="parse a response's Content Security Policies">parsing</a> <a>response</a>'s
+      Content Security Policies or inherited following the rules of the [=/policy container=].
 
   2.  A <a for="/">global object</a>'s <dfn for="global object" id="global-object-csp-list">CSP list</dfn>
       is the result of executing [[#get-csp-of-object]] with the <a for="/">global object</a>
@@ -1151,136 +1092,55 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       <a for="/">global object</a> by inserting it into the <a for="/">global object</a>'s
       <a for="global object">CSP list</a>.
 
-  4.  [[#initialize-global-object-csp]] is called during the <a>run a worker</a>
-      algorithm in order to bind a set of <a for="/">policy</a> objects associated
-      with a <a>response</a> {{WorkerGlobalScope}} or {{WorkletGlobalScope}}.
+  4.  [[#run-document-csp-initialization]] is called during the <a>create and initialize a
+      new `Document` object</a> algorithm.
 
-  5.  [[#initialize-document-csp]] is called during the <a>initializing a
-      new `Document` object</a> algorithm in order to bind a set of <a for="/">policy</a>
-      objects associated with a <a>response</a> to a newly created {{Document}}.
-
-  6.  [[#should-block-inline]] is called during the <a>prepare a script</a> and
+  5.  [[#should-block-inline]] is called during the <a>prepare a script</a> and
       <a>update a `style` block</a> algorithms in order to determine whether or
       not an inline script or style block is allowed to execute/render.
 
-  7.  [[#should-block-inline]] is called during handling of inline event
+  6.  [[#should-block-inline]] is called during handling of inline event
       handlers (like `onclick`) and inline `style` attributes in order to
       determine whether or not they ought to be allowed to execute/render.
 
-  8.  <a for="/">policy</a> is <a>enforced</a> during processing of the <{meta}>
+  7.  <a for="/">policy</a> is <a>enforced</a> during processing of the <{meta}>
       element's <{meta/http-equiv}>.
 
-  9.  A {{Document}}'s <dfn>embedding document</dfn> is the {{Document}}
-      <a lt="nested through">through which</a> the {{Document}}'s
-      <a>browsing context</a> is nested.
-
-  10. HTML populates each <a for="/">request</a>'s <a for="request">cryptographic nonce
+  9.  HTML populates each <a for="/">request</a>'s <a for="request">cryptographic nonce
       metadata</a> and <a>parser metadata</a> with relevant data from the
       elements responsible for resource loading.
 
       ISSUE(whatwg/html#968): Stylesheet loading is not yet integrated with
       Fetch in WHATWG's HTML.
 
-  11. [[#allow-base-for-document]] is called during <{base}>'s <a>set the frozen
+  9.  [[#allow-base-for-document]] is called during <{base}>'s <a>set the frozen
       base URL</a> algorithm to ensure that the <{base/href}> attribute's value
       is valid.
 
-  12. [[#should-plugin-element-be-blocked-a-priori-by-content-security-policy]]
-      is called during the processing of <{object}>, <{embed}>, and <a>`applet`</a>
-      elements to determine whether they may trigger a fetch.
-
-      Note: Fetched plugin resources are handled in [[#should-block-response]].
-
-  13. [[#should-block-navigation-request]] is called during the <a>process a
+  10. [[#should-block-navigation-request]] is called during the <a>process a
       navigate fetch</a> algorithm, and [[#should-block-navigation-response]]
       is called during the <a>process a navigate response</a> algorithm to
       apply directive's navigation checks, as well as inline checks for
       navigations to `javascript:` URLs.
 
-  <h4 id="initialize-document-csp" algorithm dfn export>
-    Initialize a `Document`'s `CSP list`
+  11. [[#run-global-object-csp-initialization]] is called during the <a>run a worker</a>
+      algorithm.
+
+  <h4 id="run-document-csp-initialization" algorithm dfn export>
+    Run `CSP` initialization for a `Document`
   </h4>
 
-  Given a {{Document}} (|document|), a <a>response</a> (|response|), and a
-  <a for="/">request</a> or `null` (|request|) the user agent performs the following
-  steps in order to initialize |document|'s <a for="Document">CSP list</a>:
+  Given a {{Document}} (|document|), the user agent performs the following
+  steps in order to initialize CSP for |document|:
 
-  1.  If |request| is not `null` and |response|'s <a for="response">url</a>'s
-      <a for="url">scheme</a> is either a <a>local scheme</a> or `javascript`:
-
-      1.  For each |policy| in |request|'s <a for="request">client</a>'s
-          <a for="environment settings object">global object</a>'s
-          <a for="global object">CSP list</a>:
-
-          1.  Insert a copy of |policy| into |document|'s
-              <a for="Document">CSP list</a>.
-
-      Note: For <a data-lt="an iframe srcdoc Document">iframe srcdoc Documents</a>,
-      |request| will be `null`, but |response| will contain a copy of the
-      <a>embedding document</a>'s <a for="Document">CSP list</a> in its
-      <a for="response">CSP list</a>, as specified in <a>process the iframe attributes</a>.
-      As such <a data-lt="an iframe srcdoc Document">iframe srcdoc Documents</a>
-      inherit their <a>embedding document</a>'s <a for="Document">CSP list</a>.
-
-      Note: Since [=policy/self-origin=] is also copied, any <a grammar>`'self'`</a>
-      checks will be using the <a>source browsing context</a>'s origin. This is
-      done for the purpose of making <a grammar>`'self'`</a> make sense in documents
-      with <a>opaque origins</a>. The <a grammar>`'self'`</a> keyword is used
-      in the [[#match-url-to-source-expression]] algorithm.
-
-      Note: We do all this to ensure that a page cannot bypass its <a for="/">policy</a>
-      by embedding a frame or popping up a new window containing content it
-      controls (`blob:` resources, or `document.write()`).
-
-  2.  For each |policy| in |response|'s <a for="response">CSP list</a>, insert
-      |policy| into |document|'s <a for="Document">CSP list</a>.
-
-  3.  For each |policy| in |document|'s <a for="Document">CSP list</a>:
+  1. For each |policy| in |document|'s [=Document/policy container=]'s
+     [=policy container/CSP list=]:
 
       1.  For each |directive| in |policy|:
 
           1.  Execute |directive|'s <a for="directive">initialization</a>
-              algorithm on |document| and |response|.
-
-  <h4 id="initialize-global-object-csp" algorithm dfn export>
-    Initialize a global object's `CSP list`
-  </h4>
-
-  Given a <a for="/">global object</a> (|global|), and a <a>response</a>
-  (|response|), the user agent performs the following steps in order
-  to initialize |global|'s <a for="global object">CSP list</a>:
-
-  1.  If |response|'s <a for="response">url</a>'s <a for="url">scheme</a> is a
-      <a>local scheme</a>, or if |global| is a {{DedicatedWorkerGlobalScope}}:
-
-      1.  Let |owners| be an empty list.
-
-      2.  Add each of the items in |global|'s [=WorkerGlobalScope/owner set=] to |owners|.
-
-      4.  For each |owner| in |owners|:
-
-          1.  For each |policy| in |owner|'s <a for="global object">CSP list</a>:
-
-              1.  Insert a copy of |policy| into |global|'s
-                  <a for="global object">CSP list</a>.
-
-      Note: <a>local scheme</a> includes `about:`, and this algorithm will
-      therefore copy the <a>embedding document</a>'s policies for <a>an iframe
-      `srcdoc` `Document`</a>.
-
-  2.  If |global| is a {{SharedWorkerGlobalScope}} or {{ServiceWorkerGlobalScope}}:
-
-      1.  For each |policy| in |response|'s
-          <a for="response">CSP list</a>, insert |policy| into
-          |global|'s <a for="global object">CSP list</a>.
-
-  3. If |global| is a {{WorkletGlobalScope}}:
-
-      1. Let |owner| be |global|'s [=WorkletGlobalScope/owner document=].
-
-      2. For each |policy| in |owner|'s <a for="global object">CSP list</a>:
-
-          1.  Insert a copy of |policy| into |global|'s <a for="global object">CSP list</a>.
+              algorithm on |document|, and assert: its returned value is
+              "`Allowed`".
 
   <h4 id="get-csp-of-object" algorithm>
     Retrieve the <a for="global object">CSP list</a> of an |object|
@@ -1288,16 +1148,14 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   To obtain |object|'s <a for="global object">CSP list</a>:
 
-  1.  If |object| is a {{Document}} return |object|'s <a for="Document">CSP list</a>.
+  1.  If |object| is a {{Document}} return |object|'s [=Document/policy container=]'s
+      [=policy container/CSP list=].
 
-  2.  If |object| is a {{Window}} return |object|'s <a>associated `Document`</a>'s
-      <a for="Document">CSP list</a>.
+  2.  If |object| is a {{Window}} or a {{WorkerGlobalScope}} or a {{WorkletGlobalScope}},
+      return <a>environment settings object</a>'s [=environment settings object/policy
+      container=]'s [=policy container/CSP list=].
 
-  3.  If |object| is a {{WorkerGlobalScope}}, return |object|'s <a for="global object">CSP list</a>.
-
-  4.  If |object| is a {{WorkletGlobalScope}}, return |object|'s <a for="global object">CSP list</a>.
-
-  5.  Return `null`.
+  3.  Return `null`.
 
   <h4 id="should-block-inline" algorithm dfn export>
     Should |element|'s inline |type| behavior be blocked by Content Security Policy?
@@ -1362,9 +1220,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   <ol class="algorithm">
     1.  Let |result| be "`Allowed`".
 
-    2.  For each |policy| in |navigation request|'s <a for="request">client</a>'s
-        <a for="environment settings object">global object</a>'s
-        <a for="global object">CSP list</a>:
+    2.  For each |policy| in |navigation request|'s <a for="request">policy container</a>'s
+        <a for="policy container">CSP list</a>:
 
         1.  For each |directive| in |policy|:
 
@@ -1423,17 +1280,16 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     in |target| be blocked by Content Security Policy?
   </h4>
 
-  Given a <a for="/">request</a> (|navigation request|), a string (|type|, either
-  "`form-submission`" or "`other`"), a <a>response</a> |navigation
-  response|, and a <a>browsing context</a> |target|, this algorithm
+  Given a <a for="/">request</a> (|navigation request|), a <a>response</a> |navigation
+  response|, a [=/CSP list=] |response CSP list|, a string (|type|, either
+  "`form-submission`" or "`other`"),  and a <a>browsing context</a> |target|, this algorithm
   returns "`Blocked`" if the active policy blocks the navigation, and "`Allowed`"
   otherwise:
 
   <ol class="algorithm">
     1.  Let |result| be "`Allowed`".
 
-    2.  For each |policy| in |navigation response|'s
-        <a for="response">CSP list</a>:
+    2.  For each |policy| in |response CSP list|:
 
         Note: Some directives (like <a>frame-ancestors</a>) allow a |response|'s
         <a>Content Security Policy</a> to act on the navigation.
@@ -1460,9 +1316,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
             5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
                 set |result| to "`Blocked`".
 
-    3.  For each |policy| in |navigation request|'s <a for="request">client</a>'s
-        <a for="environment settings object">global object</a>'s
-        <a for="global object">CSP list</a>:
+    3.  For each |policy| in |navigation request|'s <a for="request">policy container</a>'s
+        <a for="policy container">CSP list</a>:
 
         Note: Some directives in the |navigation request|'s context (like <a>navigate-to</a>)
         need the |response| before acting on the navigation.
@@ -1490,6 +1345,28 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     4.  Return |result|.
   </ol>
 
+  <h4 id="run-global-object-csp-initialization" algorithm dfn export>
+    Run `CSP` initialization for a global object.
+  </h4>
+
+  Given a <a for="/">global object</a> (|global|), the user agent performs the
+  following steps in order to initialize CSP for |global|. This algorithm
+  returns "`Allowed`" if |global| is allowed, and "`Blocked`" otherwise:
+
+  <ol class="algorithm">
+    1.  Let |result| be "`Allowed`".
+
+    2.  For each |policy| in |global|'s [=global object/CSP list=]:
+
+        1.  For each |directive| in |policy|:
+
+            1. Execute |directive|'s <a for="directive">initialization</a> algorithm on
+               |global|. If its returned value is "`Blocked`", then set |result| to
+               "`Blocked`".
+
+    3.  Return |result|.
+  </ol>
+
   <h3 id="webrtc-integration">Integration with WebRTC</h3>
 
   Mostly TODO. The general idea is that WebRTC should call into [[#should-block-rtc-connection]],
@@ -1507,7 +1384,6 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     1.  Let |result| be "`Allowed`".
 
     2.  For each |policy| in |global|'s [=global object/CSP list=]:
-
           1.  Let |directive| be `null`.
 
           2.  If |policy| contains a [=directive=] whose [=directive/name=] is "`webrtc`", then
@@ -1687,7 +1563,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   string representation of the violation, suitable for submission to a reporting
   endpoint associated with the deprecated <a>`report-uri`</a> directive.
 
-  1.  Let |body| be a new JavaScript object with properties initialized as
+  1.  Let |body| be a <a lt="ordered map">map</a> with its keys initialized as
       follows:
 
       :   "`document-url`"
@@ -1727,36 +1603,31 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   2.  If |violation|'s <a for="violation">source file</a> is not `null`:
 
-      1.  Set |body|'s "`source-file`" property to the result of executing
+      1.  Set |body|["`source-file`"] to the result of executing
           the <a>URL serializer</a> on |violation|'s <a for="violation">source
           file</a>, with the `exclude fragment` flag set.
 
-      2.  Set |body|'s "`lineno`" property to |violation|'s
+      2.  Set |body|["`lineno`"] to |violation|'s
           <a for="violation">line number</a>.
 
-      3.  Set |body|'s "`line-number`" property to |violation|'s
+      3.  Set |body|["`line-number`"] to |violation|'s
           <a for="violation">line number</a>.
 
-      4.  Set |body|'s "`colno`" property to |violation|'s
+      4.  Set |body|["`colno`"] to |violation|'s
           <a for="violation">column number</a>.
 
-      5.  Set |body|'s "`column-number`" property to |violation|'s
+      5.  Set |body|["`column-number`"] to |violation|'s
           <a for="violation">column number</a>.
 
-          Note: the "`line-number`" and "`column-number`" properties are
+          Note: the "`line-number`" and "`column-number`" keys are
           maintained for historical reasons and are duplicates of "`lineno`"
           and "`colno`" respectively.
 
-  3.  Assert: If |body|'s "`blocked-url`" property is not "`inline`", then its "`sample`"
-      property is the empty string.
+  3.  Assert: If |body|["`blocked-url`"] is not "`inline`", then |body|["`sample`"]
+      is the empty string.
 
-  4.  Let |object| be a new JavaScript object with properties initialized as
-      follows:
-
-      :   "`csp-report`"
-      ::  |body|
-
-  5.  Return the result of executing {{JSON.stringify()}} on |object|.
+  4.  Return the result of <a>serialize an infra value to JSON bytes</a> given
+      «[ "csp-report" → body ]».
 
   <h3 id="report-violation" algorithm>
     Report a |violation|
@@ -1876,7 +1747,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
                   ::  ""
                   :   <a for="request">credentials mode</a>
                   ::  "`same-origin`"
-                  :   <a for="request">keepalive flag</a>
+                  :   <a for="request">keepalive</a>
                   ::  "`true`"
                   :   <a for="request">header list</a>
                   ::  A header list containing a single header whose name is
@@ -2530,7 +2401,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       on |request|.
 
   2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `frame-src` and |policy| is "`No`", return "`Allowed`".
+      `img-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  If the result of executing [[#match-response-to-source-list]] on
       |response|, |request|, this directive's <a for="directive">value</a>,
@@ -2699,7 +2570,6 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     <pre highlight="html">
       &lt;embed src="https://example.org/flash"&gt;&lt;/embed&gt;
       &lt;object data="https://example.org/flash"&gt;&lt;/object&gt;
-      &lt;applet archive="https://example.org/flash"&gt;&lt;/applet&gt;
     </pre>
   </div>
 
@@ -2709,7 +2579,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   `'none'`, but will otherwise be allowed.
 
   Note: The `object-src` directive acts upon any request made on behalf of
-  an <{object}>, <{embed}>, or <a>`applet`</a> element. This includes requests
+  an <{object}> or <{embed}> element. This includes requests
   which would populate the <a>nested browsing context</a> generated by the
   former two (also including navigations). This is true even when the data is
   semantically equivalent to content which would otherwise be restricted by
@@ -2718,7 +2588,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   Note: When a plugin resource is navigated to directly (that is, as a <a>plugin document</a> in the
   <a>top-level browsing context</a> or a <a>nested browsing context</a>, and not as an embedded
-  subresource via <{embed}>, <{object}>, or <a>`applet`</a>), any <a for="/">policy</a> delivered along
+  subresource via <{embed}> or <{object}>), any <a for="/">policy</a> delivered along
   with that resource will be applied to the <a>plugin document</a>. This means, for instance, that
   developers can prevent the execution of arbitrary resources as plugin content by delivering the
   policy `object-src 'none'` along with a response. Given plugins' power (and the
@@ -3480,124 +3350,6 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   2.  Return "`Allowed`".
 
-  <h4 id="directive-plugin-types">`plugin-types`</h4>
-
-  The <dfn export>plugin-types</dfn> directive restricts the set of plugins that
-  can be embedded into a document by limiting the types of resources which can
-  be loaded. The directive's syntax is described by the following ABNF grammar:
-
-  <pre dfn-type="grammar" link-type="grammar">
-    directive-name  = "plugin-types"
-    directive-value = <a>media-type-list</a>
-
-    <dfn>media-type-list</dfn> = "" / <a>media-type</a> *( <a>required-ascii-whitespace</a> <a>media-type</a> )
-    <dfn>media-type</dfn> = <a>type</a> "/" <a>subtype</a>
-    ; <a>type</a> and <a>subtype</a> are defined in RFC 2045
-  </pre>
-
-  If a `plugin-types` directive is present, instantiation of an <{embed}> or
-  <{object}> element will fail if any of the following conditions hold:
-
-  1.  The element does not explicitly declare a <a>valid MIME type</a> via a
-      <{embed/type}> attribute.
-
-  2.  The declared type does not match one of the items in the directive's
-      value.
-
-  3.  The fetched resource does not match the declared type.
-
-  Note: The `plugin-types` grammar allows for an empty directive value in which
-  case all instantions of <{embed}> and <{object}> will fail.
-
-  <div class="example">
-    Given a page with the following Content Security Policy:
-
-    <pre>
-      <a http-header>Content-Security-Policy</a>: <a>plugin-types</a> application/pdf
-    </pre>
-
-    Fetches for the following code will all return network errors:
-
-    <pre highlight="html">
-      &lt;!-- No 'type' declaration --&gt;
-      &lt;object data="https://example.com/flash"&gt;&lt;/object&gt;
-
-      &lt;!-- Non-matching 'type' declaration --&gt;
-      &lt;object data="https://example.com/flash" type="application/x-shockwave-flash"&gt;&lt;/object&gt;
-
-      &lt;!-- Non-matching resource --&gt;
-      &lt;object data="https://example.com/flash" type="application/pdf"&gt;&lt;/object&gt;
-    </pre>
-
-    If the page allowed Flash content by sending the following header:
-
-    <pre>
-      <a http-header>Content-Security-Policy</a>: <a>plugin-types</a> application/x-shockwave-flash
-    </pre>
-
-    Then the second item above would load successfully:
-
-    <pre highlight="html">
-      &lt;!-- Matching 'type' declaration and resource --&gt;
-      &lt;object data="https://example.com/flash" type="application/x-shockwave-flash"&gt;&lt;/object&gt;
-    </pre>
-  </div>
-
-  <h5 algorithm dfn>
-    `plugin-types` Post-Request Check
-  </h5>
-
-  This directive's <a for="directive">post-request check</a> algorithm is as
-  follows:
-
-  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
-  <a for="/">policy</a> (|policy|):
-
-  1.  Assert: |policy| is unused.
-
-  2.  If |request|'s <a for="request">destination</a> is either "`object`"
-      or "`embed`":
-
-      1.  Let |type| be the result of <a lt="extract a MIME type">extracting a
-          MIME type</a> from |response|'s <a for="response">header list</a>.
-
-      2.  If |type| is not an <a>ASCII case-insensitive</a> match for any item
-          in this directive's <a for="directive">value</a>, return "`Blocked`".
-
-  3.  Return "`Allowed`".
-
-  <h5 algorithm dfn export>
-    Should |plugin element| be blocked <i lang="la">a priori</i> by Content
-    Security Policy?:
-  </h5>
-
-  Given an {{Element}} (|plugin element|), this algorithm returns "`Blocked`"
-  or "`Allowed`" based on the element's `type` attribute and the policy applied to
-  its document:
-
-  <ol class="algorithm">
-    1.  For each |policy| in |plugin element|'s <a>node document</a>'s
-        <a for="Document">CSP list</a>:
-
-        1.  If |policy| contains a <a>directive</a> (|directive|) whose name is
-            `plugin-types`:
-
-            1.  Let |type| be "`application/x-java-applet`" if |plugin element|
-                is an <a>`applet`</a> element, or |plugin element|'s `type` attribute's
-                value if present, or "`null`" otherwise.
-
-            2.  Return "`Blocked`" if any of the following are true:
-
-                1.  |type| is `null`.
-
-                2.  |type| is not a <a>valid MIME type</a>.
-
-                3.  |type| is not an <a>ASCII case-insensitive</a> match for any
-                    item in |directive|'s <a for="directive">value</a>.
-
-    2.  Return "`Allowed`".
-  </ol>
-
   <h4 id="directive-sandbox">`sandbox`</h4>
 
   The <dfn export>sandbox</dfn> directive specifies an HTML sandbox policy which the
@@ -3618,58 +3370,40 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   delivered in a <a http-header>`Content-Security-Policy-Report-Only`</a> header, or within
   a <{meta}> element.
 
-  <h5 algorithm id="sandbox-response">
-    `sandbox` Response Check
-  </h5>
-
-  This directive's <a for="directive">response check</a> algorithm is as
-  follows:
-
-  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
-  <a for="/">policy</a> (|policy|):
-
-  1.  Assert: |response| is unused.
-
-  2.  If |policy|'s <a for="policy">disposition</a> is not "`enforce`", then
-      return "`Allowed`".
-
-  3.  If |request|'s <a for="request">destination</a> is one of
-      "`serviceworker`", "`sharedworker`", or "`worker`":
-
-      1.  If the result of the <a>Parse a sandboxing directive</a> algorithm
-          using this directive's <a for="directive">value</a> as the input
-          contains either the <a>sandboxed scripts browsing context flag</a> or
-          the <a>sandboxed origin browsing context flag</a> flags, return
-          "`Blocked`".
-
-          Note: This will need to change if we allow Workers to be sandboxed into
-          unique origins, which seems like a pretty reasonable thing to do.
-
-  4.  Return "`Allowed`".
-
   <h5 algorithm id="sandbox-init">
     `sandbox` Initialization
   </h5>
 
   This directive's <a for="directive">initialization</a> algorithm is
   responsible for adjusting a {{Document}}'s <a>forced sandboxing flag set</a>
-  according to the <a>`sandbox`</a> values present in its policies, as
-  follows:
+  and for checking whether a worker is allowed to run according to the <a>`sandbox`</a>
+  values present in its policies as follows:
 
-  Given a {{Document}} or <a for="/">global object</a> (|context|), a <a>response</a>
-  (|response|), and a <a for="/">policy</a> (|policy|):
+  Given a {{Document}} or <a for="/">global object</a> (|context|) and a <a for="/">policy</a>
+  (|policy|):
 
-  1.  Assert: |response| is unused.
+  1.  If |policy|'s <a for="policy">disposition</a> is not "`enforce`", or
+      |context| is a {{WorkletGlobalScope}}, then abort this algorithm.
 
-  2.  If |policy|'s <a for="policy">disposition</a> is not "`enforce`", or
-      |context| is not a {{Document}}, then abort this algorithm.
+  2.  Let |sandboxing flag set| be a new [=/sandboxing flag set=].
 
-      Note: This will need to change if we allow Workers to be sandboxed,
-      which seems like a pretty reasonable thing to do.
+  3.  <a>Parse a sandboxing directive</a> using this directive's <a
+      for="directive">value</a> as the input, and |sandboxing flag set| as the output.
 
-  3.  <a>Parse a sandboxing directive</a> using this directive's
-      <a for="directive">value</a> as the input, and |context|'s <a>forced
-      sandboxing flag set</a> as the output.
+  4.  If |context| is a {{WorkerGlobalScope}}:
+
+      1.  If |sandboxing flag set| contains either the <a>sandboxed scripts browsing
+          context flag</a> or the <a>sandboxed origin browsing context flag</a> flags,
+          return "`Blocked`".
+
+          Note: This will need to change if we allow Workers to be sandboxed into unique
+          origins, which seems like a pretty reasonable thing to do.
+
+  5.  If |context| is a {{Document}}:
+
+      1.  Set |context|'s <a>forced sandboxing flag set</a> to |sandboxing flag set|.
+
+  6.  Return "`Allowed`".
 
   <h3 id="directives-navigation">
     Navigation Directives
@@ -3710,10 +3444,9 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   <h4 id="directive-frame-ancestors">`frame-ancestors`</h4>
 
   The <dfn export>frame-ancestors</dfn> directive restricts the {{URL}}s which can
-  embed the resource using <{frame}>, <{iframe}>, <{object}>, <{embed}>, or
-  <a>`applet`</a> element. Resources can use this directive to avoid many UI
-  Redressing [[UISECURITY]] attacks, by avoiding the risk of being embedded into
-  potentially hostile contexts.
+  embed the resource using <{frame}>, <{iframe}>, <{object}>, or <{embed}>. Resources
+  can use this directive to avoid many UI Redressing [[UISECURITY]] attacks, by
+  avoiding the risk of being embedded into potentially hostile contexts.
 
   The directive's syntax is described by the following ABNF grammar:
 
@@ -3747,27 +3480,29 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   `frame-ancestors` directive's <a>navigation response check</a>:
 
   <ol class="algorithm">
-    1.  Assert: |request|, |navigation response|, and |navigation type|, are
-        unused in this algorithm, as `frame-ancestors` is concerned only
+    1.  If |navigation response|'s [=response/URL=] [=is local=], return "`Allowed`".
+
+    2.  Assert: |request|, |navigation response|, and |navigation type|, are unused
+        from this point forward in this algorithm, as `frame-ancestors` is concerned only
         with |navigation response|'s <a>frame-ancestors</a> <a>directive</a>.
 
-    2.  If |check type| is "`source`", return "`Allowed`".
+    3.  If |check type| is "`source`", return "`Allowed`".
 
         Note: The 'frame-ancestors' <a>directive</a> is relevant only to the
         |target| <a>browsing context</a> and it has no impact on the |request|'s
         context.
 
-    2.  If |target| is not a <a>nested browsing context</a>, return "`Allowed`".
+    4.  If |target| is not a <a>nested browsing context</a>, return "`Allowed`".
 
-    3.  Let |current| be |target|.
+    5.  Let |current| be |target|.
 
-    4.  While |current| is a <a>nested browsing context</a>:
+    6.  While |current| is a <a>nested browsing context</a>:
 
-        1.  Let |document| be the {{Document}} that |current| is <a>nested through</a>.
+        1.  Let |document| be |current|'s [=browsing context/container document=].
 
         2.  Let |origin| be the result of executing the <a>URL parser</a> on the
             <a lt="ASCII serialization of an origin">ASCII serialization</a>
-            of |document|'s {{Document/origin}}.
+            of |document|'s [=Document/origin=].
 
         3.  If [[#match-url-to-source-list]] returns `Does Not Match` when
             executed upon |origin|, this directive's <a for="directive">value</a>,
@@ -3775,7 +3510,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
         4.  Set |current| to |document|'s <a>browsing context</a>.
 
-    5.  Return "`Allowed`".
+    7.  Return "`Allowed`".
   </ol>
 
 	<h5 id="frame-ancestors-and-frame-options">
@@ -3927,7 +3662,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   </div>
 
   The <dfn export>`report-uri`</dfn> directive defines a set of endpoints to which
-  <a>violation reports</a> will be sent when particular behaviors are prevented.
+  <a>csp violation reports</a> will be sent when particular behaviors are prevented.
 
   <pre link-type="grammar">
     directive-name  = "report-uri"
@@ -3967,9 +3702,9 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   that document.
 
   New directives SHOULD use the <a for="directive">pre-request check</a>,
-  <a for="directive">post-request check</a>, <a for="directive">response
-  check</a>, and <a for="directive">initialization</a> hooks in order to
-  integrate themselves into Fetch and HTML.
+  <a for="directive">post-request check</a>, and
+  <a for="directive">initialization</a> hooks in order to integrate themselves
+  into Fetch and HTML.
 
   <h3 id="matching-algorithms">Matching Algorithms</h3>
 
@@ -4008,10 +3743,10 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
               1.  If |directive|'s <a for="directive">value</a> does not
                   contain a <a>source expression</a> whose
-                  <a grammar>hash-algorithm</a> is a <a>case-sensitive</a> match
-                  for |source|'s `hash-algo` component, and whose
-                  <a grammar>base64-value</a> is a <a>case-sensitive</a> match
-                  for |source|'s `base64-value`, then set |bypass due to
+                  <a grammar>hash-algorithm</a> is an <a>ASCII case-insensitive</a> match
+                  for |source|'s <a grammar>hash-algorithm</a>, and whose
+                  <a grammar>base64-value</a> is <a for="string" lt="is">identical to</a>
+                  |source|'s `base64-value`, then set |bypass due to
                   integrity match| to `false`.
 
           5.  If |bypass due to integrity match| is `true`, return
@@ -4105,7 +3840,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   3.  For each |expression| in |source list|:
 
       1.  If |expression| matches the <a grammar>`nonce-source`</a> grammar,
-          and |nonce| is a <a>case-sensitive</a> match for |expression|'s
+          and |nonce| is <a for="string" lt="is">identical to</a> |expression|'s
           <a grammar>`base64-value`</a> part, return "`Matches`".
 
   4.  Return "`Does Not Match`".
@@ -4181,11 +3916,11 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   1.  If |expression| is the string "*", return "`Matches`" if one or more of
       the following conditions is met:
 
-      1. |url|'s <a for="url">scheme</a> is a <a>network scheme</a>.
+      1. |url|'s <a for="url">scheme</a> is an <a>HTTP(S) scheme</a>.
 
       2. |url|'s <a for="url">scheme</a> is the same as |origin|'s <a for="origin">scheme</a>.
 
-      Note: This logic means that in order to allow a resource from a non-<a>network scheme</a>,
+      Note: This logic means that in order to allow a resource from a non-<a>HTTP(S) scheme</a>,
       it has to be either explicitly specified (e.g.
       `default-src * data: custom-scheme-1: custom-scheme-2:`),
       or the protected resource must be loaded from the same scheme.
@@ -4349,7 +4084,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
     2.  If |port A| is equal to "*", return "`Matches`".
 
-    3.  If |port A| is a <a>case-sensitive</a> match for |port B|, return "`Matches`".
+    3.  If |port A| is <a for="string" lt="is">identical to</a> |port B|, return "`Matches`".
 
     4.  If |port B| is empty:
 
@@ -4400,12 +4135,13 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
         1.  Let |piece B| be the next item in |path list B|.
 
-        2.  <a for="string">Percent-decode</a> |piece A|.
+        2.  Let |decoded piece A| be the <a for=string lt=percent-decode>percent-decoding</a> of
+            |piece A|.
 
-        3.  <a for="string">Percent-decode</a> |piece B|.
+        3.  Let |decoded piece B| be the <a for=string lt=percent-decode>percent-decoding</a> of
+            |piece B|.
 
-        4.  If |piece A| is not a <a>case-sensitive</a> match
-            for |piece B|, return "`Does Not Match`".
+        4.  If |decoded piece A| is not |decoded piece B|, return "`Does Not Match`".
 
     9.  Return "`Matches`".
   </ol>
@@ -4537,9 +4273,9 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       1.  For each |expression| in |list|:
 
           1.  If |expression| matches the <a grammar>`nonce-source`</a> grammar,
-              and |element| has a <{htmlsvg-global/nonce}> attribute whose value is a
-              <a>case-sensitive</a> match for |expression|'s
-              <a grammar>`base64-value`</a> part, return "`Matches`".
+              and |element| has a <{htmlsvg-global/nonce}> attribute whose value
+              [=string/is=] |expression|'s <a grammar>`base64-value`</a> part,
+              return "`Matches`".
 
       Note: Nonces only apply to inline <{script}> and inline <{style}>, not to
       attributes of either element or to `javascript:` navigations.
@@ -4590,8 +4326,8 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
                       Note: This replacement normalizes hashes expressed in [=base64url
                       encoding=] into [=base64 encoding=] for matching.
 
-                  3.  If |actual| is a <a>case-sensitive</a> match for |expected|, return
-                      "`Matches`".
+                  3.  If |actual| is <a for="string" lt="is">identical to</a>
+                      |expected|, return "`Matches`".
 
       Note: Hashes apply to inline <{script}> and inline <{style}>. If the
       "<a grammar>`'unsafe-hashes'`</a>" source expression is present,
@@ -4980,8 +4716,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     CSP Inheriting to avoid bypasses
   </h3>
 
-  As described in [[#initialize-document-csp]] and [[#initialize-global-object-csp]],
-  documents loaded from <a>local schemes</a> will inherit a copy of the
+  Documents loaded from <a>local schemes</a> will inherit a copy of the
   policies in the <a>source browsing context</a>. The goal is to ensure that a page can't
   bypass its policy by embedding a frame or opening a new window containing
   content that is entirely under its control (`srcdoc` documents, `blob:` or `data:`
@@ -5303,8 +5038,6 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   ::  This document (see [[#directive-media-src]])
   :   <a>`object-src`</a>
   ::  This document (see [[#directive-object-src]])
-  :   <a>`plugin-types`</a>
-  ::  This document (see [[#directive-plugin-types]])
   :   <a>`report-uri`</a>
   ::  This document (see [[#directive-report-uri]])
   :   <a>`report-to`</a>
