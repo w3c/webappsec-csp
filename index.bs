@@ -1388,22 +1388,20 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     1.  Let |result| be "`Allowed`".
 
     2.  For each |policy| in |global|'s [=global object/CSP list=]:
-          1.  Let |directive| be `null`.
+          1.  For each |directive| in |policy|:
+              1.  If |directive|'s <a for="directive">webrtc pre-connect check</a>
+                  returns "`Allowed`" when executed upon |global|, |policy|,
+                  and |directive|'s [=directive/name=], skip to the next directive.
 
-          2.  If |policy| contains a [=directive=] whose [=directive/name=] is "`webrtc`", then
-              set |directive| to that [=directive=].
+              2.  Otherwise, let |violation| be the result of executing
+                  [[#create-violation-for-global]] on |global|, |policy|, and
+                  |directive|'s <a for="directive">name</a>.
 
-          3.  If |directive| is not `null`, and the result of executing |directive|'s
-              [=webrtc pre-connect check=] is "`Blocked`":
+              3.  Set |violation|'s <a for="violation">resource</a> to null.
 
-              1.  Let |violation| be the result of executing [[#create-violation-for-global]] on
-                  |global|, |policy|, and |directive|'s [=directive/name=].
+              4.  Execute [[#report-violation]] on |violation|.
 
-              2.  Set |violation|'s <a for="violation">resource</a> to null.
-
-              3.  Execute [[#report-violation]] on |violation|.
-
-              4.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
+              5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
                   set |result| to "`Blocked`".
 
     3.  Return |result|.
