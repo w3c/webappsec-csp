@@ -64,6 +64,7 @@ spec:infra;
     text:append; for: set
     text:empty; for: set
     text:strictly split a string
+spec:webrtc; type:interface; text:RTCPeerConnection
 </pre>
 <pre class="anchors">
 spec: RFC6454; urlPrefix: https://tools.ietf.org/html/rfc6454
@@ -140,6 +141,10 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   type: grammar
     text: ASCII whitespace; url: ascii-whitespace
     text: INFRA; url: #
+
+spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
+  type:dfn
+    text: RTCPeerConnection; url: #
 </pre>
 <pre class="biblio">
 {
@@ -609,6 +614,10 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       a <a>response</a>, a <a>browsing context</a>, a check type string ("`source`"
       or "`response`"), and a <a for="/">policy</a> as arguments, and is executed during
       [[#should-block-navigation-response]]. It returns "`Allowed`" unless otherwise specified.
+
+  8.  A <dfn for="directive" export>webrtc pre-connect check</dfn>, which takes a [=/policy=], and
+      is executed during [[#should-block-rtc-connection]]. It returns "`Allowed`" unless
+      otherwise specified.
 
   <h4 id="framework-directive-source-list">Source Lists</h4>
 
@@ -1359,6 +1368,41 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
             1. Execute |directive|'s <a for="directive">initialization</a> algorithm on
                |global|. If its returned value is "`Blocked`", then set |result| to
                "`Blocked`".
+
+    3.  Return |result|.
+  </ol>
+
+  <h3 id="webrtc-integration">Integration with WebRTC</h3>
+
+  <p>The constructor for {{RTCPeerConnection}} calls [[#should-block-rtc-connection]] when
+  invoked, and throws an error if it returns "`Blocked`."</p>
+
+  <h4 id="should-block-rtc-connection">
+    Should RTC connections be blocked for |global|?
+  </h4>
+
+  Given a [=/global object=] (|global|), this algorithm returns "`Blocked`"
+  if the active policy for |global| blocks RTC connections, and "`Allowed`" otherwise:
+
+  <ol class="algorithm">
+    1.  Let |result| be "`Allowed`".
+
+    2.  For each |policy| in |global|'s [=global object/CSP list=]:
+          1.  For each |directive| in |policy|:
+              1.  If |directive|'s <a for="directive">webrtc pre-connect check</a>
+                  returns "`Allowed`" when executed upon |global|, |policy|,
+                  and |directive|'s [=directive/name=], skip to the next directive.
+
+              2.  Otherwise, let |violation| be the result of executing
+                  [[#create-violation-for-global]] on |global|, |policy|, and
+                  |directive|'s <a for="directive">name</a>.
+
+              3.  Set |violation|'s <a for="violation">resource</a> to null.
+
+              4.  Execute [[#report-violation]] on |violation|.
+
+              5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
+                  set |result| to "`Blocked`".
 
     3.  Return |result|.
   </ol>
@@ -3098,6 +3142,52 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   4.  Return "`Allowed`".
 
+  <h4 id="directive-webrtc">`webrtc`</h4>
+
+  The <dfn export>webrtc</dfn> directive restricts whether connections may be
+  established via WebRTC. The syntax for the directive's name and value is
+  described by the following ABNF:
+
+  <pre>
+    directive-name  = "webrtc"
+    directive-value = "<dfn>*</dfn>" / "<dfn>'none'</dfn>"
+  </pre>
+
+  <div class="example">
+    Given a page with the following Content Security Policy:
+
+    <pre>
+      Content-Security-Policy: <a>webrtc</a> 'none'
+    </pre>
+
+    In the following code, creating an {{RTCPeerConnection}} will throw; `webrtc`
+    does not allow connections:
+
+    <pre highlight="html">
+      &lt;script&gt;
+        const pc = new RTCPeerConnection();
+      &lt;/script&gt;
+    </pre>
+  </div>
+
+  <h5 algorithm id="webrtc-pre-connect">
+    `webrtc` Preconnect Check
+  </h5>
+
+  This directive's <a for="directive">webrtc pre-connect check</a> is as follows:
+
+  Given a [=/policy=] (|policy|):
+
+  1.  Assert: |policy| is unused.
+
+  2.  Let |url| be a [=/url=] whose [=url/scheme=] is |origin|'s [=origin/scheme=], [=url/host=]
+      is |host|, and [=url/port=] is |port|.
+
+  3.  If this directive's [=directive/value=] contains a single item which is an
+      <a>ASCII case-insensitive</a> match for the string "*", return "Allowed"
+
+  4.  Return "`Blocked`".
+
   <h4 id="directive-worker-src">`worker-src`</h4>
 
   The <dfn export>worker-src</dfn> directive restricts the URLs which may be loaded as
@@ -3359,7 +3449,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   `frame-ancestors` directive's <a>navigation response check</a>:
 
   <ol class="algorithm">
-    1.  If |navigation response|'s [=response/URL=] [=is local=], return "`Allowed`". 
+    1.  If |navigation response|'s [=response/URL=] [=is local=], return "`Allowed`".
 
     2.  Assert: |request|, |navigation response|, and |navigation type|, are unused
         from this point forward in this algorithm, as `frame-ancestors` is concerned only
