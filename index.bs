@@ -1421,6 +1421,60 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   to CSP.
 </section>
 
+<h3 id="wasm-integration">Integration with WebAssembly</h3>
+
+WebAssembly defines the {{HostEnsureCanCompileWasmBytes()}} and
+{{HostEnsureCanCompileWasmResponse()}} abstract operations which allow the host
+environment to block the compilation of WebAssembly sources into executable
+code. This document defines an implementation of that abstract operation thich
+examines the relevant <a for="global object">CSP list</a> to determine whether
+such compilation ought to be blocked.
+
+<h4 id="can-compile-wasm-bytes" algorithm dfn>
+  EnsureCSPDoesNotBlockWasmByteCompilation(|callerRealm|, |calleeRealm|, |bytes|)
+</h4>
+
+Given two <a>realms</a> (|callerRealm| and |calleeRealm|), and a <a>BufferSource</a> (|bytes|), this algorithm
+returns normally if compilation is allowed, and throws an "`WebAssembly.CompileError`" if not:
+
+1.  Let |globals| be a list containing |callerRealm|'s [=Realm/global object=] and |calleeRealm|'s
+    [=Realm/global object=].
+
+2.  For each |global| in |globals|:
+
+    1.  Let |result| be "`Allowed`".
+
+    2.  For each |policy| in |global|'s [=global object/CSP list=]:
+
+        1.  Let |source-list| be `null`.
+
+        2.  If |policy| contains a [=directive=] whose [=directive/name=] is "`script-src`", then
+            set |source-list| to that [=directive=]'s [=directive/value=].
+
+            Otherwise if |policy| contains a [=directive=] whose [=directive/name=] is
+            "`default-src`", then set |source-list| to that directive's [=directive/value=].
+
+        3.  If |source-list| is non-`null`, and does not contain a [=source expression=] which is
+            an [=ASCII case-insensitive=] match for the string "<a grammar>`'wasm-eval'`</a>",
+            then:
+
+            1.  Let |violation| be the result of executing [[#create-violation-for-global]] on
+                |global|, |policy|, and "`script-src`".
+
+            2.  Set |violation|'s [=violation/resource=] to "`inline`".
+
+            3.  If |source-list| [=list/contains=] the expression
+                "<a grammar>`'report-sample'`</a>", then set |violation|'s [=violation/sample=] to
+                the substring of |source| containing its first 40 characters.
+
+            4.  Execute [[#report-violation]] on |violation|.
+
+            5.  If |policy|'s [=policy/disposition=] is "`enforce`", then set |result| to
+                "`Blocked`".
+
+    3.  If |result| is "`Blocked`", throw a `WebAssembly.CompileError` exception.
+</section>
+
 <!-- Big Text: Reporting -->
 <section>
   <h2 id="reporting">
@@ -2688,19 +2742,14 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   5. The following WebAssembly execution sinks are gated on the "`wasm-unsafe-eval`"
      source expression:
 
-     *    {{WebAssembly.instantiate()}}
-
-<<<<<<< HEAD:index.bs
-  6.  Navigation to `javascript:` URLs MUST pass through [[#script-src-inline]].
-=======
-     User agents MAY also gate the following WebAssembly operations on the
-     "`wasm-eval`" source expression:
-
+     *    {{new WebAssembly.Module()}}
      *    {{WebAssembly.compile()}}
+     *    {{WebAssembly.compileStreaming()}}
+     *    {{WebAssembly.instantiate()}}
+     *    {{WebAssembly.instantiateStreaming()}}
 
   6.  Navigation to `javascript:` URLs MUST pass through [[#should-block-inline]]. These navigations
       will only execute script if every policy allows inline script, as per #3 above.
->>>>>>> 26d792b (Make WebAssembly.compile gating optional):index.src.html
 
   <h5 algorithm id="script-src-pre-request">
     `script-src` Pre-request check
