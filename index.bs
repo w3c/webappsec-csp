@@ -152,7 +152,6 @@ spec: WebAssembly-web-api-api; urlPrefix: https://webassembly.github.io/spec/web
   type: method
     text: WebAssembly.compileStreaming(); url: #dom-webassembly-compilestreaming
     text: WebAssembly.instantiateStreaming(); url: #dom-webassembly-instantiatestreaming
-    text: HostEnsureCanCompileWasmResponse(); url:#host-ensure-can-compile-wasm-response
 
 </pre>
 <pre class="biblio">
@@ -1436,9 +1435,9 @@ spec: WebAssembly-web-api-api; urlPrefix: https://webassembly.github.io/spec/web
 
 <h3 id="wasm-integration">Integration with WebAssembly</h3>
 
-WebAssembly defines the {{HostEnsureCanCompileWasmBytes()}} and {{HostEnsureCanCompileWasmResponse()}}
-abstract operations which allow the host environment to block the compilation of WebAssembly sources
-into executable code. This document defines an implementation of those abstract operations which
+WebAssembly defines the {{HostEnsureCanCompileWasmBytes()}} 
+abstract operation which allows the host environment to block the compilation of WebAssembly sources
+into executable code. This document defines an implementation of this abstract operation which
 examines the relevant <a for="global object">CSP list</a> to determine whether such compilation ought
 to be blocked.
 
@@ -1486,51 +1485,6 @@ this algorithm returns normally if compilation is allowed, and throws an
                 "`Blocked`".
 
     3.  If |result| is "`Blocked`", throw a `WebAssembly.CompileError` exception.
-
-<h4 id="can-compile-wasm-response" algorithm dfn>
-    EnsureCSPDoesNotBlockWasmResponseCompilation(|callerRealm|, |calleeRealm|, |response|)
-</h4>
-  
-  Given two <a>realms</a> (|callerRealm| and |calleeRealm|), and a <a>Response</a> (|response|),
-  this algorithm returns normally if compilation is allowed, and throws an 
-  "`WebAssembly.CompileError`" if not:
-  
-  1.  Let |globals| be a list containing |callerRealm|'s [=Realm/global object=] and |calleeRealm|'s
-      [=Realm/global object=].
-  
-  2.  For each |global| in |globals|:
-  
-      1.  Let |result| be "`Allowed`".
-  
-      2.  For each |policy| in |global|'s [=global object/CSP list=]:
-  
-          1.  Let |source-list| be `null`.
-  
-          2.  If |policy| contains a [=directive=] whose [=directive/name=] is "`script-src`", then
-              set |source-list| to that [=directive=]'s [=directive/value=].
-  
-              Otherwise if |policy| contains a [=directive=] whose [=directive/name=] is
-              "`default-src`", then set |source-list| to that directive's [=directive/value=].
-  
-          3.  If |source-list| is non-`null`, and does not contain a [=source expression=] which is
-              an [=ASCII case-insensitive=] match for the string "<a grammar>`'wasm-unsafe-eval'`</a>",
-              then:
-  
-              1.  Let |violation| be the result of executing [[#create-violation-for-global]] on
-                  |global|, |policy|, and "`script-src`".
-  
-              2.  Set |violation|'s [=violation/resource=] to "`streaming`".
-  
-              3.  If |source-list| [=list/contains=] the expression
-                  "<a grammar>`'report-sample'`</a>", then set |violation|'s [=violation/sample=] to
-                  the substring of |response/url| containing its first 40 characters.
-  
-              4.  Execute [[#report-violation]] on |violation|.
-  
-              5.  If |policy|'s [=policy/disposition=] is "`enforce`", then set |result| to
-                  "`Blocked`".
-  
-      3.  If |result| is "`Blocked`", throw a `WebAssembly.CompileError` exception.
 </section>
   
 <!-- Big Text: Reporting -->
