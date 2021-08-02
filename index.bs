@@ -152,6 +152,8 @@ spec: WebAssembly-web-api-api; urlPrefix: https://webassembly.github.io/spec/web
   type: method
     text: WebAssembly.compileStreaming(); url: #dom-webassembly-compilestreaming
     text: WebAssembly.instantiateStreaming(); url: #dom-webassembly-instantiatestreaming
+  type: exception
+    text: WebAssembly.CompileError; url: #exceptiondef-compileerror
 
 </pre>
 <pre class="biblio">
@@ -1445,9 +1447,9 @@ to be blocked.
   EnsureCSPDoesNotBlockWasmByteCompilation(|callerRealm|, |calleeRealm|, |bytes|)
 </h4>
 
-Given two <a>realms</a> (|callerRealm| and |calleeRealm|), and a <a>BufferSource</a> (|bytes|),
-this algorithm returns normally if compilation is allowed, and throws an 
-"`WebAssembly.CompileError`" if not:
+Given two <a>realms</a> (|callerRealm| and |calleeRealm|), and (|bytes|),
+this algorithm returns normally if compilation is allowed, and throws a 
+{{WebAssembly.CompileError}} if not:
 
 1.  Let |globals| be a list containing |callerRealm|'s [=Realm/global object=] and |calleeRealm|'s
     [=Realm/global object=].
@@ -1477,14 +1479,15 @@ this algorithm returns normally if compilation is allowed, and throws an
 
             3.  If |source-list| [=list/contains=] the expression
                 "<a grammar>`'report-sample'`</a>", then set |violation|'s [=violation/sample=] to
-                the substring of |bytes| containing its first 40 characters.
+                a string consisting of the first 40 bytes encoded using [=base64 encoding=].
 
             4.  Execute [[#report-violation]] on |violation|.
 
             5.  If |policy|'s [=policy/disposition=] is "`enforce`", then set |result| to
                 "`Blocked`".
 
-    3.  If |result| is "`Blocked`", throw a `WebAssembly.CompileError` exception.
+    3.  If |result| is "`Blocked`", throw a {{WebAssembly.CompileError}} exception.
+
 </section>
   
 <!-- Big Text: Reporting -->
@@ -2760,7 +2763,7 @@ this algorithm returns normally if compilation is allowed, and throws an
      *    {{WebAssembly.instantiate()}}
      *    {{WebAssembly.instantiateStreaming()}}
 
-  6.  Navigation to `javascript:` URLs MUST pass through [[#should-block-inline]]. These navigations
+  6.  Navigation to `javascript:` URLs MUST pass through [[#should-block-inline]]. Such navigations
       will only execute script if every policy allows inline script, as per #3 above.
 
   <h5 algorithm id="script-src-pre-request">
