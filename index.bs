@@ -152,7 +152,6 @@ spec: WebAssembly-web-api-api; urlPrefix: https://webassembly.github.io/spec/web
   type: method
     text: WebAssembly.compileStreaming(); url: #dom-webassembly-compilestreaming
     text: WebAssembly.instantiateStreaming(); url: #dom-webassembly-instantiatestreaming
-    text: HostEnsureCanCompileWasmResponse(); url:#dom-host-ensure-can-compile-wasm-response
   type: exception
     text: WebAssembly.CompileError; url: #exceptiondef-compileerror
 
@@ -1439,11 +1438,11 @@ spec: WebAssembly-web-api-api; urlPrefix: https://webassembly.github.io/spec/web
 
 <h3 id="wasm-integration">Integration with WebAssembly</h3>
 
-WebAssembly defines the {{HostEnsureCanCompileWasmBytes()}} and the {{HostEnsureCanCompileWasmResponse(Response)}}
-abstract operations which allow the host environment to block the compilation of WebAssembly sources
-into executable code. This document defines an implementation of these abstract operations which
-examines the relevant <a for="global object">CSP list</a> to determine whether such compilation ought
-to be blocked.
+WebAssembly defines the {{HostEnsureCanCompileWasmBytes()}} abstract operation
+which allows the host environment to block the compilation of WebAssembly
+sources into executable code. This document defines an implementation of this
+abstract operation which examines the relevant <a for="global object">CSP
+list</a> to determine whether such compilation ought to be blocked.
 
 <h4 id="can-compile-wasm-bytes" algorithm dfn>
   EnsureCSPDoesNotBlockWasmByteCompilation(|callerRealm|, |calleeRealm|, |bytes|)
@@ -1489,37 +1488,6 @@ this algorithm returns normally if compilation is allowed, and throws a
                 "`Blocked`".
 
     3.  If |result| is "`Blocked`", throw a {{WebAssembly.CompileError}} exception.
-
-
-<h4 id="can-compile-wasm-response" algorithm dfn>
-  EnsureCSPDoesNotBlockWasmCompileWasmResponse(|callerRealm|, |calleeRealm|, |response|)
-</h4>
-
-Note that this algorithm is effectively identical to that in
-[[#should-block-response]]; slightly specialized for the WebAssembly case.
-
-Given a <a>response</a> (|response|) and a <a for="/">request</a> (|request|), this algorithm
-returns `Blocked` or `Allowed`, and reports violations based on |request|'s
-[=request/policy container=]'s [=policy container/CSP list=].
-
-1.  Let |CSP list| be |request|'s [=request/policy container=]'s [=policy container/CSP list=].
-
-2.  Let |result| be "`Allowed`".
-
-3.  For each |policy| in |CSP list|:
-
-    1.  For each |directive| in |policy|:
-
-        1.  If the result of executing |directive|'s
-              <a for="directive">post-request check</a> is "`Blocked`", then:
-
-            1.  Execute [[#report-violation]] on the result of executing
-                  [[#create-violation-for-request]] on |request|, and |policy|.
-
-            2.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
-                  then set |result| to "`Blocked`".
-
-4.  If |result| is "`Blocked`" then throw a {{WebAssembly.CompileError}} exception.
 
 </section>
   
@@ -2796,11 +2764,7 @@ returns `Blocked` or `Allowed`, and reports violations based on |request|'s
      *    {{WebAssembly.instantiate()}}
      *    {{WebAssembly.instantiateStreaming()}}
 
-  6.  The {{WebAssembly.compileStreaming()}} and {{WebAssembly.instantiateStreaming()}} execution
-      sinks are gated on [[#should-block-response]] if no "`wasm-unsafe-eval`" source expression
-      is present.
-
-  7.  Navigation to `javascript:` URLs MUST pass through [[#should-block-inline]]. Such navigations
+  6.  Navigation to `javascript:` URLs MUST pass through [[#should-block-inline]]. Such navigations
       will only execute script if every policy allows inline script, as per #3 above.
 
   <h5 algorithm id="script-src-pre-request">
