@@ -1467,23 +1467,20 @@ this algorithm returns normally if compilation is allowed, and throws a
             Otherwise if |policy| contains a [=directive=] whose [=directive/name=] is
             "`default-src`", then set |source-list| to that directive's [=directive/value=].
 
-        3.  If |source-list| is non-`null`, and does not contain a [=source expression=] which is
-            an [=ASCII case-insensitive=] match for the string "<a grammar>`'wasm-unsafe-eval'`</a>",
-            then:
+        3.  If |source-list| is non-`null`, and does not contain a [=source
+            expression=] which is an [=ASCII case-insensitive=] match for the
+            string "<a grammar>`'unsafe-eval'`</a>", and does not contain a
+            [=source expression=] which is an [=ASCII case-insensitive=] match
+            for the string "<a grammar>`'wasm-unsafe-eval'`</a>", then:
 
             1.  Let |violation| be the result of executing [[#create-violation-for-global]] on
                 |global|, |policy|, and "`script-src`".
 
             2.  Set |violation|'s [=violation/resource=] to "`inline`".
 
-            3.  If |source-list| [=list/contains=] the expression "<a
-                grammar>`'report-sample'`</a>", then set |violation|'s
-                [=violation/sample=] to a string consisting of the first 40
-                bytes of |bytes| encoded using [=base64 encoding=].
+            3.  Execute [[#report-violation]] on |violation|.
 
-            4.  Execute [[#report-violation]] on |violation|.
-
-            5.  If |policy|'s [=policy/disposition=] is "`enforce`", then set |result| to
+            4.  If |policy|'s [=policy/disposition=] is "`enforce`", then set |result| to
                 "`Blocked`".
 
     3.  If |result| is "`Blocked`", throw a {{WebAssembly.CompileError}} exception.
@@ -2754,14 +2751,20 @@ this algorithm returns normally if compilation is allowed, and throws a
       and <a>`script-src-elem`</a> are not used when performing this check, instead
       `script-src` (or it's fallback directive) is always used.
 
-  5. The following WebAssembly execution sinks are gated on the "`wasm-unsafe-eval`"
-     source expression:
+  5. The following WebAssembly execution sinks are gated on the
+     "`wasm-unsafe-eval`" or the "`unsafe-eval`" source expressions:
 
      *    {{new WebAssembly.Module()}}
      *    {{WebAssembly.compile()}}
      *    {{WebAssembly.compileStreaming()}}
      *    {{WebAssembly.instantiate()}}
      *    {{WebAssembly.instantiateStreaming()}}
+
+     Note: the "`wasm-unsafe-eval`" source expression is the more specific
+     source expression. In particular, "`unsafe-eval`" permits both compilation
+     (and instantiation) of WebAssembly and, for example, the use of the "`eval`" operation in
+     JavaScript. The "`wasm-unsafe-eval`" source expression only permits
+     WebAssembly and does not affect JavaScript.
 
   6.  Navigation to `javascript:` URLs MUST pass through [[#should-block-inline]]. Such navigations
       will only execute script if every policy allows inline script, as per #3 above.
