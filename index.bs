@@ -139,6 +139,21 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   type: grammar
     text: ASCII whitespace; url: ascii-whitespace
     text: INFRA; url: #
+
+spec: WebAssembly-js-api; urlPrefix: https://webassembly.github.io/spec/js-api/
+  type: method
+    text: new WebAssembly.Module(); url: #dom-module-module
+    text: WebAssembly.compile(); url: #dom-webassembly-compile
+    text: WebAssembly.instantiate(); url: #dom-webassembly-instantiate
+    text: HostEnsureCanCompileWasmBytes(); url:#dom-host-ensure-can-compile-wasm-bytes
+
+spec: WebAssembly-web-api-api; urlPrefix: https://webassembly.github.io/spec/web-api/
+  type: method
+    text: WebAssembly.compileStreaming(); url: #dom-webassembly-compilestreaming
+    text: WebAssembly.instantiateStreaming(); url: #dom-webassembly-instantiatestreaming
+  type: exception
+    text: WebAssembly.CompileError; url: #exceptiondef-compileerror
+
 </pre>
 <pre class="biblio">
 {
@@ -662,6 +677,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     <dfn>keyword-source</dfn> = "<dfn>'self'</dfn>" / "<dfn>'unsafe-inline'</dfn>" / "<dfn>'unsafe-eval'</dfn>"
                      / "<dfn>'strict-dynamic'</dfn>" / "<dfn>'unsafe-hashes'</dfn>" /
                      / "<dfn>'report-sample'</dfn>" / "<dfn>'unsafe-allow-redirects'</dfn>"
+                     / "<dfn>'wasm-unsafe-eval'</dfn>"
 
     ISSUE: Bikeshed `unsafe-allow-redirects`.
 
@@ -713,7 +729,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
 
   Each <a>violation</a> has a
   <dfn for="violation" id="violation-resource" export>resource</dfn>, which is
-  either `null`, "`inline`", "`eval`", or a {{URL}}. It represents the resource
+  either `null`, "`inline`", "`eval`", "`wasm-eval`", or a {{URL}}. It represents the resource
   which violated the policy.
 
   Each <a>violation</a> has a
@@ -1415,8 +1431,60 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   ISSUE(tc39/ecma262#938): {{HostEnsureCanCompileStrings()}} does not include the string which is
   going to be compiled as a parameter. We'll also need to update HTML to pipe that value through
   to CSP.
-</section>
 
+<h3 id="wasm-integration">Integration with WebAssembly</h3>
+
+WebAssembly defines the {{HostEnsureCanCompileWasmBytes()}} abstract operation
+which allows the host environment to block the compilation of WebAssembly
+sources into executable code. This document defines an implementation of this
+abstract operation which examines the relevant <a for="global object">CSP
+list</a> to determine whether such compilation ought to be blocked.
+
+<h4 id="can-compile-wasm-bytes" algorithm dfn>
+  EnsureCSPDoesNotBlockWasmByteCompilation(|callerRealm|, |calleeRealm|)
+</h4>
+
+Given two <a>realms</a> (|callerRealm| and |calleeRealm|),
+this algorithm returns normally if compilation is allowed, and throws a 
+{{WebAssembly.CompileError}} if not:
+
+1.  Let |globals| be a list containing |callerRealm|'s [=Realm/global object=] and |calleeRealm|'s
+    [=Realm/global object=].
+
+2.  For each |global| in |globals|:
+
+    1.  Let |result| be "`Allowed`".
+
+    2.  For each |policy| in |global|'s [=global object/CSP list=]:
+
+        1.  Let |source-list| be `null`.
+
+        2.  If |policy| contains a [=directive=] whose [=directive/name=] is "`script-src`", then
+            set |source-list| to that [=directive=]'s [=directive/value=].
+
+            Otherwise if |policy| contains a [=directive=] whose [=directive/name=] is
+            "`default-src`", then set |source-list| to that directive's [=directive/value=].
+
+        3.  If |source-list| is non-`null`, and does not contain a [=source
+            expression=] which is an [=ASCII case-insensitive=] match for the
+            string "<a grammar>`'unsafe-eval'`</a>", and does not contain a
+            [=source expression=] which is an [=ASCII case-insensitive=] match
+            for the string "<a grammar>`'wasm-unsafe-eval'`</a>", then:
+
+            1.  Let |violation| be the result of executing [[#create-violation-for-global]] on
+                |global|, |policy|, and "`script-src`".
+
+            2.  Set |violation|'s [=violation/resource=] to "`wasm-eval`".
+
+            3.  Execute [[#report-violation]] on |violation|.
+
+            4.  If |policy|'s [=policy/disposition=] is "`enforce`", then set |result| to
+                "`Blocked`".
+
+    3.  If |result| is "`Blocked`", throw a {{WebAssembly.CompileError}} exception.
+
+</section>
+  
 <!-- Big Text: Reporting -->
 <section>
   <h2 id="reporting">
@@ -2654,7 +2722,7 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
   as in most situations there is no particular reason to have separate lists of
   permissions for inline event handlers and <{script}> elements.
 
-  The `script-src` directive governs five things:
+  The `script-src` directive governs six things:
 
   1.  Script <a for="/">requests</a> MUST pass through [[#should-block-request]].
 
@@ -2681,7 +2749,23 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
       and <a>`script-src-elem`</a> are not used when performing this check, instead
       `script-src` (or it's fallback directive) is always used.
 
-  5.  Navigation to `javascript:` URLs MUST pass through [[#script-src-inline]].
+  5. The following WebAssembly execution sinks are gated on the
+     "`wasm-unsafe-eval`" or the "`unsafe-eval`" source expressions:
+
+     *    {{new WebAssembly.Module()}}
+     *    {{WebAssembly.compile()}}
+     *    {{WebAssembly.compileStreaming()}}
+     *    {{WebAssembly.instantiate()}}
+     *    {{WebAssembly.instantiateStreaming()}}
+
+     Note: the "`wasm-unsafe-eval`" source expression is the more specific
+     source expression. In particular, "`unsafe-eval`" permits both compilation
+     (and instantiation) of WebAssembly and, for example, the use of the "`eval`" operation in
+     JavaScript. The "`wasm-unsafe-eval`" source expression only permits
+     WebAssembly and does not affect JavaScript.
+
+  6.  Navigation to `javascript:` URLs MUST pass through [[#should-block-inline]]. Such navigations
+      will only execute script if every policy allows inline script, as per #3 above.
 
   <h5 algorithm id="script-src-pre-request">
     `script-src` Pre-request check
