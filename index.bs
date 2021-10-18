@@ -732,6 +732,14 @@ spec: WebAssembly-web-api-api; urlPrefix: https://webassembly.github.io/spec/web
   either `null`, "`inline`", "`eval`", "`wasm-eval`", or a {{URL}}. It represents the resource
   which violated the policy.
 
+  Note: The value `null` for a <a>violation</a>'s <a
+  for="violation">resource</a> is only allowed while the <a>violation</a> is
+  being populated. By the time the <a>violation</a> is reported and its <a
+  for="violation">resource</a> is used for
+  [[#obtain-violation-blocked-uri|obtaining the blocked URI]], the
+  <a>violation</a>'s <a for="violation">resource</a> should be populated with a
+  {{URL}} or one of the allowed strings.
+
   Each <a>violation</a> has a
   <dfn for="violation" id="violation-referrer" export>referrer</dfn>, which is either
   `null`, or a {{URL}}. It represents the referrer of the resource whose policy
@@ -1560,6 +1568,20 @@ this algorithm returns normally if compilation is allowed, and throws a
     };
   </pre>
 
+  <h3 id="obtain-violation-blocked-uri" algorithm>
+    Obtain the {{SecurityPolicyViolationEvent/blockedURI}} of a violation's |resource|
+  </h3>
+
+  Given a violation's <a>resource</a> (|resource|), this algorithm returns a
+  [=string=], to be used as the blocked URI field for violation reports.
+
+  1. Assert: |resource| is a {{URL}} or a [=string=].
+
+  2. If |resource| is a {{URL}}, return the result of executing the <a>URL
+     serializer</a> on |resource|, with the `exclude fragment` flag set.
+
+  3. Return |resource|.
+
   <h3 id="deprecated-serialize-violation">
     Obtain the deprecated serialization of |violation|
   </h3>
@@ -1578,8 +1600,8 @@ this algorithm returns normally if compilation is allowed, and throws a
       ::  The result of executing the <a>URL serializer</a> on |violation|'s
           <a for="violation">referrer</a>, with the `exclude fragment` flag set.
       :   "`blocked-uri`"
-      ::  The result of executing the <a>URL serializer</a> on |violation|'s
-          <a for="violation">resource</a>, with the `exclude fragment` flag set.
+      ::  The result of executing [[#obtain-violation-blocked-uri]] on |violation|'s
+          <a for="violation">resource</a>.
       :   "`effective-directive`"
       ::  |violation|'s <a for="violation">effective directive</a>
       :   "`violated-directive`"
@@ -1668,8 +1690,8 @@ this algorithm returns normally if compilation is allowed, and throws a
           ::  The result of executing the <a>URL serializer</a> on |violation|'s
               <a for="violation">referrer</a>, with the `exclude fragment` flag set.
           :  {{SecurityPolicyViolationEvent/blockedURI}}
-          ::  The result of executing the <a>URL serializer</a> on |violation|'s
-              <a for="violation">resource</a>, with the `exclude fragment` flag set.
+          ::  The result of executing [[#obtain-violation-blocked-uri]] on |violation|'s
+              <a for="violation">resource</a>.
           :  {{SecurityPolicyViolationEvent/effectiveDirective}}
           :: |violation|'s <a for="violation">effective directive</a>
           :  {{SecurityPolicyViolationEvent/violatedDirective}}
@@ -1783,8 +1805,8 @@ this algorithm returns normally if compilation is allowed, and throws a
                   <a for="violation">referrer</a>, with the `exclude fragment` flag set.
 
               :   {{CSPViolationReportBody/blockedURL}}
-              ::  The result of executing the <a>URL serializer</a> on |violation|'s
-                  <a for="violation">resource</a>, with the `exclude fragment` flag set.
+              ::  The result of executing [[#obtain-violation-blocked-uri]] on |violation|'s
+                  <a for="violation">resource</a>.
 
               :   {{CSPViolationReportBody/effectiveDirective}}
               ::  |violation|'s <a for="violation">effective directive</a>.
