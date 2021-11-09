@@ -15,7 +15,6 @@ Abstract:
 Indent: 2
 Version History: https://github.com/w3c/webappsec-csp/commits/main/index.src.html
 Boilerplate: feedback-header off
-Local Boilerplate: bs-extensions yes
 !Participate: <a href="https://github.com/w3c/webappsec-csp/issues/new">File an issue</a> (<a href="https://github.com/w3c/webappsec-csp/issues">open issues</a>)
 !Tests: <a href=https://github.com/web-platform-tests/wpt/tree/master/content-security-policy>web-platform-tests content-security-policy/</a> (<a href=https://github.com/web-platform-tests/wpt/labels/content-security-policy>ongoing work</a>)
 Markup Shorthands: css off, markdown on
@@ -142,9 +141,24 @@ spec: INFRA; urlPrefix: https://infra.spec.whatwg.org/
     text: ASCII whitespace; url: ascii-whitespace
     text: INFRA; url: #
 
+spec: WebAssembly-js-api; urlPrefix: https://webassembly.github.io/spec/js-api/
+  type: method
+    text: new WebAssembly.Module(); url: #dom-module-module
+    text: WebAssembly.compile(); url: #dom-webassembly-compile
+    text: WebAssembly.instantiate(); url: #dom-webassembly-instantiate
+    text: HostEnsureCanCompileWasmBytes(); url:#dom-host-ensure-can-compile-wasm-bytes
+
+spec: WebAssembly-web-api-api; urlPrefix: https://webassembly.github.io/spec/web-api/
+  type: method
+    text: WebAssembly.compileStreaming(); url: #dom-webassembly-compilestreaming
+    text: WebAssembly.instantiateStreaming(); url: #dom-webassembly-instantiatestreaming
+  type: exception
+    text: WebAssembly.CompileError; url: #exceptiondef-compileerror
+
 spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
   type:dfn
     text: RTCPeerConnection; url: #
+
 </pre>
 <pre class="biblio">
 {
@@ -316,8 +330,6 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
       2. A `worker-src` directive has been added, deferring to `child-src`
          if not present (which likewise defers to `script-src` and
          eventually `default-src`).
-
-      3. Dedicated workers now always inherit their creator's policy.
 
   3.  The URL matching algorithm now treats insecure schemes and ports as
       matching their secure variants. That is, the source expression
@@ -674,6 +686,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     <dfn>keyword-source</dfn> = "<dfn>'self'</dfn>" / "<dfn>'unsafe-inline'</dfn>" / "<dfn>'unsafe-eval'</dfn>"
                      / "<dfn>'strict-dynamic'</dfn>" / "<dfn>'unsafe-hashes'</dfn>" /
                      / "<dfn>'report-sample'</dfn>" / "<dfn>'unsafe-allow-redirects'</dfn>"
+                     / "<dfn>'wasm-unsafe-eval'</dfn>"
 
     ISSUE: Bikeshed `unsafe-allow-redirects`.
 
@@ -725,8 +738,16 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
 
   Each <a>violation</a> has a
   <dfn for="violation" id="violation-resource" export>resource</dfn>, which is
-  either `null`, "`inline`", "`eval`", or a {{URL}}. It represents the resource
+  either `null`, "`inline`", "`eval`", "`wasm-eval`", or a {{URL}}. It represents the resource
   which violated the policy.
+
+  Note: The value `null` for a <a>violation</a>'s <a
+  for="violation">resource</a> is only allowed while the <a>violation</a> is
+  being populated. By the time the <a>violation</a> is reported and its <a
+  for="violation">resource</a> is used for
+  [[#obtain-violation-blocked-uri|obtaining the blocked URI]], the
+  <a>violation</a>'s <a for="violation">resource</a> should be populated with a
+  {{URL}} or one of the allowed strings.
 
   Each <a>violation</a> has a
   <dfn for="violation" id="violation-referrer" export>referrer</dfn>, which is either
@@ -1446,7 +1467,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
               1.  Let |violation| be the result of executing [[#create-violation-for-global]] on
                   |global|, |policy|, and "`script-src`".
 
-              2.  Set |violation|'s [=violation/resource=] to "`inline`".
+              2.  Set |violation|'s [=violation/resource=] to "`eval`".
 
               3.  If |source-list| [=list/contains=] the expression
                   "<a grammar>`'report-sample'`</a>", then set |violation|'s [=violation/sample=] to
@@ -1462,8 +1483,60 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
   ISSUE(tc39/ecma262#938): {{HostEnsureCanCompileStrings()}} does not include the string which is
   going to be compiled as a parameter. We'll also need to update HTML to pipe that value through
   to CSP.
-</section>
 
+<h3 id="wasm-integration">Integration with WebAssembly</h3>
+
+WebAssembly defines the {{HostEnsureCanCompileWasmBytes()}} abstract operation
+which allows the host environment to block the compilation of WebAssembly
+sources into executable code. This document defines an implementation of this
+abstract operation which examines the relevant <a for="global object">CSP
+list</a> to determine whether such compilation ought to be blocked.
+
+<h4 id="can-compile-wasm-bytes" algorithm dfn>
+  EnsureCSPDoesNotBlockWasmByteCompilation(|callerRealm|, |calleeRealm|)
+</h4>
+
+Given two <a>realms</a> (|callerRealm| and |calleeRealm|),
+this algorithm returns normally if compilation is allowed, and throws a 
+{{WebAssembly.CompileError}} if not:
+
+1.  Let |globals| be a list containing |callerRealm|'s [=Realm/global object=] and |calleeRealm|'s
+    [=Realm/global object=].
+
+2.  For each |global| in |globals|:
+
+    1.  Let |result| be "`Allowed`".
+
+    2.  For each |policy| in |global|'s [=global object/CSP list=]:
+
+        1.  Let |source-list| be `null`.
+
+        2.  If |policy| contains a [=directive=] whose [=directive/name=] is "`script-src`", then
+            set |source-list| to that [=directive=]'s [=directive/value=].
+
+            Otherwise if |policy| contains a [=directive=] whose [=directive/name=] is
+            "`default-src`", then set |source-list| to that directive's [=directive/value=].
+
+        3.  If |source-list| is non-`null`, and does not contain a [=source
+            expression=] which is an [=ASCII case-insensitive=] match for the
+            string "<a grammar>`'unsafe-eval'`</a>", and does not contain a
+            [=source expression=] which is an [=ASCII case-insensitive=] match
+            for the string "<a grammar>`'wasm-unsafe-eval'`</a>", then:
+
+            1.  Let |violation| be the result of executing [[#create-violation-for-global]] on
+                |global|, |policy|, and "`script-src`".
+
+            2.  Set |violation|'s [=violation/resource=] to "`wasm-eval`".
+
+            3.  Execute [[#report-violation]] on |violation|.
+
+            4.  If |policy|'s [=policy/disposition=] is "`enforce`", then set |result| to
+                "`Blocked`".
+
+    3.  If |result| is "`Blocked`", throw a {{WebAssembly.CompileError}} exception.
+
+</section>
+  
 <!-- Big Text: Reporting -->
 <section>
   <h2 id="reporting">
@@ -1509,11 +1582,9 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     [Exposed=(Window,Worker)]
     interface SecurityPolicyViolationEvent : Event {
         constructor(DOMString type, optional SecurityPolicyViolationEventInit eventInitDict = {});
-        readonly    attribute USVString      documentURL;
-        readonly    attribute USVString      documentURI; // historical alias of documentURL
+        readonly    attribute USVString      documentURI;
         readonly    attribute USVString      referrer;
-        readonly    attribute USVString      blockedURL;
-        readonly    attribute USVString      blockedURI; // historical alias of blockedURL
+        readonly    attribute USVString      blockedURI;
         readonly    attribute DOMString      effectiveDirective;
         readonly    attribute DOMString      violatedDirective; // historical alias of effectiveDirective
         readonly    attribute DOMString      originalPolicy;
@@ -1521,41 +1592,39 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
         readonly    attribute DOMString      sample;
         readonly    attribute SecurityPolicyViolationEventDisposition      disposition;
         readonly    attribute unsigned short statusCode;
-        readonly    attribute unsigned long  lineno;
-        readonly    attribute unsigned long  lineNumber; // historical alias of lineno
-        readonly    attribute unsigned long  colno;
-        readonly    attribute unsigned long  columnNumber; // historical alias of colno
+        readonly    attribute unsigned long  lineNumber;
+        readonly    attribute unsigned long  columnNumber;
     };
 
     dictionary SecurityPolicyViolationEventInit : EventInit {
-        required USVString      documentURL;
+        required USVString      documentURI;
                  USVString      referrer = "";
-                 USVString      blockedURL = "";
+                 USVString      blockedURI = "";
+        required DOMString      violatedDirective;
         required DOMString      effectiveDirective;
         required DOMString      originalPolicy;
                  USVString      sourceFile = "";
                  DOMString      sample = "";
         required SecurityPolicyViolationEventDisposition disposition;
         required unsigned short statusCode;
-                 unsigned long  lineno = 0;
-                 unsigned long  colno = 0;
+                 unsigned long  lineNumber = 0;
+                 unsigned long  columnNumber = 0;
     };
   </pre>
 
-  The <dfn for="SecurityPolicyViolationEvent" attribute export>documentURI</dfn> attribute's
-  getter must return the value of the object's {{SecurityPolicyViolationEvent/documentURL}} property.
+  <h3 id="obtain-violation-blocked-uri" algorithm>
+    Obtain the {{SecurityPolicyViolationEvent/blockedURI}} of a violation's |resource|
+  </h3>
 
-  The <dfn for="SecurityPolicyViolationEvent" attribute export>blockedURI</dfn> attribute's
-  getter must return the value of the object's {{SecurityPolicyViolationEvent/blockedURL}} property.
+  Given a violation's <a>resource</a> (|resource|), this algorithm returns a
+  [=string=], to be used as the blocked URI field for violation reports.
 
-  The <dfn for="SecurityPolicyViolationEvent" attribute export>violatedDirective</dfn> attribute's
-  getter must return the value of the object's {{SecurityPolicyViolationEvent/effectiveDirective}} property.
+  1. Assert: |resource| is a {{URL}} or a [=string=].
 
-  The <dfn for="SecurityPolicyViolationEvent" attribute export>lineNumber</dfn> attribute's
-  getter must return the value of the object's {{SecurityPolicyViolationEvent/lineno}} property.
+  2. If |resource| is a {{URL}}, return the result of executing the <a>URL
+     serializer</a> on |resource|, with the `exclude fragment` flag set.
 
-  The <dfn for="SecurityPolicyViolationEvent" attribute export>columnNumber</dfn> attribute's
-  getter must return the value of the object's {{SecurityPolicyViolationEvent/colno}} property.
+  3. Return |resource|.
 
   <h3 id="deprecated-serialize-violation">
     Obtain the deprecated serialization of |violation|
@@ -1568,23 +1637,19 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
   1.  Let |body| be a <a lt="ordered map">map</a> with its keys initialized as
       follows:
 
-      :   "`document-url`"
+      :   "`document-uri`"
       ::  The result of executing the <a>URL serializer</a> on |violation|'s
           <a for="violation">url</a>, with the `exclude fragment` flag set.
-      :   "`document-uri`"
-      ::  A copy of the "`document-url`" property, kept for historical reasons
       :   "`referrer`"
       ::  The result of executing the <a>URL serializer</a> on |violation|'s
           <a for="violation">referrer</a>, with the `exclude fragment` flag set.
-      :   "`blocked-url`"
-      ::  The result of executing the <a>URL serializer</a> on |violation|'s
-          <a for="violation">resource</a>, with the `exclude fragment` flag set.
       :   "`blocked-uri`"
-      ::  A copy of the "`blocked-url`" property, kept for historical reasons
+      ::  The result of executing [[#obtain-violation-blocked-uri]] on |violation|'s
+          <a for="violation">resource</a>.
       :   "`effective-directive`"
       ::  |violation|'s <a for="violation">effective directive</a>
       :   "`violated-directive`"
-      ::  A copy of the "`effective-directive`" property, kept for historical reasons
+      ::  |violation|'s <a for="violation">effective directive</a>
       :   "`original-policy`"
       ::  The <a lt="serialized CSP">serialization</a> of |violation|'s
           <a for="violation">policy</a>
@@ -1609,23 +1674,13 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
           the <a>URL serializer</a> on |violation|'s <a for="violation">source
           file</a>, with the `exclude fragment` flag set.
 
-      2.  Set |body|["`lineno`"] to |violation|'s
+      2.  Set |body|["`line-number`"] to |violation|'s
           <a for="violation">line number</a>.
 
-      3.  Set |body|["`line-number`"] to |violation|'s
-          <a for="violation">line number</a>.
-
-      4.  Set |body|["`colno`"] to |violation|'s
+      3.  Set |body|["`column-number`"] to |violation|'s
           <a for="violation">column number</a>.
 
-      5.  Set |body|["`column-number`"] to |violation|'s
-          <a for="violation">column number</a>.
-
-          Note: the "`line-number`" and "`column-number`" keys are
-          maintained for historical reasons and are duplicates of "`lineno`"
-          and "`colno`" respectively.
-
-  3.  Assert: If |body|["`blocked-url`"] is not "`inline`", then |body|["`sample`"]
+  3.  Assert: If |body|["`blocked-uri`"] is not "`inline`", then |body|["`sample`"]
       is the empty string.
 
   4.  Return the result of <a>serialize an infra value to JSON bytes</a> given
@@ -1672,16 +1727,18 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
           that uses the {{SecurityPolicyViolationEvent}} interface at |target| with
           its attributes initialized as follows:
 
-          :  {{SecurityPolicyViolationEvent/documentURL}}
+          :  {{SecurityPolicyViolationEvent/documentURI}}
           ::  The result of executing the <a>URL serializer</a> on |violation|'s
               <a for="violation">url</a>, with the `exclude fragment` flag set.
           :  {{SecurityPolicyViolationEvent/referrer}}
           ::  The result of executing the <a>URL serializer</a> on |violation|'s
               <a for="violation">referrer</a>, with the `exclude fragment` flag set.
-          :  {{SecurityPolicyViolationEvent/blockedURL}}
-          ::  The result of executing the <a>URL serializer</a> on |violation|'s
-              <a for="violation">resource</a>, with the `exclude fragment` flag set.
+          :  {{SecurityPolicyViolationEvent/blockedURI}}
+          ::  The result of executing [[#obtain-violation-blocked-uri]] on |violation|'s
+              <a for="violation">resource</a>.
           :  {{SecurityPolicyViolationEvent/effectiveDirective}}
+          :: |violation|'s <a for="violation">effective directive</a>
+          :  {{SecurityPolicyViolationEvent/violatedDirective}}
           :: |violation|'s <a for="violation">effective directive</a>
           :  {{SecurityPolicyViolationEvent/originalPolicy}}
           ::  The <a lt="serialized CSP">serialization</a> of |violation|'s
@@ -1695,9 +1752,9 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
              it not `null` and the empty string otherwise.
           :  {{SecurityPolicyViolationEvent/statusCode}}
           :: |violation|'s <a for="violation">status</a>
-          :  {{SecurityPolicyViolationEvent/lineno}}
+          :  {{SecurityPolicyViolationEvent/lineNumber}}
           :: |violation|'s <a for="violation">line number</a>
-          :  {{SecurityPolicyViolationEvent/colno}}
+          :  {{SecurityPolicyViolationEvent/columnNumber}}
           :: |violation|'s <a for="violation">column number</a>
           :  {{SecurityPolicyViolationEvent/sample}}
           :: |violation|'s <a for="violation">sample</a>
@@ -1710,6 +1767,10 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
           can be captured on its way into, and will bubble its way out of a shadow
           tree. {{Event/target}}, et al will be automagically scoped correctly for
           the main tree.
+
+          Note: Both {{SecurityPolicyViolationEvent/effectiveDirective}} and
+          {{SecurityPolicyViolationEvent/violatedDirective}} are the same value.
+          This is intentional to maintain backwards compatibility.
 
       4.  If |violation|'s <a for="violation">policy</a>'s <a for="policy">directive
           set</a> contains a <a>directive</a> named "<a>`report-uri`</a>"
@@ -1788,8 +1849,8 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
                   <a for="violation">referrer</a>, with the `exclude fragment` flag set.
 
               :   {{CSPViolationReportBody/blockedURL}}
-              ::  The result of executing the <a>URL serializer</a> on |violation|'s
-                  <a for="violation">resource</a>, with the `exclude fragment` flag set.
+              ::  The result of executing [[#obtain-violation-blocked-uri]] on |violation|'s
+                  <a for="violation">resource</a>.
 
               :   {{CSPViolationReportBody/effectiveDirective}}
               ::  |violation|'s <a for="violation">effective directive</a>.
@@ -2727,7 +2788,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
   as in most situations there is no particular reason to have separate lists of
   permissions for inline event handlers and <{script}> elements.
 
-  The `script-src` directive governs five things:
+  The `script-src` directive governs six things:
 
   1.  Script <a for="/">requests</a> MUST pass through [[#should-block-request]].
 
@@ -2754,7 +2815,23 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
       and <a>`script-src-elem`</a> are not used when performing this check, instead
       `script-src` (or it's fallback directive) is always used.
 
-  5.  Navigation to `javascript:` URLs MUST pass through [[#script-src-inline]].
+  5. The following WebAssembly execution sinks are gated on the
+     "`wasm-unsafe-eval`" or the "`unsafe-eval`" source expressions:
+
+     *    {{new WebAssembly.Module()}}
+     *    {{WebAssembly.compile()}}
+     *    {{WebAssembly.compileStreaming()}}
+     *    {{WebAssembly.instantiate()}}
+     *    {{WebAssembly.instantiateStreaming()}}
+
+     Note: the "`wasm-unsafe-eval`" source expression is the more specific
+     source expression. In particular, "`unsafe-eval`" permits both compilation
+     (and instantiation) of WebAssembly and, for example, the use of the "`eval`" operation in
+     JavaScript. The "`wasm-unsafe-eval`" source expression only permits
+     WebAssembly and does not affect JavaScript.
+
+  6.  Navigation to `javascript:` URLs MUST pass through [[#should-block-inline]]. Such navigations
+      will only execute script if every policy allows inline script, as per #3 above.
 
   <h5 algorithm id="script-src-pre-request">
     `script-src` Pre-request check
@@ -3475,7 +3552,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
   `frame-ancestors` directive's <a>navigation response check</a>:
 
   <ol class="algorithm">
-    1.  If |navigation response|'s [=response/URL=] [=is local=], return "`Allowed`".
+    1.  If |navigation response|'s [=response/URL=] [=is local=], return "`Allowed`". 
 
     2.  Assert: |request|, |navigation response|, and |navigation type|, are unused
         from this point forward in this algorithm, as `frame-ancestors` is concerned only
@@ -4833,7 +4910,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     Suppose MegaCorp, Inc. deploys the following policy:
 
     <pre>
-      <a http-header>Content-Security-Policy</a>: <a>script-src</a> 'nonce-DhcnhD3khTMePgXwdayK9BsMqXjhguV' <a grammar>'strict-dynamic'</a>
+      <a http-header>Content-Security-Policy</a>: <a>script-src</a> 'nonce-DhcnhD3khTMePgXwdayK9BsMqXjhguVV' <a grammar>'strict-dynamic'</a>
     </pre>
 
     And serves the following HTML with that policy active:
@@ -4897,7 +4974,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
       </pre>
 
       Rather than reducing security by specifying "`'unsafe-inline'`", they decide to use
-      "`'unsafe-hashes'`" along with a hash source expression, as follows:
+      "`'unsafe-hashes'`" along with a hash source expression corresponding to `doSubmit()`, as follows:
 
       <pre>
         <a http-header>Content-Security-Policy</a>:  <a>script-src</a> <a grammar>'unsafe-hashes'</a> 'sha256-jzgBGA4UWFFmpOBq0JpdsySukE1FrEN5bUpoK8Z29fY='
