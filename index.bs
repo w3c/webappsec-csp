@@ -1577,8 +1577,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   1. Assert: |resource| is a {{URL}} or a [=string=].
 
-  2. If |resource| is a {{URL}}, return the result of executing the <a>URL
-     serializer</a> on |resource|, with the `exclude fragment` flag set.
+  2. If |resource| is a {{URL}}, return the result of executing [[#strip-url-for-use-in-reports]] on
+     |resource|.
 
   3. Return |resource|.
 
@@ -1594,11 +1594,11 @@ this algorithm returns normally if compilation is allowed, and throws a
       follows:
 
       :   "`document-uri`"
-      ::  The result of executing the <a>URL serializer</a> on |violation|'s
-          <a for="violation">url</a>, with the `exclude fragment` flag set.
+      ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+          <a for="violation">url</a>.
       :   "`referrer`"
-      ::  The result of executing the <a>URL serializer</a> on |violation|'s
-          <a for="violation">referrer</a>, with the `exclude fragment` flag set.
+      ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+          <a for="violation">referrer</a>.
       :   "`blocked-uri`"
       ::  The result of executing [[#obtain-violation-blocked-uri]] on |violation|'s
           <a for="violation">resource</a>.
@@ -1626,9 +1626,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   2.  If |violation|'s <a for="violation">source file</a> is not `null`:
 
-      1.  Set |body|["`source-file`"] to the result of executing
-          the <a>URL serializer</a> on |violation|'s <a for="violation">source
-          file</a>, with the `exclude fragment` flag set.
+      1.  Set |body|["`source-file`'] to the result of executing [[#strip-url-for-use-in-reports]]
+          on |violation|'s <a for="violation">source file</a>.
 
       2.  Set |body|["`line-number`"] to |violation|'s
           <a for="violation">line number</a>.
@@ -1641,6 +1640,31 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   4.  Return the result of <a>serialize an infra value to JSON bytes</a> given
       «[ "csp-report" → body ]».
+
+  <h3 id="strip-url-for-use-in-reports" algorithm>Strip URL for use in reports</h3>
+  Given a {{URL}} (|url|), this algorithm returns a string representing the URL for use in violation
+  reports:
+
+  1. If |url| is null, return the empty string.
+
+  2. If |url| is not a valid {{URL}}, return the empty string;
+
+  3. If |url|'s <a for="url">scheme</a> is 'file', return 'file';
+
+     Note: file: URLs leak interesting information through pathnames, like the user's local username
+     and their download folder. They aren't included in reports.
+
+  4. If |url|'s <a for="url">scheme</a> is 'data', return 'data';
+
+     Note: data URLs can be huge. They aren't included in reports.
+
+  5. Set |url|’s <a for="url">fragment</a> to the empty string.
+
+  6. Set |url|’s <a for="url">username</a> to the empty string.
+
+  7. Set |url|’s <a for="url">password</a> to the empty string.
+
+  8. Return the result of executing the <a>URL serializer</a> on |url|.
 
   <h3 id="report-violation" algorithm>
     Report a |violation|
@@ -1684,11 +1708,11 @@ this algorithm returns normally if compilation is allowed, and throws a
           its attributes initialized as follows:
 
           :  {{SecurityPolicyViolationEvent/documentURI}}
-          ::  The result of executing the <a>URL serializer</a> on |violation|'s
-              <a for="violation">url</a>, with the `exclude fragment` flag set.
+          ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+              <a for="violation">url</a>.
           :  {{SecurityPolicyViolationEvent/referrer}}
-          ::  The result of executing the <a>URL serializer</a> on |violation|'s
-              <a for="violation">referrer</a>, with the `exclude fragment` flag set.
+          ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+              <a for="violation">referrer</a>.
           :  {{SecurityPolicyViolationEvent/blockedURI}}
           ::  The result of executing [[#obtain-violation-blocked-uri]] on |violation|'s
               <a for="violation">resource</a>.
@@ -1702,10 +1726,8 @@ this algorithm returns normally if compilation is allowed, and throws a
           :  {{SecurityPolicyViolationEvent/disposition}}
           :: |violation|'s <a for="violation">disposition</a>
           :  {{SecurityPolicyViolationEvent/sourceFile}}
-          :: The result of executing the <a>URL serializer</a> on |violation|'s
-             <a for="violation">source file</a>, with the `exclude fragment`
-             flag set if the |violation|'s <a for="violation">source file</a>
-             it not `null` and the empty string otherwise.
+          ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+              <a for="violation">source file</a>.
           :  {{SecurityPolicyViolationEvent/statusCode}}
           :: |violation|'s <a for="violation">status</a>
           :  {{SecurityPolicyViolationEvent/lineNumber}}
@@ -1797,12 +1819,12 @@ this algorithm returns normally if compilation is allowed, and throws a
               follows:
 
               :   {{CSPViolationReportBody/documentURL}}
-              ::  The result of executing the <a>URL serializer</a> on |violation|'s
-                  <a for="violation">url</a>, with the `exclude fragment` flag set.
+              ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+                  <a for="violation">url</a>.
 
               :   {{CSPViolationReportBody/referrer}}
-              ::  The result of executing the <a>URL serializer</a> on |violation|'s
-                  <a for="violation">referrer</a>, with the `exclude fragment` flag set.
+              ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+                  <a for="violation">referrer</a>.
 
               :   {{CSPViolationReportBody/blockedURL}}
               ::  The result of executing [[#obtain-violation-blocked-uri]] on |violation|'s
@@ -1816,11 +1838,8 @@ this algorithm returns normally if compilation is allowed, and throws a
                   <a for="violation">policy</a>.
 
               :   {{CSPViolationReportBody/sourceFile}}
-              ::  The result of executing the <a>URL serializer</a> on
-                  |violation|'s <a for="violation">source file</a>, with the
-                  `exclude fragment` flag set, if |violation|'s
-                  <a for="violation">source file</a> is not null, or null
-                  otherwise.
+              ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+                  <a for="violation">source file</a>.
 
               :   {{CSPViolationReportBody/sample}}
               ::  |violation|'s <a for="violation">sample</a>.
