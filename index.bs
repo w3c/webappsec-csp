@@ -1575,9 +1575,9 @@ this algorithm returns normally if compilation is allowed, and throws a
   Given a violation's <a>resource</a> (|resource|), this algorithm returns a
   [=string=], to be used as the blocked URI field for violation reports.
 
-  1. Assert: |resource| is a {{URL}} or a [=string=].
+  1. Assert: |resource| is a [=/URL=] or a [=string=].
 
-  2. If |resource| is a {{URL}}, return the result of executing [[#strip-url-for-use-in-reports]] on
+  2. If |resource| is a [=/URL=], return the result of executing [[#strip-url-for-use-in-reports]] on
      |resource|.
 
   3. Return |resource|.
@@ -1642,17 +1642,19 @@ this algorithm returns normally if compilation is allowed, and throws a
       «[ "csp-report" → body ]».
 
   <h3 id="strip-url-for-use-in-reports" algorithm>Strip URL for use in reports</h3>
-  Given a {{URL}} (|url|), this algorithm returns a string representing the URL for use in violation
+  Given a [=/URL=]} (|url|), this algorithm returns a string representing the URL for use in violation
   reports:
 
   1. If |url|'s <a for="url">scheme</a> is "`file`", return "`file`";
 
-     Note: file: URLs leak interesting information through pathnames, like the user's local username
-     and their download folder. They aren't included in reports.
+     Note: As of 2021, we are not entirely sure why this is done. Some argue that file: URLs leak
+     interesting information through pathnames, like the user's local username and their download
+     folder. However, those are "pre-redirect" URLs, so the document already has access to this
+     information.
 
-  2. If |url|'s <a for="url">scheme</a> is "`file`", return "`file`";
+  2. If |url|'s <a for="url">scheme</a> is "`data`", return "`data`";
 
-     Note: data URLs can be huge. They aren't included in reports.
+     Note: data: URLs can be huge. They aren't included in reports.
 
   3. Set |url|’s <a for="url">fragment</a> to the empty string.
 
