@@ -1645,26 +1645,22 @@ this algorithm returns normally if compilation is allowed, and throws a
   Given a {{URL}} (|url|), this algorithm returns a string representing the URL for use in violation
   reports:
 
-  1. If |url| is null, return the empty string.
-
-  2. If |url| is not a valid {{URL}}, return the empty string;
-
-  3. If |url|'s <a for="url">scheme</a> is "`file`", return "`file`";
+  1. If |url|'s <a for="url">scheme</a> is "`file`", return "`file`";
 
      Note: file: URLs leak interesting information through pathnames, like the user's local username
      and their download folder. They aren't included in reports.
 
-  4. If |url|'s <a for="url">scheme</a> is "`file`", return "`file`";
+  2. If |url|'s <a for="url">scheme</a> is "`file`", return "`file`";
 
      Note: data URLs can be huge. They aren't included in reports.
 
-  5. Set |url|’s <a for="url">fragment</a> to the empty string.
+  3. Set |url|’s <a for="url">fragment</a> to the empty string.
 
-  6. Set |url|’s <a for="url">username</a> to the empty string.
+  4. Set |url|’s <a for="url">username</a> to the empty string.
 
-  7. Set |url|’s <a for="url">password</a> to the empty string.
+  5. Set |url|’s <a for="url">password</a> to the empty string.
 
-  8. Return the result of executing the <a>URL serializer</a> on |url|.
+  6. Return the result of executing the <a>URL serializer</a> on |url|.
 
   <h3 id="report-violation" algorithm>
     Report a |violation|
@@ -1727,7 +1723,8 @@ this algorithm returns normally if compilation is allowed, and throws a
           :: |violation|'s <a for="violation">disposition</a>
           :  {{SecurityPolicyViolationEvent/sourceFile}}
           ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
-              <a for="violation">source file</a>.
+              <a for="violation">source file</a>, if |violation|'s
+              <a for="violation">source file</a> is not null, or null otherwise.
           :  {{SecurityPolicyViolationEvent/statusCode}}
           :: |violation|'s <a for="violation">status</a>
           :  {{SecurityPolicyViolationEvent/lineNumber}}
@@ -1839,7 +1836,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
               :   {{CSPViolationReportBody/sourceFile}}
               ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
-                  <a for="violation">source file</a>.
+                  <a for="violation">source file</a>, if |violation|'s
+                  <a for="violation">source file</a> is not null, or null otherwise.
 
               :   {{CSPViolationReportBody/sample}}
               ::  |violation|'s <a for="violation">sample</a>.
