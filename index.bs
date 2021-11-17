@@ -1645,24 +1645,20 @@ this algorithm returns normally if compilation is allowed, and throws a
   Given a [=/URL=] (|url|), this algorithm returns a string representing the URL for use in violation
   reports:
 
-  1. If |url|'s <a for="url">scheme</a> is "`file`", return "`file`";
+  1. Return |url|'s <a for="url">scheme</a>, if it is not one of:
+     - "`http`"
+     - "`https`"
+     - "`ftp`"
+     - "`ws`"
+     - "`wss`"
 
-     Note: As of 2021, we are not entirely sure why this is done. Some argue that file: URLs leak
-     interesting information through pathnames, like the user's local username and their download
-     folder. However, those are "pre-redirect" URLs, so the document already has access to this
-     information.
+  2. Set |url|’s <a for="url">fragment</a> to the empty string.
 
-  2. If |url|'s <a for="url">scheme</a> is "`data`", return "`data`";
+  3. Set |url|’s <a for="url">username</a> to the empty string.
 
-     Note: data: URLs can be huge. They aren't included in reports.
+  4. Set |url|’s <a for="url">password</a> to the empty string.
 
-  3. Set |url|’s <a for="url">fragment</a> to the empty string.
-
-  4. Set |url|’s <a for="url">username</a> to the empty string.
-
-  5. Set |url|’s <a for="url">password</a> to the empty string.
-
-  6. Return the result of executing the <a>URL serializer</a> on |url|.
+  5. Return the result of executing the <a>URL serializer</a> on |url|.
 
   <h3 id="report-violation" algorithm>
     Report a |violation|
