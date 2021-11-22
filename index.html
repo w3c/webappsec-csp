@@ -7,7 +7,7 @@
   <link href="https://www.w3.org/StyleSheets/TR/2021/W3C-WD" rel="stylesheet" type="text/css">
   <meta content="Bikeshed version bbc364800, updated Mon Nov 15 13:57:55 2021 -0800" name="generator">
   <link href="https://www.w3.org/TR/CSP3/" rel="canonical">
-  <meta content="8e6b7634962126d3ca5da172dbb2dba89b1a2ec5" name="document-revision">
+  <meta content="aa6955e6b13c7790dabe31eba8b3850e8a07ee53" name="document-revision">
 <style>
   ul.toc ul ul ul {
     margin: 0 0 0 2em;
@@ -323,13 +323,13 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2021/logos/W3C" width="72"> </a> </p>
    <h1>Content Security Policy Level 3</h1>
-   <p id="w3c-state"><a href="https://www.w3.org/standards/types#WD">W3C Working Draft</a>, <time class="dt-updated" datetime="2021-11-19">19 November 2021</time></p>
+   <p id="w3c-state"><a href="https://www.w3.org/standards/types#WD">W3C Working Draft</a>, <time class="dt-updated" datetime="2021-11-22">22 November 2021</time></p>
    <details open>
     <summary>More details about this document</summary>
     <div data-fill-with="spec-metadata">
      <dl>
       <dt>This version:
-      <dd><a class="u-url" href="https://www.w3.org/TR/2021/WD-CSP3-20211119/">https://www.w3.org/TR/2021/WD-CSP3-20211119/</a>
+      <dd><a class="u-url" href="https://www.w3.org/TR/2021/WD-CSP3-20211122/">https://www.w3.org/TR/2021/WD-CSP3-20211122/</a>
       <dt>Latest published version:
       <dd><a href="https://www.w3.org/TR/CSP3/">https://www.w3.org/TR/CSP3/</a>
       <dt>Editor's Draft:
@@ -475,7 +475,8 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
       <li><a href="#violation-events"><span class="secno">5.1</span> <span class="content"> Violation DOM Events </span></a>
       <li><a href="#obtain-violation-blocked-uri"><span class="secno">5.2</span> <span class="content"> Obtain the <code class="idl"><span>blockedURI</span></code> of a violation’s <var>resource</var> </span></a>
       <li><a href="#deprecated-serialize-violation"><span class="secno">5.3</span> <span class="content"> Obtain the deprecated serialization of <var>violation</var> </span></a>
-      <li><a href="#report-violation"><span class="secno">5.4</span> <span class="content"> Report a <var>violation</var> </span></a>
+      <li><a href="#strip-url-for-use-in-reports"><span class="secno">5.4</span> <span class="content">Strip URL for use in reports</span></a>
+      <li><a href="#report-violation"><span class="secno">5.5</span> <span class="content"> Report a <var>violation</var> </span></a>
      </ol>
     <li>
      <a href="#csp-directives"><span class="secno">6</span> <span class="content"> Content Security Policy Directives </span></a>
@@ -1283,7 +1284,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
        <li data-md>
         <p>Let <var>violates</var> be the result of executing <a href="#does-request-violate-policy">§ 6.6.2.1 Does request violate policy?</a> on <var>request</var> and <var>policy</var>.</p>
        <li data-md>
-        <p>If <var>violates</var> is not "<code>Does Not Violate</code>", then execute <a href="#report-violation">§ 5.4 Report a violation</a> on the result of executing <a href="#create-violation-for-request">§ 2.4.2 Create a violation object for request, and policy.</a> on <var>request</var>, and <var>policy</var>.</p>
+        <p>If <var>violates</var> is not "<code>Does Not Violate</code>", then execute <a href="#report-violation">§ 5.5 Report a violation</a> on the result of executing <a href="#create-violation-for-request">§ 2.4.2 Create a violation object for request, and policy.</a> on <var>request</var>, and <var>policy</var>.</p>
       </ol>
     </ol>
     <h4 class="heading settled dfn-paneled algorithm" data-algorithm="Should request be blocked by Content Security Policy?" data-dfn-type="dfn" data-export data-level="4.1.2" data-lt="Should request be blocked by Content Security Policy?" id="should-block-request"><span class="secno">4.1.2. </span><span class="content"> Should <var>request</var> be blocked by Content Security Policy? </span><a class="self-link" href="#should-block-request" id="ref-for-should-block-request②"></a></h4>
@@ -1306,7 +1307,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
         <p>If <var>violates</var> is not "<code>Does Not Violate</code>", then:</p>
         <ol>
          <li data-md>
-          <p>Execute <a href="#report-violation">§ 5.4 Report a violation</a> on the result of executing <a href="#create-violation-for-request">§ 2.4.2 Create a violation object for request, and policy.</a> on <var>request</var>, and <var>policy</var>.</p>
+          <p>Execute <a href="#report-violation">§ 5.5 Report a violation</a> on the result of executing <a href="#create-violation-for-request">§ 2.4.2 Create a violation object for request, and policy.</a> on <var>request</var>, and <var>policy</var>.</p>
          <li data-md>
           <p>Set <var>result</var> to "<code>Blocked</code>".</p>
         </ol>
@@ -1332,7 +1333,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
           <p>If the result of executing <var>directive</var>’s <a data-link-type="dfn" href="#directive-post-request-check" id="ref-for-directive-post-request-check①">post-request check</a> is "<code>Blocked</code>", then:</p>
           <ol>
            <li data-md>
-            <p>Execute <a href="#report-violation">§ 5.4 Report a violation</a> on the result of executing <a href="#create-violation-for-request">§ 2.4.2 Create a violation object for request, and policy.</a> on <var>request</var>, and <var>policy</var>.</p>
+            <p>Execute <a href="#report-violation">§ 5.5 Report a violation</a> on the result of executing <a href="#create-violation-for-request">§ 2.4.2 Create a violation object for request, and policy.</a> on <var>request</var>, and <var>policy</var>.</p>
            <li data-md>
             <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition⑨">disposition</a> is "<code>enforce</code>",
   then set <var>result</var> to "<code>Blocked</code>".</p>
@@ -1453,7 +1454,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
   expression "<a data-link-type="grammar" href="#grammardef-report-sample" id="ref-for-grammardef-report-sample①"><code>'report-sample'</code></a>", then set <var>violation</var>’s <a data-link-type="dfn" href="#violation-sample" id="ref-for-violation-sample②">sample</a> to the substring of <var>source</var> containing its first 40
   characters.</p>
          <li data-md>
-          <p>Execute <a href="#report-violation">§ 5.4 Report a violation</a> on <var>violation</var>.</p>
+          <p>Execute <a href="#report-violation">§ 5.5 Report a violation</a> on <var>violation</var>.</p>
          <li data-md>
           <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①⓪">disposition</a> is "<code>enforce</code>", then
   set <var>result</var> to "<code>Blocked</code>".</p>
@@ -1485,7 +1486,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
           <p>Set <var>violation</var>’s <a data-link-type="dfn" href="#violation-resource" id="ref-for-violation-resource⑥">resource</a> to <var>navigation
   request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url" id="ref-for-concept-request-url②">URL</a>.</p>
          <li data-md>
-          <p>Execute <a href="#report-violation">§ 5.4 Report a violation</a> on <var>violation</var>.</p>
+          <p>Execute <a href="#report-violation">§ 5.5 Report a violation</a> on <var>violation</var>.</p>
          <li data-md>
           <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①①">disposition</a> is "<code>enforce</code>", then
   set <var>result</var> to "<code>Blocked</code>".</p>
@@ -1512,7 +1513,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
             <p>Set <var>violation</var>’s <a data-link-type="dfn" href="#violation-resource" id="ref-for-violation-resource⑦">resource</a> to <var>navigation
   request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url" id="ref-for-concept-request-url③">URL</a>.</p>
            <li data-md>
-            <p>Execute <a href="#report-violation">§ 5.4 Report a violation</a> on <var>violation</var>.</p>
+            <p>Execute <a href="#report-violation">§ 5.5 Report a violation</a> on <var>violation</var>.</p>
            <li data-md>
             <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①②">disposition</a> is "<code>enforce</code>", then
   set <var>result</var> to "<code>Blocked</code>".</p>
@@ -1549,7 +1550,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
           <p>Set <var>violation</var>’s <a data-link-type="dfn" href="#violation-resource" id="ref-for-violation-resource⑧">resource</a> to <var>navigation
   response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url" id="ref-for-concept-response-url①">URL</a>.</p>
          <li data-md>
-          <p>Execute <a href="#report-violation">§ 5.4 Report a violation</a> on <var>violation</var>.</p>
+          <p>Execute <a href="#report-violation">§ 5.5 Report a violation</a> on <var>violation</var>.</p>
          <li data-md>
           <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①③">disposition</a> is "<code>enforce</code>", then
   set <var>result</var> to "<code>Blocked</code>".</p>
@@ -1571,7 +1572,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
           <p>Set <var>violation</var>’s <a data-link-type="dfn" href="#violation-resource" id="ref-for-violation-resource⑨">resource</a> to <var>navigation
   request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-url" id="ref-for-concept-request-url④">URL</a>.</p>
          <li data-md>
-          <p>Execute <a href="#report-violation">§ 5.4 Report a violation</a> on <var>violation</var>.</p>
+          <p>Execute <a href="#report-violation">§ 5.5 Report a violation</a> on <var>violation</var>.</p>
          <li data-md>
           <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①④">disposition</a> is "<code>enforce</code>", then
   set <var>result</var> to "<code>Blocked</code>".</p>
@@ -1641,7 +1642,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
   "<a data-link-type="grammar" href="#grammardef-report-sample" id="ref-for-grammardef-report-sample②"><code>'report-sample'</code></a>", then set <var>violation</var>’s <a data-link-type="dfn" href="#violation-sample" id="ref-for-violation-sample③">sample</a> to
   the substring of <var>source</var> containing its first 40 characters.</p>
            <li data-md>
-            <p>Execute <a href="#report-violation">§ 5.4 Report a violation</a> on <var>violation</var>.</p>
+            <p>Execute <a href="#report-violation">§ 5.5 Report a violation</a> on <var>violation</var>.</p>
            <li data-md>
             <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①⑤">disposition</a> is "<code>enforce</code>", then set <var>result</var> to
   "<code>Blocked</code>".</p>
@@ -1692,7 +1693,7 @@ this algorithm returns normally if compilation is allowed, and throws a <code cl
            <li data-md>
             <p>Set <var>violation</var>’s <a data-link-type="dfn" href="#violation-resource" id="ref-for-violation-resource①①">resource</a> to "<code>wasm-eval</code>".</p>
            <li data-md>
-            <p>Execute <a href="#report-violation">§ 5.4 Report a violation</a> on <var>violation</var>.</p>
+            <p>Execute <a href="#report-violation">§ 5.5 Report a violation</a> on <var>violation</var>.</p>
            <li data-md>
             <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①⑥">disposition</a> is "<code>enforce</code>", then set <var>result</var> to
   "<code>Blocked</code>".</p>
@@ -1766,10 +1767,9 @@ this algorithm returns normally if compilation is allowed, and throws a <code cl
     <p>Given a violation’s <a data-link-type="dfn" href="#violation-resource" id="ref-for-violation-resource①②">resource</a> (<var>resource</var>), this algorithm returns a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string⑦">string</a>, to be used as the blocked URI field for violation reports.</p>
     <ol>
      <li data-md>
-      <p class="assertion">Assert: <var>resource</var> is a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url⑤">URL</a></code> or a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string⑧">string</a>.</p>
+      <p class="assertion">Assert: <var>resource</var> is a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url">URL</a> or a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string⑧">string</a>.</p>
      <li data-md>
-      <p>If <var>resource</var> is a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url⑥">URL</a></code>, return the result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer">URL
- serializer</a> on <var>resource</var>, with the <code>exclude fragment</code> flag set.</p>
+      <p>If <var>resource</var> is a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url①">URL</a>, return the result of executing <a href="#strip-url-for-use-in-reports">§ 5.4 Strip URL for use in reports</a> on <var>resource</var>.</p>
      <li data-md>
       <p>Return <var>resource</var>.</p>
     </ol>
@@ -1784,10 +1784,10 @@ this algorithm returns normally if compilation is allowed, and throws a <code cl
       <dl>
        <dt data-md>"<code>document-uri</code>"
        <dd data-md>
-        <p>The result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer①">URL serializer</a> on <var>violation</var>’s <a data-link-type="dfn" href="#violation-url" id="ref-for-violation-url">url</a>, with the <code>exclude fragment</code> flag set.</p>
+        <p>The result of executing <a href="#strip-url-for-use-in-reports">§ 5.4 Strip URL for use in reports</a> on <var>violation</var>’s <a data-link-type="dfn" href="#violation-url" id="ref-for-violation-url">url</a>.</p>
        <dt data-md>"<code>referrer</code>"
        <dd data-md>
-        <p>The result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer②">URL serializer</a> on <var>violation</var>’s <a data-link-type="dfn" href="#violation-referrer" id="ref-for-violation-referrer①">referrer</a>, with the <code>exclude fragment</code> flag set.</p>
+        <p>The result of executing <a href="#strip-url-for-use-in-reports">§ 5.4 Strip URL for use in reports</a> on <var>violation</var>’s <a data-link-type="dfn" href="#violation-referrer" id="ref-for-violation-referrer①">referrer</a>.</p>
        <dt data-md>"<code>blocked-uri</code>"
        <dd data-md>
         <p>The result of executing <a href="#obtain-violation-blocked-uri">§ 5.2 Obtain the blockedURI of a violation’s resource</a> on <var>violation</var>’s <a data-link-type="dfn" href="#violation-resource" id="ref-for-violation-resource①③">resource</a>.</p>
@@ -1819,9 +1819,7 @@ this algorithm returns normally if compilation is allowed, and throws a <code cl
       <p>If <var>violation</var>’s <a data-link-type="dfn" href="#violation-source-file" id="ref-for-violation-source-file②">source file</a> is not <code>null</code>:</p>
       <ol>
        <li data-md>
-        <p>Set <var>body</var>["<code>source-file</code>"] to the result of executing
-  the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer③">URL serializer</a> on <var>violation</var>’s <a data-link-type="dfn" href="#violation-source-file" id="ref-for-violation-source-file③">source
-  file</a>, with the <code>exclude fragment</code> flag set.</p>
+        <p>Set <var>body</var>["<code>source-file</code>'] to the result of executing <a href="#strip-url-for-use-in-reports">§ 5.4 Strip URL for use in reports</a> on <var>violation</var>’s <a data-link-type="dfn" href="#violation-source-file" id="ref-for-violation-source-file③">source file</a>.</p>
        <li data-md>
         <p>Set <var>body</var>["<code>line-number</code>"] to <var>violation</var>’s <a data-link-type="dfn" href="#violation-line-number" id="ref-for-violation-line-number①">line number</a>.</p>
        <li data-md>
@@ -1834,7 +1832,23 @@ this algorithm returns normally if compilation is allowed, and throws a <code cl
       <p>Return the result of <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#serialize-an-infra-value-to-json-bytes" id="ref-for-serialize-an-infra-value-to-json-bytes">serialize an infra value to JSON bytes</a> given
   «[ "csp-report" → body ]».</p>
     </ol>
-    <h3 class="heading settled algorithm" data-algorithm="Report a violation" data-level="5.4" id="report-violation"><span class="secno">5.4. </span><span class="content"> Report a <var>violation</var> </span><a class="self-link" href="#report-violation"></a></h3>
+    <h3 class="heading settled algorithm" data-algorithm="Strip URL for use in reports" data-level="5.4" id="strip-url-for-use-in-reports"><span class="secno">5.4. </span><span class="content">Strip URL for use in reports</span><a class="self-link" href="#strip-url-for-use-in-reports"></a></h3>
+     Given a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url" id="ref-for-concept-url②">URL</a> (<var>url</var>), this algorithm returns a string representing the URL for use in violation
+  reports: 
+    <ol>
+     <li data-md>
+      <p>If <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme①">scheme</a> is not an <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-scheme" id="ref-for-http-scheme②">HTTP(S) scheme</a>,
+ then return <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme②">scheme</a>.</p>
+     <li data-md>
+      <p>Set <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-fragment" id="ref-for-concept-url-fragment">fragment</a> to the empty string.</p>
+     <li data-md>
+      <p>Set <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-username" id="ref-for-concept-url-username">username</a> to the empty string.</p>
+     <li data-md>
+      <p>Set <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-password" id="ref-for-concept-url-password">password</a> to the empty string.</p>
+     <li data-md>
+      <p>Return the result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer">URL serializer</a> on <var>url</var>.</p>
+    </ol>
+    <h3 class="heading settled algorithm" data-algorithm="Report a violation" data-level="5.5" id="report-violation"><span class="secno">5.5. </span><span class="content"> Report a <var>violation</var> </span><a class="self-link" href="#report-violation"></a></h3>
     <p>Given a <a data-link-type="dfn" href="#violation" id="ref-for-violation②②">violation</a> (<var>violation</var>), this algorithm reports it to the endpoint specified in <var>violation</var>’s <a data-link-type="dfn" href="#violation-policy" id="ref-for-violation-policy③">policy</a>, and fires a <code class="idl"><a data-link-type="idl" href="#securitypolicyviolationevent" id="ref-for-securitypolicyviolationevent①">SecurityPolicyViolationEvent</a></code> at <var>violation</var>’s <a data-link-type="dfn" href="#violation-element" id="ref-for-violation-element①">element</a>, or at <var>violation</var>’s <a data-link-type="dfn" href="#violation-global-object" id="ref-for-violation-global-object③">global object</a> as described below:</p>
     <ol>
      <li data-md>
@@ -1868,10 +1882,10 @@ this algorithm returns normally if compilation is allowed, and throws a <code cl
         <dl>
          <dt data-md><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-documenturi" id="ref-for-dom-securitypolicyviolationevent-documenturi">documentURI</a></code>
          <dd data-md>
-          <p>The result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer④">URL serializer</a> on <var>violation</var>’s <a data-link-type="dfn" href="#violation-url" id="ref-for-violation-url①">url</a>, with the <code>exclude fragment</code> flag set.</p>
+          <p>The result of executing <a href="#strip-url-for-use-in-reports">§ 5.4 Strip URL for use in reports</a> on <var>violation</var>’s <a data-link-type="dfn" href="#violation-url" id="ref-for-violation-url①">url</a>.</p>
          <dt data-md><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-referrer" id="ref-for-dom-securitypolicyviolationevent-referrer">referrer</a></code>
          <dd data-md>
-          <p>The result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer⑤">URL serializer</a> on <var>violation</var>’s <a data-link-type="dfn" href="#violation-referrer" id="ref-for-violation-referrer②">referrer</a>, with the <code>exclude fragment</code> flag set.</p>
+          <p>The result of executing <a href="#strip-url-for-use-in-reports">§ 5.4 Strip URL for use in reports</a> on <var>violation</var>’s <a data-link-type="dfn" href="#violation-referrer" id="ref-for-violation-referrer②">referrer</a>.</p>
          <dt data-md><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-blockeduri" id="ref-for-dom-securitypolicyviolationevent-blockeduri①">blockedURI</a></code>
          <dd data-md>
           <p>The result of executing <a href="#obtain-violation-blocked-uri">§ 5.2 Obtain the blockedURI of a violation’s resource</a> on <var>violation</var>’s <a data-link-type="dfn" href="#violation-resource" id="ref-for-violation-resource①④">resource</a>.</p>
@@ -1889,7 +1903,7 @@ this algorithm returns normally if compilation is allowed, and throws a <code cl
           <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-disposition" id="ref-for-violation-disposition">disposition</a></p>
          <dt data-md><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-sourcefile" id="ref-for-dom-securitypolicyviolationevent-sourcefile">sourceFile</a></code>
          <dd data-md>
-          <p>The result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer⑥">URL serializer</a> on <var>violation</var>’s <a data-link-type="dfn" href="#violation-source-file" id="ref-for-violation-source-file④">source file</a>, with the <code>exclude fragment</code> flag set if the <var>violation</var>’s <a data-link-type="dfn" href="#violation-source-file" id="ref-for-violation-source-file⑤">source file</a> it not <code>null</code> and the empty string otherwise.</p>
+          <p>The result of executing <a href="#strip-url-for-use-in-reports">§ 5.4 Strip URL for use in reports</a> on <var>violation</var>’s <a data-link-type="dfn" href="#violation-source-file" id="ref-for-violation-source-file④">source file</a>, if <var>violation</var>’s <a data-link-type="dfn" href="#violation-source-file" id="ref-for-violation-source-file⑤">source file</a> is not null, or null otherwise.</p>
          <dt data-md><code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-statuscode" id="ref-for-dom-securitypolicyviolationevent-statuscode">statusCode</a></code>
          <dd data-md>
           <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-status" id="ref-for-violation-status②">status</a></p>
@@ -1995,10 +2009,10 @@ this algorithm returns normally if compilation is allowed, and throws a <code cl
           <dl>
            <dt data-md><code class="idl"><a data-link-type="idl" href="#dom-cspviolationreportbody-documenturl" id="ref-for-dom-cspviolationreportbody-documenturl">documentURL</a></code>
            <dd data-md>
-            <p>The result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer⑦">URL serializer</a> on <var>violation</var>’s <a data-link-type="dfn" href="#violation-url" id="ref-for-violation-url④">url</a>, with the <code>exclude fragment</code> flag set.</p>
+            <p>The result of executing <a href="#strip-url-for-use-in-reports">§ 5.4 Strip URL for use in reports</a> on <var>violation</var>’s <a data-link-type="dfn" href="#violation-url" id="ref-for-violation-url④">url</a>.</p>
            <dt data-md><code class="idl"><a data-link-type="idl" href="#dom-cspviolationreportbody-referrer" id="ref-for-dom-cspviolationreportbody-referrer">referrer</a></code>
            <dd data-md>
-            <p>The result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer⑧">URL serializer</a> on <var>violation</var>’s <a data-link-type="dfn" href="#violation-referrer" id="ref-for-violation-referrer③">referrer</a>, with the <code>exclude fragment</code> flag set.</p>
+            <p>The result of executing <a href="#strip-url-for-use-in-reports">§ 5.4 Strip URL for use in reports</a> on <var>violation</var>’s <a data-link-type="dfn" href="#violation-referrer" id="ref-for-violation-referrer③">referrer</a>.</p>
            <dt data-md><code class="idl"><a data-link-type="idl" href="#dom-cspviolationreportbody-blockedurl" id="ref-for-dom-cspviolationreportbody-blockedurl">blockedURL</a></code>
            <dd data-md>
             <p>The result of executing <a href="#obtain-violation-blocked-uri">§ 5.2 Obtain the blockedURI of a violation’s resource</a> on <var>violation</var>’s <a data-link-type="dfn" href="#violation-resource" id="ref-for-violation-resource①⑤">resource</a>.</p>
@@ -2010,8 +2024,7 @@ this algorithm returns normally if compilation is allowed, and throws a <code cl
             <p>The <a data-link-type="dfn" href="#serialized-csp" id="ref-for-serialized-csp⑦">serialization</a> of <var>violation</var>’s <a data-link-type="dfn" href="#violation-policy" id="ref-for-violation-policy⑨">policy</a>.</p>
            <dt data-md><code class="idl"><a data-link-type="idl" href="#dom-cspviolationreportbody-sourcefile" id="ref-for-dom-cspviolationreportbody-sourcefile">sourceFile</a></code>
            <dd data-md>
-            <p>The result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-serializer" id="ref-for-concept-url-serializer⑨">URL serializer</a> on <var>violation</var>’s <a data-link-type="dfn" href="#violation-source-file" id="ref-for-violation-source-file⑥">source file</a>, with the <code>exclude fragment</code> flag set, if <var>violation</var>’s <a data-link-type="dfn" href="#violation-source-file" id="ref-for-violation-source-file⑦">source file</a> is not null, or null
-  otherwise.</p>
+            <p>The result of executing <a href="#strip-url-for-use-in-reports">§ 5.4 Strip URL for use in reports</a> on <var>violation</var>’s <a data-link-type="dfn" href="#violation-source-file" id="ref-for-violation-source-file⑥">source file</a>, if <var>violation</var>’s <a data-link-type="dfn" href="#violation-source-file" id="ref-for-violation-source-file⑦">source file</a> is not null, or null otherwise.</p>
            <dt data-md><code class="idl"><a data-link-type="idl" href="#dom-cspviolationreportbody-sample" id="ref-for-dom-cspviolationreportbody-sample">sample</a></code>
            <dd data-md>
             <p><var>violation</var>’s <a data-link-type="dfn" href="#violation-sample" id="ref-for-violation-sample⑥">sample</a>.</p>
@@ -3046,7 +3059,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
     <p>The following directives govern the properties of a document or worker
   environment to which a policy applies.</p>
     <h4 class="heading settled" data-level="6.2.1" id="directive-base-uri"><span class="secno">6.2.1. </span><span class="content"><code>base-uri</code></span><a class="self-link" href="#directive-base-uri"></a></h4>
-    <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="base-uri">base-uri</dfn> directive restricts the <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url⑦">URL</a></code>s which can be used in
+    <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="base-uri">base-uri</dfn> directive restricts the <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url⑤">URL</a></code>s which can be used in
   a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document⑨">Document</a></code>'s <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-base-element" id="ref-for-the-base-element①">base</a></code> element. The syntax for the directive’s name and
   value is described by the following ABNF:</p>
 <pre>directive-name  = "base-uri"
@@ -3054,7 +3067,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
 </pre>
     <p>The following algorithm is called during HTML’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/semantics.html#set-the-frozen-base-url" id="ref-for-set-the-frozen-base-url①">set the frozen base url</a> algorithm in order to monitor and enforce this directive:</p>
     <h5 class="heading settled dfn-paneled algorithm" data-algorithm="Is base allowed for document?" data-dfn-type="dfn" data-export data-level="6.2.1.1" data-lt="Is base allowed for document?" id="allow-base-for-document"><span class="secno">6.2.1.1. </span><span class="content"> Is <var>base</var> allowed for <var>document</var>? </span><a class="self-link" href="#allow-base-for-document" id="ref-for-allow-base-for-document①"></a></h5>
-    <p>Given a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url⑧">URL</a></code> (<var>base</var>), and a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①⓪">Document</a></code> (<var>document</var>), this algorithm
+    <p>Given a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url⑥">URL</a></code> (<var>base</var>), and a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①⓪">Document</a></code> (<var>document</var>), this algorithm
   returns "<code>Allowed</code>" if <var>base</var> may be used as the value of a <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/semantics.html#the-base-element" id="ref-for-the-base-element②">base</a></code> element’s <code><a data-link-type="element-sub" href="https://html.spec.whatwg.org/multipage/semantics.html#attr-base-href" id="ref-for-attr-base-href①">href</a></code> attribute, and "<code>Blocked</code>" otherwise:</p>
     <ol>
      <li data-md>
@@ -3077,7 +3090,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
          <li data-md>
           <p>Set <var>violation</var>’s <a data-link-type="dfn" href="#violation-resource" id="ref-for-violation-resource①⑥">resource</a> to "<code>inline</code>".</p>
          <li data-md>
-          <p>Execute <a href="#report-violation">§ 5.4 Report a violation</a> on <var>violation</var>.</p>
+          <p>Execute <a href="#report-violation">§ 5.5 Report a violation</a> on <var>violation</var>.</p>
          <li data-md>
           <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①⑧">disposition</a> is "<code>enforce</code>",
   return "<code>Blocked</code>".</p>
@@ -3132,7 +3145,7 @@ directive-value = "" / <a data-link-type="grammar" href="https://tools.ietf.org/
     </ol>
     <h3 class="heading settled" data-level="6.3" id="directives-navigation"><span class="secno">6.3. </span><span class="content"> Navigation Directives </span><a class="self-link" href="#directives-navigation"></a></h3>
     <h4 class="heading settled" data-level="6.3.1" id="directive-form-action"><span class="secno">6.3.1. </span><span class="content"><code>form-action</code></span><a class="self-link" href="#directive-form-action"></a></h4>
-    <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="form-action">form-action</dfn> directive restricts the <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url⑨">URL</a></code>s which can be used
+    <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="form-action">form-action</dfn> directive restricts the <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url⑦">URL</a></code>s which can be used
   as the target of a form submissions from a given context. The directive’s syntax is
   described by the following ABNF grammar:</p>
 <pre class="abnf">directive-name  = "form-action"
@@ -3156,7 +3169,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
       <p>Return "<code>Allowed</code>".</p>
     </ol>
     <h4 class="heading settled" data-level="6.3.2" id="directive-frame-ancestors"><span class="secno">6.3.2. </span><span class="content"><code>frame-ancestors</code></span><a class="self-link" href="#directive-frame-ancestors"></a></h4>
-    <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="frame-ancestors">frame-ancestors</dfn> directive restricts the <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url①⓪">URL</a></code>s which can
+    <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="frame-ancestors">frame-ancestors</dfn> directive restricts the <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url⑧">URL</a></code>s which can
   embed the resource using <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/obsolete.html#frame" id="ref-for-frame②">frame</a></code>, <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-iframe-element" id="ref-for-the-iframe-element④">iframe</a></code>, <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-object-element" id="ref-for-the-object-element④">object</a></code>, or <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/iframe-embed-object.html#the-embed-element" id="ref-for-the-embed-element②">embed</a></code>. Resources
   can use this directive to avoid many UI Redressing <a data-link-type="biblio" href="#biblio-uisecurity">[UISECURITY]</a> attacks, by
   avoiding the risk of being embedded into potentially hostile contexts.</p>
@@ -3216,7 +3229,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-ancestor-source-
   _obsoletes_ the <code>X-Frame-Options</code> header. If a resource is delivered with an <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object⑥⑦">policy</a> that includes a <a data-link-type="dfn" href="#directives" id="ref-for-directives②⑦">directive</a> named <a data-link-type="dfn" href="#frame-ancestors" id="ref-for-frame-ancestors④"><code>frame-ancestors</code></a> and whose <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition②⓪">disposition</a> is "<code>enforce</code>", then the <code>X-Frame-Options</code> header MUST be ignored.</p>
     <p class="issue" id="issue-c6a38617"><a class="self-link" href="#issue-c6a38617"></a> Spell this out in more detail as part of defining <code>X-Frame-Options</code> integration with the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsing-the-web.html#process-a-navigate-response" id="ref-for-process-a-navigate-response①">process a navigate response</a> algorithm. <a href="https://github.com/whatwg/html/issues/1230">[Issue #whatwg/html#1230]</a></p>
     <h4 class="heading settled" data-level="6.3.3" id="directive-navigate-to"><span class="secno">6.3.3. </span><span class="content"><code>navigate-to</code></span><a class="self-link" href="#directive-navigate-to"></a></h4>
-    <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="navigate-to">navigate-to</dfn> directive restricts the <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url①①">URL</a></code>s to which
+    <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="navigate-to">navigate-to</dfn> directive restricts the <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url⑨">URL</a></code>s to which
   a <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document" id="ref-for-concept-document">document</a> can initiate navigations by any means (<code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/text-level-semantics.html#the-a-element" id="ref-for-the-a-element①">a</a></code>, <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/forms.html#the-form-element" id="ref-for-the-form-element">form</a></code>, <code>window.location</code>, <code>window.open</code>, etc.). This is an enforcement on what navigations this <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document" id="ref-for-concept-document①">document</a> initiates <code>not</code> on what this <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document" id="ref-for-concept-document②">document</a> is allowed to navigate to.
   If the <a data-link-type="dfn" href="#form-action" id="ref-for-form-action">form-action</a> directive is present, the <a data-link-type="dfn" href="#navigate-to" id="ref-for-navigate-to②">navigate-to</a> directive
   will not act on navigations that are form submissions.</p>
@@ -3284,7 +3297,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
     </ol>
     <h3 class="heading settled" data-level="6.4" id="directives-reporting"><span class="secno">6.4. </span><span class="content"> Reporting Directives </span><a class="self-link" href="#directives-reporting"></a></h3>
     <p>Various algorithms in this document hook into the reporting process by
-  constructing a <a data-link-type="dfn" href="#violation" id="ref-for-violation②③">violation</a> object via <a href="#create-violation-for-request">§ 2.4.2 Create a violation object for request, and policy.</a> or <a href="#create-violation-for-global">§ 2.4.1 Create a violation object for global, policy, and directive</a>, and passing that object to <a href="#report-violation">§ 5.4 Report a violation</a> to deliver the report.</p>
+  constructing a <a data-link-type="dfn" href="#violation" id="ref-for-violation②③">violation</a> object via <a href="#create-violation-for-request">§ 2.4.2 Create a violation object for request, and policy.</a> or <a href="#create-violation-for-global">§ 2.4.1 Create a violation object for global, policy, and directive</a>, and passing that object to <a href="#report-violation">§ 5.5 Report a violation</a> to deliver the report.</p>
     <h4 class="heading settled" data-level="6.4.1" id="directive-report-uri"><span class="secno">6.4.1. </span><span class="content"><code>report-uri</code></span><a class="self-link" href="#directive-report-uri"></a></h4>
     <div class="note" role="note">
       Note: The <a data-link-type="dfn" href="#report-uri" id="ref-for-report-uri②"><code>report-uri</code></a> directive is deprecated. Please use the <a data-link-type="dfn" href="#report-to" id="ref-for-report-to③"><code>report-to</code></a> directive instead. If the latter directive is present,
@@ -3307,7 +3320,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
     <h4 class="heading settled" data-level="6.4.2" id="directive-report-to"><span class="secno">6.4.2. </span><span class="content"><code>report-to</code></span><a class="self-link" href="#directive-report-to"></a></h4>
     <p>The <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="report-to"><code>report-to</code></dfn> directive defines a <a data-link-type="dfn" href="https://w3c.github.io/reporting/#group" id="ref-for-group">reporting
   group</a> to which violation reports ought to be sent <a data-link-type="biblio" href="#biblio-reporting">[REPORTING]</a>. The
-  directive’s behavior is defined in <a href="#report-violation">§ 5.4 Report a violation</a>. The directive’s name
+  directive’s behavior is defined in <a href="#report-violation">§ 5.5 Report a violation</a>. The directive’s name
   and value are described by the following ABNF:</p>
 <pre>directive-name  = "report-to"
 directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/rfc7230#section-3.2.6" id="ref-for-section-3.2.6②">token</a>
@@ -3455,7 +3468,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
   and a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object⑦④">policy</a> (<var>policy</var>), this algorithm returns the result of executing <a href="#match-url-to-source-list">§ 6.6.2.5 Does url match source list in origin with redirect count?</a> on <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url" id="ref-for-concept-response-url③">url</a>, <var>source list</var>, <var>policy</var>’s <a data-link-type="dfn" href="#policy-self-origin" id="ref-for-policy-self-origin④">self-origin</a>, and <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-redirect-count" id="ref-for-concept-request-redirect-count①">redirect count</a>.</p>
     <p class="note" role="note"><span>Note:</span> This is generally used in <a data-link-type="dfn" href="#directives" id="ref-for-directives③⑤">directives</a>' <a data-link-type="dfn" href="#directive-post-request-check" id="ref-for-directive-post-request-check②①">post-request check</a> algorithms to verify that a given <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response③①">response</a> is reasonable.</p>
     <h5 class="heading settled algorithm" data-algorithm="Does url match source list in origin with redirect count?" data-level="6.6.2.5" id="match-url-to-source-list"><span class="secno">6.6.2.5. </span><span class="content"> Does <var>url</var> match <var>source list</var> in <var>origin</var> with <var>redirect count</var>? </span><a class="self-link" href="#match-url-to-source-list"></a></h5>
-    <p>Given a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url①②">URL</a></code> (<var>url</var>), a <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists①⑤">source list</a> (<var>source list</var>), an <a data-link-type="dfn" href="https://html.spec.whatwg.org/#concept-origin" id="ref-for-concept-origin①">origin</a> (<var>origin</var>), and a number (<var>redirect count</var>), this
+    <p>Given a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url①⓪">URL</a></code> (<var>url</var>), a <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists①⑤">source list</a> (<var>source list</var>), an <a data-link-type="dfn" href="https://html.spec.whatwg.org/#concept-origin" id="ref-for-concept-origin①">origin</a> (<var>origin</var>), and a number (<var>redirect count</var>), this
   algorithm returns "<code>Matches</code>" if the URL matches one or more source
   expressions in <var>source list</var>, or "<code>Does Not Match</code>" otherwise:</p>
     <ol>
@@ -3481,7 +3494,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
       <p>Return "<code>Does Not Match</code>".</p>
     </ol>
     <h5 class="heading settled algorithm" data-algorithm="Does url match expression in origin with redirect count?" data-level="6.6.2.6" id="match-url-to-source-expression"><span class="secno">6.6.2.6. </span><span class="content"> Does <var>url</var> match <var>expression</var> in <var>origin</var> with <var>redirect count</var>? </span><a class="self-link" href="#match-url-to-source-expression"></a></h5>
-    <p>Given a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url①③">URL</a></code> (<var>url</var>), a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression①①">source expression</a> (<var>expression</var>), an <a data-link-type="dfn" href="https://html.spec.whatwg.org/#concept-origin" id="ref-for-concept-origin②">origin</a> (<var>origin</var>), and a number (<var>redirect count</var>), this algorithm
+    <p>Given a <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#url" id="ref-for-url①①">URL</a></code> (<var>url</var>), a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression①①">source expression</a> (<var>expression</var>), an <a data-link-type="dfn" href="https://html.spec.whatwg.org/#concept-origin" id="ref-for-concept-origin②">origin</a> (<var>origin</var>), and a number (<var>redirect count</var>), this algorithm
   returns "<code>Matches</code>" if <var>url</var> matches <var>expression</var>, and "<code>Does Not Match</code>"
   otherwise.</p>
     <p class="note" role="note"><span>Note:</span> <var>origin</var> is the <a data-link-type="dfn" href="https://html.spec.whatwg.org/#concept-origin" id="ref-for-concept-origin③">origin</a> of the resource relative to which the <var>expression</var> should be resolved. "<code>'self'</code>", for instance, will have distinct
@@ -3492,18 +3505,18 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
   the following conditions is met:</p>
       <ol>
        <li data-md>
-        <p><var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme①">scheme</a> is an <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-scheme" id="ref-for-http-scheme②">HTTP(S) scheme</a>.</p>
+        <p><var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme③">scheme</a> is an <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-scheme" id="ref-for-http-scheme③">HTTP(S) scheme</a>.</p>
        <li data-md>
-        <p><var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme②">scheme</a> is the same as <var>origin</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/origin.html#concept-origin-scheme" id="ref-for-concept-origin-scheme">scheme</a>.</p>
+        <p><var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme④">scheme</a> is the same as <var>origin</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/origin.html#concept-origin-scheme" id="ref-for-concept-origin-scheme">scheme</a>.</p>
       </ol>
-      <p class="note" role="note"><span>Note:</span> This logic means that in order to allow a resource from a non-<a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-scheme" id="ref-for-http-scheme③">HTTP(S) scheme</a>,
+      <p class="note" role="note"><span>Note:</span> This logic means that in order to allow a resource from a non-<a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-scheme" id="ref-for-http-scheme④">HTTP(S) scheme</a>,
   it has to be either explicitly specified (e.g. <code>default-src * data: custom-scheme-1: custom-scheme-2:</code>),
   or the protected resource must be loaded from the same scheme.</p>
      <li data-md>
       <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-scheme-source" id="ref-for-grammardef-scheme-source②"><code>scheme-source</code></a> or <a data-link-type="grammar" href="#grammardef-host-source" id="ref-for-grammardef-host-source②"><code>host-source</code></a> grammar:</p>
       <ol>
        <li data-md>
-        <p>If <var>expression</var> has a <a data-link-type="grammar" href="#grammardef-scheme-part" id="ref-for-grammardef-scheme-part②"><code>scheme-part</code></a>, and it does not <a data-link-type="dfn" href="#scheme-part-match" id="ref-for-scheme-part-match"><code>scheme-part</code> match</a> <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme③">scheme</a>, return "<code>Does Not Match</code>".</p>
+        <p>If <var>expression</var> has a <a data-link-type="grammar" href="#grammardef-scheme-part" id="ref-for-grammardef-scheme-part②"><code>scheme-part</code></a>, and it does not <a data-link-type="dfn" href="#scheme-part-match" id="ref-for-scheme-part-match"><code>scheme-part</code> match</a> <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme⑤">scheme</a>, return "<code>Does Not Match</code>".</p>
        <li data-md>
         <p>If <var>expression</var> matches the <a data-link-type="grammar" href="#grammardef-scheme-source" id="ref-for-grammardef-scheme-source③"><code>scheme-source</code></a> grammar,
   return "<code>Matches</code>".</p>
@@ -3514,7 +3527,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
        <li data-md>
         <p>If <var>url</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-host" id="ref-for-dom-url-host">host</a></code> is <code>null</code>, return "<code>Does Not Match</code>".</p>
        <li data-md>
-        <p>If <var>expression</var> does not have a <a data-link-type="grammar" href="#grammardef-scheme-part" id="ref-for-grammardef-scheme-part③"><code>scheme-part</code></a>, and <var>origin</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/origin.html#concept-origin-scheme" id="ref-for-concept-origin-scheme①">scheme</a> does not <a data-link-type="dfn" href="#scheme-part-match" id="ref-for-scheme-part-match①"><code>scheme-part</code> match</a> <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme④">scheme</a>,
+        <p>If <var>expression</var> does not have a <a data-link-type="grammar" href="#grammardef-scheme-part" id="ref-for-grammardef-scheme-part③"><code>scheme-part</code></a>, and <var>origin</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/origin.html#concept-origin-scheme" id="ref-for-concept-origin-scheme①">scheme</a> does not <a data-link-type="dfn" href="#scheme-part-match" id="ref-for-scheme-part-match①"><code>scheme-part</code> match</a> <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme⑥">scheme</a>,
   return "<code>Does Not Match</code>".</p>
         <p class="note" role="note"><span>Note:</span> As with <a data-link-type="grammar" href="#grammardef-scheme-part" id="ref-for-grammardef-scheme-part④"><code>scheme-part</code></a> above, we allow schemeless <a data-link-type="grammar" href="#grammardef-host-source" id="ref-for-grammardef-host-source④"><code>host-source</code></a> expressions to be upgraded from insecure
   schemes to secure schemes.</p>
@@ -3523,7 +3536,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
        <li data-md>
         <p>Let <var>port-part</var> be <var>expression</var>’s <a data-link-type="grammar" href="#grammardef-port-part" id="ref-for-grammardef-port-part①"><code>port-part</code></a> if present, and <code>null</code> otherwise.</p>
        <li data-md>
-        <p>If <var>port-part</var> does not <a data-link-type="dfn" href="#port-part-matches" id="ref-for-port-part-matches"><code>port-part</code> match</a> <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-port" id="ref-for-concept-url-port">port</a> and <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme⑤">scheme</a>, return "<code>Does Not Match</code>".</p>
+        <p>If <var>port-part</var> does not <a data-link-type="dfn" href="#port-part-matches" id="ref-for-port-part-matches"><code>port-part</code> match</a> <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-port" id="ref-for-concept-url-port">port</a> and <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme⑦">scheme</a>, return "<code>Does Not Match</code>".</p>
        <li data-md>
         <p>If <var>expression</var> contains a non-empty <a data-link-type="grammar" href="#grammardef-path-part" id="ref-for-grammardef-path-part①"><code>path-part</code></a>, and <var>redirect count</var> is 0, then:</p>
         <ol>
@@ -3544,13 +3557,13 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
         <p><var>origin</var> is the same as <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-origin" id="ref-for-concept-url-origin①">origin</a></p>
        <li data-md>
         <p><var>origin</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-host" id="ref-for-dom-url-host②">host</a></code> is the same as <var>url</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-host" id="ref-for-dom-url-host③">host</a></code>, <var>origin</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-port" id="ref-for-dom-url-port">port</a></code> and <var>url</var>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-port" id="ref-for-dom-url-port①">port</a></code> are either the same
-  or the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#default-port" id="ref-for-default-port">default ports</a> for their respective <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme⑥">scheme</a>s, and
+  or the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#default-port" id="ref-for-default-port">default ports</a> for their respective <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme⑧">scheme</a>s, and
   one or more of the following conditions is met:</p>
         <ol>
          <li data-md>
-          <p><var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme⑦">scheme</a> is "<code>https</code>" or "<code>wss</code>"</p>
+          <p><var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme⑨">scheme</a> is "<code>https</code>" or "<code>wss</code>"</p>
          <li data-md>
-          <p><var>origin</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme⑧">scheme</a> is "<code>http</code>" and <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme⑨">scheme</a> is "<code>http</code>" or "<code>ws</code>"</p>
+          <p><var>origin</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme①⓪">scheme</a> is "<code>http</code>" and <var>url</var>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme①①">scheme</a> is "<code>http</code>" or "<code>ws</code>"</p>
         </ol>
       </ol>
       <p class="note" role="note"><span>Note:</span> Like the <a data-link-type="grammar" href="#grammardef-scheme-part" id="ref-for-grammardef-scheme-part⑤"><code>scheme-part</code></a> logic above, the "<code>'self'</code>"
@@ -3563,7 +3576,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
       <p>Return "<code>Does Not Match</code>".</p>
     </ol>
     <h5 class="heading settled algorithm" data-algorithm="scheme-part matching" data-level="6.6.2.7" id="match-schemes"><span class="secno">6.6.2.7. </span><span class="content"> <code>scheme-part</code> matching </span><a class="self-link" href="#match-schemes"></a></h5>
-    <p>An <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ascii-string" id="ref-for-ascii-string⑤">ASCII string</a> <dfn class="dfn-paneled" data-dfn-type="dfn" data-export data-lt="scheme-part match" id="scheme-part-match"><code>scheme-part</code> matches</dfn> another <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ascii-string" id="ref-for-ascii-string⑥">ASCII string</a> if a CSP source expression that contained the first as a <a data-link-type="grammar" href="#grammardef-scheme-part" id="ref-for-grammardef-scheme-part⑥"><code>scheme-part</code></a> could potentially match a URL containing the latter as a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme①⓪">scheme</a>. For example, we say that "http" <a data-link-type="dfn" href="#scheme-part-match" id="ref-for-scheme-part-match②"><code>scheme-part</code> matches</a> "https".</p>
+    <p>An <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ascii-string" id="ref-for-ascii-string⑤">ASCII string</a> <dfn class="dfn-paneled" data-dfn-type="dfn" data-export data-lt="scheme-part match" id="scheme-part-match"><code>scheme-part</code> matches</dfn> another <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ascii-string" id="ref-for-ascii-string⑥">ASCII string</a> if a CSP source expression that contained the first as a <a data-link-type="grammar" href="#grammardef-scheme-part" id="ref-for-grammardef-scheme-part⑥"><code>scheme-part</code></a> could potentially match a URL containing the latter as a <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme①②">scheme</a>. For example, we say that "http" <a data-link-type="dfn" href="#scheme-part-match" id="ref-for-scheme-part-match②"><code>scheme-part</code> matches</a> "https".</p>
     <p class="note" role="note"><span>Note:</span> The matching relation is asymmetric. For example, the source expressions <code>https:</code> and <code>https://example.com/</code> do not match the URL <code>http://example.com/</code>. We always allow a
   secure upgrade from an explicitly insecure expression. <code>script-src http:</code> is treated as equivalent
   to <code>script-src http: https:</code>, <code>script-src http://example.com</code> to <code>script-src http://example.com https://example.com</code>, and <code>connect-src ws:</code> to <code>connect-src ws: wss:</code>.</p>
@@ -3624,7 +3637,7 @@ directive-value = <a data-link-type="grammar" href="https://tools.ietf.org/html/
     </ol>
     <h5 class="heading settled algorithm" data-algorithm="port-part matching" data-level="6.6.2.9" id="match-ports"><span class="secno">6.6.2.9. </span><span class="content"> <code>port-part</code> matching </span><a class="self-link" href="#match-ports"></a></h5>
     <p>An <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ascii-string" id="ref-for-ascii-string①①">ASCII string</a> (<var>port A</var>) <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="port-part-matches"><code>port-part</code> matches</dfn> two other <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ascii-string" id="ref-for-ascii-string①②">ASCII
-  strings</a> (<var>port B</var> and <var>scheme B</var>) if a CSP source expression that contained the first as a <a data-link-type="grammar" href="#grammardef-port-part" id="ref-for-grammardef-port-part②"><code>port-part</code></a> could potentially match a URL containing the latter as <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-port" id="ref-for-concept-url-port①">port</a> and <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme①①">scheme</a>. For example, "80" <a data-link-type="dfn" href="#port-part-matches" id="ref-for-port-part-matches①"><code>port-part</code> matches</a> matches "80"/"http".</p>
+  strings</a> (<var>port B</var> and <var>scheme B</var>) if a CSP source expression that contained the first as a <a data-link-type="grammar" href="#grammardef-port-part" id="ref-for-grammardef-port-part②"><code>port-part</code></a> could potentially match a URL containing the latter as <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-port" id="ref-for-concept-url-port①">port</a> and <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-scheme" id="ref-for-concept-url-scheme①③">scheme</a>. For example, "80" <a data-link-type="dfn" href="#port-part-matches" id="ref-for-port-part-matches①"><code>port-part</code> matches</a> matches "80"/"http".</p>
     <ol class="algorithm">
      <li data-md>
       <p>If <var>port A</var> is empty:</p>
@@ -4851,7 +4864,7 @@ rest of Google’s CSP Cabal.</p>
     Retrieve the CSP list of an object </a>
     <li><a href="#ref-for-document⑥">4.2.3. 
     Should element’s inline type behavior be blocked by Content Security Policy? </a>
-    <li><a href="#ref-for-document⑦">5.4. 
+    <li><a href="#ref-for-document⑦">5.5. 
     Report a violation </a>
     <li><a href="#ref-for-document⑧">6.1.14. style-src</a>
     <li><a href="#ref-for-document⑨">6.2.1. base-uri</a>
@@ -4906,21 +4919,21 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="term-for-dom-event-bubbles">
    <a href="https://dom.spec.whatwg.org/#dom-event-bubbles">https://dom.spec.whatwg.org/#dom-event-bubbles</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-event-bubbles">5.4. 
+    <li><a href="#ref-for-dom-event-bubbles">5.5. 
     Report a violation </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-dom-event-composed">
    <a href="https://dom.spec.whatwg.org/#dom-event-composed">https://dom.spec.whatwg.org/#dom-event-composed</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-event-composed">5.4. 
+    <li><a href="#ref-for-dom-event-composed">5.5. 
     Report a violation </a> <a href="#ref-for-dom-event-composed①">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-connected">
    <a href="https://dom.spec.whatwg.org/#connected">https://dom.spec.whatwg.org/#connected</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-connected">5.4. 
+    <li><a href="#ref-for-connected">5.5. 
     Report a violation </a>
    </ul>
   </aside>
@@ -4933,7 +4946,7 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="term-for-concept-event-fire">
    <a href="https://dom.spec.whatwg.org/#concept-event-fire">https://dom.spec.whatwg.org/#concept-event-fire</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-event-fire">5.4. 
+    <li><a href="#ref-for-concept-event-fire">5.5. 
     Report a violation </a>
    </ul>
   </aside>
@@ -4947,14 +4960,14 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="term-for-concept-shadow-including-root">
    <a href="https://dom.spec.whatwg.org/#concept-shadow-including-root">https://dom.spec.whatwg.org/#concept-shadow-including-root</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-shadow-including-root">5.4. 
+    <li><a href="#ref-for-concept-shadow-including-root">5.5. 
     Report a violation </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-dom-event-target">
    <a href="https://dom.spec.whatwg.org/#dom-event-target">https://dom.spec.whatwg.org/#dom-event-target</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-event-target">5.4. 
+    <li><a href="#ref-for-dom-event-target">5.5. 
     Report a violation </a>
    </ul>
   </aside>
@@ -5000,7 +5013,7 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="term-for-concept-request-body">
    <a href="https://fetch.spec.whatwg.org/#concept-request-body">https://fetch.spec.whatwg.org/#concept-request-body</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-request-body">5.4. 
+    <li><a href="#ref-for-concept-request-body">5.5. 
     Report a violation </a>
    </ul>
   </aside>
@@ -5015,14 +5028,14 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-concept-request-client④">4.2.5. 
     Should navigation response to navigation request of type
     in target be blocked by Content Security Policy? </a>
-    <li><a href="#ref-for-concept-request-client⑤">5.4. 
+    <li><a href="#ref-for-concept-request-client⑤">5.5. 
     Report a violation </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-request-credentials-mode">
    <a href="https://fetch.spec.whatwg.org/#concept-request-credentials-mode">https://fetch.spec.whatwg.org/#concept-request-credentials-mode</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-request-credentials-mode">5.4. 
+    <li><a href="#ref-for-concept-request-credentials-mode">5.5. 
     Report a violation </a>
    </ul>
   </aside>
@@ -5062,7 +5075,7 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="term-for-concept-request-destination">
    <a href="https://fetch.spec.whatwg.org/#concept-request-destination">https://fetch.spec.whatwg.org/#concept-request-destination</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-request-destination">5.4. 
+    <li><a href="#ref-for-concept-request-destination">5.5. 
     Report a violation </a>
     <li><a href="#ref-for-concept-request-destination①">6.1.1. child-src</a> <a href="#ref-for-concept-request-destination②">(2)</a>
     <li><a href="#ref-for-concept-request-destination③">6.1.6. img-src</a>
@@ -5084,7 +5097,7 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="term-for-concept-fetch">
    <a href="https://fetch.spec.whatwg.org/#concept-fetch">https://fetch.spec.whatwg.org/#concept-fetch</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-fetch">5.4. 
+    <li><a href="#ref-for-concept-fetch">5.5. 
     Report a violation </a>
    </ul>
   </aside>
@@ -5099,14 +5112,15 @@ rest of Google’s CSP Cabal.</p>
    <a href="https://fetch.spec.whatwg.org/#http-scheme">https://fetch.spec.whatwg.org/#http-scheme</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-http-scheme">1.3. Changes from Level 2</a> <a href="#ref-for-http-scheme①">(2)</a>
-    <li><a href="#ref-for-http-scheme②">6.6.2.6. 
-    Does url match expression in origin with redirect count? </a> <a href="#ref-for-http-scheme③">(2)</a>
+    <li><a href="#ref-for-http-scheme②">5.4. Strip URL for use in reports</a>
+    <li><a href="#ref-for-http-scheme③">6.6.2.6. 
+    Does url match expression in origin with redirect count? </a> <a href="#ref-for-http-scheme④">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-request-initiator">
    <a href="https://fetch.spec.whatwg.org/#concept-request-initiator">https://fetch.spec.whatwg.org/#concept-request-initiator</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-request-initiator">5.4. 
+    <li><a href="#ref-for-concept-request-initiator">5.5. 
     Report a violation </a>
     <li><a href="#ref-for-concept-request-initiator①">6.7.1. 
     Get the effective directive for request </a> <a href="#ref-for-concept-request-initiator②">(2)</a>
@@ -5129,7 +5143,7 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="term-for-request-keepalive-flag">
    <a href="https://fetch.spec.whatwg.org/#request-keepalive-flag">https://fetch.spec.whatwg.org/#request-keepalive-flag</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-request-keepalive-flag">5.4. 
+    <li><a href="#ref-for-request-keepalive-flag">5.5. 
     Report a violation </a>
    </ul>
   </aside>
@@ -5152,14 +5166,14 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="term-for-concept-request-method">
    <a href="https://fetch.spec.whatwg.org/#concept-request-method">https://fetch.spec.whatwg.org/#concept-request-method</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-request-method">5.4. 
+    <li><a href="#ref-for-concept-request-method">5.5. 
     Report a violation </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-request-mode">
    <a href="https://fetch.spec.whatwg.org/#concept-request-mode">https://fetch.spec.whatwg.org/#concept-request-mode</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-request-mode">5.4. 
+    <li><a href="#ref-for-concept-request-mode">5.5. 
     Report a violation </a>
    </ul>
   </aside>
@@ -5173,7 +5187,7 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="term-for-concept-request-origin">
    <a href="https://fetch.spec.whatwg.org/#concept-request-origin">https://fetch.spec.whatwg.org/#concept-request-origin</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-request-origin">5.4. 
+    <li><a href="#ref-for-concept-request-origin">5.5. 
     Report a violation </a>
    </ul>
   </aside>
@@ -5217,7 +5231,7 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="term-for-concept-request-redirect-mode">
    <a href="https://fetch.spec.whatwg.org/#concept-request-redirect-mode">https://fetch.spec.whatwg.org/#concept-request-redirect-mode</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-request-redirect-mode">5.4. 
+    <li><a href="#ref-for-concept-request-redirect-mode">5.5. 
     Report a violation </a>
    </ul>
   </aside>
@@ -5250,7 +5264,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-concept-request①③">4.2.5. 
     Should navigation response to navigation request of type
     in target be blocked by Content Security Policy? </a>
-    <li><a href="#ref-for-concept-request①④">5.4. 
+    <li><a href="#ref-for-concept-request①④">5.5. 
     Report a violation </a>
     <li><a href="#ref-for-concept-request①⑤">6.1.1. child-src</a> <a href="#ref-for-concept-request①⑥">(2)</a>
     <li><a href="#ref-for-concept-request①⑦">6.1.1.1. 
@@ -5446,7 +5460,7 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="term-for-concept-request-window">
    <a href="https://fetch.spec.whatwg.org/#concept-request-window">https://fetch.spec.whatwg.org/#concept-request-window</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-request-window">5.4. 
+    <li><a href="#ref-for-concept-request-window">5.5. 
     Report a violation </a>
    </ul>
   </aside>
@@ -5476,7 +5490,7 @@ rest of Google’s CSP Cabal.</p>
     Create a violation object for global, policy, and directive </a>
     <li><a href="#ref-for-window①">4.2.2. 
     Retrieve the CSP list of an object </a>
-    <li><a href="#ref-for-window②">5.4. 
+    <li><a href="#ref-for-window②">5.5. 
     Report a violation </a> <a href="#ref-for-window③">(2)</a>
    </ul>
   </aside>
@@ -5532,7 +5546,7 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="term-for-concept-document-window">
    <a href="https://html.spec.whatwg.org/multipage/window-object.html#concept-document-window">https://html.spec.whatwg.org/multipage/window-object.html#concept-document-window</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-document-window">5.4. 
+    <li><a href="#ref-for-concept-document-window">5.5. 
     Report a violation </a> <a href="#ref-for-concept-document-window①">(2)</a>
    </ul>
   </aside>
@@ -5778,7 +5792,7 @@ rest of Google’s CSP Cabal.</p>
    <a href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-origin">https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-origin</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-concept-settings-object-origin">2.2. Policies</a>
-    <li><a href="#ref-for-concept-settings-object-origin①">5.4. 
+    <li><a href="#ref-for-concept-settings-object-origin①">5.5. 
     Report a violation </a>
    </ul>
   </aside>
@@ -5841,7 +5855,7 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="term-for-queue-a-task">
    <a href="https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-task">https://html.spec.whatwg.org/multipage/webappapis.html#queue-a-task</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-queue-a-task">5.4. 
+    <li><a href="#ref-for-queue-a-task">5.5. 
     Report a violation </a>
    </ul>
   </aside>
@@ -5855,7 +5869,7 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="term-for-relevant-settings-object">
    <a href="https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object">https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-relevant-settings-object">5.4. 
+    <li><a href="#ref-for-relevant-settings-object">5.5. 
     Report a violation </a> <a href="#ref-for-relevant-settings-object①">(2)</a> <a href="#ref-for-relevant-settings-object②">(3)</a>
    </ul>
   </aside>
@@ -6165,7 +6179,7 @@ rest of Google’s CSP Cabal.</p>
    <ul>
     <li><a href="#ref-for-split-on-ascii-whitespace">2.2.1. 
     Parse a serialized CSP </a>
-    <li><a href="#ref-for-split-on-ascii-whitespace①">5.4. 
+    <li><a href="#ref-for-split-on-ascii-whitespace①">5.5. 
     Report a violation </a>
    </ul>
   </aside>
@@ -6216,7 +6230,7 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="term-for-queue-report">
    <a href="https://w3c.github.io/reporting/#queue-report">https://w3c.github.io/reporting/#queue-report</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-queue-report">5.4. 
+    <li><a href="#ref-for-queue-report">5.5. 
     Report a violation </a>
    </ul>
   </aside>
@@ -6370,24 +6384,22 @@ rest of Google’s CSP Cabal.</p>
    <a href="https://url.spec.whatwg.org/#url">https://url.spec.whatwg.org/#url</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-url">2.4. Violations</a> <a href="#ref-for-url①">(2)</a> <a href="#ref-for-url②">(3)</a> <a href="#ref-for-url③">(4)</a> <a href="#ref-for-url④">(5)</a>
-    <li><a href="#ref-for-url⑤">5.2. 
-    Obtain the blockedURI of a violation’s resource </a> <a href="#ref-for-url⑥">(2)</a>
-    <li><a href="#ref-for-url⑦">6.2.1. base-uri</a>
-    <li><a href="#ref-for-url⑧">6.2.1.1. 
+    <li><a href="#ref-for-url⑤">6.2.1. base-uri</a>
+    <li><a href="#ref-for-url⑥">6.2.1.1. 
     Is base allowed for document? </a>
-    <li><a href="#ref-for-url⑨">6.3.1. form-action</a>
-    <li><a href="#ref-for-url①⓪">6.3.2. frame-ancestors</a>
-    <li><a href="#ref-for-url①①">6.3.3. navigate-to</a>
-    <li><a href="#ref-for-url①②">6.6.2.5. 
+    <li><a href="#ref-for-url⑦">6.3.1. form-action</a>
+    <li><a href="#ref-for-url⑧">6.3.2. frame-ancestors</a>
+    <li><a href="#ref-for-url⑨">6.3.3. navigate-to</a>
+    <li><a href="#ref-for-url①⓪">6.6.2.5. 
     Does url match source list in origin with redirect count? </a>
-    <li><a href="#ref-for-url①③">6.6.2.6. 
+    <li><a href="#ref-for-url①①">6.6.2.6. 
     Does url match expression in origin with redirect count? </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-base-url">
    <a href="https://url.spec.whatwg.org/#concept-base-url">https://url.spec.whatwg.org/#concept-base-url</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-base-url">5.4. 
+    <li><a href="#ref-for-concept-base-url">5.5. 
     Report a violation </a>
    </ul>
   </aside>
@@ -6398,6 +6410,12 @@ rest of Google’s CSP Cabal.</p>
     Does url match expression in origin with redirect count? </a>
     <li><a href="#ref-for-default-port①">6.6.2.9. 
     port-part matching </a> <a href="#ref-for-default-port②">(2)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-concept-url-fragment">
+   <a href="https://url.spec.whatwg.org/#concept-url-fragment">https://url.spec.whatwg.org/#concept-url-fragment</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-url-fragment">5.4. Strip URL for use in reports</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-url-host">
@@ -6421,6 +6439,12 @@ rest of Google’s CSP Cabal.</p>
     Parse response’s Content Security Policies </a>
     <li><a href="#ref-for-concept-url-origin①">6.6.2.6. 
     Does url match expression in origin with redirect count? </a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-concept-url-password">
+   <a href="https://url.spec.whatwg.org/#concept-url-password">https://url.spec.whatwg.org/#concept-url-password</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-url-password">5.4. Strip URL for use in reports</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-url-path">
@@ -6454,18 +6478,27 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-concept-url-scheme">4.2.4. 
     Should navigation request of type be blocked
     by Content Security Policy? </a>
-    <li><a href="#ref-for-concept-url-scheme①">6.6.2.6. 
-    Does url match expression in origin with redirect count? </a> <a href="#ref-for-concept-url-scheme②">(2)</a> <a href="#ref-for-concept-url-scheme③">(3)</a> <a href="#ref-for-concept-url-scheme④">(4)</a> <a href="#ref-for-concept-url-scheme⑤">(5)</a> <a href="#ref-for-concept-url-scheme⑥">(6)</a> <a href="#ref-for-concept-url-scheme⑦">(7)</a> <a href="#ref-for-concept-url-scheme⑧">(8)</a> <a href="#ref-for-concept-url-scheme⑨">(9)</a>
-    <li><a href="#ref-for-concept-url-scheme①⓪">6.6.2.7. 
+    <li><a href="#ref-for-concept-url-scheme①">5.4. Strip URL for use in reports</a> <a href="#ref-for-concept-url-scheme②">(2)</a>
+    <li><a href="#ref-for-concept-url-scheme③">6.6.2.6. 
+    Does url match expression in origin with redirect count? </a> <a href="#ref-for-concept-url-scheme④">(2)</a> <a href="#ref-for-concept-url-scheme⑤">(3)</a> <a href="#ref-for-concept-url-scheme⑥">(4)</a> <a href="#ref-for-concept-url-scheme⑦">(5)</a> <a href="#ref-for-concept-url-scheme⑧">(6)</a> <a href="#ref-for-concept-url-scheme⑨">(7)</a> <a href="#ref-for-concept-url-scheme①⓪">(8)</a> <a href="#ref-for-concept-url-scheme①①">(9)</a>
+    <li><a href="#ref-for-concept-url-scheme①②">6.6.2.7. 
     scheme-part matching </a>
-    <li><a href="#ref-for-concept-url-scheme①①">6.6.2.9. 
+    <li><a href="#ref-for-concept-url-scheme①③">6.6.2.9. 
     port-part matching </a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-concept-url">
+   <a href="https://url.spec.whatwg.org/#concept-url">https://url.spec.whatwg.org/#concept-url</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-url">5.2. 
+    Obtain the blockedURI of a violation’s resource </a> <a href="#ref-for-concept-url①">(2)</a>
+    <li><a href="#ref-for-concept-url②">5.4. Strip URL for use in reports</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-url-parser">
    <a href="https://url.spec.whatwg.org/#concept-url-parser">https://url.spec.whatwg.org/#concept-url-parser</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-url-parser">5.4. 
+    <li><a href="#ref-for-concept-url-parser">5.5. 
     Report a violation </a>
     <li><a href="#ref-for-concept-url-parser①">6.3.2.1. 
     frame-ancestors Navigation Response Check </a>
@@ -6474,12 +6507,13 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="term-for-concept-url-serializer">
    <a href="https://url.spec.whatwg.org/#concept-url-serializer">https://url.spec.whatwg.org/#concept-url-serializer</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-url-serializer">5.2. 
-    Obtain the blockedURI of a violation’s resource </a>
-    <li><a href="#ref-for-concept-url-serializer①">5.3. 
-    Obtain the deprecated serialization of violation </a> <a href="#ref-for-concept-url-serializer②">(2)</a> <a href="#ref-for-concept-url-serializer③">(3)</a>
-    <li><a href="#ref-for-concept-url-serializer④">5.4. 
-    Report a violation </a> <a href="#ref-for-concept-url-serializer⑤">(2)</a> <a href="#ref-for-concept-url-serializer⑥">(3)</a> <a href="#ref-for-concept-url-serializer⑦">(4)</a> <a href="#ref-for-concept-url-serializer⑧">(5)</a> <a href="#ref-for-concept-url-serializer⑨">(6)</a>
+    <li><a href="#ref-for-concept-url-serializer">5.4. Strip URL for use in reports</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="term-for-concept-url-username">
+   <a href="https://url.spec.whatwg.org/#concept-url-username">https://url.spec.whatwg.org/#concept-url-username</a><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-concept-url-username">5.4. Strip URL for use in reports</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-dom-host-ensure-can-compile-wasm-bytes">
@@ -6809,15 +6843,19 @@ rest of Google’s CSP Cabal.</p>
      <li><span class="dfn-paneled" id="term-for-url">URL</span>
      <li><span class="dfn-paneled" id="term-for-concept-base-url">base url</span>
      <li><span class="dfn-paneled" id="term-for-default-port">default port</span>
+     <li><span class="dfn-paneled" id="term-for-concept-url-fragment">fragment</span>
      <li><span class="dfn-paneled" id="term-for-concept-url-host">host <small>(for url)</small></span>
      <li><span class="dfn-paneled" id="term-for-concept-ipv6">ipv6 address</span>
      <li><span class="dfn-paneled" id="term-for-concept-url-origin">origin</span>
+     <li><span class="dfn-paneled" id="term-for-concept-url-password">password</span>
      <li><span class="dfn-paneled" id="term-for-concept-url-path">path</span>
      <li><span class="dfn-paneled" id="term-for-string-percent-decode">percent-decode</span>
      <li><span class="dfn-paneled" id="term-for-concept-url-port">port <small>(for url)</small></span>
      <li><span class="dfn-paneled" id="term-for-concept-url-scheme">scheme</span>
+     <li><span class="dfn-paneled" id="term-for-concept-url">url</span>
      <li><span class="dfn-paneled" id="term-for-concept-url-parser">url parser</span>
      <li><span class="dfn-paneled" id="term-for-concept-url-serializer">url serializer</span>
+     <li><span class="dfn-paneled" id="term-for-concept-url-username">username</span>
     </ul>
    <li>
     <a data-link-type="biblio">[webassembly-js-api]</a> defines the following terms:
@@ -7176,7 +7214,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-policy-directive-set⑤">2.3. Directives</a>
     <li><a href="#ref-for-policy-directive-set⑥">4.2.3. 
     Should element’s inline type behavior be blocked by Content Security Policy? </a>
-    <li><a href="#ref-for-policy-directive-set⑦">5.4. 
+    <li><a href="#ref-for-policy-directive-set⑦">5.5. 
     Report a violation </a> <a href="#ref-for-policy-directive-set⑧">(2)</a> <a href="#ref-for-policy-directive-set⑨">(3)</a>
     <li><a href="#ref-for-policy-directive-set①⓪">6.2.1.1. 
     Is base allowed for document? </a>
@@ -7276,7 +7314,7 @@ rest of Google’s CSP Cabal.</p>
     The Content-Security-Policy-Report-Only HTTP Response Header Field </a>
     <li><a href="#ref-for-serialized-csp⑤">5.3. 
     Obtain the deprecated serialization of violation </a>
-    <li><a href="#ref-for-serialized-csp⑥">5.4. 
+    <li><a href="#ref-for-serialized-csp⑥">5.5. 
     Report a violation </a> <a href="#ref-for-serialized-csp⑦">(2)</a>
    </ul>
   </aside>
@@ -7339,7 +7377,7 @@ rest of Google’s CSP Cabal.</p>
     EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a> <a href="#ref-for-directives⑨">(2)</a> <a href="#ref-for-directives①⓪">(3)</a>
     <li><a href="#ref-for-directives①①">4.4.1. 
   EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a> <a href="#ref-for-directives①②">(2)</a> <a href="#ref-for-directives①③">(3)</a>
-    <li><a href="#ref-for-directives①④">5.4. 
+    <li><a href="#ref-for-directives①④">5.5. 
     Report a violation </a> <a href="#ref-for-directives①⑤">(2)</a> <a href="#ref-for-directives①⑥">(3)</a>
     <li><a href="#ref-for-directives①⑦">6. 
     Content Security Policy Directives </a>
@@ -7426,7 +7464,7 @@ rest of Google’s CSP Cabal.</p>
     EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a> <a href="#ref-for-directive-value⑥">(2)</a>
     <li><a href="#ref-for-directive-value⑦">4.4.1. 
   EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a> <a href="#ref-for-directive-value⑧">(2)</a>
-    <li><a href="#ref-for-directive-value⑨">5.4. 
+    <li><a href="#ref-for-directive-value⑨">5.5. 
     Report a violation </a> <a href="#ref-for-directive-value①⓪">(2)</a>
     <li><a href="#ref-for-directive-value①①">6.1.1.1. 
     child-src Pre-request check </a>
@@ -8024,7 +8062,7 @@ rest of Google’s CSP Cabal.</p>
     Create a violation object for request, and policy. </a>
     <li><a href="#ref-for-violation②①">5.3. 
     Obtain the deprecated serialization of violation </a>
-    <li><a href="#ref-for-violation②②">5.4. 
+    <li><a href="#ref-for-violation②②">5.5. 
     Report a violation </a>
     <li><a href="#ref-for-violation②③">6.4. 
     Reporting Directives </a>
@@ -8036,7 +8074,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-violation-global-object">2.4. Violations</a>
     <li><a href="#ref-for-violation-global-object①">2.4.1. 
     Create a violation object for global, policy, and directive </a> <a href="#ref-for-violation-global-object②">(2)</a>
-    <li><a href="#ref-for-violation-global-object③">5.4. 
+    <li><a href="#ref-for-violation-global-object③">5.5. 
     Report a violation </a> <a href="#ref-for-violation-global-object④">(2)</a> <a href="#ref-for-violation-global-object⑤">(3)</a> <a href="#ref-for-violation-global-object⑥">(4)</a> <a href="#ref-for-violation-global-object⑦">(5)</a> <a href="#ref-for-violation-global-object⑧">(6)</a>
    </ul>
   </aside>
@@ -8045,7 +8083,7 @@ rest of Google’s CSP Cabal.</p>
    <ul>
     <li><a href="#ref-for-violation-url">5.3. 
     Obtain the deprecated serialization of violation </a>
-    <li><a href="#ref-for-violation-url①">5.4. 
+    <li><a href="#ref-for-violation-url①">5.5. 
     Report a violation </a> <a href="#ref-for-violation-url②">(2)</a> <a href="#ref-for-violation-url③">(3)</a> <a href="#ref-for-violation-url④">(4)</a>
    </ul>
   </aside>
@@ -8056,7 +8094,7 @@ rest of Google’s CSP Cabal.</p>
     Create a violation object for global, policy, and directive </a>
     <li><a href="#ref-for-violation-status①">5.3. 
     Obtain the deprecated serialization of violation </a>
-    <li><a href="#ref-for-violation-status②">5.4. 
+    <li><a href="#ref-for-violation-status②">5.5. 
     Report a violation </a> <a href="#ref-for-violation-status③">(2)</a>
    </ul>
   </aside>
@@ -8084,7 +8122,7 @@ rest of Google’s CSP Cabal.</p>
     Obtain the blockedURI of a violation’s resource </a>
     <li><a href="#ref-for-violation-resource①③">5.3. 
     Obtain the deprecated serialization of violation </a>
-    <li><a href="#ref-for-violation-resource①④">5.4. 
+    <li><a href="#ref-for-violation-resource①④">5.5. 
     Report a violation </a> <a href="#ref-for-violation-resource①⑤">(2)</a>
     <li><a href="#ref-for-violation-resource①⑥">6.2.1.1. 
     Is base allowed for document? </a>
@@ -8097,7 +8135,7 @@ rest of Google’s CSP Cabal.</p>
     Create a violation object for global, policy, and directive </a>
     <li><a href="#ref-for-violation-referrer①">5.3. 
     Obtain the deprecated serialization of violation </a>
-    <li><a href="#ref-for-violation-referrer②">5.4. 
+    <li><a href="#ref-for-violation-referrer②">5.5. 
     Report a violation </a> <a href="#ref-for-violation-referrer③">(2)</a>
    </ul>
   </aside>
@@ -8108,14 +8146,14 @@ rest of Google’s CSP Cabal.</p>
     Create a violation object for global, policy, and directive </a>
     <li><a href="#ref-for-violation-policy①">5.3. 
     Obtain the deprecated serialization of violation </a> <a href="#ref-for-violation-policy②">(2)</a>
-    <li><a href="#ref-for-violation-policy③">5.4. 
+    <li><a href="#ref-for-violation-policy③">5.5. 
     Report a violation </a> <a href="#ref-for-violation-policy④">(2)</a> <a href="#ref-for-violation-policy⑤">(3)</a> <a href="#ref-for-violation-policy⑥">(4)</a> <a href="#ref-for-violation-policy⑦">(5)</a> <a href="#ref-for-violation-policy⑧">(6)</a> <a href="#ref-for-violation-policy⑨">(7)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="violation-disposition">
    <b><a href="#violation-disposition">#violation-disposition</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-violation-disposition">5.4. 
+    <li><a href="#ref-for-violation-disposition">5.5. 
     Report a violation </a> <a href="#ref-for-violation-disposition①">(2)</a>
    </ul>
   </aside>
@@ -8126,7 +8164,7 @@ rest of Google’s CSP Cabal.</p>
     Create a violation object for global, policy, and directive </a>
     <li><a href="#ref-for-violation-effective-directive①">5.3. 
     Obtain the deprecated serialization of violation </a> <a href="#ref-for-violation-effective-directive②">(2)</a>
-    <li><a href="#ref-for-violation-effective-directive③">5.4. 
+    <li><a href="#ref-for-violation-effective-directive③">5.5. 
     Report a violation </a> <a href="#ref-for-violation-effective-directive④">(2)</a> <a href="#ref-for-violation-effective-directive⑤">(3)</a>
    </ul>
   </aside>
@@ -8137,7 +8175,7 @@ rest of Google’s CSP Cabal.</p>
     Create a violation object for global, policy, and directive </a> <a href="#ref-for-violation-source-file①">(2)</a>
     <li><a href="#ref-for-violation-source-file②">5.3. 
     Obtain the deprecated serialization of violation </a> <a href="#ref-for-violation-source-file③">(2)</a>
-    <li><a href="#ref-for-violation-source-file④">5.4. 
+    <li><a href="#ref-for-violation-source-file④">5.5. 
     Report a violation </a> <a href="#ref-for-violation-source-file⑤">(2)</a> <a href="#ref-for-violation-source-file⑥">(3)</a> <a href="#ref-for-violation-source-file⑦">(4)</a> <a href="#ref-for-violation-source-file⑧">(5)</a> <a href="#ref-for-violation-source-file⑨">(6)</a>
    </ul>
   </aside>
@@ -8148,7 +8186,7 @@ rest of Google’s CSP Cabal.</p>
     Create a violation object for global, policy, and directive </a>
     <li><a href="#ref-for-violation-line-number①">5.3. 
     Obtain the deprecated serialization of violation </a>
-    <li><a href="#ref-for-violation-line-number②">5.4. 
+    <li><a href="#ref-for-violation-line-number②">5.5. 
     Report a violation </a> <a href="#ref-for-violation-line-number③">(2)</a>
    </ul>
   </aside>
@@ -8159,7 +8197,7 @@ rest of Google’s CSP Cabal.</p>
     Create a violation object for global, policy, and directive </a>
     <li><a href="#ref-for-violation-column-number①">5.3. 
     Obtain the deprecated serialization of violation </a>
-    <li><a href="#ref-for-violation-column-number②">5.4. 
+    <li><a href="#ref-for-violation-column-number②">5.5. 
     Report a violation </a> <a href="#ref-for-violation-column-number③">(2)</a>
    </ul>
   </aside>
@@ -8168,7 +8206,7 @@ rest of Google’s CSP Cabal.</p>
    <ul>
     <li><a href="#ref-for-violation-element">4.2.3. 
     Should element’s inline type behavior be blocked by Content Security Policy? </a>
-    <li><a href="#ref-for-violation-element①">5.4. 
+    <li><a href="#ref-for-violation-element①">5.5. 
     Report a violation </a> <a href="#ref-for-violation-element②">(2)</a>
    </ul>
   </aside>
@@ -8183,7 +8221,7 @@ rest of Google’s CSP Cabal.</p>
     EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a>
     <li><a href="#ref-for-violation-sample④">5.3. 
     Obtain the deprecated serialization of violation </a>
-    <li><a href="#ref-for-violation-sample⑤">5.4. 
+    <li><a href="#ref-for-violation-sample⑤">5.5. 
     Report a violation </a> <a href="#ref-for-violation-sample⑥">(2)</a>
    </ul>
   </aside>
@@ -8382,84 +8420,84 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="cspviolationreportbody">
    <b><a href="#cspviolationreportbody">#cspviolationreportbody</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-cspviolationreportbody">5.4. 
+    <li><a href="#ref-for-cspviolationreportbody">5.5. 
     Report a violation </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dom-cspviolationreportbody-documenturl">
    <b><a href="#dom-cspviolationreportbody-documenturl">#dom-cspviolationreportbody-documenturl</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-cspviolationreportbody-documenturl">5.4. 
+    <li><a href="#ref-for-dom-cspviolationreportbody-documenturl">5.5. 
     Report a violation </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dom-cspviolationreportbody-referrer">
    <b><a href="#dom-cspviolationreportbody-referrer">#dom-cspviolationreportbody-referrer</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-cspviolationreportbody-referrer">5.4. 
+    <li><a href="#ref-for-dom-cspviolationreportbody-referrer">5.5. 
     Report a violation </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dom-cspviolationreportbody-blockedurl">
    <b><a href="#dom-cspviolationreportbody-blockedurl">#dom-cspviolationreportbody-blockedurl</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-cspviolationreportbody-blockedurl">5.4. 
+    <li><a href="#ref-for-dom-cspviolationreportbody-blockedurl">5.5. 
     Report a violation </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dom-cspviolationreportbody-effectivedirective">
    <b><a href="#dom-cspviolationreportbody-effectivedirective">#dom-cspviolationreportbody-effectivedirective</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-cspviolationreportbody-effectivedirective">5.4. 
+    <li><a href="#ref-for-dom-cspviolationreportbody-effectivedirective">5.5. 
     Report a violation </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dom-cspviolationreportbody-originalpolicy">
    <b><a href="#dom-cspviolationreportbody-originalpolicy">#dom-cspviolationreportbody-originalpolicy</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-cspviolationreportbody-originalpolicy">5.4. 
+    <li><a href="#ref-for-dom-cspviolationreportbody-originalpolicy">5.5. 
     Report a violation </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dom-cspviolationreportbody-sourcefile">
    <b><a href="#dom-cspviolationreportbody-sourcefile">#dom-cspviolationreportbody-sourcefile</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-cspviolationreportbody-sourcefile">5.4. 
+    <li><a href="#ref-for-dom-cspviolationreportbody-sourcefile">5.5. 
     Report a violation </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dom-cspviolationreportbody-sample">
    <b><a href="#dom-cspviolationreportbody-sample">#dom-cspviolationreportbody-sample</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-cspviolationreportbody-sample">5.4. 
+    <li><a href="#ref-for-dom-cspviolationreportbody-sample">5.5. 
     Report a violation </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dom-cspviolationreportbody-disposition">
    <b><a href="#dom-cspviolationreportbody-disposition">#dom-cspviolationreportbody-disposition</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-cspviolationreportbody-disposition">5.4. 
+    <li><a href="#ref-for-dom-cspviolationreportbody-disposition">5.5. 
     Report a violation </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dom-cspviolationreportbody-statuscode">
    <b><a href="#dom-cspviolationreportbody-statuscode">#dom-cspviolationreportbody-statuscode</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-cspviolationreportbody-statuscode">5.4. 
+    <li><a href="#ref-for-dom-cspviolationreportbody-statuscode">5.5. 
     Report a violation </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dom-cspviolationreportbody-linenumber">
    <b><a href="#dom-cspviolationreportbody-linenumber">#dom-cspviolationreportbody-linenumber</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-cspviolationreportbody-linenumber">5.4. 
+    <li><a href="#ref-for-dom-cspviolationreportbody-linenumber">5.5. 
     Report a violation </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dom-cspviolationreportbody-columnnumber">
    <b><a href="#dom-cspviolationreportbody-columnnumber">#dom-cspviolationreportbody-columnnumber</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-cspviolationreportbody-columnnumber">5.4. 
+    <li><a href="#ref-for-dom-cspviolationreportbody-columnnumber">5.5. 
     Report a violation </a>
    </ul>
   </aside>
@@ -8477,7 +8515,7 @@ rest of Google’s CSP Cabal.</p>
    <ul>
     <li><a href="#ref-for-securitypolicyviolationevent">5.3. 
     Obtain the deprecated serialization of violation </a>
-    <li><a href="#ref-for-securitypolicyviolationevent①">5.4. 
+    <li><a href="#ref-for-securitypolicyviolationevent①">5.5. 
     Report a violation </a> <a href="#ref-for-securitypolicyviolationevent②">(2)</a>
     <li><a href="#ref-for-securitypolicyviolationevent③">7.5. Violation Reports</a>
    </ul>
@@ -8485,14 +8523,14 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="dom-securitypolicyviolationevent-documenturi">
    <b><a href="#dom-securitypolicyviolationevent-documenturi">#dom-securitypolicyviolationevent-documenturi</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-securitypolicyviolationevent-documenturi">5.4. 
+    <li><a href="#ref-for-dom-securitypolicyviolationevent-documenturi">5.5. 
     Report a violation </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dom-securitypolicyviolationevent-referrer">
    <b><a href="#dom-securitypolicyviolationevent-referrer">#dom-securitypolicyviolationevent-referrer</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-securitypolicyviolationevent-referrer">5.4. 
+    <li><a href="#ref-for-dom-securitypolicyviolationevent-referrer">5.5. 
     Report a violation </a>
    </ul>
   </aside>
@@ -8501,35 +8539,35 @@ rest of Google’s CSP Cabal.</p>
    <ul>
     <li><a href="#ref-for-dom-securitypolicyviolationevent-blockeduri">5.2. 
     Obtain the blockedURI of a violation’s resource </a>
-    <li><a href="#ref-for-dom-securitypolicyviolationevent-blockeduri①">5.4. 
+    <li><a href="#ref-for-dom-securitypolicyviolationevent-blockeduri①">5.5. 
     Report a violation </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dom-securitypolicyviolationevent-effectivedirective">
    <b><a href="#dom-securitypolicyviolationevent-effectivedirective">#dom-securitypolicyviolationevent-effectivedirective</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-securitypolicyviolationevent-effectivedirective">5.4. 
+    <li><a href="#ref-for-dom-securitypolicyviolationevent-effectivedirective">5.5. 
     Report a violation </a> <a href="#ref-for-dom-securitypolicyviolationevent-effectivedirective①">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dom-securitypolicyviolationevent-violateddirective">
    <b><a href="#dom-securitypolicyviolationevent-violateddirective">#dom-securitypolicyviolationevent-violateddirective</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-securitypolicyviolationevent-violateddirective">5.4. 
+    <li><a href="#ref-for-dom-securitypolicyviolationevent-violateddirective">5.5. 
     Report a violation </a> <a href="#ref-for-dom-securitypolicyviolationevent-violateddirective①">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dom-securitypolicyviolationevent-originalpolicy">
    <b><a href="#dom-securitypolicyviolationevent-originalpolicy">#dom-securitypolicyviolationevent-originalpolicy</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-securitypolicyviolationevent-originalpolicy">5.4. 
+    <li><a href="#ref-for-dom-securitypolicyviolationevent-originalpolicy">5.5. 
     Report a violation </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dom-securitypolicyviolationevent-sourcefile">
    <b><a href="#dom-securitypolicyviolationevent-sourcefile">#dom-securitypolicyviolationevent-sourcefile</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-securitypolicyviolationevent-sourcefile">5.4. 
+    <li><a href="#ref-for-dom-securitypolicyviolationevent-sourcefile">5.5. 
     Report a violation </a>
    </ul>
   </aside>
@@ -8538,7 +8576,7 @@ rest of Google’s CSP Cabal.</p>
    <ul>
     <li><a href="#ref-for-dom-securitypolicyviolationevent-sample">5.3. 
     Obtain the deprecated serialization of violation </a>
-    <li><a href="#ref-for-dom-securitypolicyviolationevent-sample①">5.4. 
+    <li><a href="#ref-for-dom-securitypolicyviolationevent-sample①">5.5. 
     Report a violation </a>
     <li><a href="#ref-for-dom-securitypolicyviolationevent-sample②">7.5. Violation Reports</a>
    </ul>
@@ -8546,28 +8584,28 @@ rest of Google’s CSP Cabal.</p>
   <aside class="dfn-panel" data-for="dom-securitypolicyviolationevent-disposition">
    <b><a href="#dom-securitypolicyviolationevent-disposition">#dom-securitypolicyviolationevent-disposition</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-securitypolicyviolationevent-disposition">5.4. 
+    <li><a href="#ref-for-dom-securitypolicyviolationevent-disposition">5.5. 
     Report a violation </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dom-securitypolicyviolationevent-statuscode">
    <b><a href="#dom-securitypolicyviolationevent-statuscode">#dom-securitypolicyviolationevent-statuscode</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-securitypolicyviolationevent-statuscode">5.4. 
+    <li><a href="#ref-for-dom-securitypolicyviolationevent-statuscode">5.5. 
     Report a violation </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dom-securitypolicyviolationevent-linenumber">
    <b><a href="#dom-securitypolicyviolationevent-linenumber">#dom-securitypolicyviolationevent-linenumber</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-securitypolicyviolationevent-linenumber">5.4. 
+    <li><a href="#ref-for-dom-securitypolicyviolationevent-linenumber">5.5. 
     Report a violation </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="dom-securitypolicyviolationevent-columnnumber">
    <b><a href="#dom-securitypolicyviolationevent-columnnumber">#dom-securitypolicyviolationevent-columnnumber</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-dom-securitypolicyviolationevent-columnnumber">5.4. 
+    <li><a href="#ref-for-dom-securitypolicyviolationevent-columnnumber">5.5. 
     Report a violation </a>
    </ul>
   </aside>
@@ -8828,7 +8866,7 @@ rest of Google’s CSP Cabal.</p>
    <ul>
     <li><a href="#ref-for-report-uri">5.3. 
     Obtain the deprecated serialization of violation </a>
-    <li><a href="#ref-for-report-uri①">5.4. 
+    <li><a href="#ref-for-report-uri①">5.5. 
     Report a violation </a>
     <li><a href="#ref-for-report-uri②">6.4.1. report-uri</a> <a href="#ref-for-report-uri③">(2)</a>
     <li><a href="#ref-for-report-uri④">10.1. 
@@ -8840,7 +8878,7 @@ rest of Google’s CSP Cabal.</p>
    <ul>
     <li><a href="#ref-for-report-to">5.3. 
     Obtain the deprecated serialization of violation </a>
-    <li><a href="#ref-for-report-to①">5.4. 
+    <li><a href="#ref-for-report-to①">5.5. 
     Report a violation </a> <a href="#ref-for-report-to②">(2)</a>
     <li><a href="#ref-for-report-to③">6.4.1. report-uri</a> <a href="#ref-for-report-to④">(2)</a>
     <li><a href="#ref-for-report-to⑤">10.1. 
