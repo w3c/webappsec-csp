@@ -202,6 +202,18 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
       "title": "CSP 2015",
       "authors": [ "filedescriptor" ],
       "date": "23 November 2015"
+  },
+  "LONG-LIVE-CSP": {
+      "href": "https://dl.acm.org/doi/10.1145/2976749.2978363",
+      "title": "CSP Is Dead, Long Live CSP! On the Insecurity of Whitelists and the Future of Content Security Policy",
+      "authors": [ "Lukas Weichselbaum", "Michele Spagnuolo", "Sebastian Lekies", "Artur Janc" ],
+      "date": "24 October 2016"
+  },
+  "WEBDEV-STRICTCSP": {
+      "href": "https://web.dev/strict-csp/",
+      "title": "Mitigate cross-site scripting (XSS) with a strict Content Security Policy (CSP)",
+      "authors": [ "Lukas Weichselbaum" ],
+      "date": "15 March 2021"
   }
 }
 </pre>
@@ -1619,10 +1631,10 @@ this algorithm returns normally if compilation is allowed, and throws a
   Given a violation's <a>resource</a> (|resource|), this algorithm returns a
   [=string=], to be used as the blocked URI field for violation reports.
 
-  1. Assert: |resource| is a {{URL}} or a [=string=].
+  1. Assert: |resource| is a [=/URL=] or a [=string=].
 
-  2. If |resource| is a {{URL}}, return the result of executing the <a>URL
-     serializer</a> on |resource|, with the `exclude fragment` flag set.
+  2. If |resource| is a [=/URL=], return the result of executing [[#strip-url-for-use-in-reports]] on
+     |resource|.
 
   3. Return |resource|.
 
@@ -1638,11 +1650,11 @@ this algorithm returns normally if compilation is allowed, and throws a
       follows:
 
       :   "`document-uri`"
-      ::  The result of executing the <a>URL serializer</a> on |violation|'s
-          <a for="violation">url</a>, with the `exclude fragment` flag set.
+      ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+          <a for="violation">url</a>.
       :   "`referrer`"
-      ::  The result of executing the <a>URL serializer</a> on |violation|'s
-          <a for="violation">referrer</a>, with the `exclude fragment` flag set.
+      ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+          <a for="violation">referrer</a>.
       :   "`blocked-uri`"
       ::  The result of executing [[#obtain-violation-blocked-uri]] on |violation|'s
           <a for="violation">resource</a>.
@@ -1670,9 +1682,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   2.  If |violation|'s <a for="violation">source file</a> is not `null`:
 
-      1.  Set |body|["`source-file`"] to the result of executing
-          the <a>URL serializer</a> on |violation|'s <a for="violation">source
-          file</a>, with the `exclude fragment` flag set.
+      1.  Set |body|["`source-file`'] to the result of executing [[#strip-url-for-use-in-reports]]
+          on |violation|'s <a for="violation">source file</a>.
 
       2.  Set |body|["`line-number`"] to |violation|'s
           <a for="violation">line number</a>.
@@ -1685,6 +1696,21 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   4.  Return the result of <a>serialize an infra value to JSON bytes</a> given
       «[ "csp-report" → body ]».
+
+  <h3 id="strip-url-for-use-in-reports" algorithm>Strip URL for use in reports</h3>
+  Given a [=/URL=] (|url|), this algorithm returns a string representing the URL for use in violation
+  reports:
+
+  1. If |url|'s <a for="url">scheme</a> is not an <a>HTTP(S) scheme</a>,
+     then return |url|'s <a for="url">scheme</a>.
+
+  2. Set |url|’s <a for="url">fragment</a> to the empty string.
+
+  3. Set |url|’s <a for="url">username</a> to the empty string.
+
+  4. Set |url|’s <a for="url">password</a> to the empty string.
+
+  5. Return the result of executing the <a>URL serializer</a> on |url|.
 
   <h3 id="report-violation" algorithm>
     Report a |violation|
@@ -1728,11 +1754,11 @@ this algorithm returns normally if compilation is allowed, and throws a
           its attributes initialized as follows:
 
           :  {{SecurityPolicyViolationEvent/documentURI}}
-          ::  The result of executing the <a>URL serializer</a> on |violation|'s
-              <a for="violation">url</a>, with the `exclude fragment` flag set.
+          ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+              <a for="violation">url</a>.
           :  {{SecurityPolicyViolationEvent/referrer}}
-          ::  The result of executing the <a>URL serializer</a> on |violation|'s
-              <a for="violation">referrer</a>, with the `exclude fragment` flag set.
+          ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+              <a for="violation">referrer</a>.
           :  {{SecurityPolicyViolationEvent/blockedURI}}
           ::  The result of executing [[#obtain-violation-blocked-uri]] on |violation|'s
               <a for="violation">resource</a>.
@@ -1746,10 +1772,9 @@ this algorithm returns normally if compilation is allowed, and throws a
           :  {{SecurityPolicyViolationEvent/disposition}}
           :: |violation|'s <a for="violation">disposition</a>
           :  {{SecurityPolicyViolationEvent/sourceFile}}
-          :: The result of executing the <a>URL serializer</a> on |violation|'s
-             <a for="violation">source file</a>, with the `exclude fragment`
-             flag set if the |violation|'s <a for="violation">source file</a>
-             it not `null` and the empty string otherwise.
+          ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+              <a for="violation">source file</a>, if |violation|'s
+              <a for="violation">source file</a> is not null, or null otherwise.
           :  {{SecurityPolicyViolationEvent/statusCode}}
           :: |violation|'s <a for="violation">status</a>
           :  {{SecurityPolicyViolationEvent/lineNumber}}
@@ -1841,12 +1866,12 @@ this algorithm returns normally if compilation is allowed, and throws a
               follows:
 
               :   {{CSPViolationReportBody/documentURL}}
-              ::  The result of executing the <a>URL serializer</a> on |violation|'s
-                  <a for="violation">url</a>, with the `exclude fragment` flag set.
+              ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+                  <a for="violation">url</a>.
 
               :   {{CSPViolationReportBody/referrer}}
-              ::  The result of executing the <a>URL serializer</a> on |violation|'s
-                  <a for="violation">referrer</a>, with the `exclude fragment` flag set.
+              ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+                  <a for="violation">referrer</a>.
 
               :   {{CSPViolationReportBody/blockedURL}}
               ::  The result of executing [[#obtain-violation-blocked-uri]] on |violation|'s
@@ -1860,11 +1885,9 @@ this algorithm returns normally if compilation is allowed, and throws a
                   <a for="violation">policy</a>.
 
               :   {{CSPViolationReportBody/sourceFile}}
-              ::  The result of executing the <a>URL serializer</a> on
-                  |violation|'s <a for="violation">source file</a>, with the
-                  `exclude fragment` flag set, if |violation|'s
-                  <a for="violation">source file</a> is not null, or null
-                  otherwise.
+              ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+                  <a for="violation">source file</a>, if |violation|'s
+                  <a for="violation">source file</a> is not null, or null otherwise.
 
               :   {{CSPViolationReportBody/sample}}
               ::  |violation|'s <a for="violation">sample</a>.
@@ -4894,7 +4917,7 @@ this algorithm returns normally if compilation is allowed, and throws a
   2.  Script requests which are triggered by non-<a>"parser-inserted"</a>
       <{script}> elements are allowed.
 
-  The first change allows you to deploy "<a grammar>`'strict-dynamic'`</a> in a
+  The first change allows you to deploy "<a grammar>`'strict-dynamic'`</a>" in a
   backwards compatible way, without requiring user-agent sniffing: the policy
   `'unsafe-inline' https: 'nonce-abcdefg' 'strict-dynamic'` will act like
   `'unsafe-inline' https:` in browsers that support CSP1, `https:
@@ -5051,6 +5074,47 @@ this algorithm returns normally if compilation is allowed, and throws a
         &lt;script integrity="sha256-abc123 <b>sha1024-abcd</b>" ...&gt;&lt;/script&gt;
         &lt;script integrity="sha512-321cba <b>entirely-invalid</b>" ...&gt;&lt;/script&gt;
         &lt;script integrity="sha256-abc123 <b>not-a-hash-at-all</b> sha512-321cba" ...&gt;&lt;/script&gt;
+      </pre>
+    </div>
+  </section>
+  
+  <section>
+    <h3 id="strict-csp">
+      Strict CSP
+    </h3>
+
+    Deployment of an effective CSP against XSS is a challenge (as described in
+    <a href="https://dl.acm.org/doi/10.1145/2976749.2978363">CSP Is Dead, Long
+    Live CSP!</a> [[LONG-LIVE-CSP]]). However, enforcing the following set of CSP
+    directives has been identified as an effective and deployable mitigation
+    against XSS.
+
+    1.  <em>script-src</em>: Only use <em>nonce</em> <a grammar>source-expression</a>
+        and/or <em>hash</em> <a grammar>source-expression</a> with the
+        "<a grammar>'strict-dynamic'</a>" <a grammar>keyword-source</a>.
+	
+	Note: While "<a grammar>'strict-dynamic'</a>" allows ease of deployment (as 
+	described in [[#strict-dynamic-usage]]), it should be avoided when possible.
+	
+	Note: For backwards compatibility, it is recommended to specify <em>https:</em>
+	<a grammar>scheme-source</a> with "<a grammar>'strict-dynamic'</a>".
+	
+    2.  <em>base-uri</em>: Specify a value of either "<a grammar>'self'</a>" or "<a grammar>'none'</a>".
+    
+    A CSP that meets the above criteria is called Strict CSP. Further details
+    are discussed in [[WEBDEV-STRICTCSP]].
+
+    <div class="example">
+      The following are examples of Strict CSP:
+      
+      Nonce-based Strict CSP:
+      <pre>
+        <a http-header>Content-Security-Policy</a>: script-src 'strict-dynamic' 'nonce-{RANDOM}'; base-uri 'self';
+      </pre>
+      
+      Hash-based Strict CSP:
+      <pre>
+        <a http-header>Content-Security-Policy</a>: script-src 'strict-dynamic' 'sha256-{HASHED_INLINE_SCRIPT}'; base-uri 'self';
       </pre>
     </div>
   </section>
