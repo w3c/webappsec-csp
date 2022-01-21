@@ -64,6 +64,7 @@ spec:infra;
     text:empty; for: set
     text:strictly split a string
 spec:webrtc; type:interface; text:RTCPeerConnection
+spec:webrtc; type:dfn; text:administratively-prohibited
 </pre>
 <pre class="anchors">
 spec: RFC6454; urlPrefix: https://tools.ietf.org/html/rfc6454
@@ -1407,8 +1408,8 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
 
   <h3 id="webrtc-integration">Integration with WebRTC</h3>
 
-  <p>The constructor for {{RTCPeerConnection}} calls [[#should-block-rtc-connection]] when
-  invoked, and throws an error if it returns "`Blocked`."</p>
+  <p>The {{administratively-prohibited}} algorithm calls [[#should-block-rtc-connection]]
+  when invoked, and prohibits all candidates if it returns "`Blocked`."</p>
 
   <h4 id="should-block-rtc-connection">
     Should RTC connections be blocked for |global|?
@@ -3286,12 +3287,14 @@ this algorithm returns normally if compilation is allowed, and throws a
       Content-Security-Policy: <a>webrtc</a> 'block'
     </pre>
 
-    In the following code, creating an {{RTCPeerConnection}} will throw; `webrtc`
-    does not allow connections:
+    In the following code, creating the call to `addIceCandidate` will
+    treat the candidate as {{administratively-prohibited}} and silently
+    ignore it; `webrtc` does not allow connections:
 
     <pre highlight="html">
       &lt;script&gt;
         const pc = new RTCPeerConnection();
+        pc.addIceCandidate("candidate:4234997325 1 udp 2043278322 192.168.0.56 44323 typ host");
       &lt;/script&gt;
     </pre>
   </div>
