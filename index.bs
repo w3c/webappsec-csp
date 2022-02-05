@@ -3287,15 +3287,34 @@ this algorithm returns normally if compilation is allowed, and throws a
       Content-Security-Policy: <a>webrtc</a> 'block'
     </pre>
 
-    In the following code, creating the call to `addIceCandidate` will
-    treat the candidate as [=administratively-prohibited=] and silently
-    ignore it; `webrtc` does not allow connections:
+    No local ICE candidates will be surfaced, as no STUN checks will be made
+    against the ICE server provided to the peer connection negotiated below; No
+    connectivity-checks will be attempted to any remote candidates provided by JS;
+    The connectionState will never transition to "connected" and instead transition
+    directly from its initial state of "new" to "failed" shortly. Attempts to
+    pc.restartIce() will repeat this outcome.
 
     <pre highlight="html">
       &lt;script&gt;
-        const pc = new RTCPeerConnection();
-        pc.addIceCandidate("candidate:4234997325 1 udp 2043278322 192.168.0.56 44323 typ host");
-      &lt;/script&gt;
+        const iceServers = [{urls: "stun:stun.l.google.com:19302"}];
+        const pc = new RTCPeerConnection({iceServers});
+        pc.createDataChannel("");
+        const io = new WebSocket('ws://example.com:8080');
+        pc.onicecandidate = ({candidate}) => io.send({candidate});
+        pc.onnegotiationneeded = async () => {
+          await pc.setLocalDescription();
+          io.send({description: pc.localDescription});
+        };
+        io.onmessage = async ({data: {description, candidate}}) => {
+          if (description) {
+            await pc.setRemoteDescription(description);
+            if (description.type == "offer") {
+              await pc.setLocalDescription();
+              io.send({description: pc.localDescription});
+            }
+          } else if (candidate) await pc.addIceCandidate(candidate);
+        };
+     &lt;/script&gt;
     </pre>
   </div>
 
