@@ -8,7 +8,7 @@
   <link href="https://www.w3.org/2008/site/images/favicon.ico" rel="icon">
   <meta content="Bikeshed version 2e3c4c68b, updated Fri Jan 14 14:49:00 2022 -0800" name="generator">
   <link href="https://www.w3.org/TR/CSP3/" rel="canonical">
-  <meta content="54fe8a8792fc19c7ccdf544f06e26f0ac8aa4123" name="document-revision">
+  <meta content="a284913a553b2f94fea41947afbc6a91c647209e" name="document-revision">
 <style>
   ul.toc ul ul ul {
     margin: 0 0 0 2em;
@@ -324,13 +324,13 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2021/logos/W3C" width="72"> </a> </p>
    <h1>Content Security Policy Level 3</h1>
-   <p id="w3c-state"><a href="https://www.w3.org/standards/types#WD">W3C Working Draft</a>, <time class="dt-updated" datetime="2022-01-25">25 January 2022</time></p>
+   <p id="w3c-state"><a href="https://www.w3.org/standards/types#WD">W3C Working Draft</a>, <time class="dt-updated" datetime="2022-02-23">23 February 2022</time></p>
    <details open>
     <summary>More details about this document</summary>
     <div data-fill-with="spec-metadata">
      <dl>
       <dt>This version:
-      <dd><a class="u-url" href="https://www.w3.org/TR/2022/WD-CSP3-20220125/">https://www.w3.org/TR/2022/WD-CSP3-20220125/</a>
+      <dd><a class="u-url" href="https://www.w3.org/TR/2022/WD-CSP3-20220223/">https://www.w3.org/TR/2022/WD-CSP3-20220223/</a>
       <dt>Latest published version:
       <dd><a href="https://www.w3.org/TR/CSP3/">https://www.w3.org/TR/CSP3/</a>
       <dt>Editor's Draft:
@@ -1609,53 +1609,49 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
   ECMAScript code. This document defines an implementation of that abstract
   operation which examines the relevant <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑥">CSP list</a> to determine whether such compilation ought to be blocked.</p>
     <h4 class="heading settled dfn-paneled algorithm" data-algorithm="EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source)" data-dfn-type="dfn" data-export data-level="4.3.1" data-lt="EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source)" id="can-compile-strings"><span class="secno">4.3.1. </span><span class="content"> EnsureCSPDoesNotBlockStringCompilation(<var>callerRealm</var>, <var>calleeRealm</var>, <var>source</var>) </span><a class="self-link" href="#can-compile-strings" id="ref-for-can-compile-strings"></a></h4>
-    <p>Given two <a data-link-type="dfn" href="https://tc39.github.io/ecma262#realm" id="ref-for-realm">realms</a> (<var>callerRealm</var> and <var>calleeRealm</var>), and a string (<var>source</var>), this algorithm
-  returns normally if string compilation is allowed, and throws an "<code>EvalError</code>" if not:</p>
+    <p>Given two <a data-link-type="dfn" href="https://tc39.github.io/ecma262#realm" id="ref-for-realm">realms</a> (<var>callerRealm</var> and <var>calleeRealm</var>),
+  and a string (<var>source</var>), this algorithm returns normally if string compilation
+  is allowed, and throws an "<code>EvalError</code>" if not:</p>
     <ol>
      <li data-md>
-      <p>Let <var>globals</var> be a list containing <var>callerRealm</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global" id="ref-for-concept-realm-global">global object</a> and <var>calleeRealm</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global" id="ref-for-concept-realm-global①">global object</a>.</p>
+      <p>Let <var>result</var> be "<code>Allowed</code>".</p>
      <li data-md>
-      <p>For each <var>global</var> in <var>globals</var>:</p>
+      <p>For each <var>policy</var> in <var>calleeRealm</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑦">CSP list</a>:</p>
       <ol>
        <li data-md>
-        <p>Let <var>result</var> be "<code>Allowed</code>".</p>
+        <p>Let <var>source-list</var> be <code>null</code>.</p>
        <li data-md>
-        <p>For each <var>policy</var> in <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑦">CSP list</a>:</p>
-        <ol>
-         <li data-md>
-          <p>Let <var>source-list</var> be <code>null</code>.</p>
-         <li data-md>
-          <p>If <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives⑧">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name⑥">name</a> is "<code>script-src</code>", then
+        <p>If <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives⑧">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name⑥">name</a> is "<code>script-src</code>", then
   set <var>source-list</var> to that <a data-link-type="dfn" href="#directives" id="ref-for-directives⑨">directive</a>'s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value⑤">value</a>.</p>
-          <p>Otherwise if <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives①⓪">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name⑦">name</a> is
+        <p>Otherwise if <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives①⓪">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name⑦">name</a> is
   "<code>default-src</code>", then set <var>source-list</var> to that directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value⑥">value</a>.</p>
-         <li data-md>
-          <p>If <var>source-list</var> is not <code>null</code>, and does not contain a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression②">source expression</a> which is
+       <li data-md>
+        <p>If <var>source-list</var> is not <code>null</code>, and does not contain a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression②">source expression</a> which is
   an <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ascii-case-insensitive" id="ref-for-ascii-case-insensitive①">ASCII case-insensitive</a> match for the string "<a data-link-type="grammar" href="#grammardef-unsafe-eval" id="ref-for-grammardef-unsafe-eval"><code>'unsafe-eval'</code></a>",
   then:</p>
-          <ol>
-           <li data-md>
-            <p>Let <var>violation</var> be the result of executing <a href="#create-violation-for-global">§ 2.4.1 Create a violation object for global, policy, and directive</a> on <var>global</var>, <var>policy</var>, and "<code>script-src</code>".</p>
-           <li data-md>
-            <p>Set <var>violation</var>’s <a data-link-type="dfn" href="#violation-resource" id="ref-for-violation-resource①⓪">resource</a> to "<code>eval</code>".</p>
-           <li data-md>
-            <p>If <var>source-list</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-contain" id="ref-for-list-contain②">contains</a> the expression
+        <ol>
+         <li data-md>
+          <p>Let <var>violation</var> be the result of executing <a href="#create-violation-for-global">§ 2.4.1 Create a violation object for global, policy, and directive</a> on <var>calleeRealm</var>, <var>policy</var>, and "<code>script-src</code>".</p>
+         <li data-md>
+          <p>Set <var>violation</var>’s <a data-link-type="dfn" href="#violation-resource" id="ref-for-violation-resource①⓪">resource</a> to "<code>eval</code>".</p>
+         <li data-md>
+          <p>If <var>source-list</var> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-contain" id="ref-for-list-contain②">contains</a> the expression
   "<a data-link-type="grammar" href="#grammardef-report-sample" id="ref-for-grammardef-report-sample②"><code>'report-sample'</code></a>", then set <var>violation</var>’s <a data-link-type="dfn" href="#violation-sample" id="ref-for-violation-sample③">sample</a> to
   the substring of <var>source</var> containing its first 40 characters.</p>
-           <li data-md>
-            <p>Execute <a href="#report-violation">§ 5.5 Report a violation</a> on <var>violation</var>.</p>
-           <li data-md>
-            <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①⑤">disposition</a> is "<code>enforce</code>", then set <var>result</var> to
+         <li data-md>
+          <p>Execute <a href="#report-violation">§ 5.5 Report a violation</a> on <var>violation</var>.</p>
+         <li data-md>
+          <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①⑤">disposition</a> is "<code>enforce</code>", then set <var>result</var> to
   "<code>Blocked</code>".</p>
-          </ol>
         </ol>
-       <li data-md>
-        <p>If <var>result</var> is "<code>Blocked</code>", throw an <code>EvalError</code> exception.</p>
       </ol>
+     <li data-md>
+      <p>If <var>result</var> is "<code>Blocked</code>", throw an <code>EvalError</code> exception.</p>
     </ol>
     <p class="issue" id="issue-d5a07bef"><a class="self-link" href="#issue-d5a07bef"></a> <code class="idl"><a data-link-type="idl" href="https://tc39.github.io/ecma262#sec-hostensurecancompilestrings" id="ref-for-sec-hostensurecancompilestrings①">HostEnsureCanCompileStrings()</a></code> does not include the string which is
   going to be compiled as a parameter. We’ll also need to update HTML to pipe that value through
   to CSP. <a href="https://github.com/tc39/ecma262/issues/938">[Issue #tc39/ecma262#938]</a></p>
+    <p class="note" role="note"><span>Note:</span> The parameter <var>callerRealm</var> is ignored on purpose, see <a href="https://github.com/w3c/webappsec-csp/issues/438">Issue 438</a>.</p>
     <h3 class="heading settled" data-level="4.4" id="wasm-integration"><span class="secno">4.4. </span><span class="content">Integration with WebAssembly</span><a class="self-link" href="#wasm-integration"></a></h3>
     <p>WebAssembly defines the <code class="idl"><a data-link-type="idl" href="https://webassembly.github.io/spec/js-api/#dom-host-ensure-can-compile-wasm-bytes" id="ref-for-dom-host-ensure-can-compile-wasm-bytes">HostEnsureCanCompileWasmBytes()</a></code> abstract operation
 which allows the host environment to block the compilation of WebAssembly
@@ -1667,7 +1663,7 @@ list</a> to determine whether such compilation ought to be blocked.</p>
 this algorithm returns normally if compilation is allowed, and throws a <code class="idl"><a data-link-type="idl" href="https://webassembly.github.io/spec/web-api/#exceptiondef-compileerror" id="ref-for-exceptiondef-compileerror">WebAssembly.CompileError</a></code> if not:</p>
     <ol>
      <li data-md>
-      <p>Let <var>globals</var> be a list containing <var>callerRealm</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global" id="ref-for-concept-realm-global②">global object</a> and <var>calleeRealm</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global" id="ref-for-concept-realm-global③">global object</a>.</p>
+      <p>Let <var>globals</var> be a list containing <var>callerRealm</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global" id="ref-for-concept-realm-global">global object</a> and <var>calleeRealm</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global" id="ref-for-concept-realm-global①">global object</a>.</p>
      <li data-md>
       <p>For each <var>global</var> in <var>globals</var>:</p>
       <ol>
@@ -6950,7 +6946,7 @@ rest of Google’s CSP Cabal.</p>
   <h3 class="no-num no-ref heading settled" id="informative"><span class="content">Informative References</span><a class="self-link" href="#informative"></a></h3>
   <dl>
    <dt id="biblio-appmanifest">[APPMANIFEST]
-   <dd>Marcos Caceres; et al. <a href="https://www.w3.org/TR/appmanifest/"><cite>Web Application Manifest</cite></a>. 18 December 2021. WD. URL: <a href="https://www.w3.org/TR/appmanifest/">https://www.w3.org/TR/appmanifest/</a>
+   <dd>Marcos Caceres; et al. <a href="https://www.w3.org/TR/appmanifest/"><cite>Web Application Manifest</cite></a>. 17 February 2022. WD. URL: <a href="https://www.w3.org/TR/appmanifest/">https://www.w3.org/TR/appmanifest/</a>
    <dt id="biblio-beacon">[BEACON]
    <dd>Ilya Grigorik; et al. <a href="https://www.w3.org/TR/beacon/"><cite>Beacon</cite></a>. 13 April 2017. CR. URL: <a href="https://www.w3.org/TR/beacon/">https://www.w3.org/TR/beacon/</a>
    <dt id="biblio-csp2">[CSP2]
