@@ -1408,49 +1408,48 @@ spec: WebAssembly-web-api-api; urlPrefix: https://webassembly.github.io/spec/web
     EnsureCSPDoesNotBlockStringCompilation(|callerRealm|, |calleeRealm|, |source|)
   </h4>
 
-  Given two <a>realms</a> (|callerRealm| and |calleeRealm|), and a string (|source|), this algorithm
-  returns normally if string compilation is allowed, and throws an "`EvalError`" if not:
+  Given two <a>realms</a> (<var ignore>callerRealm</var> and |calleeRealm|),
+  and a string (|source|), this algorithm returns normally if string compilation
+  is allowed, and throws an "`EvalError`" if not:
 
-  1.  Let |globals| be a list containing |callerRealm|'s [=Realm/global object=] and |calleeRealm|'s
-      [=Realm/global object=].
+  1.  Let |result| be "`Allowed`".
 
-  2.  For each |global| in |globals|:
+  2.  For each |policy| in |calleeRealm|'s [=global object/CSP list=]:
 
-      1.  Let |result| be "`Allowed`".
+      1.  Let |source-list| be `null`.
 
-      2.  For each |policy| in |global|'s [=global object/CSP list=]:
+      2.  If |policy| contains a [=directive=] whose [=directive/name=] is "`script-src`", then
+          set |source-list| to that [=directive=]'s [=directive/value=].
 
-          1.  Let |source-list| be `null`.
+          Otherwise if |policy| contains a [=directive=] whose [=directive/name=] is
+          "`default-src`", then set |source-list| to that directive's [=directive/value=].
 
-          2.  If |policy| contains a [=directive=] whose [=directive/name=] is "`script-src`", then
-              set |source-list| to that [=directive=]'s [=directive/value=].
+      3.  If |source-list| is not `null`, and does not contain a [=source expression=] which is
+          an [=ASCII case-insensitive=] match for the string "<a grammar>`'unsafe-eval'`</a>",
+          then:
 
-              Otherwise if |policy| contains a [=directive=] whose [=directive/name=] is
-              "`default-src`", then set |source-list| to that directive's [=directive/value=].
+          1.  Let |violation| be the result of executing [[#create-violation-for-global]] on
+              |calleeRealm|, |policy|, and "`script-src`".
 
-          3.  If |source-list| is not `null`, and does not contain a [=source expression=] which is
-              an [=ASCII case-insensitive=] match for the string "<a grammar>`'unsafe-eval'`</a>",
-              then:
+          2.  Set |violation|'s [=violation/resource=] to "`eval`".
 
-              1.  Let |violation| be the result of executing [[#create-violation-for-global]] on
-                  |global|, |policy|, and "`script-src`".
+          3.  If |source-list| [=list/contains=] the expression
+              "<a grammar>`'report-sample'`</a>", then set |violation|'s [=violation/sample=] to
+              the substring of |source| containing its first 40 characters.
 
-              2.  Set |violation|'s [=violation/resource=] to "`eval`".
+          4.  Execute [[#report-violation]] on |violation|.
 
-              3.  If |source-list| [=list/contains=] the expression
-                  "<a grammar>`'report-sample'`</a>", then set |violation|'s [=violation/sample=] to
-                  the substring of |source| containing its first 40 characters.
+          5.  If |policy|'s [=policy/disposition=] is "`enforce`", then set |result| to
+              "`Blocked`".
 
-              4.  Execute [[#report-violation]] on |violation|.
-
-              5.  If |policy|'s [=policy/disposition=] is "`enforce`", then set |result| to
-                  "`Blocked`".
-
-      3.  If |result| is "`Blocked`", throw an `EvalError` exception.
+  3.  If |result| is "`Blocked`", throw an `EvalError` exception.
 
   ISSUE(tc39/ecma262#938): {{HostEnsureCanCompileStrings()}} does not include the string which is
   going to be compiled as a parameter. We'll also need to update HTML to pipe that value through
   to CSP.
+
+  Note: The parameter |callerRealm| is ignored on purpose, see
+  <a href="https://github.com/w3c/webappsec-csp/issues/438">Issue 438</a>.
 
 <h3 id="wasm-integration">Integration with WebAssembly</h3>
 
