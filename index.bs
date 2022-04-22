@@ -154,6 +154,10 @@ spec: WebAssembly-web-api-api; urlPrefix: https://webassembly.github.io/spec/web
   type: exception
     text: WebAssembly.CompileError; url: #exceptiondef-compileerror
 
+spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
+  type:dfn
+    text: administratively-prohibited; url: #dfn-administratively-prohibited
+
 </pre>
 <pre class="biblio">
 {
@@ -633,6 +637,10 @@ spec: WebAssembly-web-api-api; urlPrefix: https://webassembly.github.io/spec/web
       a <a>response</a>, a <a>browsing context</a>, a check type string ("`source`"
       or "`response`"), and a <a for="/">policy</a> as arguments, and is executed during
       [[#should-block-navigation-response]]. It returns "`Allowed`" unless otherwise specified.
+
+  8.  A <dfn for="directive" export>webrtc pre-connect check</dfn>, which takes a [=/policy=], and
+      is executed during [[#should-block-rtc-connection]]. It returns "`Allowed`" unless
+      otherwise specified.
 
   <h4 id="framework-directive-source-list">Source Lists</h4>
 
@@ -1392,6 +1400,40 @@ spec: WebAssembly-web-api-api; urlPrefix: https://webassembly.github.io/spec/web
             1. Execute |directive|'s <a for="directive">initialization</a> algorithm on
                |global|. If its returned value is "`Blocked`", then set |result| to
                "`Blocked`".
+
+    3.  Return |result|.
+  </ol>
+
+  <h3 id="webrtc-integration">Integration with WebRTC</h3>
+
+  <p>The [=administratively-prohibited=] algorithm calls [[#should-block-rtc-connection]]
+  when invoked, and prohibits all candidates if it returns "`Blocked`".</p>
+
+  <h4 id="should-block-rtc-connection">
+    Should RTC connections be blocked for |global|?
+  </h4>
+
+  Given a [=/global object=] (|global|), this algorithm returns "`Blocked`"
+  if the active policy for |global| blocks RTC connections, and "`Allowed`" otherwise:
+
+  <ol class="algorithm">
+    1.  Let |result| be "`Allowed`".
+
+    2.  For each |policy| in |global|'s [=global object/CSP list=]:
+          1.  For each |directive| in |policy|:
+              1.  If |directive|'s <a for="directive">webrtc pre-connect check</a>
+                  returns "`Allowed`", [=iteration/continue=].
+
+              2.  Otherwise, let |violation| be the result of executing
+                  [[#create-violation-for-global]] on |global|, |policy|, and
+                  |directive|'s <a for="directive">name</a>.
+
+              3.  Set |violation|'s <a for="violation">resource</a> to `null`.
+
+              4.  Execute [[#report-violation]] on |violation|.
+
+              5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
+                  set |result| to "`Blocked`".
 
     3.  Return |result|.
   </ol>
@@ -3218,6 +3260,69 @@ this algorithm returns normally if compilation is allowed, and throws a
       and |source|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
+
+  <h3 id="directives-other">Other Directives</h3>
+
+  <h4 id="directive-webrtc">`webrtc`</h4>
+
+  The <dfn export>webrtc</dfn> directive restricts whether connections may be
+  established via WebRTC. The syntax for the directive's name and value is
+  described by the following ABNF:
+
+  <pre dfn-type="grammar" link-type="grammar">
+    directive-name  = "webrtc"
+    directive-value = "<dfn>'allow'</dfn>" / "<dfn>'block'</dfn>"
+  </pre>
+
+  <div class="example">
+    Given a page with the following Content Security Policy:
+
+    <pre>
+      Content-Security-Policy: <a>webrtc</a> 'block'
+    </pre>
+
+    No local ICE candidates will be surfaced, as no STUN checks will be made
+    against the ICE server provided to the peer connection negotiated below; No
+    connectivity-checks will be attempted to any remote candidates provided by JS;
+    The connectionState will never transition to "connected" and instead transition
+    directly from its initial state of "new" to "failed" shortly. Attempts to
+    pc.restartIce() will repeat this outcome.
+
+    <pre highlight="html">
+      &lt;script&gt;
+        const iceServers = [{urls: "stun:stun.l.google.com:19302"}];
+        const pc = new RTCPeerConnection({iceServers});
+        pc.createDataChannel("");
+        const io = new WebSocket('ws://example.com:8080');
+        pc.onicecandidate = ({candidate}) => io.send({candidate});
+        pc.onnegotiationneeded = async () => {
+          await pc.setLocalDescription();
+          io.send({description: pc.localDescription});
+        };
+        io.onmessage = async ({data: {description, candidate}}) => {
+          if (description) {
+            await pc.setRemoteDescription(description);
+            if (description.type == "offer") {
+              await pc.setLocalDescription();
+              io.send({description: pc.localDescription});
+            }
+          } else if (candidate) await pc.addIceCandidate(candidate);
+        };
+     &lt;/script&gt;
+    </pre>
+  </div>
+
+  <h5 algorithm id="webrtc-pre-connect">
+    `webrtc` Pre-connect Check
+  </h5>
+
+  This directive's <a for="directive">webrtc pre-connect check</a> is as follows:
+
+  1.  If this directive's [=directive/value=] contains a single item which is an
+      <a>ASCII case-insensitive</a> match for the string "<a grammar>`'allow'`</a>",
+      return "`Allowed`".
+
+  2.  Return "`Blocked`".
 
   <h4 id="directive-worker-src">`worker-src`</h4>
 
