@@ -6,9 +6,9 @@
   <meta content="WD" name="w3c-status">
   <link href="https://www.w3.org/StyleSheets/TR/2021/W3C-WD" rel="stylesheet">
   <link href="https://www.w3.org/2008/site/images/favicon.ico" rel="icon">
-  <meta content="Bikeshed version 2e3c4c68b, updated Fri Jan 14 14:49:00 2022 -0800" name="generator">
+  <meta content="Bikeshed version fb1e763a4, updated Tue Mar 1 13:13:50 2022 -0800" name="generator">
   <link href="https://www.w3.org/TR/CSP3/" rel="canonical">
-  <meta content="a284913a553b2f94fea41947afbc6a91c647209e" name="document-revision">
+  <meta content="4430aa55627d3b9ae600c8e62326d3852c2d7678" name="document-revision">
 <style>
   ul.toc ul ul ul {
     margin: 0 0 0 2em;
@@ -324,13 +324,13 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"><a class="logo" href="https://www.w3.org/"> <img alt="W3C" height="48" src="https://www.w3.org/StyleSheets/TR/2021/logos/W3C" width="72"> </a> </p>
    <h1>Content Security Policy Level 3</h1>
-   <p id="w3c-state"><a href="https://www.w3.org/standards/types#WD">W3C Working Draft</a>, <time class="dt-updated" datetime="2022-02-23">23 February 2022</time></p>
+   <p id="w3c-state"><a href="https://www.w3.org/standards/types#WD">W3C Working Draft</a>, <time class="dt-updated" datetime="2022-04-22">22 April 2022</time></p>
    <details open>
     <summary>More details about this document</summary>
     <div data-fill-with="spec-metadata">
      <dl>
       <dt>This version:
-      <dd><a class="u-url" href="https://www.w3.org/TR/2022/WD-CSP3-20220223/">https://www.w3.org/TR/2022/WD-CSP3-20220223/</a>
+      <dd><a class="u-url" href="https://www.w3.org/TR/2022/WD-CSP3-20220422/">https://www.w3.org/TR/2022/WD-CSP3-20220422/</a>
       <dt>Latest published version:
       <dd><a href="https://www.w3.org/TR/CSP3/">https://www.w3.org/TR/CSP3/</a>
       <dt>Editor's Draft:
@@ -462,7 +462,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
       <li>
        <a href="#ecma-integration"><span class="secno">4.3</span> <span class="content">Integration with ECMAScript</span></a>
        <ol class="toc">
-        <li><a href="#can-compile-strings"><span class="secno">4.3.1</span> <span class="content"> EnsureCSPDoesNotBlockStringCompilation(<var>callerRealm</var>, <var>calleeRealm</var>, <var>source</var>) </span></a>
+        <li><a href="#can-compile-strings"><span class="secno">4.3.1</span> <span class="content"> EnsureCSPDoesNotBlockStringCompilation(<var>realm</var>, <var>source</var>) </span></a>
        </ol>
       <li>
        <a href="#wasm-integration"><span class="secno">4.4</span> <span class="content">Integration with WebAssembly</span></a>
@@ -1608,15 +1608,17 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
   which allows the host environment to block the compilation of strings into
   ECMAScript code. This document defines an implementation of that abstract
   operation which examines the relevant <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑥">CSP list</a> to determine whether such compilation ought to be blocked.</p>
-    <h4 class="heading settled dfn-paneled algorithm" data-algorithm="EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source)" data-dfn-type="dfn" data-export data-level="4.3.1" data-lt="EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source)" id="can-compile-strings"><span class="secno">4.3.1. </span><span class="content"> EnsureCSPDoesNotBlockStringCompilation(<var>callerRealm</var>, <var>calleeRealm</var>, <var>source</var>) </span><a class="self-link" href="#can-compile-strings" id="ref-for-can-compile-strings"></a></h4>
-    <p>Given two <a data-link-type="dfn" href="https://tc39.github.io/ecma262#realm" id="ref-for-realm">realms</a> (<var>callerRealm</var> and <var>calleeRealm</var>),
-  and a string (<var>source</var>), this algorithm returns normally if string compilation
-  is allowed, and throws an "<code>EvalError</code>" if not:</p>
+    <h4 class="heading settled dfn-paneled algorithm" data-algorithm="EnsureCSPDoesNotBlockStringCompilation(realm, source)" data-dfn-type="dfn" data-export data-level="4.3.1" data-lt="EnsureCSPDoesNotBlockStringCompilation(realm, source)" id="can-compile-strings"><span class="secno">4.3.1. </span><span class="content"> EnsureCSPDoesNotBlockStringCompilation(<var>realm</var>, <var>source</var>) </span><a class="self-link" href="#can-compile-strings" id="ref-for-can-compile-strings"></a></h4>
+    <p>Given a <a data-link-type="dfn" href="https://tc39.github.io/ecma262#realm" id="ref-for-realm">realm</a> (<var>realm</var>) and a string (<var>source</var>), this algorithm
+  returns normally if string compilation is allowed, and throws an "<code>EvalError</code>"
+  if not:</p>
     <ol>
      <li data-md>
       <p>Let <var>result</var> be "<code>Allowed</code>".</p>
      <li data-md>
-      <p>For each <var>policy</var> in <var>calleeRealm</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑦">CSP list</a>:</p>
+      <p>Let <var>global</var> be <var>realm</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global" id="ref-for-concept-realm-global">global object</a>.</p>
+     <li data-md>
+      <p>For each <var>policy</var> in <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑦">CSP list</a>:</p>
       <ol>
        <li data-md>
         <p>Let <var>source-list</var> be <code>null</code>.</p>
@@ -1631,7 +1633,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
   then:</p>
         <ol>
          <li data-md>
-          <p>Let <var>violation</var> be the result of executing <a href="#create-violation-for-global">§ 2.4.1 Create a violation object for global, policy, and directive</a> on <var>calleeRealm</var>, <var>policy</var>, and "<code>script-src</code>".</p>
+          <p>Let <var>violation</var> be the result of executing <a href="#create-violation-for-global">§ 2.4.1 Create a violation object for global, policy, and directive</a> on <var>global</var>, <var>policy</var>, and "<code>script-src</code>".</p>
          <li data-md>
           <p>Set <var>violation</var>’s <a data-link-type="dfn" href="#violation-resource" id="ref-for-violation-resource①⓪">resource</a> to "<code>eval</code>".</p>
          <li data-md>
@@ -1651,7 +1653,6 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
     <p class="issue" id="issue-d5a07bef"><a class="self-link" href="#issue-d5a07bef"></a> <code class="idl"><a data-link-type="idl" href="https://tc39.github.io/ecma262#sec-hostensurecancompilestrings" id="ref-for-sec-hostensurecancompilestrings①">HostEnsureCanCompileStrings()</a></code> does not include the string which is
   going to be compiled as a parameter. We’ll also need to update HTML to pipe that value through
   to CSP. <a href="https://github.com/tc39/ecma262/issues/938">[Issue #tc39/ecma262#938]</a></p>
-    <p class="note" role="note"><span>Note:</span> The parameter <var>callerRealm</var> is ignored on purpose, see <a href="https://github.com/w3c/webappsec-csp/issues/438">Issue 438</a>.</p>
     <h3 class="heading settled" data-level="4.4" id="wasm-integration"><span class="secno">4.4. </span><span class="content">Integration with WebAssembly</span><a class="self-link" href="#wasm-integration"></a></h3>
     <p>WebAssembly defines the <code class="idl"><a data-link-type="idl" href="https://webassembly.github.io/spec/js-api/#dom-host-ensure-can-compile-wasm-bytes" id="ref-for-dom-host-ensure-can-compile-wasm-bytes">HostEnsureCanCompileWasmBytes()</a></code> abstract operation
 which allows the host environment to block the compilation of WebAssembly
@@ -1663,7 +1664,7 @@ list</a> to determine whether such compilation ought to be blocked.</p>
 this algorithm returns normally if compilation is allowed, and throws a <code class="idl"><a data-link-type="idl" href="https://webassembly.github.io/spec/web-api/#exceptiondef-compileerror" id="ref-for-exceptiondef-compileerror">WebAssembly.CompileError</a></code> if not:</p>
     <ol>
      <li data-md>
-      <p>Let <var>globals</var> be a list containing <var>callerRealm</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global" id="ref-for-concept-realm-global">global object</a> and <var>calleeRealm</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global" id="ref-for-concept-realm-global①">global object</a>.</p>
+      <p>Let <var>globals</var> be a list containing <var>callerRealm</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global" id="ref-for-concept-realm-global①">global object</a> and <var>calleeRealm</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global" id="ref-for-concept-realm-global②">global object</a>.</p>
      <li data-md>
       <p>For each <var>global</var> in <var>globals</var>:</p>
       <ol>
@@ -2120,7 +2121,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
     provided do not match <code>child-src</code>'s <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists">source list</a>:</p>
 <pre class="highlight"><c- p>&lt;</c-><c- f>iframe</c-> <c- e>src</c-><c- o>=</c-><c- s>"https://example.org"</c-><c- p>>&lt;/</c-><c- f>iframe</c-><c- p>></c->
 <c- p>&lt;</c-><c- f>script</c-><c- p>></c->
-  <c- a>var</c-> blockedWorker <c- o>=</c-> <c- k>new</c-> Worker<c- p>(</c-><c- u>"data:application/javascript,..."</c-><c- p>);</c->
+  <c- a>var</c-> blockedWorker <c- o>=</c-> <c- ow>new</c-> Worker<c- p>(</c-><c- u>"data:application/javascript,..."</c-><c- p>);</c->
 <c- p>&lt;/</c-><c- f>script</c-><c- p>></c->
 </pre>
     </div>
@@ -2176,13 +2177,13 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
     provided do not match <code>connect-src</code>'s <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists①">source list</a>:</p>
 <pre class="highlight"><c- p>&lt;</c-><c- f>a</c-> <c- e>ping</c-><c- o>=</c-><c- s>"https://example.org"</c-><c- p>></c->...
 <c- p>&lt;</c-><c- f>script</c-><c- p>></c->
-  <c- a>var</c-> xhr <c- o>=</c-> <c- k>new</c-> XMLHttpRequest<c- p>();</c->
+  <c- a>var</c-> xhr <c- o>=</c-> <c- ow>new</c-> XMLHttpRequest<c- p>();</c->
   xhr<c- p>.</c->open<c- p>(</c-><c- t>'GET'</c-><c- p>,</c-> <c- t>'https://example.org/'</c-><c- p>);</c->
   xhr<c- p>.</c->send<c- p>();</c->
 
-  <c- a>var</c-> ws <c- o>=</c-> <c- k>new</c-> WebSocket<c- p>(</c-><c- u>"wss://example.org/"</c-><c- p>);</c->
+  <c- a>var</c-> ws <c- o>=</c-> <c- ow>new</c-> WebSocket<c- p>(</c-><c- u>"wss://example.org/"</c-><c- p>);</c->
 
-  <c- a>var</c-> es <c- o>=</c-> <c- k>new</c-> EventSource<c- p>(</c-><c- u>"https://example.org/"</c-><c- p>);</c->
+  <c- a>var</c-> es <c- o>=</c-> <c- ow>new</c-> EventSource<c- p>(</c-><c- u>"https://example.org/"</c-><c- p>);</c->
 
   navigator<c- p>.</c->sendBeacon<c- p>(</c-><c- u>"https://example.org/"</c-><c- p>,</c-> <c- p>{</c-> <c- p>...</c-> <c- p>});</c->
 <c- p>&lt;/</c-><c- f>script</c-><c- p>></c->
@@ -3018,8 +3019,8 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
      <p>Fetches for the following code will return a network errors, as the URL
     provided do not match <code>worker-src</code>'s <a data-link-type="dfn" href="#source-lists" id="ref-for-source-lists①⓪">source list</a>:</p>
 <pre class="highlight"><c- p>&lt;</c-><c- f>script</c-><c- p>></c->
-  <c- a>var</c-> blockedWorker <c- o>=</c-> <c- k>new</c-> Worker<c- p>(</c-><c- u>"data:application/javascript,..."</c-><c- p>);</c->
-  blockedWorker <c- o>=</c-> <c- k>new</c-> SharedWorker<c- p>(</c-><c- u>"https://example.org/"</c-><c- p>);</c->
+  <c- a>var</c-> blockedWorker <c- o>=</c-> <c- ow>new</c-> Worker<c- p>(</c-><c- u>"data:application/javascript,..."</c-><c- p>);</c->
+  blockedWorker <c- o>=</c-> <c- ow>new</c-> SharedWorker<c- p>(</c-><c- u>"https://example.org/"</c-><c- p>);</c->
   navigator<c- p>.</c->serviceWorker<c- p>.</c->register<c- p>(</c-><c- t>'https://example.org/sw.js'</c-><c- p>);</c->
 <c- p>&lt;/</c-><c- f>script</c-><c- p>></c->
 </pre>
@@ -4673,7 +4674,7 @@ rest of Google’s CSP Cabal.</p>
    <li><a href="#violation-element">element</a><span>, in § 2.4</span>
    <li><a href="#dom-securitypolicyviolationeventdisposition-enforce">"enforce"</a><span>, in § 5.1</span>
    <li><a href="#enforced">enforced</a><span>, in § 4.2</span>
-   <li><a href="#can-compile-strings">EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source)</a><span>, in § 4.3</span>
+   <li><a href="#can-compile-strings">EnsureCSPDoesNotBlockStringCompilation(realm, source)</a><span>, in § 4.3</span>
    <li><a href="#can-compile-wasm-bytes">EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm)</a><span>, in § 4.4</span>
    <li><a href="#fetch-directives">Fetch directives</a><span>, in § 6.1</span>
    <li><a href="#font-src">font-src</a><span>, in § 6.1.4</span>
@@ -4989,7 +4990,7 @@ rest of Google’s CSP Cabal.</p>
    <ul>
     <li><a href="#ref-for-sec-hostensurecancompilestrings">4.3. Integration with ECMAScript</a>
     <li><a href="#ref-for-sec-hostensurecancompilestrings①">4.3.1. 
-    EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a>
+    EnsureCSPDoesNotBlockStringCompilation(realm, source) </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-sec-eval-x">
@@ -5003,7 +5004,7 @@ rest of Google’s CSP Cabal.</p>
    <a href="https://tc39.github.io/ecma262#realm">https://tc39.github.io/ecma262#realm</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-realm">4.3.1. 
-    EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a>
+    EnsureCSPDoesNotBlockStringCompilation(realm, source) </a>
     <li><a href="#ref-for-realm①">4.4.1. 
   EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a>
    </ul>
@@ -6002,7 +6003,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-ascii-case-insensitive">3.3. 
     The &lt;meta> element </a>
     <li><a href="#ref-for-ascii-case-insensitive①">4.3.1. 
-    EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a>
+    EnsureCSPDoesNotBlockStringCompilation(realm, source) </a>
     <li><a href="#ref-for-ascii-case-insensitive②">4.4.1. 
   EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a> <a href="#ref-for-ascii-case-insensitive③">(2)</a>
     <li><a href="#ref-for-ascii-case-insensitive④">6.3.3.1. 
@@ -6081,7 +6082,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-list-contain①">4.2.3. 
     Should element’s inline type behavior be blocked by Content Security Policy? </a>
     <li><a href="#ref-for-list-contain②">4.3.1. 
-    EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a>
+    EnsureCSPDoesNotBlockStringCompilation(realm, source) </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-iteration-continue">
@@ -7252,7 +7253,7 @@ rest of Google’s CSP Cabal.</p>
     Should navigation response to navigation request of type
     in target be blocked by Content Security Policy? </a> <a href="#ref-for-policy-disposition①④">(2)</a>
     <li><a href="#ref-for-policy-disposition①⑤">4.3.1. 
-    EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a>
+    EnsureCSPDoesNotBlockStringCompilation(realm, source) </a>
     <li><a href="#ref-for-policy-disposition①⑥">4.4.1. 
   EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a>
     <li><a href="#ref-for-policy-disposition①⑦">5.3. 
@@ -7381,7 +7382,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-directives⑦">4.1. 
     Integration with Fetch </a>
     <li><a href="#ref-for-directives⑧">4.3.1. 
-    EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a> <a href="#ref-for-directives⑨">(2)</a> <a href="#ref-for-directives①⓪">(3)</a>
+    EnsureCSPDoesNotBlockStringCompilation(realm, source) </a> <a href="#ref-for-directives⑨">(2)</a> <a href="#ref-for-directives①⓪">(3)</a>
     <li><a href="#ref-for-directives①①">4.4.1. 
   EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a> <a href="#ref-for-directives①②">(2)</a> <a href="#ref-for-directives①③">(3)</a>
     <li><a href="#ref-for-directives①④">5.5. 
@@ -7435,7 +7436,7 @@ rest of Google’s CSP Cabal.</p>
     Should navigation response to navigation request of type
     in target be blocked by Content Security Policy? </a> <a href="#ref-for-directive-name⑤">(2)</a>
     <li><a href="#ref-for-directive-name⑥">4.3.1. 
-    EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a> <a href="#ref-for-directive-name⑦">(2)</a>
+    EnsureCSPDoesNotBlockStringCompilation(realm, source) </a> <a href="#ref-for-directive-name⑦">(2)</a>
     <li><a href="#ref-for-directive-name⑧">4.4.1. 
   EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a> <a href="#ref-for-directive-name⑨">(2)</a>
     <li><a href="#ref-for-directive-name①⓪">6.1.1.1. 
@@ -7468,7 +7469,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-directive-value④">4.2.3. 
     Should element’s inline type behavior be blocked by Content Security Policy? </a>
     <li><a href="#ref-for-directive-value⑤">4.3.1. 
-    EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a> <a href="#ref-for-directive-value⑥">(2)</a>
+    EnsureCSPDoesNotBlockStringCompilation(realm, source) </a> <a href="#ref-for-directive-value⑥">(2)</a>
     <li><a href="#ref-for-directive-value⑦">4.4.1. 
   EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a> <a href="#ref-for-directive-value⑧">(2)</a>
     <li><a href="#ref-for-directive-value⑨">5.5. 
@@ -7768,7 +7769,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-source-expression">1.3. Changes from Level 2</a>
     <li><a href="#ref-for-source-expression①">2.3.1. Source Lists</a>
     <li><a href="#ref-for-source-expression②">4.3.1. 
-    EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a>
+    EnsureCSPDoesNotBlockStringCompilation(realm, source) </a>
     <li><a href="#ref-for-source-expression③">4.4.1. 
   EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a> <a href="#ref-for-source-expression④">(2)</a>
     <li><a href="#ref-for-source-expression⑤">6.3.3.1. 
@@ -7945,7 +7946,7 @@ rest of Google’s CSP Cabal.</p>
    <b><a href="#grammardef-unsafe-eval">#grammardef-unsafe-eval</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-grammardef-unsafe-eval">4.3.1. 
-    EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a>
+    EnsureCSPDoesNotBlockStringCompilation(realm, source) </a>
     <li><a href="#ref-for-grammardef-unsafe-eval①">4.4.1. 
   EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a>
    </ul>
@@ -7981,7 +7982,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-grammardef-report-sample①">4.2.3. 
     Should element’s inline type behavior be blocked by Content Security Policy? </a>
     <li><a href="#ref-for-grammardef-report-sample②">4.3.1. 
-    EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a>
+    EnsureCSPDoesNotBlockStringCompilation(realm, source) </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="grammardef-unsafe-allow-redirects">
@@ -8122,7 +8123,7 @@ rest of Google’s CSP Cabal.</p>
     Should navigation response to navigation request of type
     in target be blocked by Content Security Policy? </a> <a href="#ref-for-violation-resource⑨">(2)</a>
     <li><a href="#ref-for-violation-resource①⓪">4.3.1. 
-    EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a>
+    EnsureCSPDoesNotBlockStringCompilation(realm, source) </a>
     <li><a href="#ref-for-violation-resource①①">4.4.1. 
   EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a>
     <li><a href="#ref-for-violation-resource①②">5.2. 
@@ -8225,7 +8226,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-violation-sample②">4.2.3. 
     Should element’s inline type behavior be blocked by Content Security Policy? </a>
     <li><a href="#ref-for-violation-sample③">4.3.1. 
-    EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a>
+    EnsureCSPDoesNotBlockStringCompilation(realm, source) </a>
     <li><a href="#ref-for-violation-sample④">5.3. 
     Obtain the deprecated serialization of violation </a>
     <li><a href="#ref-for-violation-sample⑤">5.5. 
@@ -8322,7 +8323,7 @@ rest of Google’s CSP Cabal.</p>
     Run CSP initialization for a global object. </a>
     <li><a href="#ref-for-global-object-csp-list⑥">4.3. Integration with ECMAScript</a>
     <li><a href="#ref-for-global-object-csp-list⑦">4.3.1. 
-    EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a>
+    EnsureCSPDoesNotBlockStringCompilation(realm, source) </a>
     <li><a href="#ref-for-global-object-csp-list⑧">4.4. Integration with WebAssembly</a>
     <li><a href="#ref-for-global-object-csp-list⑨">4.4.1. 
   EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a>
@@ -8406,7 +8407,7 @@ rest of Google’s CSP Cabal.</p>
    <b><a href="#can-compile-strings">#can-compile-strings</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-can-compile-strings">4.3.1. 
-    EnsureCSPDoesNotBlockStringCompilation(callerRealm, calleeRealm, source) </a>
+    EnsureCSPDoesNotBlockStringCompilation(realm, source) </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="can-compile-wasm-bytes">
