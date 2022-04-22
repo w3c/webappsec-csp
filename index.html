@@ -8,7 +8,7 @@
   <link href="https://www.w3.org/2008/site/images/favicon.ico" rel="icon">
   <meta content="Bikeshed version fb1e763a4, updated Tue Mar 1 13:13:50 2022 -0800" name="generator">
   <link href="https://www.w3.org/TR/CSP3/" rel="canonical">
-  <meta content="4430aa55627d3b9ae600c8e62326d3852c2d7678" name="document-revision">
+  <meta content="f8687bd08ea095bef673cf1a3e258bd34772c816" name="document-revision">
 <style>
   ul.toc ul ul ul {
     margin: 0 0 0 2em;
@@ -467,7 +467,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
       <li>
        <a href="#wasm-integration"><span class="secno">4.4</span> <span class="content">Integration with WebAssembly</span></a>
        <ol class="toc">
-        <li><a href="#can-compile-wasm-bytes"><span class="secno">4.4.1</span> <span class="content"> EnsureCSPDoesNotBlockWasmByteCompilation(<var>callerRealm</var>, <var>calleeRealm</var>) </span></a>
+        <li><a href="#can-compile-wasm-bytes"><span class="secno">4.4.1</span> <span class="content"> EnsureCSPDoesNotBlockWasmByteCompilation(<var>realm</var>) </span></a>
        </ol>
      </ol>
     <li>
@@ -1659,47 +1659,43 @@ which allows the host environment to block the compilation of WebAssembly
 sources into executable code. This document defines an implementation of this
 abstract operation which examines the relevant <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑧">CSP
 list</a> to determine whether such compilation ought to be blocked.</p>
-    <h4 class="heading settled dfn-paneled algorithm" data-algorithm="EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm)" data-dfn-type="dfn" data-level="4.4.1" data-lt="EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm)" data-noexport id="can-compile-wasm-bytes"><span class="secno">4.4.1. </span><span class="content"> EnsureCSPDoesNotBlockWasmByteCompilation(<var>callerRealm</var>, <var>calleeRealm</var>) </span><a class="self-link" href="#can-compile-wasm-bytes" id="ref-for-can-compile-wasm-bytes"></a></h4>
-    <p>Given two <a data-link-type="dfn" href="https://tc39.github.io/ecma262#realm" id="ref-for-realm①">realms</a> (<var>callerRealm</var> and <var>calleeRealm</var>),
+    <h4 class="heading settled dfn-paneled algorithm" data-algorithm="EnsureCSPDoesNotBlockWasmByteCompilation(realm)" data-dfn-type="dfn" data-level="4.4.1" data-lt="EnsureCSPDoesNotBlockWasmByteCompilation(realm)" data-noexport id="can-compile-wasm-bytes"><span class="secno">4.4.1. </span><span class="content"> EnsureCSPDoesNotBlockWasmByteCompilation(<var>realm</var>) </span><a class="self-link" href="#can-compile-wasm-bytes" id="ref-for-can-compile-wasm-bytes"></a></h4>
+    <p>Given a <a data-link-type="dfn" href="https://tc39.github.io/ecma262#realm" id="ref-for-realm①">realm</a> (<var>realm</var>),
 this algorithm returns normally if compilation is allowed, and throws a <code class="idl"><a data-link-type="idl" href="https://webassembly.github.io/spec/web-api/#exceptiondef-compileerror" id="ref-for-exceptiondef-compileerror">WebAssembly.CompileError</a></code> if not:</p>
     <ol>
      <li data-md>
-      <p>Let <var>globals</var> be a list containing <var>callerRealm</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global" id="ref-for-concept-realm-global①">global object</a> and <var>calleeRealm</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global" id="ref-for-concept-realm-global②">global object</a>.</p>
+      <p>Let <var>global</var> be <var>realm</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global" id="ref-for-concept-realm-global①">global object</a>.</p>
      <li data-md>
-      <p>For each <var>global</var> in <var>globals</var>:</p>
+      <p>Let <var>result</var> be "<code>Allowed</code>".</p>
+     <li data-md>
+      <p>For each <var>policy</var> in <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑨">CSP list</a>:</p>
       <ol>
        <li data-md>
-        <p>Let <var>result</var> be "<code>Allowed</code>".</p>
+        <p>Let <var>source-list</var> be <code>null</code>.</p>
        <li data-md>
-        <p>For each <var>policy</var> in <var>global</var>’s <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list⑨">CSP list</a>:</p>
-        <ol>
-         <li data-md>
-          <p>Let <var>source-list</var> be <code>null</code>.</p>
-         <li data-md>
-          <p>If <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives①①">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name⑧">name</a> is "<code>script-src</code>", then
+        <p>If <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives①①">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name⑧">name</a> is "<code>script-src</code>", then
   set <var>source-list</var> to that <a data-link-type="dfn" href="#directives" id="ref-for-directives①②">directive</a>'s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value⑦">value</a>.</p>
-          <p>Otherwise if <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives①③">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name⑨">name</a> is
+        <p>Otherwise if <var>policy</var> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives①③">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name⑨">name</a> is
   "<code>default-src</code>", then set <var>source-list</var> to that directive’s <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value⑧">value</a>.</p>
-         <li data-md>
-          <p>If <var>source-list</var> is non-<code>null</code>, and does not contain a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression③">source
+       <li data-md>
+        <p>If <var>source-list</var> is non-<code>null</code>, and does not contain a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression③">source
   expression</a> which is an <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ascii-case-insensitive" id="ref-for-ascii-case-insensitive②">ASCII case-insensitive</a> match for the
   string "<a data-link-type="grammar" href="#grammardef-unsafe-eval" id="ref-for-grammardef-unsafe-eval①"><code>'unsafe-eval'</code></a>", and does not contain a <a data-link-type="dfn" href="#source-expression" id="ref-for-source-expression④">source expression</a> which is an <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ascii-case-insensitive" id="ref-for-ascii-case-insensitive③">ASCII case-insensitive</a> match
   for the string "<a data-link-type="grammar" href="#grammardef-wasm-unsafe-eval" id="ref-for-grammardef-wasm-unsafe-eval"><code>'wasm-unsafe-eval'</code></a>", then:</p>
-          <ol>
-           <li data-md>
-            <p>Let <var>violation</var> be the result of executing <a href="#create-violation-for-global">§ 2.4.1 Create a violation object for global, policy, and directive</a> on <var>global</var>, <var>policy</var>, and "<code>script-src</code>".</p>
-           <li data-md>
-            <p>Set <var>violation</var>’s <a data-link-type="dfn" href="#violation-resource" id="ref-for-violation-resource①①">resource</a> to "<code>wasm-eval</code>".</p>
-           <li data-md>
-            <p>Execute <a href="#report-violation">§ 5.5 Report a violation</a> on <var>violation</var>.</p>
-           <li data-md>
-            <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①⑥">disposition</a> is "<code>enforce</code>", then set <var>result</var> to
+        <ol>
+         <li data-md>
+          <p>Let <var>violation</var> be the result of executing <a href="#create-violation-for-global">§ 2.4.1 Create a violation object for global, policy, and directive</a> on <var>global</var>, <var>policy</var>, and "<code>script-src</code>".</p>
+         <li data-md>
+          <p>Set <var>violation</var>’s <a data-link-type="dfn" href="#violation-resource" id="ref-for-violation-resource①①">resource</a> to "<code>wasm-eval</code>".</p>
+         <li data-md>
+          <p>Execute <a href="#report-violation">§ 5.5 Report a violation</a> on <var>violation</var>.</p>
+         <li data-md>
+          <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①⑥">disposition</a> is "<code>enforce</code>", then set <var>result</var> to
   "<code>Blocked</code>".</p>
-          </ol>
         </ol>
-       <li data-md>
-        <p>If <var>result</var> is "<code>Blocked</code>", throw a <code class="idl"><a data-link-type="idl" href="https://webassembly.github.io/spec/web-api/#exceptiondef-compileerror" id="ref-for-exceptiondef-compileerror①">WebAssembly.CompileError</a></code> exception.</p>
       </ol>
+     <li data-md>
+      <p>If <var>result</var> is "<code>Blocked</code>", throw a <code class="idl"><a data-link-type="idl" href="https://webassembly.github.io/spec/web-api/#exceptiondef-compileerror" id="ref-for-exceptiondef-compileerror①">WebAssembly.CompileError</a></code> exception.</p>
     </ol>
    </section>
    <section>
@@ -4675,7 +4671,7 @@ rest of Google’s CSP Cabal.</p>
    <li><a href="#dom-securitypolicyviolationeventdisposition-enforce">"enforce"</a><span>, in § 5.1</span>
    <li><a href="#enforced">enforced</a><span>, in § 4.2</span>
    <li><a href="#can-compile-strings">EnsureCSPDoesNotBlockStringCompilation(realm, source)</a><span>, in § 4.3</span>
-   <li><a href="#can-compile-wasm-bytes">EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm)</a><span>, in § 4.4</span>
+   <li><a href="#can-compile-wasm-bytes">EnsureCSPDoesNotBlockWasmByteCompilation(realm)</a><span>, in § 4.4</span>
    <li><a href="#fetch-directives">Fetch directives</a><span>, in § 6.1</span>
    <li><a href="#font-src">font-src</a><span>, in § 6.1.4</span>
    <li><a href="#form-action">form-action</a><span>, in § 6.3.1</span>
@@ -5006,7 +5002,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-realm">4.3.1. 
     EnsureCSPDoesNotBlockStringCompilation(realm, source) </a>
     <li><a href="#ref-for-realm①">4.4.1. 
-  EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a>
+  EnsureCSPDoesNotBlockWasmByteCompilation(realm) </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-utf-8-encode">
@@ -6005,7 +6001,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-ascii-case-insensitive①">4.3.1. 
     EnsureCSPDoesNotBlockStringCompilation(realm, source) </a>
     <li><a href="#ref-for-ascii-case-insensitive②">4.4.1. 
-  EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a> <a href="#ref-for-ascii-case-insensitive③">(2)</a>
+  EnsureCSPDoesNotBlockWasmByteCompilation(realm) </a> <a href="#ref-for-ascii-case-insensitive③">(2)</a>
     <li><a href="#ref-for-ascii-case-insensitive④">6.3.3.1. 
     navigate-to Pre-Navigation Check </a>
     <li><a href="#ref-for-ascii-case-insensitive⑤">6.3.3.2. 
@@ -6552,7 +6548,7 @@ rest of Google’s CSP Cabal.</p>
    <a href="https://webassembly.github.io/spec/web-api/#exceptiondef-compileerror">https://webassembly.github.io/spec/web-api/#exceptiondef-compileerror</a><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-exceptiondef-compileerror">4.4.1. 
-  EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a> <a href="#ref-for-exceptiondef-compileerror①">(2)</a>
+  EnsureCSPDoesNotBlockWasmByteCompilation(realm) </a> <a href="#ref-for-exceptiondef-compileerror①">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-dom-webassembly-compilestreaming">
@@ -7255,7 +7251,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-policy-disposition①⑤">4.3.1. 
     EnsureCSPDoesNotBlockStringCompilation(realm, source) </a>
     <li><a href="#ref-for-policy-disposition①⑥">4.4.1. 
-  EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a>
+  EnsureCSPDoesNotBlockWasmByteCompilation(realm) </a>
     <li><a href="#ref-for-policy-disposition①⑦">5.3. 
     Obtain the deprecated serialization of violation </a>
     <li><a href="#ref-for-policy-disposition①⑧">6.2.1.1. 
@@ -7384,7 +7380,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-directives⑧">4.3.1. 
     EnsureCSPDoesNotBlockStringCompilation(realm, source) </a> <a href="#ref-for-directives⑨">(2)</a> <a href="#ref-for-directives①⓪">(3)</a>
     <li><a href="#ref-for-directives①①">4.4.1. 
-  EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a> <a href="#ref-for-directives①②">(2)</a> <a href="#ref-for-directives①③">(3)</a>
+  EnsureCSPDoesNotBlockWasmByteCompilation(realm) </a> <a href="#ref-for-directives①②">(2)</a> <a href="#ref-for-directives①③">(3)</a>
     <li><a href="#ref-for-directives①④">5.5. 
     Report a violation </a> <a href="#ref-for-directives①⑤">(2)</a> <a href="#ref-for-directives①⑥">(3)</a>
     <li><a href="#ref-for-directives①⑦">6. 
@@ -7438,7 +7434,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-directive-name⑥">4.3.1. 
     EnsureCSPDoesNotBlockStringCompilation(realm, source) </a> <a href="#ref-for-directive-name⑦">(2)</a>
     <li><a href="#ref-for-directive-name⑧">4.4.1. 
-  EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a> <a href="#ref-for-directive-name⑨">(2)</a>
+  EnsureCSPDoesNotBlockWasmByteCompilation(realm) </a> <a href="#ref-for-directive-name⑨">(2)</a>
     <li><a href="#ref-for-directive-name①⓪">6.1.1.1. 
     child-src Pre-request check </a>
     <li><a href="#ref-for-directive-name①①">6.1.1.2. 
@@ -7471,7 +7467,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-directive-value⑤">4.3.1. 
     EnsureCSPDoesNotBlockStringCompilation(realm, source) </a> <a href="#ref-for-directive-value⑥">(2)</a>
     <li><a href="#ref-for-directive-value⑦">4.4.1. 
-  EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a> <a href="#ref-for-directive-value⑧">(2)</a>
+  EnsureCSPDoesNotBlockWasmByteCompilation(realm) </a> <a href="#ref-for-directive-value⑧">(2)</a>
     <li><a href="#ref-for-directive-value⑨">5.5. 
     Report a violation </a> <a href="#ref-for-directive-value①⓪">(2)</a>
     <li><a href="#ref-for-directive-value①①">6.1.1.1. 
@@ -7771,7 +7767,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-source-expression②">4.3.1. 
     EnsureCSPDoesNotBlockStringCompilation(realm, source) </a>
     <li><a href="#ref-for-source-expression③">4.4.1. 
-  EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a> <a href="#ref-for-source-expression④">(2)</a>
+  EnsureCSPDoesNotBlockWasmByteCompilation(realm) </a> <a href="#ref-for-source-expression④">(2)</a>
     <li><a href="#ref-for-source-expression⑤">6.3.3.1. 
     navigate-to Pre-Navigation Check </a>
     <li><a href="#ref-for-source-expression⑥">6.3.3.2. 
@@ -7948,7 +7944,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-grammardef-unsafe-eval">4.3.1. 
     EnsureCSPDoesNotBlockStringCompilation(realm, source) </a>
     <li><a href="#ref-for-grammardef-unsafe-eval①">4.4.1. 
-  EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a>
+  EnsureCSPDoesNotBlockWasmByteCompilation(realm) </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="grammardef-strict-dynamic">
@@ -7998,7 +7994,7 @@ rest of Google’s CSP Cabal.</p>
    <b><a href="#grammardef-wasm-unsafe-eval">#grammardef-wasm-unsafe-eval</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-grammardef-wasm-unsafe-eval">4.4.1. 
-  EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a>
+  EnsureCSPDoesNotBlockWasmByteCompilation(realm) </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="grammardef-nonce-source">
@@ -8125,7 +8121,7 @@ rest of Google’s CSP Cabal.</p>
     <li><a href="#ref-for-violation-resource①⓪">4.3.1. 
     EnsureCSPDoesNotBlockStringCompilation(realm, source) </a>
     <li><a href="#ref-for-violation-resource①①">4.4.1. 
-  EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a>
+  EnsureCSPDoesNotBlockWasmByteCompilation(realm) </a>
     <li><a href="#ref-for-violation-resource①②">5.2. 
     Obtain the blockedURI of a violation’s resource </a>
     <li><a href="#ref-for-violation-resource①③">5.3. 
@@ -8326,7 +8322,7 @@ rest of Google’s CSP Cabal.</p>
     EnsureCSPDoesNotBlockStringCompilation(realm, source) </a>
     <li><a href="#ref-for-global-object-csp-list⑧">4.4. Integration with WebAssembly</a>
     <li><a href="#ref-for-global-object-csp-list⑨">4.4.1. 
-  EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a>
+  EnsureCSPDoesNotBlockWasmByteCompilation(realm) </a>
     <li><a href="#ref-for-global-object-csp-list①⓪">6.2.1.1. 
     Is base allowed for document? </a>
     <li><a href="#ref-for-global-object-csp-list①①">7.8. 
@@ -8414,7 +8410,7 @@ rest of Google’s CSP Cabal.</p>
    <b><a href="#can-compile-wasm-bytes">#can-compile-wasm-bytes</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-can-compile-wasm-bytes">4.4.1. 
-  EnsureCSPDoesNotBlockWasmByteCompilation(callerRealm, calleeRealm) </a>
+  EnsureCSPDoesNotBlockWasmByteCompilation(realm) </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="csp-violation-report">
