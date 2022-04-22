@@ -1459,47 +1459,44 @@ abstract operation which examines the relevant <a for="global object">CSP
 list</a> to determine whether such compilation ought to be blocked.
 
 <h4 id="can-compile-wasm-bytes" algorithm dfn>
-  EnsureCSPDoesNotBlockWasmByteCompilation(|callerRealm|, |calleeRealm|)
+  EnsureCSPDoesNotBlockWasmByteCompilation(|realm|)
 </h4>
 
-Given two <a>realms</a> (|callerRealm| and |calleeRealm|),
+Given a <a>realm</a> (|realm|),
 this algorithm returns normally if compilation is allowed, and throws a 
 {{WebAssembly.CompileError}} if not:
 
-1.  Let |globals| be a list containing |callerRealm|'s [=Realm/global object=] and |calleeRealm|'s
-    [=Realm/global object=].
+1.  Let |global| be |realm|'s [=Realm/global object=].
 
-2.  For each |global| in |globals|:
+2.  Let |result| be "`Allowed`".
 
-    1.  Let |result| be "`Allowed`".
+3.  For each |policy| in |global|'s [=global object/CSP list=]:
 
-    2.  For each |policy| in |global|'s [=global object/CSP list=]:
+    1.  Let |source-list| be `null`.
 
-        1.  Let |source-list| be `null`.
+    2.  If |policy| contains a [=directive=] whose [=directive/name=] is "`script-src`", then
+        set |source-list| to that [=directive=]'s [=directive/value=].
 
-        2.  If |policy| contains a [=directive=] whose [=directive/name=] is "`script-src`", then
-            set |source-list| to that [=directive=]'s [=directive/value=].
+        Otherwise if |policy| contains a [=directive=] whose [=directive/name=] is
+        "`default-src`", then set |source-list| to that directive's [=directive/value=].
 
-            Otherwise if |policy| contains a [=directive=] whose [=directive/name=] is
-            "`default-src`", then set |source-list| to that directive's [=directive/value=].
+    3.  If |source-list| is non-`null`, and does not contain a [=source
+        expression=] which is an [=ASCII case-insensitive=] match for the
+        string "<a grammar>`'unsafe-eval'`</a>", and does not contain a
+        [=source expression=] which is an [=ASCII case-insensitive=] match
+        for the string "<a grammar>`'wasm-unsafe-eval'`</a>", then:
 
-        3.  If |source-list| is non-`null`, and does not contain a [=source
-            expression=] which is an [=ASCII case-insensitive=] match for the
-            string "<a grammar>`'unsafe-eval'`</a>", and does not contain a
-            [=source expression=] which is an [=ASCII case-insensitive=] match
-            for the string "<a grammar>`'wasm-unsafe-eval'`</a>", then:
+        1.  Let |violation| be the result of executing [[#create-violation-for-global]] on
+            |global|, |policy|, and "`script-src`".
 
-            1.  Let |violation| be the result of executing [[#create-violation-for-global]] on
-                |global|, |policy|, and "`script-src`".
+        2.  Set |violation|'s [=violation/resource=] to "`wasm-eval`".
 
-            2.  Set |violation|'s [=violation/resource=] to "`wasm-eval`".
+        3.  Execute [[#report-violation]] on |violation|.
 
-            3.  Execute [[#report-violation]] on |violation|.
+        4.  If |policy|'s [=policy/disposition=] is "`enforce`", then set |result| to
+            "`Blocked`".
 
-            4.  If |policy|'s [=policy/disposition=] is "`enforce`", then set |result| to
-                "`Blocked`".
-
-    3.  If |result| is "`Blocked`", throw a {{WebAssembly.CompileError}} exception.
+4.  If |result| is "`Blocked`", throw a {{WebAssembly.CompileError}} exception.
 
 </section>
   
