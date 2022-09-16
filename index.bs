@@ -376,10 +376,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
       metadata which is listed in the current policy. Details in
       [[#external-hash]].
 
-  11. The <a>`navigate-to`</a> directive gives a resource control over the endpoints
-      to which it can initiate navigation.
-
-  12. Reports generated for inline violations will contain a <a for="violation">sample</a>
+  11. Reports generated for inline violations will contain a <a for="violation">sample</a>
       attribute if the relevant directive contains the <a grammar>`'report-sample'`</a>
       expression.
 </section>
@@ -1355,7 +1352,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     3.  For each |policy| in |navigation request|'s <a for="request">policy container</a>'s
         <a for="policy container">CSP list</a>:
 
-        Note: Some directives in the |navigation request|'s context (like <a>navigate-to</a>)
+        Note: Some directives in the |navigation request|'s context (like <a>frame-ancestors</a>)
         need the |response| before acting on the navigation.
 
         1.  For each |directive| in |policy|:
@@ -3633,111 +3630,6 @@ this algorithm returns normally if compilation is allowed, and throws a
   <a>`frame-ancestors`</a> and whose <a for="policy">disposition</a> is
   "`enforce`", then the \`<code>[:X-Frame-Options:]</code>\` header will be
   ignored, per <cite>HTML</cite>'s processing model.
-
-  <h4 id="directive-navigate-to">`navigate-to`</h4>
-
-  The <dfn export>navigate-to</dfn> directive restricts the {{URL}}s to which
-  a <a>document</a> can initiate navigations by any means (<{a}>, <{form}>, `window.location`,
-  `window.open`, etc.). This is an enforcement on what navigations this <a>document</a>
-  initiates `not` on what this <a>document</a> is allowed to navigate to.
-  If the <a>form-action</a> directive is present, the <a>navigate-to</a> directive
-  will not act on navigations that are form submissions.
-
-  <div class="example">
-    A <a>document</a> |initiator| has the following `Content-Security-Policy`:
-    <pre>
-      <a http-header>Content-Security-Policy</a>: navigate-to example.com
-    </pre>
-    A <a>document</a> |target| has the following `Content-Security-Policy`:
-    <pre>
-      <a http-header>Content-Security-Policy</a>: navigate-to not-example.com
-    </pre>
-
-    If the |initiator| attempts to navigate the |target| to `example.com`, the
-    navigation is allowed by the `navigate-to` directive.
-
-    If the |initiator| attempts to navigate the |target| to `not-example.com`,
-    the navigation is blocked by the `navigate-to` directive.
-  </div>
-
-
-  The directive's syntax is described by the following ABNF grammar:
-
-  <pre dfn-type="grammar" link-type="grammar" class="abnf">
-    directive-name  = "navigate-to"
-    directive-value = <a>serialized-source-list</a>
-  </pre>
-
-
-  <h5 algorithm id="navigate-to-pre-navigate">
-    `navigate-to` Pre-Navigation Check
-  </h5>
-
-  Given a <a for="/">request</a> (|request|), a string |navigation type| ("`form-submission`" or
-  "`other`"), and a <a for="/">policy</a> (|policy|), this algorithm returns "`Blocked`"
-  if the navigation violates the `navigate-to` directive's constraints, and
-  "`Allowed`" otherwise. This constitutes the `navigate-to`' directive's <a>pre-navigation check</a>:
-
-  <ol class="algorithm">
-    1.  If |navigation type| is "`form-submission`" and |policy| contains a
-        <a>directive</a> named "`form-action`", return "`Allowed`".
-
-    2.  If this directive's <a for="directive">value</a> contains a <a>source
-        expression</a> that is an <a>ASCII case-insensitive</a> match for
-        the "<a grammar>`'unsafe-allow-redirects'`</a>"
-        <a grammar>keyword-source</a>, return "`Allowed`".
-
-        Note: If the 'unsafe-allow-redirects' flag is present we have to
-        wait for the <a>response</a> and take into account the <a>response</a>'s
-        <a for="response">status</a> in [[#navigate-to-navigation-response]].
-
-    3.  If the result of executing [[#match-request-to-source-list]] on
-        |request|, this directive's <a for="directive">value</a>, and |policy|,
-        is "`Does Not Match`", return "`Blocked`".
-
-    4.  Return "`Allowed`".
-  </ol>
-
-  <h5 algorithm id="navigate-to-navigation-response">
-    `navigate-to` Navigation Response Check
-  </h5>
-
-  Given a <a for="/">request</a> (|request|), a string |navigation type|
-  ("`form-submission`" or "`other`"), a <a>response</a> (|navigation response|)
-  a <a>browsing context</a> (|target|), a string |check type|
-  ("`source`" or "`response`"), and a <a for="/">policy</a> (|policy|), this
-  algorithm returns "`Blocked`" if the navigation violates the `navigate-to`
-  directive's constraints, and "`Allowed`" otherwise. This constitutes the
-  `navigate-to` directive's <a>navigation response check</a>:
-
-  <ol class="algorithm">
-    1.  Assert: |target| is unused.
-
-    2.  If |check type| is "`response`", return "`Allowed`".
-
-        Note: The 'navigate-to' <a>directive</a> is relevant only to the
-        |request|'s context and it has no impact on the |target| <a>browsing context</a>.
-
-    3.  If |navigation type| is "`form-submission`" and |policy| contains a
-        <a>directive</a> named "`form-action`", return "`Allowed`".
-
-    4.  If this directive's <a for="directive">value</a> does not contain a <a>source
-        expression</a> that is an <a>ASCII case-insensitive</a> match for
-        the "<a grammar>`'unsafe-allow-redirects'`</a>"
-        <a grammar>keyword-source</a>, return "`Allowed`".
-
-        Note: If the 'unsafe-allow-redirects' flag is not present we have
-        already checked the navigation in [[#navigate-to-pre-navigate]].
-
-    5.  If |navigation response|'s <a for="response">status</a> is a
-        <a>redirect status</a>, return "`Allowed`".
-
-    6.  If the result of executing [[#match-request-to-source-list]] on
-        |request|, this directive's <a for="directive">value</a>, and |policy|,
-        is "`Does Not Match`", return "`Blocked`".
-
-    7.  Return "`Allowed`".
-  </ol>
 
   <h3 id="directives-reporting">
     Reporting Directives
