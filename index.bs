@@ -76,10 +76,6 @@ spec: ECMA262; urlPrefix: https://tc39.github.io/ecma262
     text: HostEnsureCanCompileStrings(); url: sec-hostensurecancompilestrings
     text: eval(); url: sec-eval-x
     text: Function(); url: sec-function-objects
-spec: FETCH; urlPrefix: https://fetch.spec.whatwg.org/
-  type: dfn
-    for: request
-      text: target browsing context; url: concept-request-target-browsing-context
 spec: MIX; urlPrefix: https://www.w3.org/TR/mixed-content/
   type: dfn; text: block-all-mixed-content
 spec: RFC3986; urlPrefix: https://tools.ietf.org/html/rfc3986
@@ -112,7 +108,6 @@ spec: RFC7231; urlPrefix: https://tools.ietf.org/html/rfc7231
 
 spec: REPORTING; urlPrefix: https://w3c.github.io/reporting/
   type: dfn
-    text: group
     text: queue report; url: queue-report
     text: report type
     text: visible to reportingobservers
@@ -1452,7 +1447,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
 
   1.  Let |result| be "`Allowed`".
 
-  2.  Let |global| be |realm|'s [=Realm/global object=].
+  2.  Let |global| be |realm|'s [=realm/global object=].
 
   3.  For each |policy| in |global|'s [=global object/CSP list=]:
 
@@ -1504,7 +1499,7 @@ Given a <a>realm</a> (|realm|),
 this algorithm returns normally if compilation is allowed, and throws a
 {{WebAssembly.CompileError}} if not:
 
-1.  Let |global| be |realm|'s [=Realm/global object=].
+1.  Let |global| be |realm|'s [=realm/global object=].
 
 2.  Let |result| be "`Allowed`".
 
@@ -1968,10 +1963,7 @@ this algorithm returns normally if compilation is allowed, and throws a
   worker. More formally, <a for="/">requests</a> falling into one of the
   following categories:
 
-  *  <a for="request">destination</a> is "`document`", and whose
-     <a for="request">target browsing context</a> is a <a>nested browsing
-     context</a> (e.g. requests which will populate an <{iframe}> or <{frame}>
-     element)
+  *  <a for="request">destination</a> is "`frame`", "`iframe`", "`object`", or "`embed`".
 
   *  <a for="request">destination</a> is either "`serviceworker`",
      "`sharedworker`", or "`worker`" (which are fed to the <a>run a worker</a>
@@ -3670,8 +3662,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   <h4 id="directive-report-to">`report-to`</h4>
 
-  The <dfn export>`report-to`</dfn> directive defines a <a lt="group">reporting
-  group</a> to which violation reports ought to be sent [[REPORTING]]. The
+  The <dfn export>`report-to`</dfn> directive defines a <a lt="endpoint">reporting
+  endpoint</a> to which violation reports ought to be sent [[REPORTING]]. The
   directive's behavior is defined in [[#report-violation]]. The directive's name
   and value are described by the following ABNF:
 
@@ -4362,10 +4354,10 @@ this algorithm returns normally if compilation is allowed, and throws a
       : "`embed`"
       ::
         1.  Return `object-src`.
-      : "`document`"
+      : "`frame`"
+      : "`iframe`"
       ::
-        1.  If the |request|'s <a for="request">target browsing context</a>
-            is a <a>nested browsing context</a>, return `frame-src`.
+        1.  Return `frame-src`.
 
       : "`audio`"
       : "`track`"
