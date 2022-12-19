@@ -2140,6 +2140,14 @@ this algorithm returns normally if compilation is allowed, and throws a
   out in more detail in the [[#should-block-request]] and
   [[#should-block-response]] algorithms.
 
+  <div class="note">
+  In the case of resource hint such as [^link/rel/prefetch^] and [^link/rel/dns-prefetch^],
+  <a>default-src</a> can be used as a way to restrict fetching the resource, as a means to prevent
+  exfiltration. Resource hints don't have their own [=directive=] and they rely on
+  <a>default-src</a> and follow the least-restrictive [=directive=].
+  </div>
+
+
   <div class="example">
     The following header:
 
@@ -4288,11 +4296,11 @@ this algorithm returns normally if compilation is allowed, and throws a
   `null` or the <a for="directive">name</a> of the request's
   <dfn for="request" export>effective directive</dfn>:
 
-  1.  If |request|'s <a for="request">initiator</a> is "`fetch`" or its
-      <a for="request">destination</a> is "", return `connect-src`.
+  1.  If |request|'s [=request/initiator=] is "`prefetch`" or "`prerender`",
+      return `default-src`.
 
-  2.  If |request|'s [=request/initiator=] is "`prefetch`" or "`prerender`",
-      return `prefetch-src`.
+  2.  If |request|'s <a for="request">initiator</a> is "`fetch`" or its
+      <a for="request">destination</a> is "", return `connect-src`.
 
   3.  Switch on |request|'s <a for="request">destination</a>, and execute
       the associated steps:
@@ -4414,10 +4422,6 @@ this algorithm returns normally if compilation is allowed, and throws a
       : "`manifest-src`"
       ::
         1.  Return `<< "manifest-src", "default-src" >>`.
-
-      : "`prefetch-src`"
-      ::
-        1.  Return `<< "prefetch-src", "default-src" >>`.
 
       : "`object-src`"
       ::
@@ -4970,7 +4974,39 @@ this algorithm returns normally if compilation is allowed, and throws a
       </pre>
     </div>
   </section>
+  <section>
+    <h3 id="exfiltration">
+      Exfiltration
+    </h3>
+
+    Data exfiltration can occur when the contents of the request, such as the URL, contain
+    information about the user or page that should be restricted and not shared.
+
+    To prevent exfiltration with CSP, it is important to set the <a>default-src</a> directive, to
+    avoid a situation where a specific directive is omitted, and to ensure that other directives
+    don't relax that restriction in a way that can allow exfiltration.
+
+    <div class="example">
+      In the following example, a page that has only images, fonts and scripts, can still
+      exfiltrate, e.g. by a [^link/rel/prefetch^]. Add <pre>default-src 'none'</pre> to avoid it.
+
+      <pre>
+        <a http-header>Content-Security-Policy</a>: img-src 'none' script-src 'none' font-src 'none'
+      </pre>
+    </div>
+
+    <div class="example">
+      In the following example, the <a>default-src</a> directive appears to protect from
+      exfiltration, however the <a>img-src</a> directive relaxes it, which allows data to exfiltrate
+      either via an image or via resource hint.
+
+      <pre>
+        <a http-header>Content-Security-Policy</a>: default-src 'none' img-src *;
+      </pre>
+    </div>
 </section>
+
+
 
 <section>
   <h2 id="implementation-considerations">Implementation Considerations</h2>
