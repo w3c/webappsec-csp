@@ -2140,6 +2140,14 @@ this algorithm returns normally if compilation is allowed, and throws a
   out in more detail in the [[#should-block-request]] and
   [[#should-block-response]] algorithms.
 
+  <div class="note">
+  Resource hints such as [^link/rel/prefetch^] and [^link/rel/dns-prefetch^] generate requests that
+  aren't tied to any specific [=fetch directive=], but are instead governed by the union of servers
+  allowed in all of a policy's directives' [=source lists=]. If <a>default-src</a> is not specified, these
+  requests will always be allowed. For more information, see [[#exfiltration]].
+  </div>
+
+
   <div class="example">
     The following header:
 
@@ -2156,7 +2164,6 @@ this algorithm returns normally if compilation is allowed, and throws a
                                <a>img-src</a> <a grammar>'self'</a>;
                                <a>manifest-src</a> <a grammar>'self'</a>;
                                <a>media-src</a> <a grammar>'self'</a>;
-                               <a>prefetch-src</a> <a grammar>'self'</a>;
                                <a>object-src</a> <a grammar>'self'</a>;
                                <a>script-src-elem</a> <a grammar>'self'</a>;
                                <a>script-src-attr</a> <a grammar>'self'</a>;
@@ -2186,7 +2193,6 @@ this algorithm returns normally if compilation is allowed, and throws a
                                <a>img-src</a> <a grammar>'self'</a>;
                                <a>manifest-src</a> <a grammar>'self'</a>;
                                <a>media-src</a> <a grammar>'self'</a>;
-                               <a>prefetch-src</a> <a grammar>'self'</a>;
                                <a>object-src</a> <a grammar>'self'</a>;
                                <a>script-src-elem</a> https://example.com;
                                <a>script-src-attr</a> <a grammar>'self'</a>;
@@ -2700,74 +2706,6 @@ this algorithm returns normally if compilation is allowed, and throws a
   3.  If the result of executing [[#match-response-to-source-list]] on
       |response|, |request|, this directive's <a for="directive">value</a>,
       and |policy|, is "`Does Not Match`", return "`Blocked`".
-
-  4.  Return "`Allowed`".
-
-  <h4 id="directive-prefetch-src">`prefetch-src`</h4>
-
-  The <dfn export>prefetch-src</dfn> directive restricts the URLs from which resources may be
-  prefetched or prerendered. The syntax for the directive's name and value is described by the
-  following ABNF:
-
-  <pre>
-    directive-name  = "prefetch-src"
-    directive-value = <a grammar>serialized-source-list</a>
-  </pre>
-
-  <div class="example">
-    Given a page with the following Content Security Policy:
-
-    <pre>
-      <a http-header>Content-Security-Policy</a>: <a>prefetch-src</a> https://example.com/
-    </pre>
-
-    Fetches for the following code will return network errors, as the URLs provided do not match
-    `prefetch-src`'s <a>source list</a>:
-
-    <pre highlight="html">
-      &lt;link rel="prefetch" src="https://example.org/"&gt;&lt;/link&gt;
-      &lt;link rel="prerender" src="https://example.org/"&gt;&lt;/link&gt;
-    </pre>
-  </div>
-
-  <h5 algorithm id="prefetch-src-pre-request">
-    `prefetch-src` Pre-request check
-  </h5>
-
-  This directive's <a for="directive">pre-request check</a> is as follows:
-
-  Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `prefetch-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-request-to-source-list]] on |request|,
-      this directive's [=directive/value=], and |policy|,
-      is "`Does Not Match`", return "`Blocked`".
-
-  4.  Return "`Allowed`".
-
-  <h5 algorithm id="prefetch-src-post-request">
-    `prefetch-src` Post-request check
-  </h5>
-
-  This directive's <a for="directive">post-request check</a> is as follows:
-
-  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
-  <a for="/">policy</a> (|policy|):
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `prefetch-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-response-to-source-list]] on |response|,
-      |request|, this directive's [=directive/value=], and |policy|,
-      is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -3794,16 +3732,41 @@ this algorithm returns normally if compilation is allowed, and throws a
   algorithm returns the violated <a>directive</a> if the request violates the
   policy, and "`Does Not Violate`" otherwise.
 
-  1.  Let |violates| be "`Does Not Violate`".
+  1.  If |request|'s [=request/initiator=] is "`prefetch`", then return the result of executing
+      [[#does-resource-hint-violate-policy]] on |request| and |policy|.
 
-  2.  <a for=set>For each</a> |directive| of |policy|:
+  2.  Let |violates| be "`Does Not Violate`".
+
+  3.  <a for=set>For each</a> |directive| of |policy|:
 
       1.  Let |result| be the result of executing |directive|'s
           <a for="directive">pre-request check</a> on |request| and |policy|.
 
       2.  If |result| is "`Blocked`", then let |violates| be |directive|.
 
-  3.  Return |violates|.
+  4.  Return |violates|.
+
+  <h5 id="does-resource-hint-violate-policy">
+    Does resource hint |request| violate |policy|?
+  </h5>
+
+  Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|), this
+  algorithm returns the default <a>directive</a> if the resource-hint request violates all the
+  policies, and "`Does Not Violate`" otherwise.
+
+  1. Let |defaultDirective| be |policy|'s first [=directive=] whose [=directive/name=] is
+      "`default-src`".
+
+  2. If |defaultDirective| does not exist, return "`Does Not Violate`".
+
+  3. <a for=set>For each</a> |directive| of |policy|:
+
+      1.  Let |result| be the result of executing |directive|'s
+          <a for="directive">pre-request check</a> on |request| and |policy|.
+
+      2. If |result| is "`Allowed`", then return "`Does Not Violate`".
+
+  4. Return "`Blocked`".
 
   <h5 id="match-nonce-to-source-list" algorithm>
     Does |nonce| match |source list|?
@@ -4333,11 +4296,11 @@ this algorithm returns normally if compilation is allowed, and throws a
   `null` or the <a for="directive">name</a> of the request's
   <dfn for="request" export>effective directive</dfn>:
 
-  1.  If |request|'s <a for="request">initiator</a> is "`fetch`" or its
-      <a for="request">destination</a> is "", return `connect-src`.
+  1.  If |request|'s [=request/initiator=] is "`prefetch`" or "`prerender`",
+      return `default-src`.
 
-  2.  If |request|'s [=request/initiator=] is "`prefetch`" or "`prerender`",
-      return `prefetch-src`.
+  2.  If |request|'s <a for="request">initiator</a> is "`fetch`" or its
+      <a for="request">destination</a> is "", return `connect-src`.
 
   3.  Switch on |request|'s <a for="request">destination</a>, and execute
       the associated steps:
@@ -4459,10 +4422,6 @@ this algorithm returns normally if compilation is allowed, and throws a
       : "`manifest-src`"
       ::
         1.  Return `<< "manifest-src", "default-src" >>`.
-
-      : "`prefetch-src`"
-      ::
-        1.  Return `<< "prefetch-src", "default-src" >>`.
 
       : "`object-src`"
       ::
@@ -5015,7 +4974,44 @@ this algorithm returns normally if compilation is allowed, and throws a
       </pre>
     </div>
   </section>
+  <section>
+    <h3 id="exfiltration">
+      Exfiltration
+    </h3>
+
+    Data exfiltration can occur when the contents of the request, such as the URL, contain
+    information about the user or page that should be restricted and not shared.
+
+    Content Security Policy can mitigate data exfiltration if used to create allowlists of servers
+    with which a page is allowed to communicate. Note that a policy which lacks the <a>default-src</a>
+    directive cannot mitigate exfiltration, as there are kinds of requests that are not addressable
+    through a more-specific directive ([^link/rel/prefetch^], for example).
+
+    <div class="example">
+      In the following example, a policy with draconian restrictions on images, fonts, and scripts
+      can still allow data exfiltration via other request types (`fetch()`, [^link/rel/prefetch^], etc):
+
+      <pre>
+        <a http-header>Content-Security-Policy</a>: img-src 'none' script-src 'none' font-src 'none'
+      </pre>
+      
+      Supplementing this policy with `default-src 'none'` would improve the page's robustness
+      against this kind of attack.
+    </div>
+
+    <div class="example">
+      In the following example, the <a>default-src</a> directive appears to protect from
+      exfiltration, however the <a>img-src</a> directive relaxes this restriction by using a
+      wildcard, which allows data exfiltration to arbitrary endpoints. A policy's exfiltration
+      mitigation ability depends upon the least-restrictive directive allowlist:
+
+      <pre>
+        <a http-header>Content-Security-Policy</a>: default-src 'none'; img-src *
+      </pre>
+    </div>
 </section>
+
+
 
 <section>
   <h2 id="implementation-considerations">Implementation Considerations</h2>
