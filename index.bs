@@ -3992,15 +3992,21 @@ this algorithm returns normally if compilation is allowed, and throws a
   potentially match a URL containing the latter as a [=url/host=]. For example, we say that
   "www.example.com" <a>host-part matches</a> "www.example.com".
 
-  More formally, two <a>ASCII strings</a> (|A| and |B|) are said to <a>`host-part` match</a> if the
+  More formally, <a>ASCII string</a> |A| and {{URL/host}} |B| are said to <a>`host-part` match</a> if the
   following algorithm returns "`Matches`":
 
   Note: The matching relation is asymmetric. That is, |A| matching |B| does not
   mean that |B| will match |A|. For example, `*.example.com` <a>`host-part` matches</a>
   `www.example.com`, but `www.example.com` does not <a>`host-part` match</a> `*.example.com`.
+  
+  Note: A future version of this specification may allow literal IPv6 and IPv4 addresses,
+  depending on usage and demand. Given the weak security properties of IP addresses in
+  relation to named hosts, however, authors are encouraged to prefer the latter whenever possible.
 
   <ol class="algorithm">
-    1.  If the first character of |A| is an U+002A ASTERISK character (`*`):
+    1. If |B| is not a {{URL/domain}} return "`Does Not Match`".
+
+    2.  If the first character of |A| is an U+002A ASTERISK character (`*`):
 
         1.  Let |remaining| be the result of removing the leading ("*") from |A|.
 
@@ -4009,18 +4015,8 @@ this algorithm returns normally if compilation is allowed, and throws a
             characters of |B|, then return "`Matches`". Otherwise, return
             "`Does Not Match`".
 
-    2.  If |A| is not an <a>ASCII case-insensitive</a> match for |B|, return
+    3.  If |A| is not an <a>ASCII case-insensitive</a> match for |B|, return
         "`Does Not Match`".
-
-    3.  If |A| matches the <a grammar>IPv4address</a> rule from [[!RFC3986]], and
-        is not "`127.0.0.1`"; or if |A| is an <a>IPv6 address</a>, return
-        "`Does Not Match`".
-
-        Note: A future version of this specification may allow literal IPv6
-        and IPv4 addresses, depending on usage and demand. Given the weak
-        security properties of IP addresses in relation to named hosts,
-        however, authors are encouraged to prefer the latter whenever
-        possible.
 
     4.  Return "`Matches`".
   </ol>
