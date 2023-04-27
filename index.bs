@@ -4029,31 +4029,31 @@ this algorithm returns normally if compilation is allowed, and throws a
     `port-part` matching
   </h5>
 
-  An <a>ASCII string</a> (|port A|) <dfn export>`port-part` matches</dfn> two other <a>ASCII
-  strings</a> (|port B| and |scheme B|) if a CSP source expression that contained the first as a
+  An <a>ASCII string</a> (|port A|) <dfn export>`port-part` matches</dfn> [=url/port=] (|port B|) and
+  [=url/scheme=] (|scheme B|) if a CSP source expression that contained the first as a
   <a grammar>`port-part`</a> could potentially match a URL containing the latter as [=url/port=]
-  and [=url/scheme=]. For example, "80" <a>`port-part` matches</a> matches "80"/"http".
+  and [=url/scheme=]. For example, "80" <a>`port-part` matches</a> matches 80/http as well as null/http.
 
   <ol class="algorithm">
-    1.  Let |adjusted port A| be the result of removing any leading "0"s from |port A|.
+    1.  If |port A| is equal to "*", return "`Matches`".
 
-    2.  If |adjusted port A| is <a for="string" lt="is">identical to</a> |port B|, return "`Matches`".
+    2.  Let |adjusted port A| be null.
+    
+    3.  If |port A| is the empty string and does not equal "*" then convert |port A| to a 16-bit unsigned integer and set the result to |adjusted port A|.
 
-    3.  If |port A| is equal to "*", return "`Matches`".
+    4.  If |adjusted port A| is not null and equals |port B|, return "`Matches`".
 
-    4.  If |port A| is the empty string:
+    5.  If |adjusted port A| is null:
 
-        1.  Let |default port b| be the <a>ASCII string</a> of the <a>default port</a> for |scheme B|
-            if it is not null, otherwise the empty string.
+        1.  Let |default port b| the <a>default port</a> for |scheme B|.
 
-        2.  If |port B| is <a for="string" lt="is">identical to</a> |default port B|, return "`Matches`".
+        2.  If |port B| equals |default port B|, return "`Matches`".
 
-    5.  If |port B| is the empty string:
+    6.  If |port B| is null:
 
-        1.  Let |default port b| be the <a>ASCII string</a> of the <a>default port</a> for |scheme B|
-            if it exists and is not null, otherwise the empty string.
+        1.  Let |default port b| be the <a>default port</a> for |scheme B|.
 
-        2.  If |adjusted port A| is <a for="string" lt="is">identical to</a> |default port B|, return "`Matches`".
+        2.  If |adjusted port A| equals |default port B|, return "`Matches`".
 
     6. Return "`Does Not Match`".
   </ol>
