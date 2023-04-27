@@ -4029,31 +4029,31 @@ this algorithm returns normally if compilation is allowed, and throws a
     `port-part` matching
   </h5>
 
-  An <a>ASCII string</a> (|port A|) <dfn export>`port-part` matches</dfn> [=url/port=] (|port B|) and
-  [=url/scheme=] (|scheme B|) if a CSP source expression that contained the first as a
+  An <a>ASCII string</a> (|input|) <dfn export>`port-part` matches</dfn> null or a 16-bit unsigned integer (|expectedPort|)
+  and <a>ASCII string</a> (|expectedScheme|) if a CSP source expression that contained the first as a
   <a grammar>`port-part`</a> could potentially match a URL containing the latter as [=url/port=]
-  and [=url/scheme=]. For example, "80" <a>`port-part` matches</a> matches 80/http as well as null/http.
+  and [=url/scheme=]. For example, "80" <a>`port-part` matches</a> matches 80/"http" as well as null/"http".
 
   <ol class="algorithm">
-    1.  If |port A| is equal to "*", return "`Matches`".
+    1.  If |input| is equal to "*", return "`Matches`".
 
-    2.  Let |adjusted port A| be null.
+    2.  Let |normalizedInput| be null.
     
-    3.  If |port A| is the empty string and does not equal "*" then convert |port A| to a 16-bit unsigned integer and set the result to |adjusted port A|.
+    3.  If |input| is the empty string or does not equal "*", then convert |input| to a 16-bit unsigned integer and set the result to |normalizedInput|.
 
-    4.  If |adjusted port A| is not null and equals |port B|, return "`Matches`".
+    4.  If |normalizedInput| is not null and equals |expectedPort|, return "`Matches`".
 
-    5.  If |adjusted port A| is null:
+    5.  If |normalizedInput| is null:
 
-        1.  Let |default port b| the <a>default port</a> for |scheme B|.
+        1.  Let |defaultPort| the <a>default port</a> for |expectedScheme|.
 
-        2.  If |port B| equals |default port B|, return "`Matches`".
+        2.  If |expectedPort| equals |defaultPort|, return "`Matches`".
 
-    6.  If |port B| is null:
+    6.  If |expectedPort| is null:
 
-        1.  Let |default port b| be the <a>default port</a> for |scheme B|.
+        1.  Let |defaultPort| be the <a>default port</a> for |expectedScheme|.
 
-        2.  If |adjusted port A| equals |default port B|, return "`Matches`".
+        2.  If |normalizedInput| equals |defaultPort|, return "`Matches`".
 
     6. Return "`Does Not Match`".
   </ol>
