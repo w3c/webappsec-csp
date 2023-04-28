@@ -45,6 +45,7 @@ spec:url
   type: dfn
     text: default port
     text: base url
+    text: domain
   type:interface;
     text:URL
 spec:cssom
@@ -65,6 +66,7 @@ spec:infra;
     text:append; for: set
     text:empty; for: set
     text:strictly split a string
+    text:starts with; for:string
 </pre>
 <pre class="anchors">
 spec: RFC6454; urlPrefix: https://tools.ietf.org/html/rfc6454
@@ -3987,40 +3989,34 @@ this algorithm returns normally if compilation is allowed, and throws a
     `host-part` matching
   </h5>
 
-  An <a>ASCII string</a> <dfn export lt="host-part match">`host-part` matches</dfn> another <a>ASCII
-  string</a> if a CSP source expression that contained the first as a <a grammar>`host-part`</a> could
-  potentially match a URL containing the latter as a [=url/host=]. For example, we say that
-  "www.example.com" <a>host-part matches</a> "www.example.com".
+  An <a>ASCII string</a> <dfn export lt="host-part match">`host-part` matches</dfn> a [=/host=]
+  if a CSP source expression that contained the first as a <a grammar>`host-part`</a> could
+  potentially match the latter. For example, we say that "www.example.com" <a>host-part matches</a> "www.example.com".
 
-  More formally, two <a>ASCII strings</a> (|A| and |B|) are said to <a>`host-part` match</a> if the
+  More formally, <a>ASCII string</a> |pattern| and [=/host=] |host| are said to <a>`host-part` match</a> if the
   following algorithm returns "`Matches`":
 
-  Note: The matching relation is asymmetric. That is, |A| matching |B| does not
-  mean that |B| will match |A|. For example, `*.example.com` <a>`host-part` matches</a>
+  Note: The matching relation is asymmetric. That is, |pattern| matching |host| does not
+  mean that |host| will match |pattern|. For example, `*.example.com` <a>`host-part` matches</a>
   `www.example.com`, but `www.example.com` does not <a>`host-part` match</a> `*.example.com`.
+  
+  Note: A future version of this specification may allow literal IPv6 and IPv4 addresses,
+  depending on usage and demand. Given the weak security properties of IP addresses in
+  relation to named hosts, however, authors are encouraged to prefer the latter whenever possible.
 
   <ol class="algorithm">
-    1.  If the first character of |A| is an U+002A ASTERISK character (`*`):
+    1. If |host| is not a [=domain=], return "`Does Not Match`".
 
-        1.  Let |remaining| be the result of removing the leading ("*") from |A|.
+    2.  If |pattern| <a>starts with</a> "`*.`":
 
-        2.  If |remaining| (including the leading U+002E FULL STOP character
-            (`.`)) is an <a>ASCII case-insensitive</a> match for the rightmost
-            characters of |B|, then return "`Matches`". Otherwise, return
-            "`Does Not Match`".
+        1.  Let |remaining| be |pattern| with the leading U+002A (`*`) removed and <a>ASCII lowercased</a>.
 
-    2.  If |A| is not an <a>ASCII case-insensitive</a> match for |B|, return
+        2.  If |host| to <a>ASCII lowercase</a> <a>ends with</a> |remaining|, then return "`Matches`".
+
+        3.  Return "`Does Not Match`".
+
+    3.  If |pattern| is not an <a>ASCII case-insensitive</a> match for |host|, return
         "`Does Not Match`".
-
-    3.  If |A| matches the <a grammar>IPv4address</a> rule from [[!RFC3986]], and
-        is not "`127.0.0.1`"; or if |A| is an <a>IPv6 address</a>, return
-        "`Does Not Match`".
-
-        Note: A future version of this specification may allow literal IPv6
-        and IPv4 addresses, depending on usage and demand. Given the weak
-        security properties of IP addresses in relation to named hosts,
-        however, authors are encouraged to prefer the latter whenever
-        possible.
 
     4.  Return "`Matches`".
   </ol>
