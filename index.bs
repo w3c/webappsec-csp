@@ -45,6 +45,7 @@ spec:url
   type: dfn
     text: default port
     text: base url
+    text: domain
   type:interface;
     text:URL
 spec:cssom
@@ -65,6 +66,7 @@ spec:infra;
     text:append; for: set
     text:empty; for: set
     text:strictly split a string
+    text:starts with; for:string
 </pre>
 <pre class="anchors">
 spec: RFC6454; urlPrefix: https://tools.ietf.org/html/rfc6454
@@ -467,8 +469,8 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     Parse a serialized CSP
   </h4>
 
-  To <dfn abstract-op>parse a serialized CSP</dfn>, given a [=string=] (|serialized|), a
-  [=policy/source=] (|source|), and a [=policy/disposition=] (|disposition|), execute the
+  To <dfn abstract-op>parse a serialized CSP</dfn>, given a [=string=] |serialized|, a
+  [=policy/source=] |source|, and a [=policy/disposition=] |disposition|, execute the
   following steps.
 
   This algorithm returns a [=Content Security Policy object=]. If |serialized| could not be
@@ -517,7 +519,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
   </h4>
 
   To <dfn abstract-op>parse a serialized CSP list</dfn>, given a [=byte sequence=] or [=string=]
-  (|list|), a [=policy/source=] (|source|), and a [=policy/disposition=] (|disposition|), execute
+  |list|, a [=policy/source=] |source|, and a [=policy/disposition=] |disposition|, execute
   the following steps.
 
   This algorithm returns a [=list=] of [=Content Security Policy objects=]. If |list| cannot be
@@ -547,7 +549,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
   </h4>
 
   To <dfn abstract-op>parse a response's Content Security Policies</dfn> given a <a>response</a>
-  (|response|):
+  |response|:
 
   <ol class="algorithm">
     1.  Let |policies| be the result of <a abstract-op lt="parse a serialized CSP list">parsing</a>
@@ -747,10 +749,10 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
 
   Each <a>violation</a> has a
   <dfn for="violation" id="violation-resource" export>resource</dfn>, which is
-  either `null`, "`inline`", "`eval`", "`wasm-eval`", or a {{URL}}. It represents the resource
+  either null, "`inline`", "`eval`", "`wasm-eval`", or a {{URL}}. It represents the resource
   which violated the policy.
 
-  Note: The value `null` for a <a>violation</a>'s <a
+  Note: The value null for a <a>violation</a>'s <a
   for="violation">resource</a> is only allowed while the <a>violation</a> is
   being populated. By the time the <a>violation</a> is reported and its <a
   for="violation">resource</a> is used for
@@ -760,7 +762,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
 
   Each <a>violation</a> has a
   <dfn for="violation" id="violation-referrer" export>referrer</dfn>, which is either
-  `null`, or a {{URL}}. It represents the referrer of the resource whose policy
+  null, or a {{URL}}. It represents the referrer of the resource whose policy
   was violated.
 
   Each <a>violation</a> has a
@@ -778,7 +780,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
 
   Each <a>violation</a> has a
   <dfn for="violation" id="violation-source-file" export>source file</dfn>, which is
-  either `null` or a {{URL}}.
+  either null or a {{URL}}.
 
   Each <a>violation</a> has a
   <dfn for="violation" id="violation-line-number" export>line number</dfn>, which is
@@ -790,7 +792,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
 
   Each <a>violation</a> has a
   <dfn for="violation" id="violation-element" export>element</dfn>, which is either
-  `null` or an element.
+  null or an element.
 
   Each <a>violation</a> has a <dfn for="violation" id="violation-sample" export>sample</dfn>,
   which is a string. It is the empty string unless otherwise specified.
@@ -803,14 +805,14 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     Create a violation object for |global|, |policy|, and |directive|
   </h4>
 
-  Given a <a for="/">global object</a> (|global|), a <a for="/">policy</a> (|policy|), and a
-  <a>string</a> (|directive|), the following algorithm creates a new <a>violation</a>
+  Given a <a for="/">global object</a> |global|, a <a for="/">policy</a> |policy|, and a
+  <a>string</a> |directive|, the following algorithm creates a new <a>violation</a>
   object, and populates it with an initial set of data:
 
   1.  Let |violation| be a new <a>violation</a> whose <a for="violation">global
       object</a> is |global|, <a for="violation">policy</a> is |policy|,
       <a for="violation">effective directive</a> is |directive|, and
-      <a for="violation">resource</a> is `null`.
+      <a for="violation">resource</a> is null.
 
   2.  If the user agent is currently executing script, and can extract a source
       file's URL, line number, and column number from the |global|, set
@@ -841,7 +843,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     Create a violation object for |request|, and |policy|.
   </h4>
 
-  Given a <a for="/">request</a> (|request|), a <a for="/">policy</a> (|policy|),
+  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
   the following algorithm creates a new <a>violation</a> object,
   and populates it with an initial set of data:
 
@@ -1031,7 +1033,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     Report Content Security Policy violations for |request|
   </h4>
 
-  Given a <a for="/">request</a> (|request|), this algorithm reports violations based
+  Given a <a for="/">request</a> |request|, this algorithm reports violations based
   on [=request/policy container=]'s [=policy container/CSP list=] "report only" policies.
 
   1.  Let |CSP list| be |request|'s [=request/policy container=]'s [=policy container/CSP list=].
@@ -1052,7 +1054,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     Should |request| be blocked by Content Security Policy?
   </h4>
 
-  Given a <a for="/">request</a> (|request|), this algorithm returns `Blocked` or `Allowed` and
+  Given a <a for="/">request</a> |request|, this algorithm returns `Blocked` or `Allowed` and
   reports violations based on |request|'s [=request/policy container=]'s
   [=policy container/CSP list=].
 
@@ -1081,7 +1083,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     Should |response| to |request| be blocked by Content Security Policy?
   </h4>
 
-  Given a <a>response</a> (|response|) and a <a for="/">request</a> (|request|), this algorithm
+  Given a <a>response</a> |response| and a <a for="/">request</a> |request|, this algorithm
   returns `Blocked` or `Allowed`, and reports violations based on |request|'s
   [=request/policy container=]'s [=policy container/CSP list=].
 
@@ -1168,7 +1170,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     Run `CSP` initialization for a `Document`
   </h4>
 
-  Given a {{Document}} (|document|), the user agent performs the following
+  Given a {{Document}} |document|, the user agent performs the following
   steps in order to initialize CSP for |document|:
 
   1. <a for=list>For each</a> |policy| of |document|'s [=Document/policy container=]'s
@@ -1193,13 +1195,13 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
       return <a>environment settings object</a>'s [=environment settings object/policy
       container=]'s [=policy container/CSP list=].
 
-  3.  Return `null`.
+  3.  Return null.
 
   <h4 id="should-block-inline" algorithm dfn export>
     Should |element|'s inline |type| behavior be blocked by Content Security Policy?
   </h4>
 
-  Given an {{Element}} (|element|), a string (|type|), and a string (|source|)
+  Given an {{Element}} |element|, a string |type|, and a string |source|
   this algorithm returns "`Allowed`" if the element is allowed to have inline
   definition of a particular type of behavior (script execution, style
   application, event handlers, etc.), and "`Blocked`" otherwise:
@@ -1208,7 +1210,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
   "`style`", and "`style attribute`".
 
   <ol class="algorithm">
-    1.  Assert: |element| is not `null`.
+    1.  Assert: |element| is not null.
 
     2.  Let |result| be "`Allowed`".
 
@@ -1251,7 +1253,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     by Content Security Policy?
   </h4>
 
-  Given a <a for="/">request</a> (|navigation request|) and a string (|type|, either
+  Given a <a for="/">request</a> |navigation request| and a string |type| (either
   "`form-submission`" or "`other`"), this algorithm return "`Blocked`" if the active policy blocks
   the navigation, and "`Allowed`" otherwise:
 
@@ -1293,7 +1295,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
                     [[#effective-directive-for-inline-check]] on |type|.
 
                 2.  If |directive|'s <a for="directive">inline check</a>
-                    returns "`Allowed`" when executed upon `null`,
+                    returns "`Allowed`" when executed upon null,
                     "`navigation`" and |navigation request|'s <a for="request">current URL</a>,
                     skip to the next |directive|.
 
@@ -1318,8 +1320,8 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     in |target| be blocked by Content Security Policy?
   </h4>
 
-  Given a <a for="/">request</a> (|navigation request|), a <a>response</a> |navigation
-  response|, a [=/CSP list=] |response CSP list|, a string (|type|, either
+  Given a <a for="/">request</a> |navigation request|, a <a>response</a> |navigation
+  response|, a [=/CSP list=] |response CSP list|, a string |type| (either
   "`form-submission`" or "`other`"), and a <a>navigable</a> |target|, this algorithm
   returns "`Blocked`" if the active policy blocks the navigation, and "`Allowed`"
   otherwise:
@@ -1340,10 +1342,10 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
                 skip to the next |directive|.
 
             2.  Otherwise, let |violation| be the result of executing
-                [[#create-violation-for-global]] on `null`, |policy|, and
+                [[#create-violation-for-global]] on null, |policy|, and
                 |directive|'s <a for="directive">name</a>.
 
-                Note: We use `null` for the global object, as no global exists:
+                Note: We use null for the global object, as no global exists:
                 we haven't processed the navigation to create a Document yet.
 
             3.  Set |violation|'s <a for="violation">resource</a> to |navigation
@@ -1387,7 +1389,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     Run `CSP` initialization for a global object
   </h4>
 
-  Given a <a for="/">global object</a> (|global|), the user agent performs the
+  Given a <a for="/">global object</a> |global|, the user agent performs the
   following steps in order to initialize CSP for |global|. This algorithm
   returns "`Allowed`" if |global| is allowed, and "`Blocked`" otherwise:
 
@@ -1414,7 +1416,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     Should RTC connections be blocked for |global|?
   </h4>
 
-  Given a [=/global object=] (|global|), this algorithm returns "`Blocked`"
+  Given a [=/global object=] |global|, this algorithm returns "`Blocked`"
   if the active policy for |global| blocks RTC connections, and "`Allowed`" otherwise:
 
   <ol class="algorithm">
@@ -1429,7 +1431,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
                   [[#create-violation-for-global]] on |global|, |policy|, and
                   |directive|'s <a for="directive">name</a>.
 
-              3.  Set |violation|'s <a for="violation">resource</a> to `null`.
+              3.  Set |violation|'s <a for="violation">resource</a> to null.
 
               4.  Execute [[#report-violation]] on |violation|.
 
@@ -1451,7 +1453,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     EnsureCSPDoesNotBlockStringCompilation(|realm|, |source|)
   </h4>
 
-  Given a <a>realm</a> (|realm|) and a string (|source|), this algorithm
+  Given a <a>realm</a> |realm| and a string |source|, this algorithm
   returns normally if string compilation is allowed, and throws an "`EvalError`"
   if not:
 
@@ -1461,7 +1463,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
 
   3.  <a for=list>For each</a> |policy| of |global|'s [=global object/CSP list=]:
 
-      1.  Let |source-list| be `null`.
+      1.  Let |source-list| be null.
 
       2.  If |policy| contains a [=directive=] whose [=directive/name=] is "`script-src`", then
           set |source-list| to that [=directive=]'s [=directive/value=].
@@ -1469,7 +1471,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
           Otherwise if |policy| contains a [=directive=] whose [=directive/name=] is
           "`default-src`", then set |source-list| to that directive's [=directive/value=].
 
-      3.  If |source-list| is not `null`, and does not contain a [=source expression=] which is
+      3.  If |source-list| is not null, and does not contain a [=source expression=] which is
           an [=ASCII case-insensitive=] match for the string "<a grammar>`'unsafe-eval'`</a>",
           then:
 
@@ -1502,10 +1504,10 @@ abstract operation which examines the relevant <a for="global object">CSP
 list</a> to determine whether such compilation ought to be blocked.
 
 <h4 id="can-compile-wasm-bytes" algorithm dfn>
-  EnsureCSPDoesNotBlockWasmByteCompilation(|realm|)
+  EnsureCSPDoesNotBlockWasmByteCompilation|realm|
 </h4>
 
-Given a <a>realm</a> (|realm|),
+Given a <a>realm</a> |realm|,
 this algorithm returns normally if compilation is allowed, and throws a
 {{WebAssembly.CompileError}} if not:
 
@@ -1515,7 +1517,7 @@ this algorithm returns normally if compilation is allowed, and throws a
 
 3.  <a for=list>For each</a> |policy| of |global|'s [=global object/CSP list=]:
 
-    1.  Let |source-list| be `null`.
+    1.  Let |source-list| be null.
 
     2.  If |policy| contains a [=directive=] whose [=directive/name=] is "`script-src`", then
         set |source-list| to that [=directive=]'s [=directive/value=].
@@ -1523,7 +1525,7 @@ this algorithm returns normally if compilation is allowed, and throws a
         Otherwise if |policy| contains a [=directive=] whose [=directive/name=] is
         "`default-src`", then set |source-list| to that directive's [=directive/value=].
 
-    3.  If |source-list| is non-`null`, and does not contain a [=source
+    3.  If |source-list| is non-null, and does not contain a [=source
         expression=] which is an [=ASCII case-insensitive=] match for the
         string "<a grammar>`'unsafe-eval'`</a>", and does not contain a
         [=source expression=] which is an [=ASCII case-insensitive=] match
@@ -1623,7 +1625,7 @@ this algorithm returns normally if compilation is allowed, and throws a
     Obtain the {{SecurityPolicyViolationEvent/blockedURI}} of a violation's |resource|
   </h3>
 
-  Given a violation's <a for=violation>resource</a> (|resource|), this algorithm returns a
+  Given a violation's <a for=violation>resource</a> |resource|, this algorithm returns a
   [=string=], to be used as the blocked URI field for violation reports.
 
   1. Assert: |resource| is a [=/URL=] or a [=string=].
@@ -1637,7 +1639,7 @@ this algorithm returns normally if compilation is allowed, and throws a
     Obtain the deprecated serialization of |violation|
   </h3>
 
-  Given a <a>violation</a> (|violation|), this algorithm returns a JSON text
+  Given a <a>violation</a> |violation|, this algorithm returns a JSON text
   string representation of the violation, suitable for submission to a reporting
   endpoint associated with the deprecated <a>`report-uri`</a> directive.
 
@@ -1675,7 +1677,7 @@ this algorithm returns normally if compilation is allowed, and throws a
           the new <a>`report-to`</a> directive, is named in a more encompassing fashion:
           {{SecurityPolicyViolationEvent/sample}}.
 
-  2.  If |violation|'s <a for="violation">source file</a> is not `null`:
+  2.  If |violation|'s <a for="violation">source file</a> is not null:
 
       1.  Set |body|["`source-file`'] to the result of executing [[#strip-url-for-use-in-reports]]
           on |violation|'s <a for="violation">source file</a>.
@@ -1693,7 +1695,7 @@ this algorithm returns normally if compilation is allowed, and throws a
       «[ "csp-report" → body ]».
 
   <h3 id="strip-url-for-use-in-reports" algorithm>Strip URL for use in reports</h3>
-  Given a [=/URL=] (|url|), this algorithm returns a string representing the URL for use in violation
+  Given a [=/URL=] |url|, this algorithm returns a string representing the URL for use in violation
   reports:
 
   1. If |url|'s <a for="url">scheme</a> is not an <a>HTTP(S) scheme</a>,
@@ -1711,7 +1713,7 @@ this algorithm returns normally if compilation is allowed, and throws a
     Report a |violation|
   </h3>
 
-  Given a <a>violation</a> (|violation|), this algorithm reports it to the endpoint specified in
+  Given a <a>violation</a> |violation|, this algorithm reports it to the endpoint specified in
   |violation|'s <a for="violation">policy</a>, and fires a {{SecurityPolicyViolationEvent}} at
   |violation|'s [=violation/element=], or at |violation|'s <a for="violation">global object</a>
   as described below:
@@ -1726,9 +1728,9 @@ this algorithm returns normally if compilation is allowed, and throws a
       happens after JavaScript completes execution of the task responsible for a
       given violation (which might manipulate the DOM).
 
-      1.  If |target| is not `null`, and |global| is a {{Window}}, and |target|'s
+      1.  If |target| is not null, and |global| is a {{Window}}, and |target|'s
           <a>shadow-including root</a> is not |global|'s <a>associated
-          `Document`</a>, set |target| to `null`.
+          `Document`</a>, set |target| to null.
 
           Note: This ensures that we fire events only at elements <a>connected</a>
           to |violation|'s <a for="violation">policy</a>'s {{Document}}. If a
@@ -1737,7 +1739,7 @@ this algorithm returns normally if compilation is allowed, and throws a
           in order to ensure that the violation is visible to the document's
           listeners.
 
-      2.  If |target| is `null`:
+      2.  If |target| is null:
 
           1.  Set |target| to |violation|'s <a for="violation">global object</a>.
 
@@ -1794,7 +1796,7 @@ this algorithm returns normally if compilation is allowed, and throws a
 
       4.  If |violation|'s <a for="violation">policy</a>'s <a for="policy">directive
           set</a> contains a <a>directive</a> named "<a>`report-uri`</a>"
-          (|directive|):
+          |directive|:
 
           1.  If |violation|'s <a for="violation">policy</a>'s
               <a for="policy">directive set</a> contains a <a>directive</a> named
@@ -1854,7 +1856,7 @@ this algorithm returns normally if compilation is allowed, and throws a
 
       5.  If |violation|'s <a for="violation">policy</a>'s <a for="policy">directive
           set</a> contains a <a>directive</a> named "<a>`report-to`</a>"
-          (|directive|):
+          |directive|:
 
           1.  Let |body| be a new {{CSPViolationReportBody}}, initialized as
               follows:
@@ -2001,7 +2003,7 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
@@ -2020,8 +2022,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
-  <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
+  <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
@@ -2096,7 +2098,7 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
@@ -2116,8 +2118,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
-  <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
+  <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
@@ -2222,7 +2224,7 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
@@ -2241,8 +2243,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
-  <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
+  <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
@@ -2262,8 +2264,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">inline check</a> algorithm is as follows:
 
-  Given an {{Element}} (|element|), a string (|type|), a <a for="/">policy</a>
-  (|policy|) and a string (|source|):
+  Given an {{Element}} |element|, a string |type|, a <a for="/">policy</a>
+  |policy| and a string |source|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
       on |type|.
@@ -2316,7 +2318,7 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2336,8 +2338,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
-  <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
+  <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2384,7 +2386,7 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2404,8 +2406,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
-  <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
+  <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2455,7 +2457,7 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2475,8 +2477,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
-  <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
+  <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2522,7 +2524,7 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2542,8 +2544,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
-  <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
+  <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2592,7 +2594,7 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2612,8 +2614,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
-  <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
+  <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2683,7 +2685,7 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2703,8 +2705,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
-  <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
+  <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2789,7 +2791,7 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2806,8 +2808,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
-  <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
+  <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2824,10 +2826,10 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">inline check</a> algorithm is as follows:
 
-  Given an {{Element}} (|element|), a string (|type|), a <a for="/">policy</a>
-  (|policy|) and a string (|source|):
+  Given an {{Element}} |element|, a string |type|, a <a for="/">policy</a>
+  |policy| and a string |source|:
 
-  1.  Assert: |element| is not `null` or |type| is "`navigation`".
+  1.  Assert: |element| is not null or |type| is "`navigation`".
 
   2.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
       on |type|.
@@ -2868,7 +2870,7 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2885,8 +2887,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
-  <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
+  <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2903,10 +2905,10 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">inline check</a> algorithm is as follows:
 
-  Given an {{Element}} (|element|), a string (|type|), a <a for="/">policy</a>
-  (|policy|) and a string (|source|):
+  Given an {{Element}} |element|, a string |type|, a <a for="/">policy</a>
+  |policy| and a string |source|:
 
-  1.  Assert: |element| is not `null` or |type| is "`navigation`".
+  1.  Assert: |element| is not null or |type| is "`navigation`".
 
   2.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
       on |type|.
@@ -2938,10 +2940,10 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">inline check</a> algorithm is as follows:
 
-  Given an {{Element}} (|element|), a string (|type|), a <a for="/">policy</a>
-  (|policy|) and a string (|source|):
+  Given an {{Element}} |element|, a string |type|, a <a for="/">policy</a>
+  |policy| and a string |source|:
 
-  1.  Assert: |element| is not `null` or |type| is "`navigation`".
+  1.  Assert: |element| is not null or |type| is "`navigation`".
 
   2.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
       on |type|.
@@ -3007,7 +3009,7 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -3032,8 +3034,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
-  <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
+  <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -3058,8 +3060,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">inline check</a> algorithm is as follows:
 
-  Given an {{Element}} (|element|), a string (|type|), a <a for="/">policy</a>
-  (|policy|) and a string (|source|):
+  Given an {{Element}} |element|, a string |type|, a <a for="/">policy</a>
+  |policy| and a string |source|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
       on |type|.
@@ -3097,7 +3099,7 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -3122,8 +3124,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
-  <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
+  <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -3148,8 +3150,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">inline check</a> algorithm is as follows:
 
-  Given an {{Element}} (|element|), a string (|type|), a <a for="/">policy</a>
-  (|policy|) and a string (|source|):
+  Given an {{Element}} |element|, a string |type|, a <a for="/">policy</a>
+  |policy| and a string |source|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
       on |type|.
@@ -3180,8 +3182,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">inline check</a> algorithm is as follows:
 
-  Given an {{Element}} (|element|), a string (|type|), a <a for="/">policy</a>
-  (|policy|) and a string (|source|):
+  Given an {{Element}} |element|, a string |type|, a <a for="/">policy</a>
+  |policy| and a string |source|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
       on |type|.
@@ -3294,7 +3296,7 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -3314,8 +3316,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|), and a
-  <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
+  <a for="/">policy</a> |policy|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -3354,21 +3356,21 @@ this algorithm returns normally if compilation is allowed, and throws a
     Is |base| allowed for |document|?
   </h5>
 
-  Given a {{URL}} (|base|), and a {{Document}} (|document|), this algorithm
+  Given a {{URL}} |base|, and a {{Document}} |document|, this algorithm
   returns "`Allowed`" if |base| may be used as the value of a <{base}>
   element's <{base/href}> attribute, and "`Blocked`" otherwise:
 
   1.  <a for=list>For each</a> |policy| of |document|'s <a for="/">global object</a>'s
       <a for="global object">csp list</a>:
 
-      1.  Let |source list| be `null`.
+      1.  Let |source list| be null.
 
       2.  If a <a>directive</a> whose <a for="directive">name</a> is
           "`base-uri`" is present in |policy|'s <a for="policy">directive
           set</a>, set |source list| to that <a>directive</a>'s
           <a for="directive">value</a>.
 
-      3.  If |source list| is `null`, skip to the next |policy|.
+      3.  If |source list| is null, skip to the next |policy|.
 
       4.  If the result of executing [[#match-url-to-source-list]] on |base|, |source list|,
           |policy|'s [=policy/self-origin=], and `0` is "`Does Not Match`":
@@ -3421,8 +3423,8 @@ this algorithm returns normally if compilation is allowed, and throws a
   {{Document}}'s <a for=Document>active sandboxing flag set</a> via the
   <a spec=html>CSP-derived sandboxing flags</a>.
 
-  Given a {{Document}} or <a for="/">global object</a> (|context|) and a <a for="/">policy</a>
-  (|policy|):
+  Given a {{Document}} or <a for="/">global object</a> |context| and a <a for="/">policy</a>
+  |policy|:
 
   1.  If |policy|'s <a for="policy">disposition</a> is not "`enforce`", or
       |context| is not a {{WorkerGlobalScope}}, then abort this algorithm.
@@ -3460,8 +3462,8 @@ this algorithm returns normally if compilation is allowed, and throws a
     `form-action` Pre-Navigation Check
   </h5>
 
-  Given a <a for="/">request</a> (|request|), a string |navigation type| ("`form-submission`" or
-  "`other`"), and a <a for="/">policy</a> (|policy|) this algorithm returns "`Blocked`" if a form
+  Given a <a for="/">request</a> |request|, a string |navigation type| ("`form-submission`" or
+  "`other`"), and a <a for="/">policy</a> |policy| this algorithm returns "`Blocked`" if a form
   submission violates the `form-action` directive's constraints, and "`Allowed`"
   otherwise. This constitutes the `form-action` directive's <a>pre-navigation check</a>:
 
@@ -3506,11 +3508,11 @@ this algorithm returns normally if compilation is allowed, and throws a
     `frame-ancestors` Navigation Response Check
   </h5>
 
-  Given a <a for="/">request</a> (|request|), a string |navigation type|
+  Given a <a for="/">request</a> |request|, a string |navigation type|
   ("`form-submission`" or "`other`"), a
-  <a>response</a> (|navigation response|) a <a>navigable</a> (|target|),
+  <a>response</a> |navigation response|, a <a>navigable</a> |target|,
   a string |check type| ("`source`" or "`response`"), and a
-  <a for="/">policy</a> (|policy|) this algorithm returns "`Blocked`" if one or
+  <a for="/">policy</a> |policy| this algorithm returns "`Blocked`" if one or
   more of the ancestors of |target| violate the `frame-ancestors` directive
   delivered with the response, and "`Allowed`" otherwise. This constitutes the
   `frame-ancestors` directive's <a>navigation response check</a>:
@@ -3642,8 +3644,8 @@ this algorithm returns normally if compilation is allowed, and throws a
     Script directives pre-request check
   </h5>
 
-  Given a <a for="/">request</a> (|request|), a <a>directive</a> (|directive|),
-  and a <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request|, a <a>directive</a> |directive|,
+  and a <a for="/">policy</a> |policy|:
 
   1.  If |request|'s <a for="request">destination</a> is <a for="request/destination">script-like</a>:
 
@@ -3710,8 +3712,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> (|request|), a <a>response</a> (|response|),
-  a <a>directive</a> (|directive|), and a <a for="/">policy</a> (|policy|):
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|,
+  a <a>directive</a> |directive|, and a <a for="/">policy</a> |policy|:
 
   1.  If |request|'s <a for="request">destination</a> is <a for="request/destination">script-like</a>:
 
@@ -3737,7 +3739,7 @@ this algorithm returns normally if compilation is allowed, and throws a
     Does |request| violate |policy|?
   </h5>
 
-  Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|), this
+  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|, this
   algorithm returns the violated <a>directive</a> if the request violates the
   policy, and "`Does Not Violate`" otherwise.
 
@@ -3759,7 +3761,7 @@ this algorithm returns normally if compilation is allowed, and throws a
     Does resource hint |request| violate |policy|?
   </h5>
 
-  Given a <a for="/">request</a> (|request|) and a <a for="/">policy</a> (|policy|), this
+  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|, this
   algorithm returns the default <a>directive</a> if the resource-hint request violates all the
   policies, and "`Does Not Violate`" otherwise.
 
@@ -3782,11 +3784,11 @@ this algorithm returns normally if compilation is allowed, and throws a
   </h5>
 
   Given a <a for="/">request</a>'s <a for="request">cryptographic nonce metadata</a>
-  (|nonce|) and a <a>source list</a> (|source list|), this algorithm returns
+  |nonce| and a <a>source list</a> |source list|, this algorithm returns
   "`Matches`" if the nonce matches one or more source expressions in the list,
   and "`Does Not Match`" otherwise:
 
-  1.  Assert: |source list| is not `null`.
+  1.  Assert: |source list| is not null.
 
   2.  If |nonce| is the empty string, return "`Does Not Match`".
 
@@ -3802,8 +3804,8 @@ this algorithm returns normally if compilation is allowed, and throws a
     Does |request| match |source list|?
   </h5>
 
-  Given a <a for="/">request</a> (|request|), a <a>source list</a> (|source list|),
-  and a <a for="/">policy</a> (|policy|), this algorithm returns the result of executing
+  Given a <a for="/">request</a> |request|, a <a>source list</a> |source list|,
+  and a <a for="/">policy</a> |policy|, this algorithm returns the result of executing
   [[#match-url-to-source-list]] on |request|'s <a for="request">current url</a>,
   |source list|, |policy|'s [=policy/self-origin=], and |request|'s
   <a for="request">redirect count</a>.
@@ -3815,8 +3817,8 @@ this algorithm returns normally if compilation is allowed, and throws a
     Does |response| to |request| match |source list|?
   </h5>
 
-  Given a <a for="/">request</a> (|request|), and a <a>source list</a> (|source list|),
-  and a <a for="/">policy</a> (|policy|), this algorithm returns the result of executing
+  Given a <a for="/">request</a> |request|, and a <a>source list</a> |source list|,
+  and a <a for="/">policy</a> |policy|, this algorithm returns the result of executing
   [[#match-url-to-source-list]] on |response|'s <a for="response">url</a>,
   |source list|, |policy|'s [=policy/self-origin=], and |request|'s
   <a for="request">redirect count</a>.
@@ -3828,12 +3830,12 @@ this algorithm returns normally if compilation is allowed, and throws a
     Does |url| match |source list| in |origin| with |redirect count|?
   </h5>
 
-  Given a {{URL}} (|url|), a <a>source list</a> (|source list|), an
-  <a for="/">origin</a> (|origin|), and a number (|redirect count|), this
+  Given a {{URL}} |url|, a <a>source list</a> |source list|, an
+  <a for="/">origin</a> |origin|, and a number |redirect count|, this
   algorithm returns "`Matches`" if the URL matches one or more source
   expressions in |source list|, or "`Does Not Match`" otherwise:
 
-  1.  Assert: |source list| is not `null`.
+  1.  Assert: |source list| is not null.
 
   2.  If |source list| [=list/is empty=], return "`Does Not Match`".
 
@@ -3862,8 +3864,8 @@ this algorithm returns normally if compilation is allowed, and throws a
     Does |url| match |expression| in |origin| with |redirect count|?
   </h5>
 
-  Given a {{URL}} (|url|), a <a>source expression</a> (|expression|), an
-  <a for="/">origin</a> (|origin|), and a number (|redirect count|), this algorithm
+  Given a {{URL}} |url|, a <a>source expression</a> |expression|, an
+  <a for="/">origin</a> |origin|, and a number |redirect count|, this algorithm
   returns "`Matches`" if |url| matches |expression|, and "`Does Not Match`"
   otherwise.
 
@@ -3894,7 +3896,7 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   3.  If |expression| matches the <a grammar>`host-source`</a> grammar:
 
-      1.  If |url|'s {{URL/host}} is `null`, return "`Does Not Match`".
+      1.  If |url|'s {{URL/host}} is null, return "`Does Not Match`".
 
       2.  If |expression| does not have a <a grammar>`scheme-part`</a>, and |origin|'s
           [=origin/scheme=] does not <a>`scheme-part` match</a> |url|'s <a for="url">scheme</a>,
@@ -3907,7 +3909,7 @@ this algorithm returns normally if compilation is allowed, and throws a
       3.  If |expression|'s <a grammar>`host-part`</a> does not <a>`host-part` match</a> |url|'s
           {{URL/host}}, return "`Does Not Match`".
 
-      4.  Let |port-part| be |expression|'s <a grammar>`port-part`</a> if present, and `null`
+      4.  Let |port-part| be |expression|'s <a grammar>`port-part`</a> if present, and null
           otherwise.
 
       5.  If |port-part| does not <a>`port-part` match</a> |url|'s [=url/port=] and |url|'s
@@ -3962,7 +3964,7 @@ this algorithm returns normally if compilation is allowed, and throws a
   to `script-src http: https:`, `script-src http://example.com` to `script-src http://example.com
   https://example.com`, and `connect-src ws:` to `connect-src ws: wss:`.
 
-  More formally, two <a>ASCII strings</a> (|A| and |B|) are said to <a>`scheme-part` match</a> if the
+  More formally, two <a>ASCII strings</a> |A| and |B| are said to <a>`scheme-part` match</a> if the
   following algorithm returns "`Matches`":
 
   <ol class="algorithm">
@@ -3987,40 +3989,34 @@ this algorithm returns normally if compilation is allowed, and throws a
     `host-part` matching
   </h5>
 
-  An <a>ASCII string</a> <dfn export lt="host-part match">`host-part` matches</dfn> another <a>ASCII
-  string</a> if a CSP source expression that contained the first as a <a grammar>`host-part`</a> could
-  potentially match a URL containing the latter as a [=url/host=]. For example, we say that
-  "www.example.com" <a>host-part matches</a> "www.example.com".
+  An <a>ASCII string</a> <dfn export lt="host-part match">`host-part` matches</dfn> a [=/host=]
+  if a CSP source expression that contained the first as a <a grammar>`host-part`</a> could
+  potentially match the latter. For example, we say that "www.example.com" <a>host-part matches</a> "www.example.com".
 
-  More formally, two <a>ASCII strings</a> (|A| and |B|) are said to <a>`host-part` match</a> if the
+  More formally, <a>ASCII string</a> |pattern| and [=/host=] |host| are said to <a>`host-part` match</a> if the
   following algorithm returns "`Matches`":
 
-  Note: The matching relation is asymmetric. That is, |A| matching |B| does not
-  mean that |B| will match |A|. For example, `*.example.com` <a>`host-part` matches</a>
+  Note: The matching relation is asymmetric. That is, |pattern| matching |host| does not
+  mean that |host| will match |pattern|. For example, `*.example.com` <a>`host-part` matches</a>
   `www.example.com`, but `www.example.com` does not <a>`host-part` match</a> `*.example.com`.
+  
+  Note: A future version of this specification may allow literal IPv6 and IPv4 addresses,
+  depending on usage and demand. Given the weak security properties of IP addresses in
+  relation to named hosts, however, authors are encouraged to prefer the latter whenever possible.
 
   <ol class="algorithm">
-    1.  If the first character of |A| is an U+002A ASTERISK character (`*`):
+    1. If |host| is not a [=domain=], return "`Does Not Match`".
 
-        1.  Let |remaining| be the result of removing the leading ("*") from |A|.
+    2.  If |pattern| <a>starts with</a> "`*.`":
 
-        2.  If |remaining| (including the leading U+002E FULL STOP character
-            (`.`)) is an <a>ASCII case-insensitive</a> match for the rightmost
-            characters of |B|, then return "`Matches`". Otherwise, return
-            "`Does Not Match`".
+        1.  Let |remaining| be |pattern| with the leading U+002A (`*`) removed and <a>ASCII lowercased</a>.
 
-    2.  If |A| is not an <a>ASCII case-insensitive</a> match for |B|, return
+        2.  If |host| to <a>ASCII lowercase</a> <a>ends with</a> |remaining|, then return "`Matches`".
+
+        3.  Return "`Does Not Match`".
+
+    3.  If |pattern| is not an <a>ASCII case-insensitive</a> match for |host|, return
         "`Does Not Match`".
-
-    3.  If |A| matches the <a grammar>IPv4address</a> rule from [[!RFC3986]], and
-        is not "`127.0.0.1`"; or if |A| is an <a>IPv6 address</a>, return
-        "`Does Not Match`".
-
-        Note: A future version of this specification may allow literal IPv6
-        and IPv4 addresses, depending on usage and demand. Given the weak
-        security properties of IP addresses in relation to named hosts,
-        however, authors are encouraged to prefer the latter whenever
-        possible.
 
     4.  Return "`Matches`".
   </ol>
@@ -4029,8 +4025,8 @@ this algorithm returns normally if compilation is allowed, and throws a
     `port-part` matching
   </h5>
 
-  An <a>ASCII string</a> (|input|) <dfn export>`port-part` matches</dfn> null or a 16-bit unsigned integer (|expectedPort|)
-  and <a>ASCII string</a> (|expectedScheme|) if a CSP source expression that contained the first as a
+  An <a>ASCII string</a> |input| <dfn export>`port-part` matches</dfn> null or a 16-bit unsigned integer |expectedPort|
+  and <a>ASCII string</a> |expectedScheme| if a CSP source expression that contained the first as a
   <a grammar>`port-part`</a> could potentially match a URL containing the latter as [=url/port=]
   and [=url/scheme=]. For example, "80" <a>`port-part` matches</a> matches 80/"http" as well as null/"http".
 
@@ -4062,8 +4058,8 @@ this algorithm returns normally if compilation is allowed, and throws a
     `path-part` matching
   </h5>
 
-  An <a>ASCII string</a> (|path A|) <dfn export lt="path-part match">`path-part` matches</dfn>
-  another <a>ASCII string</a> (|path B|) if a CSP source expression that contained the first as a
+  An <a>ASCII string</a> |path A| <dfn export lt="path-part match">`path-part` matches</dfn>
+  another <a>ASCII string</a> |path B| if a CSP source expression that contained the first as a
   <a grammar>`path-part`</a> could potentially match a URL containing the latter as a [=url/path=].
   For example, we say that "/subdirectory/" <a>`path-part` matches</a> "/subdirectory/file".
 
@@ -4116,7 +4112,7 @@ this algorithm returns normally if compilation is allowed, and throws a
     Is |element| nonceable?
   </h5>
 
-  Given an {{Element}} (|element|), this algorithm returns "`Nonceable`" if
+  Given an {{Element}} |element|, this algorithm returns "`Nonceable`" if
   a <a grammar>`nonce-source`</a> expression can match the element (as discussed
   in [[#security-nonce-hijacking]]), and "`Not Nonceable`" if such expressions
   should not be applied.
@@ -4162,7 +4158,7 @@ this algorithm returns normally if compilation is allowed, and throws a
   expression <a grammar>`'unsafe-inline'`</a>, and does not override that
   expression as described in the following algorithm:
 
-  Given a <a>source list</a> (|list|) and a string (|type|), the following
+  Given a <a>source list</a> |list| and a string |type|, the following
   algorithm returns "`Allows`" if all inline content of a given |type| is
   allowed and "`Does Not Allow`" otherwise.
 
@@ -4221,8 +4217,8 @@ this algorithm returns normally if compilation is allowed, and throws a
     Does |element| match source list for |type| and |source|?
   </h5>
 
-  Given an {{Element}} (|element|), a <a>source list</a> (|list|), a string
-  (|type|), and a string (|source|), this algorithm returns "`Matches`" or
+  Given an {{Element}} |element|, a <a>source list</a> |list|, a string
+  |type|, and a string |source|, this algorithm returns "`Matches`" or
   "`Does Not Match`".
 
   Note: Regardless of the encoding of the document, |source| will be converted
@@ -4264,7 +4260,7 @@ this algorithm returns normally if compilation is allowed, and throws a
 
           1.  If |expression| matches the <a grammar>`hash-source`</a> grammar:
 
-              1.  Let |algorithm| be `null`.
+              1.  Let |algorithm| be null.
 
               2.  If |expression|'s <a grammar>`hash-algorithm`</a> part is an
                   <a>ASCII case-insensitive</a> match for "sha256", set
@@ -4278,7 +4274,7 @@ this algorithm returns normally if compilation is allowed, and throws a
                   <a>ASCII case-insensitive</a> match for "sha512", set
                   |algorithm| to <a>SHA-512</a>.
 
-              5.  If |algorithm| is not `null`:
+              5.  If |algorithm| is not null:
 
                   1.  Let |actual| be the result of <a>base64 encoding</a> the
                       result of applying |algorithm| to |source|.
@@ -4307,8 +4303,8 @@ this algorithm returns normally if compilation is allowed, and throws a
   </h4>
 
   Each <a>fetch directive</a> controls a specific destination of <a for="/">request</a>. Given
-  a <a for="/">request</a> (|request|), the following algorithm returns either
-  `null` or the <a for="directive">name</a> of the request's
+  a <a for="/">request</a> |request|, the following algorithm returns either
+  null or the <a for="directive">name</a> of the request's
   <dfn for="request" export>effective directive</dfn>:
 
   1.  If |request|'s [=request/initiator=] is "`prefetch`" or "`prerender`",
@@ -4368,13 +4364,13 @@ this algorithm returns normally if compilation is allowed, and throws a
       ::
         1. Return `connect-src`.
 
-  4.  Return `null`.
+  4.  Return null.
 
   <h4 id="effective-directive-for-inline-check" algorithm>
     Get the effective directive for inline checks
   </h4>
 
-  Given a string (|type|), this algorithm returns the <a for="directive">name</a>
+  Given a string |type|, this algorithm returns the <a for="directive">name</a>
   of the effective directive.
 
   Note: While the <a for="request">effective directive</a> is only defined for
@@ -4396,7 +4392,7 @@ this algorithm returns normally if compilation is allowed, and throws a
       : "`style attribute`"
       ::
         1.  Return `style-src-attr`.
-  2.  Return `null`.
+  2.  Return null.
 
   <h4 id="directive-fallback-list" algorithm>
     Get fetch directive fallback list
@@ -4406,7 +4402,7 @@ this algorithm returns normally if compilation is allowed, and throws a
   The returned <a>ordered set</a> is sorted from most relevant to least relevant
   and it includes the effective directive itself.
 
-  Given a string (|directive name|):
+  Given a string |directive name|:
 
   1.  Switch on |directive name|:
 
@@ -4470,8 +4466,8 @@ this algorithm returns normally if compilation is allowed, and throws a
   we are currently checking a worker request), a `default-src` directive
   should not execute if a `worker-src` or `script-src` directive exists.
 
-  Given a string (|effective directive name|), a string (|directive name|) and
-  a <a for="/">policy</a> (|policy|):
+  Given a string |effective directive name|, a string |directive name| and
+  a <a for="/">policy</a> |policy|:
 
   1.  Let |directive fallback list| be the result of executing [[#directive-fallback-list]]
       on |effective directive name|.
