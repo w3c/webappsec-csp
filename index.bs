@@ -3912,8 +3912,7 @@ this algorithm returns normally if compilation is allowed, and throws a
       4.  Let |port-part| be |expression|'s <a grammar>`port-part`</a> if present, and null
           otherwise.
 
-      5.  If |port-part| does not <a>`port-part` match</a> |url|'s [=url/port=] and |url|'s
-          [=url/scheme=], return "`Does Not Match`".
+      5.  If |port-part| does not <a>`port-part` match</a> the |url|, return "`Does Not Match`".
 
       6.  If |expression| contains a non-empty <a grammar>`path-part`</a>, and
           |redirect count| is 0, then:
@@ -4025,10 +4024,9 @@ this algorithm returns normally if compilation is allowed, and throws a
     `port-part` matching
   </h5>
 
-  An <a>ASCII string</a> |input| <dfn export>`port-part` matches</dfn> null or a 16-bit unsigned integer |expectedPort|
-  and <a>ASCII string</a> |expectedScheme| if a CSP source expression that contained the first as a
-  <a grammar>`port-part`</a> could potentially match a URL containing the latter as [=url/port=]
-  and [=url/scheme=]. For example, "80" <a>`port-part` matches</a> matches 80/"http" as well as null/"http".
+  An <a>ASCII string</a> |input| <dfn export>`port-part` matches</dfn> [=url=] |url| if a CSP source expression that
+  contained the first as a <a grammar>`port-part`</a> could potentially match a URL containing the latter's [=url/port=]
+  and [=url/scheme=]. For example, "80" <a>`port-part` matches</a> matches "http://example.com".
 
   <ol class="algorithm">
     1.  Assert: |input| is the empty string, "*", or a sequence of <a>ASCII digits</a>.
@@ -4037,11 +4035,11 @@ this algorithm returns normally if compilation is allowed, and throws a
 
     3.  Let |normalizedInput| be null if |input| is the empty string; otherwise |input| interpreted as decimal number.
     
-    4.  If |normalizedInput| equals |expectedPort|, return "`Matches`".
+    4.  If |normalizedInput| equals |url|'s [=url/port=], return "`Matches`".
 
-    5.  If |expectedPort| is null:
+    5.  If |url|'s [=url/port=] is null:
 
-        1.  Let |defaultPort| be the <a>default port</a> for |expectedScheme|.
+        1.  Let |defaultPort| be the <a>default port</a> for |url|'s [=url/scheme=].
 
         2.  If |normalizedInput| equals |defaultPort|, return "`Matches`".
 
