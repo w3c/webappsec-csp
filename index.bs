@@ -3913,8 +3913,7 @@ this algorithm returns normally if compilation is allowed, and throws a
       4.  Let |port-part| be |expression|'s <a grammar>`port-part`</a> if present, and null
           otherwise.
 
-      5.  If |port-part| does not <a>`port-part` match</a> |url|'s [=url/port=] and |url|'s
-          [=url/scheme=], return "`Does Not Match`".
+      5.  If |port-part| does not <a>`port-part` match</a> |url|, return "`Does Not Match`".
 
       6.  If |expression| contains a non-empty <a grammar>`path-part`</a>, and
           |redirect count| is 0, then:
@@ -4026,27 +4025,26 @@ this algorithm returns normally if compilation is allowed, and throws a
     `port-part` matching
   </h5>
 
-  An <a>ASCII string</a> |port A| <dfn export>`port-part` matches</dfn> two other <a>ASCII
-  strings</a> |port B| and |scheme B| if a CSP source expression that contained the first as a
-  <a grammar>`port-part`</a> could potentially match a URL containing the latter as [=url/port=]
-  and [=url/scheme=]. For example, "80" <a>`port-part` matches</a> matches "80"/"http".
+  An <a>ASCII string</a> |input| <dfn export>`port-part` matches</dfn> [=/URL=] |url| if a CSP source expression that
+  contained the first as a <a grammar>`port-part`</a> could potentially match a URL containing the latter's [=url/port=]
+  and [=url/scheme=]. For example, "80" <a>`port-part` matches</a> matches http://example.com.
 
   <ol class="algorithm">
-    1.  If |port A| is the empty string:
+    1.  Assert: |input| is the empty string, "*", or a sequence of <a>ASCII digits</a>.
 
-        1.  If |port B| is the <a>default port</a> for |scheme B|, return "`Matches`". Otherwise,
-            return "`Does Not Match`".
+    2.  If |input| is equal to "*", return "`Matches`".
 
-    2.  If |port A| is equal to "*", return "`Matches`".
+    3.  Let |normalizedInput| be null if |input| is the empty string; otherwise |input| interpreted as decimal number.
+    
+    4.  If |normalizedInput| equals |url|'s [=url/port=], return "`Matches`".
 
-    3.  If |port A| is <a for="string" lt="is">identical to</a> |port B|, return "`Matches`".
+    5.  If |url|'s [=url/port=] is null:
 
-    4.  If |port B| is the empty string:
+        1.  Let |defaultPort| be the <a>default port</a> for |url|'s [=url/scheme=].
 
-        1.  If |port A| is the <a>default port</a> for |scheme B|, return "`Matches`". Otherwise,
-            return "`Does not Match`".
+        2.  If |normalizedInput| equals |defaultPort|, return "`Matches`".
 
-    5. Return "`Does Not Match`".
+    6. Return "`Does Not Match`".
   </ol>
 
   <h5 id="match-paths" algorithm>
