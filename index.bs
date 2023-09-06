@@ -19,7 +19,7 @@ Boilerplate: feedback-header off
 !Participate: <a href="https://github.com/w3c/webappsec-csp/issues/new">File an issue</a> (<a href="https://github.com/w3c/webappsec-csp/issues">open issues</a>)
 !Tests: <a href=https://github.com/web-platform-tests/wpt/tree/master/content-security-policy>web-platform-tests content-security-policy/</a> (<a href=https://github.com/web-platform-tests/wpt/labels/content-security-policy>ongoing work</a>)
 Markup Shorthands: css off, markdown on
-At Risk: The [[#is-element-nonceable]] algorithm.
+At Risk: The [=determine whether element is nonceable=] algorithm.
 </pre>
 <pre class="link-defaults">
 spec:dom; type:interface; text:Document
@@ -471,7 +471,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     Parse a serialized CSP
   </h4>
 
-  To <dfn abstract-op>parse a serialized CSP</dfn>, given a [=string=] |serialized|, a
+  To <dfn>parse a serialized CSP</dfn>, given a [=string=] |serialized|, a
   [=policy/source=] |source|, and a [=policy/disposition=] |disposition|, execute the
   following steps.
 
@@ -520,7 +520,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     Parse a serialized CSP list
   </h4>
 
-  To <dfn abstract-op>parse a serialized CSP list</dfn>, given a [=byte sequence=] or [=string=]
+  To <dfn>parse a serialized CSP list</dfn>, given a [=byte sequence=] or [=string=]
   |list|, a [=policy/source=] |source|, and a [=policy/disposition=] |disposition|, execute
   the following steps.
 
@@ -535,9 +535,8 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
 
     3.  [=list/For each=] |token| returned by <a lt="split a string on commas">splitting |list| on commas</a>:
 
-        1.  Let |policy| be the result of <a abstract-op lt="parse a serialized CSP">parsing</a>
-            |token|, with a [=policy/source=] of |source|, and [=policy/disposition=] of
-            |disposition|.
+        1.  Let |policy| be the result of [=parsing a serialized CSP=] given
+            |token|, |source|, and |disposition|.
 
         2.  If |policy|'s [=policy/directive set=] is empty, [=iteration/continue=].
 
@@ -546,26 +545,27 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     4.  Return |policies|.
   </ol>
 
-  <h4 id="parse-response-csp" algorithm dfn export>
+  <h4 id="parse-response-csp" algorithm>
     Parse |response|'s Content Security Policies
   </h4>
 
-  To <dfn abstract-op>parse a response's Content Security Policies</dfn> given a <a>response</a>
-  |response|:
+  To <dfn export>parse response's Content Security Policies</dfn> given a
+  <a>response</a> |response|:
 
   <ol class="algorithm">
-    1.  Let |policies| be the result of <a abstract-op lt="parse a serialized CSP list">parsing</a>
-        the result of [=extracting header list values=] given `Content-Security-Policy` and
-        |response|'s [=response/header list=], with a [=policy/source=] of "`header`", and a
-        [=policy/disposition=] of "`enforce`".
+    1.  Let |headers| be the result of [=extracting header list values=], given
+        `Content-Security-Policy` and |response|'s [=response/header list=].
 
-    2.  Append to |policies| the result of
-        <a abstract-op lt="parse a serialized CSP list">parsing</a> the result of
-        [=extracting header list values=] given `Content-Security-Policy-Report-Only` and
-        |response|'s [=response/header list=], with a [=policy/source=] of "`header`", and a
-        [=policy/disposition=] of "`report`".
+    2.  Let |policies| be the result of [=parsing a serialized CSP list=], given
+        |headers|, "`header`", and "`enforce`".
 
-    3.  <a for=list>For each</a> |policy| of |policies|:
+    3.  Let |report only headers| be the result of [=extracting header list values=], given
+        `Content-Security-Policy-Report-Only` and |response|'s [=response/header list=].
+
+    4.  Append to |policies| the result of [=parsing a serialized CSP list=], given
+        |report only headers|, "`header`", and "`report`".
+
+    4.  <a for=list>For each</a> |policy| of |policies|:
 
         1.  Set |policy|'s [=policy/self-origin=] to |response|'s [=response/url=]'s
             [=url/origin=].
@@ -573,10 +573,10 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     4.  Return |policies|.
   </ol>
 
-  Note: When <a abstract-op lt="parse a response's Content Security Policies">parsing a response's
-  Content Security Policies</a>, if the resulting |policies| end up containing at least one item,
-  user agents can hold a flag on |policies| and use it to optimize away the [=/contains a
-  header-delivered Content Security Policy=] algorithm.
+  Note: When [=parsing response's Content Security Policies=], if the resulting
+  |policies| end up containing at least one item, user agents can hold a flag on
+  |policies| and use it to optimize away the [=/contains a header-delivered
+  Content Security Policy=] algorithm.
 
   <h3 id="framework-directives">Directives</h3>
 
@@ -608,41 +608,48 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
 
   1.  A <dfn for="directive" export>pre-request check</dfn>, which takes a
       <a for="/">request</a> and a <a for="/">policy</a> as an argument, and is executed
-      during [[#should-block-request]]. This algorithm returns "`Allowed`" unless
+      to [=determine whether a request should be blocked by Content Security
+      Policy=]. This algorithm returns "`Allowed`" unless
       otherwise specified.
 
   2.  A <dfn for="directive" export>post-request check</dfn>, which takes a
       <a for="/">request</a>, a <a>response</a>, and a <a for="/">policy</a> as arguments,
-      and is executed during [[#should-block-response]]. This algorithm returns
+      and is executed to [=determine whether a response should be blocked by Content Security
+      Policy=]. This algorithm returns "`Allowed`" unless otherwise specified.
+
+  3.  An <dfn for="directive" export>inline check</dfn>, which takes an
+      {{Element}}, a type string, a <a for="/">policy</a>, and a source string
+      as arguments, and is executed when [=determining whether element's inline
+      type behavior should be blocked by Content Security Policy=] and when
+      [=determining whether a navigation request should be blocked by Content
+      Security Policy=] for `javascript:` requests. This algorithm returns
       "`Allowed`" unless otherwise specified.
 
-  3.  An <dfn for="directive" export>inline check</dfn>, which takes an {{Element}}, a
-      type string, a <a for="/">policy</a>, and a source string as arguments,
-      and is executed during [[#should-block-inline]] and during
-      [[#should-block-navigation-request]] for `javascript:` requests. This
-      algorithm returns "`Allowed`" unless otherwise specified.
+  4.  An <dfn for="directive" export>initialization</dfn>, which takes a
+      {{Document}} or <a for="/">global object</a> and a <a for="/">policy</a>
+      as arguments. This algorithm is executed when [=running CSP initialization
+      for a Document=] and when [=running CSP initialization for a global
+      object=]. Unless otherwise specified, it has no effect and it returns
+      "`Allowed`".
 
-  4.  An <dfn for="directive" export>initialization</dfn>, which takes a {{Document}}
-      or <a for="/">global object</a> and a <a for="/">policy</a> as arguments. This
-      algorithm is executed during [[#run-document-csp-initialization]] and
-      [[#run-global-object-csp-initialization]]. Unless otherwise specified, it has no
-      effect and it returns "`Allowed`".
+  5.  A <dfn for="directive" export>pre-navigation check</dfn>, which takes a <a
+      for="/">request</a>, a navigation type string ("`form-submission`" or
+      "`other`"), and a <a for="/">policy</a> as arguments, and is executed when
+      [=determining whether a navigation request should be blocked by Content
+      Security Policy=]. It returns "`Allowed`" unless otherwise specified.
 
-  5.  A <dfn for="directive" export>pre-navigation check</dfn>, which takes a
-      <a for="/">request</a>, a navigation type string ("`form-submission`"
-      or "`other`"), and a <a for="/">policy</a> as arguments, and
-      is executed during [[#should-block-navigation-request]]. It returns
-      "`Allowed`" unless otherwise specified.
-
-  6.  A <dfn for="directive" export>navigation response check</dfn>, which takes a
-      <a for="/">request</a>, a navigation type string ("`form-submission`" or "`other`"),
-      a <a>response</a>, a <a>navigable</a>, a check type string ("`source`"
-      or "`response`"), and a <a for="/">policy</a> as arguments, and is executed during
-      [[#should-block-navigation-response]]. It returns "`Allowed`" unless otherwise specified.
-
-  8.  A <dfn for="directive" export>webrtc pre-connect check</dfn>, which takes a [=/policy=], and
-      is executed during [[#should-block-rtc-connection]]. It returns "`Allowed`" unless
+  6.  A <dfn for="directive" export>navigation response check</dfn>, which takes
+      a <a for="/">request</a>, a navigation type string ("`form-submission`" or
+      "`other`"), a <a>response</a>, a <a>navigable</a>, a check type string
+      ("`source`" or "`response`"), and a <a for="/">policy</a> as arguments,
+      and is executed when [=determining whether a navigation response should be
+      blocked by Content Security Policy=]. It returns "`Allowed`" unless
       otherwise specified.
+
+  8.  A <dfn for="directive" export>webrtc pre-connect check</dfn>, which takes
+      a [=/policy=], and is executed when [=determining whether RTC connections
+      should be blocked by Content Security policy=]. It returns "`Allowed`"
+      unless otherwise specified.
 
   <h4 id="framework-directive-source-list">Source Lists</h4>
 
@@ -754,11 +761,10 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
   either null, "`inline`", "`eval`", "`wasm-eval`", or a {{URL}}. It represents the resource
   which violated the policy.
 
-  Note: The value null for a <a>violation</a>'s <a
-  for="violation">resource</a> is only allowed while the <a>violation</a> is
-  being populated. By the time the <a>violation</a> is reported and its <a
-  for="violation">resource</a> is used for
-  [[#obtain-violation-blocked-uri|obtaining the blocked URI]], the
+  Note: The value null for a <a>violation</a>'s <a for="violation">resource</a>
+  is only allowed while the <a>violation</a> is being populated. By the time the
+  <a>violation</a> is reported and its <a for="violation">resource</a> is used
+  for [=obtaining the blocked URI of a violation's resource=], the
   <a>violation</a>'s <a for="violation">resource</a> should be populated with a
   {{URL}} or one of the allowed strings.
 
@@ -807,9 +813,10 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     Create a violation object for |global|, |policy|, and |directive|
   </h4>
 
-  Given a <a for="/">global object</a> |global|, a <a for="/">policy</a> |policy|, and a
-  <a>string</a> |directive|, the following algorithm creates a new <a>violation</a>
-  object, and populates it with an initial set of data:
+  To <dfn>create a violation object for a global</dfn>, given a <a
+  for="/">global object</a> |global|, a <a for="/">policy</a> |policy|, and a
+  <a>string</a> |directive|, execute the following steps, which create a new
+  <a>violation</a> object, and populate it with an initial set of data.
 
   1.  Let |violation| be a new <a>violation</a> whose <a for="violation">global
       object</a> is |global|, <a for="violation">policy</a> is |policy|,
@@ -845,17 +852,18 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     Create a violation object for |request|, and |policy|.
   </h4>
 
-  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
-  the following algorithm creates a new <a>violation</a> object,
-  and populates it with an initial set of data:
+  To <dfn>create a violation object for a request</dfn>, given a <a
+  for="/">request</a> |request|, a <a for="/">policy</a> |policy|, execute the
+  following steps, which create a new <a>violation</a> object, and populate it
+  with an initial set of data.
 
-  1.  Let |directive| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
+  1.  Let |directive| be the result of [=getting the effective directive for
+      request=] given |request|.
 
-  2.  Let |violation| be the result of executing
-      [[#create-violation-for-global]] on |request|'s
-      <a for="request">client</a>'s <a for="environment settings object">global object</a>,
-      |policy|, and |directive|.
+  2.  Let |violation| be the result of [=creating a violation object for a
+      global=], given |request|'s <a for="request">client</a>'s <a
+      for="environment settings object">global object</a>, |policy|, and
+      |directive|.
 
   3.  Set |violation|'s <a for="violation">resource</a> to |request|'s
       <a for="request">url</a>.
@@ -913,7 +921,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
   representation</a>.
 
   When the user agent receives a `Content-Security-Policy` header field, it
-  MUST <a abstract-op lt="parse a serialized CSP">parse</a> and <a>enforce</a> each
+  MUST <a lt="parse a serialized CSP">parse</a> and <a>enforce</a> each
   <a>serialized CSP</a> it contains as described in [[#fetch-integration]],
   [[#html-integration]].
 
@@ -954,7 +962,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
   representation</a>.
 
   When the user agent receives a `Content-Security-Policy-Report-Only` header
-  field, it MUST <a abstract-op lt="parse a serialized CSP">parse</a> and <a>monitor</a>
+  field, it MUST <a lt="parse a serialized CSP">parse</a> and <a>monitor</a>
   each <a>serialized CSP</a> it contains as described in
   [[#fetch-integration]] and [[#html-integration]].
 
@@ -1020,23 +1028,27 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
   or allowed, and about whether a particular <a>response</a> should be replaced
   with a <a>network error</a>.
 
-  1.  [[#should-block-request]] is called as part of step 2.4 of the <a>Main
+  1.  [=Determine whether a request should be blocked by Content Security Policy=]
+      is called as part of step 2.4 of the <a>Main
       Fetch</a> algorithm. This allows directives' <a>pre-request checks</a>
       to be executed against each <a for="/">request</a> before it hits the network,
       and against each redirect that a <a for="/">request</a> might go through on its
       way to reaching a resource.
 
-  2.  [[#should-block-response]] is called as part of step 11 of the <a>Main
+  2.  [=Determine whether a response should be blocked by Content Security Policy=]
+      is called as part of step 11 of the <a>Main
       Fetch</a> algorithm. This allows directives' <a>post-request checks</a>
       to be executed on the <a>response</a> delivered from the network
       or from a Service Worker.
 
-  <h4 id="report-for-request" algorithm dfn export>
+  <h4 id="report-for-request" algorithm>
     Report Content Security Policy violations for |request|
   </h4>
 
-  Given a <a for="/">request</a> |request|, this algorithm reports violations based
-  on [=request/policy container=]'s [=policy container/CSP list=] "report only" policies.
+  To <dfn export>report Content Security Policy violations</dfn>, given a <a
+  for="/">request</a> |request|, execute the following steps, which report
+  violations based on [=request/policy container=]'s [=policy container/CSP
+  list=] "report only" policies.
 
   1.  Let |CSP list| be |request|'s [=request/policy container=]'s [=policy container/CSP list=].
 
@@ -1045,20 +1057,22 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
       1.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
           then skip to the next |policy|.
 
-      2.  Let |violates| be the result of executing
-          [[#does-request-violate-policy]] on |request| and |policy|.
+      2.  Let |violates| be the result of [=determining whether request violates
+          policy=], given |request| and |policy|.
 
-      3.  If |violates| is not "`Does Not Violate`", then execute
-          [[#report-violation]] on the result of executing
-          [[#create-violation-for-request]] on |request|, and |policy|.
+      3.  If |violates| is not "`Does Not Violate`", then [=report a
+          violation=], given the result of [=creating a violation object for a
+          request=] given |request|, and |policy|.
 
-  <h4 id="should-block-request" algorithm dfn export>
+  <h4 id="should-block-request" algorithm>
     Should |request| be blocked by Content Security Policy?
   </h4>
 
-  Given a <a for="/">request</a> |request|, this algorithm returns `Blocked` or `Allowed` and
-  reports violations based on |request|'s [=request/policy container=]'s
-  [=policy container/CSP list=].
+  To <dfn export>determine whether a request should be blocked by Content
+  Security Policy</dfn>, given a <a for="/">request</a> |request|, execute the
+  following steps, which return `Blocked` or `Allowed` and report violations
+  based on |request|'s [=request/policy container=]'s [=policy container/CSP
+  list=].
 
   1.  Let |CSP list| be |request|'s [=request/policy container=]'s [=policy container/CSP list=].
 
@@ -1069,24 +1083,28 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
       1.  If |policy|'s <a for="policy">disposition</a> is "`report`",
           then skip to the next |policy|.
 
-      2.  Let |violates| be the result of executing
-          [[#does-request-violate-policy]] on |request| and |policy|.
+      2.  Let |violates| be the result of [=determining whether request violates
+          policy=], given |request| and |policy|.
 
       3.  If |violates| is not "`Does Not Violate`", then:
 
-          1.  Execute [[#report-violation]] on the result of executing
-              [[#create-violation-for-request]] on |request|, and |policy|.
+          1.  Let |violation| be the result of [=creating a violation
+              object for a request=], given |request|, and |policy|.
 
-          2.  Set |result| to "`Blocked`".
+          2.  [=Report a violation=], given |violation|.
+
+          3.  Set |result| to "`Blocked`".
 
   4.  Return |result|.
 
-  <h4 id="should-block-response" algorithm dfn export>
+  <h4 id="should-block-response" algorithm>
     Should |response| to |request| be blocked by Content Security Policy?
   </h4>
 
-  Given a <a>response</a> |response| and a <a for="/">request</a> |request|, this algorithm
-  returns `Blocked` or `Allowed`, and reports violations based on |request|'s
+  To <dfn export>determine whether a response should be blocked by Content
+  Security Policy</dfn>, given a <a>response</a> |response| and a <a
+  for="/">request</a> |request|, execute the following steps, which return
+  `Blocked` or `Allowed` and report violations based on |request|'s
   [=request/policy container=]'s [=policy container/CSP list=].
 
   1.  Let |CSP list| be |request|'s [=request/policy container=]'s [=policy container/CSP list=].
@@ -1100,10 +1118,12 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
           1.  If the result of executing |directive|'s
               <a for="directive">post-request check</a> is "`Blocked`", then:
 
-              1.  Execute [[#report-violation]] on the result of executing
-                  [[#create-violation-for-request]] on |request|, and |policy|.
+              1.  Let |violation| be the result of [=creating a violation
+                  object for a request=], given |request|, and |policy|.
 
-              2.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
+              2.  [=Report a violation=], given |violation|.
+
+              3.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
                   then set |result| to "`Blocked`".
 
       Note: This portion of the check verifies that the page can load the
@@ -1118,27 +1138,29 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
   </h3>
 
   1.  The [=/policy container=] has a [=policy container/CSP list=], which holds
-      all the <a for="/">policy</a> objects which are active for a given context. This
-      list is empty unless otherwise specified, and is populated from the <a>response</a> by <a
-      abstract-op lt="parse a response's Content Security Policies">parsing</a> <a>response</a>'s
-      Content Security Policies or inherited following the rules of the [=/policy container=].
+      all the <a for="/">policy</a> objects which are active for a given
+      context. This list is empty unless otherwise specified, and is populated
+      from the <a>response</a> by [=parsing response's Content Security
+      Policies=] or inherited following the rules of the [=/policy container=].
 
   2.  A <a for="/">global object</a>'s <dfn for="global object" id="global-object-csp-list">CSP list</dfn>
-      is the result of executing [[#get-csp-of-object]] with the <a for="/">global object</a>
-      as the `object`.
+      is the result of [=retrieving object's CSP list=] given <a for="/">global object</a>.
 
   3.  A <a for="/">policy</a> is <dfn export>enforced</dfn> or <dfn export>monitored</dfn> for a
       <a for="/">global object</a> by inserting it into the <a for="/">global object</a>'s
       <a for="global object">CSP list</a>.
 
-  4.  [[#run-document-csp-initialization]] is called during the <a>create and initialize a
-      new `Document` object</a> algorithm.
+  4.  <a>Run `CSP` initialization for a document</a> is called during the
+      <a>create and initialize a new `Document` object</a> algorithm.
 
-  5.  [[#should-block-inline]] is called during the <a>prepare the script element</a> and
-      <a>update a `style` block</a> algorithms in order to determine whether or
-      not an inline script or style block is allowed to execute/render.
+  5.  [=Determine whether element's inline type behavior should be blocked by
+      Content Security Policy=] is called during the <a>prepare the script
+      element</a> and <a>update a `style` block</a> algorithms in order to
+      determine whether or not an inline script or style block is allowed to
+      execute/render.
 
-  6.  [[#should-block-inline]] is called during handling of inline event
+  6.  [=Determine whether element's inline type behavior should be blocked by
+      Content Security Policy=] is called during handling of inline event
       handlers (like `onclick`) and inline `style` attributes in order to
       determine whether or not they ought to be allowed to execute/render.
 
@@ -1152,28 +1174,30 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
       ISSUE(whatwg/html#968): Stylesheet loading is not yet integrated with
       Fetch in WHATWG's HTML.
 
-  9.  [[#allow-base-for-document]] is called during <{base}>'s <a>set the frozen
-      base URL</a> algorithm to ensure that the <{base/href}> attribute's value
-      is valid.
+  9.  [=Determine whether base is allowed for document=] is called during
+      <{base}>'s <a>set the frozen base URL</a> algorithm to ensure that the
+      <{base/href}> attribute's value is valid.
 
-  10. [[#should-block-navigation-request]] is called during the <a spec=html>create
-      navigation params by fetching</a> algorithm, and [[#should-block-navigation-response]]
-      is called during the <a spec=html>attempt to populate the history entry's document</a>
-      algorithm to apply directive's navigation checks, as well as inline checks for
-      navigations to `javascript:` URLs.
+  10. [=Determine whether a navigation request should be blocked by Content
+      Security Policy=] is called during the <a spec=html>create navigation
+      params by fetching</a> algorithm, and [=determine whether a navigation
+      response should be blocked by Content Security Policy=] is called during
+      the <a spec=html>attempt to populate the history entry's document</a>
+      algorithm to apply directive's navigation checks, as well as inline checks
+      for navigations to `javascript:` URLs.
 
-  11. [[#run-global-object-csp-initialization]] is called during the <a>run a worker</a>
-      algorithm.
+  11. <a>Run `CSP` initialization for a global object</a> is called during the
+      <a>run a worker</a> algorithm.
 
   12. The <a>sandbox</a> directive is used to populate the <a spec=html>CSP-derived
       sandboxing flags</a>.
 
-  <h4 id="run-document-csp-initialization" algorithm dfn export>
+  <h4 id="run-document-csp-initialization" algorithm>
     Run `CSP` initialization for a `Document`
   </h4>
 
-  Given a {{Document}} |document|, the user agent performs the following
-  steps in order to initialize CSP for |document|:
+  To <dfn export>run `CSP` initialization for a document</dfn>, given a
+  {{Document}} |document|, execute the following steps.
 
   1. <a for=list>For each</a> |policy| of |document|'s [=Document/policy container=]'s
      [=policy container/CSP list=]:
@@ -1188,7 +1212,8 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     Retrieve the <a for="global object">CSP list</a> of an |object|
   </h4>
 
-  To obtain |object|'s <a for="global object">CSP list</a>:
+  To <dfn>retrieve object's <a for="global object">CSP list</a></dfn>,
+  given a {{Document}} or [=/global object=] |object|, execute the following steps.
 
   1.  If |object| is a {{Document}} return |object|'s [=Document/policy container=]'s
       [=policy container/CSP list=].
@@ -1199,14 +1224,16 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
 
   3.  Return null.
 
-  <h4 id="should-block-inline" algorithm dfn export>
+  <h4 id="should-block-inline" algorithm>
     Should |element|'s inline |type| behavior be blocked by Content Security Policy?
   </h4>
 
-  Given an {{Element}} |element|, a string |type|, and a string |source|
-  this algorithm returns "`Allowed`" if the element is allowed to have inline
-  definition of a particular type of behavior (script execution, style
-  application, event handlers, etc.), and "`Blocked`" otherwise:
+  To <dfn export>determine whether element's inline type behavior should be
+  blocked by Content Security Policy</dfn>, given an {{Element}} |element|, a
+  string |type|, and a string |source|, execute the following steps, which
+  return "`Allowed`" if the element is allowed to have inline definition of a
+  particular type of behavior (script execution, style application, event
+  handlers, etc.), and "`Blocked`" otherwise.
 
   Note: The valid values for |type| are "`script`", "`script attribute`",
   "`style`", and "`style attribute`".
@@ -1225,11 +1252,11 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
                 "`Allowed`" when executed upon |element|, |type|, |policy| and |source|,
                 skip to the next |directive|.
 
-            2.  Let |directive-name| be the result of executing
-                [[#effective-directive-for-inline-check]] on |type|.
+            2.  Let |directive-name| be the result of [=getting the effective directive
+                for inline checks=], given |type|.
 
-            3.  Otherwise, let |violation| be the result of executing
-                [[#create-violation-for-global]] on the <a>current settings
+            3.  Otherwise, let |violation| be the result of [=creating a violation
+                object for a global=] given the <a>current settings
                 object</a>'s <a for="environment settings object">global object</a>, |policy|,
                 and |directive-name|.
 
@@ -1242,7 +1269,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
                 <a for="violation">sample</a> to the substring of |source| containing its first 40
                 characters.
 
-            7.  Execute [[#report-violation]] on |violation|.
+            7.  [=Report a violation=], given |violation|.
 
             8.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
                 set |result| to "`Blocked`".
@@ -1250,14 +1277,16 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     4.  Return |result|.
   </ol>
 
-  <h4 id="should-block-navigation-request" algorithm dfn export>
+  <h4 id="should-block-navigation-request" algorithm>
     Should |navigation request| of |type| be blocked
     by Content Security Policy?
   </h4>
 
-  Given a <a for="/">request</a> |navigation request| and a string |type| (either
-  "`form-submission`" or "`other`"), this algorithm return "`Blocked`" if the active policy blocks
-  the navigation, and "`Allowed`" otherwise:
+  To <dfn export>determine whether a navigation request should be blocked by
+  Content Security Policy</dfn>, given a <a for="/">request</a> |navigation
+  request| and a string |type| (either "`form-submission`" or "`other`"),
+  execute the following steps, which return "`Blocked`" if the active policy
+  blocks the navigation, and "`Allowed`" otherwise.
 
   <ol class="algorithm">
     1.  Let |result| be "`Allowed`".
@@ -1271,15 +1300,15 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
                 returns "`Allowed`" when executed upon |navigation request|,
                 |type|, and |policy| skip to the next |directive|.
 
-            2.  Otherwise, let |violation| be the result of executing
-                [[#create-violation-for-global]] on |navigation request|'s
+            2.  Otherwise, let |violation| be the result of [=creating a violation
+                object for a global=] given |navigation request|'s
                 <a for="request">client</a>'s <a for="environment settings object">global object</a>,
                 |policy|, and |directive|'s <a for="directive">name</a>.
 
             3.  Set |violation|'s <a for="violation">resource</a> to |navigation
                 request|'s <a for="request">URL</a>.
 
-            4.  Execute [[#report-violation]] on |violation|.
+            4.  [=Report a violation=], given |violation|.
 
             5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
                 set |result| to "`Blocked`".
@@ -1293,23 +1322,23 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
 
             1.  <a for=set>For each</a> |directive| of |policy|:
 
-                1.  Let |directive-name| be the result of executing
-                    [[#effective-directive-for-inline-check]] on |type|.
+                1.  Let |directive-name| be the result of [=getting the effective
+                    directive for inline checks=], given |type|.
 
                 2.  If |directive|'s <a for="directive">inline check</a>
                     returns "`Allowed`" when executed upon null,
                     "`navigation`" and |navigation request|'s <a for="request">current URL</a>,
                     skip to the next |directive|.
 
-                3.  Otherwise, let |violation| be the result of executing
-                    [[#create-violation-for-global]] on |navigation request|'s
+                3.  Otherwise, let |violation| be the result of [=creating a violation
+                    object for a global=] given |navigation request|'s
                     <a for="request">client</a>'s <a for="environment settings object">global object</a>,
                     |policy|, and |directive-name|.
 
                 4.  Set |violation|'s <a for="violation">resource</a> to |navigation
                     request|'s <a for="request">URL</a>.
 
-                5.  Execute [[#report-violation]] on |violation|.
+                5.  [=Report a violation=], given |violation|.
 
                 6.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
                     set |result| to "`Blocked`".
@@ -1317,16 +1346,18 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     4.  Return |result|.
   </ol>
 
-  <h4 id="should-block-navigation-response" algorithm dfn export>
+  <h4 id="should-block-navigation-response" algorithm>
     Should |navigation response| to |navigation request| of |type|
     in |target| be blocked by Content Security Policy?
   </h4>
 
-  Given a <a for="/">request</a> |navigation request|, a <a>response</a> |navigation
-  response|, a [=/CSP list=] |response CSP list|, a string |type| (either
-  "`form-submission`" or "`other`"), and a <a>navigable</a> |target|, this algorithm
-  returns "`Blocked`" if the active policy blocks the navigation, and "`Allowed`"
-  otherwise:
+  To <dfn export>determine whether a navigation response should be blocked by
+  Content Security Policy</dfn>, given a <a for="/">request</a> |navigation
+  request|, a <a>response</a> |navigation response|, a [=/CSP list=] |response
+  CSP list|, a string |type| (either "`form-submission`" or "`other`"), and a
+  <a>navigable</a> |target|, execute the following steps, which return
+  "`Blocked`" if the active policy blocks the navigation, and "`Allowed`"
+  otherwise.
 
   <ol class="algorithm">
     1.  Let |result| be "`Allowed`".
@@ -1343,8 +1374,8 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
                 |navigation response|, |target|, "`response`", and |policy|
                 skip to the next |directive|.
 
-            2.  Otherwise, let |violation| be the result of executing
-                [[#create-violation-for-global]] on null, |policy|, and
+            2.  Otherwise, let |violation| be the result of [=creating a violation
+                object for a global=] given null, |policy|, and
                 |directive|'s <a for="directive">name</a>.
 
                 Note: We use null for the global object, as no global exists:
@@ -1353,7 +1384,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
             3.  Set |violation|'s <a for="violation">resource</a> to |navigation
                 response|'s <a for="response">URL</a>.
 
-            4.  Execute [[#report-violation]] on |violation|.
+            4.  [=Report a violation=], given |violation|.
 
             5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
                 set |result| to "`Blocked`".
@@ -1371,15 +1402,15 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
                 |navigation response|, |target|, "`source`", and |policy|
                 skip to the next |directive|.
 
-            2.  Otherwise, let |violation| be the result of executing
-                [[#create-violation-for-global]] on |navigation request|'s
+            2.  Otherwise, let |violation| be the result of [=creating a violation
+                object for a global=] given |navigation request|'s
                 <a for="request">client</a>'s <a for="environment settings object">global object</a>,
                 |policy|, and |directive|'s <a for="directive">name</a>.
 
             3.  Set |violation|'s <a for="violation">resource</a> to |navigation
                 request|'s <a for="request">URL</a>.
 
-            4.  Execute [[#report-violation]] on |violation|.
+            4.  [=Report a violation=], given |violation|.
 
             5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
                 set |result| to "`Blocked`".
@@ -1387,13 +1418,13 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     4.  Return |result|.
   </ol>
 
-  <h4 id="run-global-object-csp-initialization" algorithm dfn export>
+  <h4 id="run-global-object-csp-initialization" algorithm>
     Run `CSP` initialization for a global object
   </h4>
 
-  Given a <a for="/">global object</a> |global|, the user agent performs the
-  following steps in order to initialize CSP for |global|. This algorithm
-  returns "`Allowed`" if |global| is allowed, and "`Blocked`" otherwise:
+  To <dfn export>run `CSP` initialization for a global object</dfn>, given a <a
+  for="/">global object</a> |global|, execute the following steps, which return
+  "`Allowed`" if |global| is allowed, and "`Blocked`" otherwise.
 
   <ol class="algorithm">
     1.  Let |result| be "`Allowed`".
@@ -1411,15 +1442,18 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
 
   <h3 id="webrtc-integration">Integration with WebRTC</h3>
 
-  <p>The [=administratively-prohibited=] algorithm calls [[#should-block-rtc-connection]]
-  when invoked, and prohibits all candidates if it returns "`Blocked`".</p>
+  <p>The [=administratively-prohibited=] algorithm calls [=determine whether RTC
+  connections should be blocked by Content Security Policy=] when invoked, and
+  prohibits all candidates if it returns "`Blocked`".</p>
 
-  <h4 id="should-block-rtc-connection">
+  <h4 id="should-block-rtc-connection" algorithm>
     Should RTC connections be blocked for |global|?
   </h4>
 
-  Given a [=/global object=] |global|, this algorithm returns "`Blocked`"
-  if the active policy for |global| blocks RTC connections, and "`Allowed`" otherwise:
+  To <dfn export>determine whether RTC connections should be blocked by Content
+  Security Policy</dfn>, given a [=/global object=] |global|, execute the
+  following steps, which return "`Blocked`" if the active policy for |global|
+  blocks RTC connections, and "`Allowed`" otherwise.
 
   <ol class="algorithm">
     1.  Let |result| be "`Allowed`".
@@ -1429,13 +1463,13 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
               1.  If |directive|'s <a for="directive">webrtc pre-connect check</a>
                   returns "`Allowed`", [=iteration/continue=].
 
-              2.  Otherwise, let |violation| be the result of executing
-                  [[#create-violation-for-global]] on |global|, |policy|, and
+              2.  Otherwise, let |violation| be the result of [=creating a violation
+                  object for a global=] given |global|, |policy|, and
                   |directive|'s <a for="directive">name</a>.
 
               3.  Set |violation|'s <a for="violation">resource</a> to null.
 
-              4.  Execute [[#report-violation]] on |violation|.
+              4.  [=Report a violation=], given |violation|.
 
               5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
                   set |result| to "`Blocked`".
@@ -1455,9 +1489,10 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
     EnsureCSPDoesNotBlockStringCompilation(|realm|, |source|)
   </h4>
 
-  Given a <a>realm</a> |realm| and a string |source|, this algorithm
-  returns normally if string compilation is allowed, and throws an "`EvalError`"
-  if not:
+  To <dfn export>determine whether string compilation is allowed by CSP</dfn>,
+  given a <a>realm</a> |realm| and a string |source|, execute the following
+  steps, which return normally if string compilation is allowed, and throw an
+  "`EvalError`" if not.
 
   1.  Let |result| be "`Allowed`".
 
@@ -1477,8 +1512,8 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
           an [=ASCII case-insensitive=] match for the string "<a grammar>`'unsafe-eval'`</a>",
           then:
 
-          1.  Let |violation| be the result of executing [[#create-violation-for-global]] on
-              |global|, |policy|, and "`script-src`".
+          1.  Let |violation| be the result of [=creating a violation object for
+              a global=] given |global|, |policy|, and "`script-src`".
 
           2.  Set |violation|'s [=violation/resource=] to "`eval`".
 
@@ -1486,7 +1521,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
               "<a grammar>`'report-sample'`</a>", then set |violation|'s [=violation/sample=] to
               the substring of |source| containing its first 40 characters.
 
-          4.  Execute [[#report-violation]] on |violation|.
+          4.  [=Report a violation=], given |violation|.
 
           5.  If |policy|'s [=policy/disposition=] is "`enforce`", then set |result| to
               "`Blocked`".
@@ -1505,13 +1540,14 @@ sources into executable code. This document defines an implementation of this
 abstract operation which examines the relevant <a for="global object">CSP
 list</a> to determine whether such compilation ought to be blocked.
 
-<h4 id="can-compile-wasm-bytes" algorithm dfn>
+<h4 id="can-compile-wasm-bytes" algorithm>
   EnsureCSPDoesNotBlockWasmByteCompilation|realm|
 </h4>
 
-Given a <a>realm</a> |realm|,
-this algorithm returns normally if compilation is allowed, and throws a
-{{WebAssembly.CompileError}} if not:
+To <dfn export>determine whether WebAssembly byte compilation is allowed by
+CSP</dfn>, given a <a>realm</a> |realm|, execute the following steps, which
+return normally if compilation is allowed, and throws a
+{{WebAssembly.CompileError}} if not.
 
 1.  Let |global| be |realm|'s [=realm/global object=].
 
@@ -1533,12 +1569,12 @@ this algorithm returns normally if compilation is allowed, and throws a
         [=source expression=] which is an [=ASCII case-insensitive=] match
         for the string "<a grammar>`'wasm-unsafe-eval'`</a>", then:
 
-        1.  Let |violation| be the result of executing [[#create-violation-for-global]] on
-            |global|, |policy|, and "`script-src`".
+        1.  Let |violation| be the result of [=creating a violation object for a global=]
+            given |global|, |policy|, and "`script-src`".
 
         2.  Set |violation|'s [=violation/resource=] to "`wasm-eval`".
 
-        3.  Execute [[#report-violation]] on |violation|.
+        3.  [=Report a violation=], given |violation|.
 
         4.  If |policy|'s [=policy/disposition=] is "`enforce`", then set |result| to
             "`Blocked`".
@@ -1627,13 +1663,15 @@ this algorithm returns normally if compilation is allowed, and throws a
     Obtain the {{SecurityPolicyViolationEvent/blockedURI}} of a violation's |resource|
   </h3>
 
-  Given a violation's <a for=violation>resource</a> |resource|, this algorithm returns a
-  [=string=], to be used as the blocked URI field for violation reports.
+  To <dfn>obtain the blocked URI of a violation's resource</dfn>, given a
+  violation's <a for=violation>resource</a> |resource|, execute the following
+  steps, which return a [=string=] to be used as the blocked URI field for
+  violation reports.
 
   1. Assert: |resource| is a [=/URL=] or a [=string=].
 
-  2. If |resource| is a [=/URL=], return the result of executing [[#strip-url-for-use-in-reports]] on
-     |resource|.
+  2. If |resource| is a [=/URL=], return the result of [=stripping URL for use
+     in reports=] given |resource|.
 
   3. Return |resource|.
 
@@ -1641,21 +1679,23 @@ this algorithm returns normally if compilation is allowed, and throws a
     Obtain the deprecated serialization of |violation|
   </h3>
 
-  Given a <a>violation</a> |violation|, this algorithm returns a JSON text
-  string representation of the violation, suitable for submission to a reporting
-  endpoint associated with the deprecated <a>`report-uri`</a> directive.
+  To <dfn>obtain the deprecated serialization of a violation</dfn>, given a
+  <a>violation</a> |violation|, execute the following steps, which return a JSON
+  text string representation of the violation, suitable for submission to a
+  reporting endpoint associated with the deprecated <a>`report-uri`</a>
+  directive.
 
   1.  Let |body| be a <a lt="ordered map">map</a> with its keys initialized as
       follows:
 
       :   "`document-uri`"
-      ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+      ::  The result of [=stripping URL for use in reports=], given |violation|'s
           <a for="violation">url</a>.
       :   "`referrer`"
-      ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+      ::  The result of [=stripping URL for use in reports=], given |violation|'s
           <a for="violation">referrer</a>.
       :   "`blocked-uri`"
-      ::  The result of executing [[#obtain-violation-blocked-uri]] on |violation|'s
+      ::  The result of [=stripping URL for use in reports=], given |violation|'s
           <a for="violation">resource</a>.
       :   "`effective-directive`"
       ::  |violation|'s <a for="violation">effective directive</a>
@@ -1681,8 +1721,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   2.  If |violation|'s <a for="violation">source file</a> is not null:
 
-      1.  Set |body|["`source-file`'] to the result of executing [[#strip-url-for-use-in-reports]]
-          on |violation|'s <a for="violation">source file</a>.
+      1.  Set |body|["`source-file`'] to the result of [=stripping URL for use
+          in reports=], given |violation|'s <a for="violation">source file</a>.
 
       2.  Set |body|["`line-number`"] to |violation|'s
           <a for="violation">line number</a>.
@@ -1696,9 +1736,10 @@ this algorithm returns normally if compilation is allowed, and throws a
   4.  Return the result of <a>serialize an infra value to JSON bytes</a> given
       «[ "csp-report" → body ]».
 
-  <h3 id="strip-url-for-use-in-reports" algorithm>Strip URL for use in reports</h3>
-  Given a [=/URL=] |url|, this algorithm returns a string representing the URL for use in violation
-  reports:
+  <h3 id="heading-strip-url-for-use-in-reports" algorithm>Strip URL for use in reports</h3>
+
+  To <dfn>strip URL for use in reports</dfn>, given a [=/URL=] |url|, execute
+  the following steps.
 
   1. If |url|'s <a for="url">scheme</a> is not an <a>HTTP(S) scheme</a>,
      then return |url|'s <a for="url">scheme</a>.
@@ -1715,10 +1756,11 @@ this algorithm returns normally if compilation is allowed, and throws a
     Report a |violation|
   </h3>
 
-  Given a <a>violation</a> |violation|, this algorithm reports it to the endpoint specified in
-  |violation|'s <a for="violation">policy</a>, and fires a {{SecurityPolicyViolationEvent}} at
-  |violation|'s [=violation/element=], or at |violation|'s <a for="violation">global object</a>
-  as described below:
+  To <dfn>report a violation</dfn>, given a <a>violation</a> |violation|,
+  execute the following steps, which report it to the endpoint specified in
+  |violation|'s <a for="violation">policy</a>, and fire a
+  {{SecurityPolicyViolationEvent}} at |violation|'s [=violation/element=], or at
+  |violation|'s <a for="violation">global object</a>.
 
   1.  Let |global| be |violation|'s <a for="violation">global object</a>.
 
@@ -1753,13 +1795,13 @@ this algorithm returns normally if compilation is allowed, and throws a
           interface at |target| with its attributes initialized as follows:
 
           :  {{SecurityPolicyViolationEvent/documentURI}}
-          ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+          ::  The result of [=stripping URL for use in reports=], given |violation|'s
               <a for="violation">url</a>.
           :  {{SecurityPolicyViolationEvent/referrer}}
-          ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+          ::  The result of [=stripping URL for use in reports=], given |violation|'s
               <a for="violation">referrer</a>.
           :  {{SecurityPolicyViolationEvent/blockedURI}}
-          ::  The result of executing [[#obtain-violation-blocked-uri]] on |violation|'s
+          ::  The result of [=stripping URL for use in reports=], given |violation|'s
               <a for="violation">resource</a>.
           :  {{SecurityPolicyViolationEvent/effectiveDirective}}
           :: |violation|'s <a for="violation">effective directive</a>
@@ -1771,7 +1813,7 @@ this algorithm returns normally if compilation is allowed, and throws a
           :  {{SecurityPolicyViolationEvent/disposition}}
           :: |violation|'s <a for="violation">disposition</a>
           :  {{SecurityPolicyViolationEvent/sourceFile}}
-          ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+          ::  The result of [=stripping URL for use in reports=], given |violation|'s
               <a for="violation">source file</a>, if |violation|'s
               <a for="violation">source file</a> is not null, or null otherwise.
           :  {{SecurityPolicyViolationEvent/statusCode}}
@@ -1838,9 +1880,8 @@ this algorithm returns normally if compilation is allowed, and throws a
                   :   <a for="request">header list</a>
                   ::  A header list containing a single header whose name is
                       "`Content-Type`", and value is "`application/csp-report`"
-                  :   <a for="request">body</a>
-                  ::  The result of executing [[#deprecated-serialize-violation]] on
-                      |violation|
+                  :   <a for="request">body</a> :: The result of [=obtaining the
+                      deprecated serialization of a violation=], given |violation|
                   :   <a for="request">redirect mode</a>
                   ::  "`error`"
 
@@ -1864,15 +1905,15 @@ this algorithm returns normally if compilation is allowed, and throws a
               follows:
 
               :   {{CSPViolationReportBody/documentURL}}
-              ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+              ::  The result of [=stripping URL for use in reports=}, given |violation|'s
                   <a for="violation">url</a>.
 
               :   {{CSPViolationReportBody/referrer}}
-              ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+              ::  The result of [=stripping URL for use in reports=}, given |violation|'s
                   <a for="violation">referrer</a>.
 
               :   {{CSPViolationReportBody/blockedURL}}
-              ::  The result of executing [[#obtain-violation-blocked-uri]] on |violation|'s
+              ::  The result of [=stripping URL for use in reports=}, given |violation|'s
                   <a for="violation">resource</a>.
 
               :   {{CSPViolationReportBody/effectiveDirective}}
@@ -1883,7 +1924,7 @@ this algorithm returns normally if compilation is allowed, and throws a
                   <a for="violation">policy</a>.
 
               :   {{CSPViolationReportBody/sourceFile}}
-              ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+              ::  The result of [=stripping URL for use in reports=}, given |violation|'s
                   <a for="violation">source file</a>, if |violation|'s
                   <a for="violation">source file</a> is not null, or null otherwise.
 
@@ -2007,11 +2048,11 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing
-      [[#effective-directive-for-a-request]] on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `child-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `child-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  Return the result of executing the <a for="directive">pre-request
       check</a> for the <a>directive</a> whose <a for="directive">name</a>
@@ -2027,11 +2068,11 @@ this algorithm returns normally if compilation is allowed, and throws a
   Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
   <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing
-      [[#effective-directive-for-a-request]] on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `child-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `child-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  Return the result of executing the <a for="directive">post-request
       check</a> for the <a>directive</a> whose <a for="directive">name</a>
@@ -2102,14 +2143,14 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing
-      [[#effective-directive-for-a-request]] on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `connect-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `connect-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-request-to-source-list]] on
-      |request|, this directive's <a for="directive">value</a>, and
+  3.  If the result of [=determining whether request matches source list=],
+      given |request|, this directive's <a for="directive">value</a>, and
       |policy|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
@@ -2123,15 +2164,16 @@ this algorithm returns normally if compilation is allowed, and throws a
   Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
   <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing
-      [[#effective-directive-for-a-request]] on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `connect-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `connect-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, this directive's <a for="directive">value</a>,
-      and |policy|, is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of [=determining whether response matches source list=],
+      given |response|, |request|, this directive's <a
+      for="directive">value</a>, and |policy|, is "`Does Not Match`", return
+      "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2150,8 +2192,10 @@ this algorithm returns normally if compilation is allowed, and throws a
   used as the policy's default source list. That is, given `default-src 'none';
   script-src 'self'`, script requests will use `'self'` as the <a>source
   list</a> to match against. Other requests will use `'none'`. This is spelled
-  out in more detail in the [[#should-block-request]] and
-  [[#should-block-response]] algorithms.
+  out in more detail in the algorithms to determine whether a <a lt="determine
+  whether a request should be blocked by Content Security Policy">request</a> or
+  a <a lt="determine whether a response should be blocked by Content Security
+  Policy">response</a> should be blocked by Content Security Policy.
 
   <div class="note">
   Resource hints such as <{link/rel/prefetch}> and <{link/rel/preconnect}> generate requests that
@@ -2228,11 +2272,11 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing
-      [[#effective-directive-for-a-request]] on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `default-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `default-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  Return the result of executing the
       <a for="directive">pre-request check</a> for the <a>directive</a> whose
@@ -2248,11 +2292,11 @@ this algorithm returns normally if compilation is allowed, and throws a
   Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
   <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing
-      [[#effective-directive-for-a-request]] on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `default-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `default-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  Return the result of executing the
       <a for="directive">post-request check</a> for the <a>directive</a> whose
@@ -2269,11 +2313,11 @@ this algorithm returns normally if compilation is allowed, and throws a
   Given an {{Element}} |element|, a string |type|, a <a for="/">policy</a>
   |policy| and a string |source|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
-      on |type|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      inline checks=], given |type|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `default-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `default-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  Otherwise, return the result of executing the
       <a for="directive">inline check</a> for the <a>directive</a> whose
@@ -2322,14 +2366,14 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `font-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `font-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-request-to-source-list]] on
-      |request|, this directive's <a for="directive">value</a>, and
+  3.  If the result of [=determining whether request matches source list=],
+      given |request|, this directive's <a for="directive">value</a>, and
       |policy|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
@@ -2343,15 +2387,16 @@ this algorithm returns normally if compilation is allowed, and throws a
   Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
   <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `font-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `font-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, this directive's <a for="directive">value</a>,
-      and |policy|, is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of [=determining whether response matches source list=],
+      given |response|, |request|, this directive's <a
+      for="directive">value</a>, and |policy|, is "`Does Not Match`", return
+      "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2390,14 +2435,14 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `frame-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `frame-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-request-to-source-list]] on
-      |request|, this directive's <a for="directive">value</a>, and
+  3.  If the result of [=determining whether request matches source list=],
+      given |request|, this directive's <a for="directive">value</a>, and
       |policy|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
@@ -2411,15 +2456,16 @@ this algorithm returns normally if compilation is allowed, and throws a
   Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
   <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `frame-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `frame-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, this directive's <a for="directive">value</a>,
-      and |policy|, is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of [=determining whether response matches source list=],
+      given |response|, |request|, this directive's <a
+      for="directive">value</a>, and |policy|, is "`Does Not Match`", return
+      "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2461,15 +2507,15 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `img-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `img-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-request-to-source-list]] on
-      |request|, this directive's <a for="directive">value</a>, and |policy|,
-      is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of [=determining whether request matches source list=],
+      given |request|, this directive's <a for="directive">value</a>, and
+      |policy|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2482,15 +2528,16 @@ this algorithm returns normally if compilation is allowed, and throws a
   Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
   <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `img-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `img-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, this directive's <a for="directive">value</a>,
-      and |policy|, is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of [=determining whether response matches source list=],
+      given |response|, |request|, this directive's <a
+      for="directive">value</a>, and |policy|, is "`Does Not Match`", return
+      "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2528,15 +2575,15 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `manifest-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `manifest-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-request-to-source-list]] on
-      |request|, this directive's <a for="directive">value</a>, and |policy|,
-      is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of [=determining whether request matches source list=],
+      given |request|, this directive's <a for="directive">value</a>, and
+      |policy|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2549,15 +2596,16 @@ this algorithm returns normally if compilation is allowed, and throws a
   Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
   <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `manifest-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `manifest-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, this directive's <a for="directive">value</a>,
-      and |policy|, is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of [=determining whether response matches source list=],
+      given |response|, |request|, this directive's <a
+      for="directive">value</a>, and |policy|, is "`Does Not Match`", return
+      "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2598,15 +2646,15 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `media-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `media-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-request-to-source-list]] on
-      |request|, this directive's <a for="directive">value</a>, and |policy|,
-      is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of [=determining whether request matches source list=],
+      given |request|, this directive's <a for="directive">value</a>, and
+      |policy|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2619,15 +2667,16 @@ this algorithm returns normally if compilation is allowed, and throws a
   Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
   <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `media-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `media-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, this directive's <a for="directive">value</a>,
-      and |policy|, is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of [=determining whether response matches source list=],
+      given |response|, |request|, this directive's <a
+      for="directive">value</a>, and |policy|, is "`Does Not Match`", return
+      "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2689,15 +2738,15 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `object-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `object-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-request-to-source-list]] on
-      |request|, this directive's <a for="directive">value</a>, and |policy|,
-      is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of [=determining whether request matches source list=],
+      given |request|, this directive's <a for="directive">value</a>, and
+      |policy|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2710,15 +2759,16 @@ this algorithm returns normally if compilation is allowed, and throws a
   Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
   <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `object-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `object-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, this directive's <a for="directive">value</a>,
-      and |policy|, is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of [=determining whether response matches source list=],
+      given |response|, |request|, this directive's <a
+      for="directive">value</a>, and |policy|, is "`Does Not Match`", return
+      "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2744,15 +2794,18 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   The `script-src` directive governs six things:
 
-  1.  Script <a for="/">requests</a> MUST pass through [[#should-block-request]].
+  1.  Script <a for="/">requests</a> MUST be allowed when [=determining whether
+      a request should be blocked by Content Security Policy=].
 
-  2.  Script <a>responses</a> MUST pass through [[#should-block-response]].
+  2.  Script <a>responses</a> MUST be allowed when [=determining whether a response
+      should be blocked by Content Security Policy=].
 
-  3.  Inline <{script}> blocks MUST pass through [[#should-block-inline]]. Their
-      behavior will be blocked unless every policy allows inline script, either
-      implicitly by not specifying a `script-src` (or `default-src`) directive,
-      or explicitly, by specifying "`unsafe-inline`", a
-      <a grammar>nonce-source</a> or a <a grammar>hash-source</a> that matches
+  3.  Inline <{script}> blocks MUST be allowed when [=determining whether
+      element's inline type behavior should be blocked by Content Security
+      Policy=]. Their behavior will be blocked unless every policy allows inline
+      script, either implicitly by not specifying a `script-src` (or
+      `default-src`) directive, or explicitly, by specifying "`unsafe-inline`",
+      a <a grammar>nonce-source</a> or a <a grammar>hash-source</a> that matches
       the inline block.
 
   4.  The following JavaScript execution sinks are gated on the "`unsafe-eval`"
@@ -2784,8 +2837,10 @@ this algorithm returns normally if compilation is allowed, and throws a
      JavaScript. The "`wasm-unsafe-eval`" source expression only permits
      WebAssembly and does not affect JavaScript.
 
-  6.  Navigation to `javascript:` URLs MUST pass through [[#should-block-inline]]. Such navigations
-      will only execute script if every policy allows inline script, as per #3 above.
+  6.  Navigation to `javascript:` URLs MUST be allowed when [=determining
+      whether element's inline type behavior should be blocked by Content
+      Security Policy=]. Such navigations will only execute script if every
+      policy allows inline script, as per #3 above.
 
   <h5 algorithm id="script-src-pre-request">
     `script-src` Pre-request check
@@ -2795,14 +2850,14 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `script-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `script-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  Return the result of executing [[#script-pre-request]] on |request|,
-      this directive, and |policy|.
+  3.  Return the result of [=running script directives pre-request check=],
+      given |request|, this directive, and |policy|.
 
   <h5 algorithm id="script-src-post-request">
     `script-src` Post-request check
@@ -2813,14 +2868,14 @@ this algorithm returns normally if compilation is allowed, and throws a
   Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
   <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `script-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `script-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  Return the result of executing [[#script-post-request]] on |request|,
-      |response|, this directive, and |policy|.
+  3.  Return the result of [=running script directives post-request check=],
+      given |request|, |response|, this directive, and |policy|.
 
   <h5 algorithm id="script-src-inline">
     `script-src` Inline Check
@@ -2833,14 +2888,14 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   1.  Assert: |element| is not null or |type| is "`navigation`".
 
-  2.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
-      on |type|.
+  2.  Let |name| be the result of [=getting the effective directive for
+      inline checks=], given |type|.
 
-  3.  If the result of executing [[#should-directive-execute]] on |name|,
-      `script-src` and |policy| is "`No`", return "`Allowed`".
+  3.  If the result of [=determining whether directive should execute=], given
+      |name|, `script-src` and |policy| is "`No`", return "`Allowed`".
 
-  4.  If the result of executing [[#match-element-to-source-list]] on
-      |element|, this directive's <a for="directive">value</a>, |type|,
+  4.  If the result of [=determining whether element matches source list=],
+      given |element|, this directive's <a for="directive">value</a>, |type|,
       and |source|, is "`Does Not Match`", return "`Blocked`".
 
   5.  Return "`Allowed`".
@@ -2874,14 +2929,14 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `script-src-elem` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `script-src-elem` and |policy| is "`No`", return "`Allowed`".
 
-  3.  Return the result of executing [[#script-pre-request]] on |request|,
-      this directive, and |policy|.
+  3.  Return the result of [=running script directives pre-request check=],
+      given |request|, this directive, and |policy|.
 
   <h5 algorithm id="script-src-elem-post-request">
     `script-src-elem` Post-request check
@@ -2892,14 +2947,14 @@ this algorithm returns normally if compilation is allowed, and throws a
   Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
   <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `script-src-elem` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `script-src-elem` and |policy| is "`No`", return "`Allowed`".
 
-  3.  Return the result of executing [[#script-post-request]] on |request|,
-      |response|, this directive, and |policy|.
+  3.  Return the result of [=running script directives post-request check=],
+      given |request|, |response|, this directive, and |policy|.
 
   <h5 algorithm id="script-src-elem-inline">
     `script-src-elem` Inline Check
@@ -2912,14 +2967,14 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   1.  Assert: |element| is not null or |type| is "`navigation`".
 
-  2.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
-      on |type|.
+  2.  Let |name| be the result of [=getting the effective directive for
+      inline checks=], given |type|.
 
-  3.  If the result of executing [[#should-directive-execute]] on |name|,
-      `script-src-elem`, and |policy| is "`No`", return "`Allowed`".
+  3.  If the result of [=determining whether directive should execute=], given
+      |name|, `script-src-elem`, and |policy| is "`No`", return "`Allowed`".
 
-  4.  If the result of executing [[#match-element-to-source-list]] on
-      |element|, this directive's <a for="directive">value</a>, |type|,
+  4.  If the result of [=determining whether element matches source list=],
+      given |element|, this directive's <a for="directive">value</a>, |type|,
       and |source| is "`Does Not Match`", return "`Blocked`".
 
   5.  Return "`Allowed`".
@@ -2947,14 +3002,14 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   1.  Assert: |element| is not null or |type| is "`navigation`".
 
-  2.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
-      on |type|.
+  2.  Let |name| be the result of [=getting the effective directive for
+      inline checks=], given |type|.
 
-  3.  If the result of executing [[#should-directive-execute]] on |name|,
-      `script-src-attr` and |policy| is "`No`", return "`Allowed`".
+  3.  If the result of [=determining whether directive should execute=], given
+      |name|, `script-src-attr` and |policy| is "`No`", return "`Allowed`".
 
-  4.  If the result of executing [[#match-element-to-source-list]] on
-      |element|, this directive's <a for="directive">value</a>, |type|,
+  4.  If the result of [=determining whether element matches source list=],
+      given |element|, this directive's <a for="directive">value</a>, |type|,
       and |source|, is "`Does Not Match`", return "`Blocked`".
 
   5.  Return "`Allowed`".
@@ -2972,7 +3027,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   The `style-src` directive governs several things:
 
-  1.  Style <a for="/">requests</a> MUST pass through [[#should-block-request]]. This
+  1.  Style <a for="/">requests</a> MUST be allowed when [=determining
+      whether a request should be blocked by Content Security Policy=]. This
       includes:
 
       1.  Stylesheet requests originating from a <{link}> element.
@@ -2981,14 +3037,15 @@ this algorithm returns normally if compilation is allowed, and throws a
       3.  Stylesheet requests originating from a `Link` HTTP response header
           field [[!RFC8288]].
 
-  2.  <a>Responses</a> to style requests MUST pass through
-      [[#should-block-response]].
+  2.  <a>Responses</a> to style requests MUST be allowed when [=determining
+      whether a response should be blocked by Content Security Policy=].
 
-  3.  Inline <{style}> blocks MUST pass through [[#should-block-inline]]. The
-      styles will be blocked unless every policy allows inline style, either
-      implicitly by not specifying a `style-src` (or `default-src`) directive,
-      or explicitly, by specifying "`unsafe-inline`", a
-      <a grammar>nonce-source</a> or a <a grammar>hash-source</a> that matches
+  3.  Inline <{style}> blocks MUST be allowed when [=determining whether
+      element's inline type behavior should be blocked by Content Security
+      Policy=]. The styles will be blocked unless every policy allows inline
+      style, either implicitly by not specifying a `style-src` (or
+      `default-src`) directive, or explicitly, by specifying "`unsafe-inline`",
+      a <a grammar>nonce-source</a> or a <a grammar>hash-source</a> that matches
       the inline block.
 
   4.  The following CSS algorithms are gated on the `unsafe-eval` source
@@ -3013,20 +3070,20 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `style-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `style-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-nonce-to-source-list]] on
+  3.  If the result of [=determining whether nonce matches source list=], given
       |request|'s <a for="request">cryptographic nonce metadata</a> and this
       directive's <a for="directive">value</a> is "`Matches`", return
       "`Allowed`".
 
-  4.  If the result of executing [[#match-request-to-source-list]] on
-      |request|, this directive's <a for="directive">value</a>, and |policy|,
-      is "`Does Not Match`", return "`Blocked`".
+  4.  If the result of [=determining whether request matches source list=],
+      given |request|, this directive's <a for="directive">value</a>, and
+      |policy|, is "`Does Not Match`", return "`Blocked`".
 
   5.  Return "`Allowed`".
 
@@ -3039,20 +3096,21 @@ this algorithm returns normally if compilation is allowed, and throws a
   Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
   <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `style-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `style-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-nonce-to-source-list]] on
+  3.  If the result of [=determining whether nonce matches source list=], given
       |request|'s <a for="request">cryptographic nonce metadata</a> and this
       directive's <a for="directive">value</a> is "`Matches`", return
       "`Allowed`".
 
-  4.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, this directive's <a for="directive">value</a>,
-      and |policy|, is "`Does Not Match`", return "`Blocked`".
+  4.  If the result of [=determining whether response matches source list=],
+      given |response|, |request|, this directive's <a
+      for="directive">value</a>, and |policy|, is "`Does Not Match`", return
+      "`Blocked`".
 
   5.  Return "`Allowed`".
 
@@ -3065,14 +3123,14 @@ this algorithm returns normally if compilation is allowed, and throws a
   Given an {{Element}} |element|, a string |type|, a <a for="/">policy</a>
   |policy| and a string |source|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
-      on |type|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |type|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `style-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `style-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-element-to-source-list]] on
-      |element|, this directive's <a for="directive">value</a>, |type|,
+  3.  If the result of [=determining whether element matches source list=],
+      given |element|, this directive's <a for="directive">value</a>, |type|,
       and |source|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
@@ -3103,20 +3161,20 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `style-src-elem` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `style-src-elem` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-nonce-to-source-list]] on
+  3.  If the result of [=determining whether nonce matches source list=], given
       |request|'s <a for="request">cryptographic nonce metadata</a> and this
       directive's <a for="directive">value</a> is "`Matches`", return
       "`Allowed`".
 
-  4.  If the result of executing [[#match-request-to-source-list]] on
-      |request|, this directive's <a for="directive">value</a>, and |policy|,
-      is "`Does Not Match`", return "`Blocked`".
+  4.  If the result of [=determining whether request matches source list=],
+      given |request|, this directive's <a for="directive">value</a>, and
+      |policy|, is "`Does Not Match`", return "`Blocked`".
 
   5.  Return "`Allowed`".
 
@@ -3129,20 +3187,21 @@ this algorithm returns normally if compilation is allowed, and throws a
   Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
   <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `style-src-elem` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `style-src-elem` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-nonce-to-source-list]] on
+  3.  If the result of [=determining whether nonce matches source list=], given
       |request|'s <a for="request">cryptographic nonce metadata</a> and this
       directive's <a for="directive">value</a> is "`Matches`", return
       "`Allowed`".
 
-  4.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, this directive's <a for="directive">value</a>,
-      and |policy|, is "`Does Not Match`", return "`Blocked`".
+  4.  If the result of [=determining whether response matches source list=],
+      given |response|, |request|, this directive's <a
+      for="directive">value</a>, and |policy|, is "`Does Not Match`", return
+      "`Blocked`".
 
   5.  Return "`Allowed`".
 
@@ -3155,14 +3214,14 @@ this algorithm returns normally if compilation is allowed, and throws a
   Given an {{Element}} |element|, a string |type|, a <a for="/">policy</a>
   |policy| and a string |source|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
-      on |type|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      inline checks=], given |type|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `style-src-elem` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `style-src-elem` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-element-to-source-list]] on
-      |element|, this directive's <a for="directive">value</a>, |type|,
+  3.  If the result of [=determining whether element matches source list=],
+      given |element|, this directive's <a for="directive">value</a>, |type|,
       and |source|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
@@ -3187,14 +3246,14 @@ this algorithm returns normally if compilation is allowed, and throws a
   Given an {{Element}} |element|, a string |type|, a <a for="/">policy</a>
   |policy| and a string |source|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
-      on |type|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      inline checks=], given |type|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `style-src-attr` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `style-src-attr` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-element-to-source-list]] on
-      |element|, this directive's <a for="directive">value</a>, |type|,
+  3.  If the result of [=determining whether element matches source list=],
+      given |element|, this directive's <a for="directive">value</a>, |type|,
       and |source|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
@@ -3300,15 +3359,15 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `worker-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `worker-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-request-to-source-list]] on
-      |request|, this directive's <a for="directive">value</a>, and |policy|,
-      is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of [=determining whether request matches source list=],
+      given |request|, this directive's <a for="directive">value</a>, and
+      |policy|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -3321,15 +3380,16 @@ this algorithm returns normally if compilation is allowed, and throws a
   Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
   <a for="/">policy</a> |policy|:
 
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
+  1.  Let |name| be the result of [=getting the effective directive for
+      request=], given |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `worker-src` and |policy| is "`No`", return "`Allowed`".
+  2.  If the result of [=determining whether directive should execute=], given
+      |name|, `worker-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, this directive's <a for="directive">value</a>,
-      and |policy|, is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of [=determining whether response matches source list=],
+      given |response|, |request|, this directive's <a
+      for="directive">value</a>, and |policy|, is "`Does Not Match`", return
+      "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -3354,13 +3414,14 @@ this algorithm returns normally if compilation is allowed, and throws a
   The following algorithm is called during HTML's <a>set the frozen base url</a>
   algorithm in order to monitor and enforce this directive:
 
-  <h5 id="allow-base-for-document" algorithm dfn export>
+  <h5 id="allow-base-for-document" algorithm>
     Is |base| allowed for |document|?
   </h5>
 
-  Given a {{URL}} |base|, and a {{Document}} |document|, this algorithm
-  returns "`Allowed`" if |base| may be used as the value of a <{base}>
-  element's <{base/href}> attribute, and "`Blocked`" otherwise:
+  To <dfn export>determine whether base is allowed for document</dfn>, given a
+  {{URL}} |base|, and a {{Document}} |document|, execute the following steps,
+  which return "`Allowed`" if |base| may be used as the value of a <{base}>
+  element's <{base/href}> attribute, and "`Blocked`" otherwise.
 
   1.  <a for=list>For each</a> |policy| of |document|'s <a for="/">global object</a>'s
       <a for="global object">csp list</a>:
@@ -3374,16 +3435,17 @@ this algorithm returns normally if compilation is allowed, and throws a
 
       3.  If |source list| is null, skip to the next |policy|.
 
-      4.  If the result of executing [[#match-url-to-source-list]] on |base|, |source list|,
-          |policy|'s [=policy/self-origin=], and `0` is "`Does Not Match`":
+      4.  If the result of [=determining whether url matches source
+          expression=], given |base|, |source list|, |policy|'s
+          [=policy/self-origin=], and `0` is "`Does Not Match`":
 
-          1.  Let |violation| be the result of executing
-              [[#create-violation-for-global]] on |document|'s <a for="/">global
+          1.  Let |violation| be the result of [=creating a violation object for a global=]
+              given |document|'s <a for="/">global
               object</a>, |policy|, and "<a>`base-uri`</a>".
 
           2.  Set |violation|'s <a for="violation">resource</a> to "`inline`".
 
-          3.  Execute [[#report-violation]] on |violation|.
+          3.  [=Report a violation=], given |violation|.
 
           4.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
               return "`Blocked`".
@@ -3474,7 +3536,7 @@ this algorithm returns normally if compilation is allowed, and throws a
 
     2.  If |navigation type| is "`form-submission`":
 
-        1.  If the result of executing [[#match-request-to-source-list]] on
+        1.  If the result of [=determining whether request matches source list=], given
             |request|, this directive's <a for="directive">value</a>, and a
             |policy|, is "`Does Not Match`", return "`Blocked`".
 
@@ -3544,9 +3606,10 @@ this algorithm returns normally if compilation is allowed, and throws a
             <a lt="ASCII serialization of an origin">ASCII serialization</a>
             of |document|'s [=Document/origin=].
 
-        3.  If [[#match-url-to-source-list]] returns `Does Not Match` when
-            executed upon |origin|, this directive's <a for="directive">value</a>,
-            |policy|'s [=policy/self-origin=], and `0`, return "`Blocked`".
+        3.  If the result of [=determining whether url matches source list=],
+             given |origin|, this directive's <a for="directive">value</a>,
+            |policy|'s [=policy/self-origin=], and `0` is `Does Not Match`,
+            return "`Blocked`".
 
         4.  Set |current| to |document|'s <a>node navigable</a>.
 
@@ -3574,9 +3637,9 @@ this algorithm returns normally if compilation is allowed, and throws a
   </h3>
 
   Various algorithms in this document hook into the reporting process by
-  constructing a <a>violation</a> object via [[#create-violation-for-request]]
-  or [[#create-violation-for-global]], and passing that object to
-  [[#report-violation]] to deliver the report.
+  [=creating a violation object for a request=] or [=creating a violation object
+  for a global=], and <a lt="report a violation">reporting</a> the obtained
+  [=violation=].
 
   <h4 id="directive-report-uri">`report-uri`</h4>
 
@@ -3646,15 +3709,16 @@ this algorithm returns normally if compilation is allowed, and throws a
     Script directives pre-request check
   </h5>
 
-  Given a <a for="/">request</a> |request|, a <a>directive</a> |directive|,
-  and a <a for="/">policy</a> |policy|:
+  To <dfn>run script directives pre-request check</dfn>,
+  given a <a for="/">request</a> |request|, a <a>directive</a> |directive|, and
+  a <a for="/">policy</a> |policy|, execute the following steps.
 
   1.  If |request|'s <a for="request">destination</a> is <a for="request/destination">script-like</a>:
 
-      1.  If the result of executing [[#match-nonce-to-source-list]] on
-          |request|'s <a for="request">cryptographic nonce metadata</a> and this
-          directive's <a for="directive">value</a> is "`Matches`", return
-          "`Allowed`".
+      1.  If the result of [=determining whether nonce matches source list=],
+          given |request|'s <a for="request">cryptographic nonce metadata</a>
+          and this directive's <a for="directive">value</a> is "`Matches`",
+          return "`Allowed`".
 
       2.  Let |integrity expressions| be the set of <a>source expressions</a> in
           |directive|'s <a for="directive">value</a> that match the
@@ -3702,9 +3766,9 @@ this algorithm returns normally if compilation is allowed, and throws a
               Note: "<a grammar>`'strict-dynamic'`</a>" is explained in more detail
               in [[#strict-dynamic-usage]].
 
-      4.  If the result of executing [[#match-request-to-source-list]] on
-          |request|, |directive|'s <a for="directive">value</a>, and |policy|,
-          is "`Does Not Match`", return "`Blocked`".
+      4.  If the result of [=determining whether request matches source list=],
+          given |request|, |directive|'s <a for="directive">value</a>, and
+          |policy|, is "`Does Not Match`", return "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -3712,26 +3776,26 @@ this algorithm returns normally if compilation is allowed, and throws a
     Script directives post-request check
   </h5>
 
-  This directive's <a for="directive">post-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|,
-  a <a>directive</a> |directive|, and a <a for="/">policy</a> |policy|:
+  To <dfn>run script directives post-request check</dfn>, given a <a
+  for="/">request</a> |request|, a <a>response</a> |response|, a
+  <a>directive</a> |directive|, and a <a for="/">policy</a> |policy|:
 
   1.  If |request|'s <a for="request">destination</a> is <a for="request/destination">script-like</a>:
 
-      1.  If the result of executing [[#match-nonce-to-source-list]] on
-          |request|'s <a for="request">cryptographic nonce metadata</a> and this
-          directive's <a for="directive">value</a> is "`Matches`", return
-          "`Allowed`".
+      1.  If the result of [=determining whether nonce matches source list=],
+          given |request|'s <a for="request">cryptographic nonce metadata</a>
+          and this directive's <a for="directive">value</a> is "`Matches`",
+          return "`Allowed`".
 
       2.  If |directive|'s <a for="directive">value</a> contains
           "<a grammar>`'strict-dynamic'`</a>", and |request|'s
           <a for="request">parser metadata</a> is not <a>"parser-inserted"</a>,
           return "`Allowed`".
 
-      3.  If the result of executing [[#match-response-to-source-list]] on
-          |response|, |request|, |directive|'s <a for="directive">value</a>,
-          and |policy|, is "`Does Not Match`", return "`Blocked`".
+      3.  If the result of [=determining whether response matches source list=],
+          given |response|, |request|, |directive|'s <a
+          for="directive">value</a>, and |policy|, is "`Does Not Match`", return
+          "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -3741,12 +3805,14 @@ this algorithm returns normally if compilation is allowed, and throws a
     Does |request| violate |policy|?
   </h5>
 
-  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|, this
-  algorithm returns the violated <a>directive</a> if the request violates the
-  policy, and "`Does Not Violate`" otherwise.
+  To <dfn>determine whether request violates policy</dfn>, given a <a
+  for="/">request</a> |request| and a <a for="/">policy</a> |policy|, execute
+  the following steps, which return the violated <a>directive</a> if the request
+  violates the policy, and "`Does Not Violate`" otherwise.
 
-  1.  If |request|'s [=request/initiator=] is "`prefetch`", then return the result of executing
-      [[#does-resource-hint-violate-policy]] on |request| and |policy|.
+  1.  If |request|'s [=request/initiator=] is "`prefetch`", then return the
+      result of [=determining whether resource hint request violates policy=],
+      given |request| and |policy|.
 
   2.  Let |violates| be "`Does Not Violate`".
 
@@ -3763,9 +3829,11 @@ this algorithm returns normally if compilation is allowed, and throws a
     Does resource hint |request| violate |policy|?
   </h5>
 
-  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|, this
-  algorithm returns the default <a>directive</a> if the resource-hint request violates all the
-  policies, and "`Does Not Violate`" otherwise.
+  To <dfn>determine whether resource hint request violates policy</dfn>, given a
+  <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|, execute
+  the following steps, which return the default <a>directive</a> if the
+  resource-hint request violates all the policies, and "`Does Not Violate`"
+  otherwise.
 
   1. Let |defaultDirective| be |policy|'s first [=directive=] whose [=directive/name=] is
       "`default-src`".
@@ -3785,10 +3853,11 @@ this algorithm returns normally if compilation is allowed, and throws a
     Does |nonce| match |source list|?
   </h5>
 
-  Given a <a for="/">request</a>'s <a for="request">cryptographic nonce metadata</a>
-  |nonce| and a <a>source list</a> |source list|, this algorithm returns
-  "`Matches`" if the nonce matches one or more source expressions in the list,
-  and "`Does Not Match`" otherwise:
+  To <dfn>determine whether nonce matches source list</dfn>, given a <a
+  for="/">request</a>'s <a for="request">cryptographic nonce metadata</a>
+  |nonce| and a <a>source list</a> |source list|, execute the following steps,
+  which return "`Matches`" if the nonce matches one or more source expressions
+  in the list, and "`Does Not Match`" otherwise.
 
   1.  Assert: |source list| is not null.
 
@@ -3806,11 +3875,12 @@ this algorithm returns normally if compilation is allowed, and throws a
     Does |request| match |source list|?
   </h5>
 
-  Given a <a for="/">request</a> |request|, a <a>source list</a> |source list|,
-  and a <a for="/">policy</a> |policy|, this algorithm returns the result of executing
-  [[#match-url-to-source-list]] on |request|'s <a for="request">current url</a>,
-  |source list|, |policy|'s [=policy/self-origin=], and |request|'s
-  <a for="request">redirect count</a>.
+  To <dfn>determine whether request matches source list</dfn>, given a <a
+  for="/">request</a> |request|, a <a>source list</a> |source list|, and a <a
+  for="/">policy</a> |policy|, return the result of [=determining whether url
+  matches source list=] given |request|'s <a for="request">current url</a>,
+  |source list|, |policy|'s [=policy/self-origin=], and |request|'s <a
+  for="request">redirect count</a>.
 
   Note: This is generally used in <a>directives</a>' <a>pre-request check</a>
   algorithms to verify that a given <a for="/">request</a> is reasonable.
@@ -3819,11 +3889,12 @@ this algorithm returns normally if compilation is allowed, and throws a
     Does |response| to |request| match |source list|?
   </h5>
 
-  Given a <a for="/">request</a> |request|, and a <a>source list</a> |source list|,
-  and a <a for="/">policy</a> |policy|, this algorithm returns the result of executing
-  [[#match-url-to-source-list]] on |response|'s <a for="response">url</a>,
-  |source list|, |policy|'s [=policy/self-origin=], and |request|'s
-  <a for="request">redirect count</a>.
+  To <dfn>determine whether response matches source list</dfn>, given a
+  [=/response=] |response|, a <a for="/">request</a> |request|, a <a>source
+  list</a> |source list|, and a <a for="/">policy</a> |policy|, return the
+  result of [=determining whether url matches source list=], given |response|'s
+  <a for="response">url</a>, |source list|, |policy|'s [=policy/self-origin=],
+  and |request|'s <a for="request">redirect count</a>.
 
   Note: This is generally used in <a>directives</a>' <a>post-request check</a>
   algorithms to verify that a given <a>response</a> is reasonable.
@@ -3832,10 +3903,11 @@ this algorithm returns normally if compilation is allowed, and throws a
     Does |url| match |source list| in |origin| with |redirect count|?
   </h5>
 
-  Given a {{URL}} |url|, a <a>source list</a> |source list|, an
-  <a for="/">origin</a> |origin|, and a number |redirect count|, this
-  algorithm returns "`Matches`" if the URL matches one or more source
-  expressions in |source list|, or "`Does Not Match`" otherwise:
+  To <dfn>determine whether url matches source list</dfn>, given a {{URL}}
+  |url|, a <a>source list</a> |source list|, an <a for="/">origin</a> |origin|,
+  and a number |redirect count|, execute the following steps, which return
+  "`Matches`" if the URL matches one or more source expressions in |source
+  list|, or "`Does Not Match`" otherwise.
 
   1.  Assert: |source list| is not null.
 
@@ -3848,7 +3920,7 @@ this algorithm returns normally if compilation is allowed, and throws a
       Note: An empty source list (that is, a directive without a value: `script-src`,
       as opposed to `script-src host1`) is equivalent to a source list containing `'none'`,
       and will not match any URL.
-      
+
       Note: The `'none'` keyword has no effect when other source expressions are
       present. That is, the list « `'none'` » does not match any URL. A list consisting
       of « `'none'`, `https://example.com` », on the other hand, would match
@@ -3856,20 +3928,21 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   4.  <a for=set>For each</a> |expression| of |source list|:
 
-      1.  If [[#match-url-to-source-expression]] returns "`Matches`" when
-          executed upon |url|, |expression|, |origin|, and |redirect count|, return
-          "`Matches`".
+      1.  If the result of [=determining whether url matches source
+          expression=], given |url|, |expression|, |origin|, and |redirect
+          count|, is returns "`Matches`", return "`Matches`".
 
   5.  Return "`Does Not Match`".
 
-  <h5 id="match-url-to-source-expression" algorithm dfn export>
+  <h5 id="match-url-to-source-expression" algorithm>
     Does |url| match |expression| in |origin| with |redirect count|?
   </h5>
 
-  Given a {{URL}} |url|, a <a>source expression</a> |expression|, an
-  <a for="/">origin</a> |origin|, and a number |redirect count|, this algorithm
-  returns "`Matches`" if |url| matches |expression|, and "`Does Not Match`"
-  otherwise.
+  To <dfn export>determine whether url matches source expression</dfn>, given a
+  {{URL}} |url|, a <a>source expression</a> |expression|, an <a
+  for="/">origin</a> |origin|, and a number |redirect count|, execute the
+  following steps, which return "`Matches`" if |url| matches |expression|, and
+  "`Does Not Match`" otherwise.
 
   Note: |origin| is the <a for="/">origin</a> of the resource relative to which the
   |expression| should be resolved. "`'self'`", for instance, will have distinct
@@ -4000,7 +4073,7 @@ this algorithm returns normally if compilation is allowed, and throws a
   Note: The matching relation is asymmetric. That is, |pattern| matching |host| does not
   mean that |host| will match |pattern|. For example, `*.example.com` <a>`host-part` matches</a>
   `www.example.com`, but `www.example.com` does not <a>`host-part` match</a> `*.example.com`.
-  
+
   Note: A future version of this specification may allow literal IPv6 and IPv4 addresses,
   depending on usage and demand. Given the weak security properties of IP addresses in
   relation to named hosts, however, authors are encouraged to prefer the latter whenever possible.
@@ -4036,7 +4109,7 @@ this algorithm returns normally if compilation is allowed, and throws a
     2.  If |input| is equal to "*", return "`Matches`".
 
     3.  Let |normalizedInput| be null if |input| is the empty string; otherwise |input| interpreted as decimal number.
-    
+
     4.  If |normalizedInput| equals |url|'s [=url/port=], return "`Matches`".
 
     5.  If |url|'s [=url/port=] is null:
@@ -4106,9 +4179,10 @@ this algorithm returns normally if compilation is allowed, and throws a
     Is |element| nonceable?
   </h5>
 
-  Given an {{Element}} |element|, this algorithm returns "`Nonceable`" if
-  a <a grammar>`nonce-source`</a> expression can match the element (as discussed
-  in [[#security-nonce-hijacking]]), and "`Not Nonceable`" if such expressions
+  To <dfn>determine whether element is nonceable</dfn>, given an {{Element}}
+  |element|, execute the following steps, which return "`Nonceable`" if a <a
+  grammar>`nonce-source`</a> expression can match |element| (as discussed in
+  [[#security-nonce-hijacking]]), and "`Not Nonceable`" if such expressions
   should not be applied.
 
   1.  If |element| does not have an attribute named "`nonce`", return "`Not
@@ -4146,15 +4220,12 @@ this algorithm returns normally if compilation is allowed, and throws a
     Does a source list allow all inline behavior for |type|?
   </h5>
 
-  A <a>source list</a>
-  <dfn export for="source list" local-lt="allow all inline behavior">allows all inline behavior</dfn>
-  of a given |type| if it contains the <a grammar>`keyword-source`</a>
-  expression <a grammar>`'unsafe-inline'`</a>, and does not override that
-  expression as described in the following algorithm:
-
-  Given a <a>source list</a> |list| and a string |type|, the following
-  algorithm returns "`Allows`" if all inline content of a given |type| is
-  allowed and "`Does Not Allow`" otherwise.
+  To <dfn>determine whether a source list allows all inline behavior</dfn> given
+  a [=source list=] |list| and a [=string=] |type|, execute the following steps,
+  which return "`Allows`" if |list| contains the <a grammar>`keyword-source`</a>
+  expression <a grammar>`'unsafe-inline'`</a> and does not override that
+  expression as described in the following algorithm, and "`Does Not Allow`"
+  otherwise.
 
   1.  Let |allow all inline| be `false`.
 
@@ -4211,18 +4282,19 @@ this algorithm returns normally if compilation is allowed, and throws a
     Does |element| match source list for |type| and |source|?
   </h5>
 
-  Given an {{Element}} |element|, a <a>source list</a> |list|, a string
-  |type|, and a string |source|, this algorithm returns "`Matches`" or
+  To <dfn>determine whether element matches source list</dfn>, given an
+  {{Element}} |element|, a <a>source list</a> |list|, a string |type|, and a
+  string |source|, execute the following steps, which return "`Matches`" or
   "`Does Not Match`".
 
   Note: Regardless of the encoding of the document, |source| will be converted
   to `UTF-8` before applying any hashing algorithms.
 
-  1.  If [[#allow-all-inline]] returns "`Allows`" given |list| and |type|,
-      return "`Matches`".
+  1.  If the result of [=determining whether a source list allows all inline
+      behavior=] given |list| and |type| is "`Allows`", then return "`Matches`".
 
-  2.  If |type| is "`script`" or "`style`", and [[#is-element-nonceable]]
-      returns "`Nonceable`" when executed upon |element|:
+  2.  If |type| is "`script`" or "`style`", and the result of [=determining
+      whether element is nonceable=] given |element| is "`Nonceable`":
 
       1.  <a for=set>For each</a> |expression| of |list|:
 
@@ -4298,10 +4370,11 @@ this algorithm returns normally if compilation is allowed, and throws a
     Get the effective directive for |request|
   </h4>
 
-  Each <a>fetch directive</a> controls a specific destination of <a for="/">request</a>. Given
-  a <a for="/">request</a> |request|, the following algorithm returns either
-  null or the <a for="directive">name</a> of the request's
-  <dfn for="request" export>effective directive</dfn>:
+  Each <a>fetch directive</a> controls a specific destination of <a
+  for="/">request</a>. To <dfn>get the effective directive for request</dfn>,
+  given a <a for="/">request</a> |request|, execute the following steps, which
+  return either null or the <a for="directive">name</a> of the request's <dfn
+  for="request" export>effective directive</dfn>.
 
   1.  If |request|'s [=request/initiator=] is "`prefetch`" or "`prerender`",
       return `default-src`.
@@ -4374,8 +4447,9 @@ this algorithm returns normally if compilation is allowed, and throws a
     Get the effective directive for inline checks
   </h4>
 
-  Given a string |type|, this algorithm returns the <a for="directive">name</a>
-  of the effective directive.
+   To <dfn>get the effective directive for inline checks</dfn>, given a string
+  |type|, execute the following steps, which return the <a
+  for="directive">name</a> of the effective directive.
 
   Note: While the <a for="request">effective directive</a> is only defined for
   <a for="/">requests</a>, in this algorithm it is used similarly to mean
@@ -4402,11 +4476,11 @@ this algorithm returns normally if compilation is allowed, and throws a
     Get fetch directive fallback list
   </h4>
 
-  Will return an <a>ordered set</a> of the fallback <a>directives</a> for a specific <a>directive</a>.
-  The returned <a>ordered set</a> is sorted from most relevant to least relevant
-  and it includes the effective directive itself.
-
-  Given a string |directive name|:
+  To <dfn>get the directive fallback list</dfn> given a <a>string</a> |directive
+  name|, execute the following steps, which return an <a>ordered set</a> of the
+  fallback <a>directives</a> for a specific <a>directive</a>. The returned
+  <a>ordered set</a> is sorted from most relevant to least relevant and it
+  includes the effective directive itself.
 
   1.  Switch on |directive name|:
 
@@ -4470,11 +4544,12 @@ this algorithm returns normally if compilation is allowed, and throws a
   we are currently checking a worker request), a `default-src` directive
   should not execute if a `worker-src` or `script-src` directive exists.
 
-  Given a string |effective directive name|, a string |directive name| and
-  a <a for="/">policy</a> |policy|:
+  To <dfn>determine whether directive should execute</dfn>, given a string
+  |effective directive name|, a string |directive name| and a <a
+  for="/">policy</a> |policy|, execute the following steps.
 
-  1.  Let |directive fallback list| be the result of executing [[#directive-fallback-list]]
-      on |effective directive name|.
+  1.  Let |directive fallback list| be the result of [=getting the directive
+      fallback list=] given |effective directive name|.
 
   2.  <a for=set>For each</a> |fallback directive| of |directive fallback list|:
 
@@ -4539,19 +4614,21 @@ this algorithm returns normally if compilation is allowed, and throws a
   an attribute named "<code>&lt;script</code>", a `nonce` attribute, and a
   second `src` attribute which is helpfully discarded as duplicate by the parser.
 
-  The [[#is-element-nonceable]] algorithm attempts to mitigate this specific
-  attack by walking through <{script}> or <{style}> element attributes, looking for the
-  string "<code>&lt;script</code>" or "<code>&lt;style</code>" in their names or values.
+  The [=determine whether element is nonceable=] algorithm attempts to mitigate
+  this specific attack by walking through <{script}> or <{style}> element
+  attributes, looking for the string "<code>&lt;script</code>" or
+  "<code>&lt;style</code>" in their names or values.
 
   User-agents must pay particular attention when implementing this algorithm to
   not ignore duplicate attributes. If an element has a duplicate attribute any
   instance of the attribute after the first one is ignored but in the
-  [[#is-element-nonceable]] algorithm, all attributes including the
-  duplicate ones need to be checked.
+  [=determine whether element is nonceable=] algorithm, all attributes including
+  the duplicate ones need to be checked.
 
-  ISSUE(whatwg/html#3257): Currently the HTML spec's parsing algorithm removes this information
-  before the [[#is-element-nonceable]] algorithm can be run which makes it
-  impossible to actually detect duplicate attributes.
+  ISSUE(whatwg/html#3257): Currently the HTML spec's parsing algorithm removes
+  this information before the [=determine whether element is nonceable=]
+  algorithm can be run which makes it impossible to actually detect duplicate
+  attributes.
 
   For the following example page:
 
@@ -4561,7 +4638,7 @@ this algorithm returns normally if compilation is allowed, and throws a
   </pre>
 
   The following injected string will use a duplicate attribute to attempt to
-  bypass the [[#is-element-nonceable]] algorithm check:
+  bypass the [=determine whether element is nonceable=] algorithm check:
 
   <pre highlight="html">
     Hello, &lt;script src='https://evil.com/evil.js' x="" x=
@@ -5010,7 +5087,7 @@ this algorithm returns normally if compilation is allowed, and throws a
       <pre>
         <a http-header>Content-Security-Policy</a>: img-src 'none'; script-src 'none'; font-src 'none'
       </pre>
-      
+
       Supplementing this policy with `default-src 'none'` would improve the page's robustness
       against this kind of attack.
     </div>
