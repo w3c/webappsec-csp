@@ -1070,13 +1070,13 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
 
   To <dfn export>determine whether a request is blocked by Content
   Security Policy</dfn>, given a <a for="/">request</a> |request|, execute the
-  following steps, which return `Blocked` or `Allowed` and report violations
+  following steps, which return a [=boolean=] and report violations
   based on |request|'s [=request/policy container=]'s [=policy container/CSP
   list=].
 
   1.  Let |CSP list| be |request|'s [=request/policy container=]'s [=policy container/CSP list=].
 
-  2.  Let |result| be "`Allowed`".
+  2.  Let |blocked| be false.
 
   3.  <a for=list>For each</a> |policy| of |CSP list|:
 
@@ -1093,9 +1093,9 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
 
           2.  [=Report a violation=], given |violation|.
 
-          3.  Set |result| to "`Blocked`".
+          3.  Set |blocked| to true.
 
-  4.  Return |result|.
+  4.  Return |blocked|.
 
   <h4 id="should-block-response" algorithm>
     Is |response| to |request| blocked by Content Security Policy?
@@ -1104,12 +1104,12 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
   To <dfn export>determine whether a response is blocked by Content
   Security Policy</dfn>, given a <a>response</a> |response| and a <a
   for="/">request</a> |request|, execute the following steps, which return
-  `Blocked` or `Allowed` and report violations based on |request|'s
+  a [=boolean=] and report violations based on |request|'s
   [=request/policy container=]'s [=policy container/CSP list=].
 
   1.  Let |CSP list| be |request|'s [=request/policy container=]'s [=policy container/CSP list=].
 
-  2.  Let |result| be "`Allowed`".
+  2.  Let |blocked| be false.
 
   3.  <a for=list>For each</a> |policy| of |CSP list|:
 
@@ -1124,13 +1124,13 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
               2.  [=Report a violation=], given |violation|.
 
               3.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
-                  then set |result| to "`Blocked`".
+                  then set |blocked| to true.
 
       Note: This portion of the check verifies that the page can load the
       response. That is, that a Service Worker hasn't substituted a file which
       would violate the page's CSP.
 
-  4.  Return |result|.
+  4.  Return |blocked|.
 
 
   <h3 id="html-integration">
@@ -1231,9 +1231,9 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
   To <dfn export>determine whether element's inline type behavior is
   blocked by Content Security Policy</dfn>, given an {{Element}} |element|, a
   string |type|, and a string |source|, execute the following steps, which
-  return "`Allowed`" if the element is allowed to have inline definition of a
+  return false if the element is allowed to have inline definition of a
   particular type of behavior (script execution, style application, event
-  handlers, etc.), and "`Blocked`" otherwise.
+  handlers, etc.), and true otherwise.
 
   Note: The valid values for |type| are "`script`", "`script attribute`",
   "`style`", and "`style attribute`".
@@ -1241,7 +1241,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
   <ol class="algorithm">
     1.  Assert: |element| is not null.
 
-    2.  Let |result| be "`Allowed`".
+    2.  Let |blocked| be false.
 
     3.  <a for=list>For each</a> |policy| of |element|'s {{Document}}'s <a for="/">global object</a>'s
         <a for="global object">CSP list</a>:
@@ -1272,9 +1272,9 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
             7.  [=Report a violation=], given |violation|.
 
             8.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
-                set |result| to "`Blocked`".
+                set |blocked| to true.
 
-    4.  Return |result|.
+    4.  Return |blocked|.
   </ol>
 
   <h4 id="should-block-navigation-request" algorithm>
@@ -1284,11 +1284,11 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
   To <dfn export>determine whether a navigation request is blocked by
   Content Security Policy</dfn>, given a <a for="/">request</a> |navigation
   request| and a string |type| (either "`form-submission`" or "`other`"),
-  execute the following steps, which return "`Blocked`" if the active policy
-  blocks the navigation, and "`Allowed`" otherwise.
+  execute the following steps, which return true if the active policy
+  blocks the navigation, and false otherwise.
 
   <ol class="algorithm">
-    1.  Let |result| be "`Allowed`".
+    1.  Let |blocked| be false.
 
     2.  <a for=list>For each</a> |policy| of |navigation request|'s <a for="request">policy container</a>'s
         <a for="policy container">CSP list</a>:
@@ -1310,9 +1310,9 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
             4.  [=Report a violation=], given |violation|.
 
             5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
-                set |result| to "`Blocked`".
+                set |blocked| to true.
 
-    3.  If |result| is "`Allowed`", and if |navigation request|'s
+    3.  If |blocked| is false, and if |navigation request|'s
         <a for="request">current URL</a>'s <a for="url">scheme</a> is `javascript`:
 
         1.  <a for=list>For each</a> |policy| of |navigation request|'s <a for="request">client</a>'s
@@ -1340,9 +1340,9 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
                 5.  [=Report a violation=], given |violation|.
 
                 6.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
-                    set |result| to "`Blocked`".
+                    set |blocked| to true.
 
-    4.  Return |result|.
+    4.  Return |blocked|.
   </ol>
 
   <h4 id="should-block-navigation-response" algorithm>
@@ -1355,11 +1355,11 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
   request|, a <a>response</a> |navigation response|, a [=/CSP list=] |response
   CSP list|, a string |type| (either "`form-submission`" or "`other`"), and a
   <a>navigable</a> |target|, execute the following steps, which return
-  "`Blocked`" if the active policy blocks the navigation, and "`Allowed`"
+  true if the active policy blocks the navigation, and false
   otherwise.
 
   <ol class="algorithm">
-    1.  Let |result| be "`Allowed`".
+    1.  Let |blocked| be false.
 
     2.  <a for=list>For each</a> |policy| of |response CSP list|:
 
@@ -1386,7 +1386,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
             4.  [=Report a violation=], given |violation|.
 
             5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
-                set |result| to "`Blocked`".
+                set |blocked| to true.
 
     3.  <a for=list>For each</a> |policy| of |navigation request|'s <a for="request">policy container</a>'s
         <a for="policy container">CSP list</a>:
@@ -1412,9 +1412,9 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
             4.  [=Report a violation=], given |violation|.
 
             5.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
-                set |result| to "`Blocked`".
+                set |blocked| to true.
 
-    4.  Return |result|.
+    4.  Return |blocked|.
   </ol>
 
   <h4 id="run-global-object-csp-initialization" algorithm>
@@ -3419,8 +3419,8 @@ return normally if compilation is allowed, and throws a
 
   To <dfn export>determine whether base is allowed for document</dfn>, given a
   {{URL}} |base|, and a {{Document}} |document|, execute the following steps,
-  which return "`Allowed`" if |base| may be used as the value of a <{base}>
-  element's <{base/href}> attribute, and "`Blocked`" otherwise.
+  which return false if |base| may be used as the value of a <{base}>
+  element's <{base/href}> attribute, and true otherwise.
 
   1.  <a for=list>For each</a> |policy| of |document|'s <a for="/">global object</a>'s
       <a for="global object">csp list</a>:
@@ -3447,12 +3447,12 @@ return normally if compilation is allowed, and throws a
           3.  [=Report a violation=], given |violation|.
 
           4.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
-              return "`Blocked`".
+              return true.
 
       Note: We compare against the fallback base URL in order to deal correctly with things like
       <a>an iframe `srcdoc` `Document`</a> which has been sandboxed into an opaque origin.
 
-  2.  Return "`Allowed`".
+  2.  Return false.
 
   <h4 id="directive-sandbox">`sandbox`</h4>
 
