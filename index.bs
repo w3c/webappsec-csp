@@ -1442,12 +1442,31 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
   to determine whether such compilation ought to be blocked.
 
   <h4 id="can-compile-strings" algorithm dfn export>
-    EnsureCSPDoesNotBlockStringCompilation(|realm|, |source|)
+    EnsureCSPDoesNotBlockStringCompilation(|realm|, |parameterStrings|, |bodyString|, |compilationType|, |parameterArgs|, |bodyArg|)
   </h4>
 
-  Given a <a>realm</a> |realm| and a string |source|, this algorithm
+  Given a <a>realm</a> |realm|, a list of strings |parameterStrings|, a string |bodyString|, an enum (|compilationType|),
+  a list of ECMAScript language values (|parameterArgs|), and an ECMAScript language value (|bodyArg|), this algorithm
   returns normally if string compilation is allowed, and throws an "`EvalError`"
   if not:
+
+  1.  Let |source| be |bodyString|.
+  
+  1.  If |compilationType| is `*FUNCTION*`:
+
+      1.  Set |source| to `"function anonymous("`
+
+      1.  For each |arg| in |parameterStrings|:
+
+          1.  Append |arg| to |source|.
+
+          1.  If |arg| is not the last item of |parameterStrings|, append `","` to |source|.
+
+      1.  Append `"\n) {\n"` to |source|.
+
+      1.  Append |bodyString| to |source|.
+
+      1.  Append `"\n}"` to |source|.
 
   1.  Let |result| be "`Allowed`".
 
@@ -1483,9 +1502,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
 
   4.  If |result| is "`Blocked`", throw an `EvalError` exception.
 
-  ISSUE(tc39/ecma262#938): {{HostEnsureCanCompileStrings()}} does not include the string which is
-  going to be compiled as a parameter. We'll also need to update HTML to pipe that value through
-  to CSP.
+  Note: |parameterArgs| and |bodyArg| are currently unused. They are included for future use.
 
 <h3 id="wasm-integration">Integration with WebAssembly</h3>
 
