@@ -3646,39 +3646,10 @@ this algorithm returns normally if compilation is allowed, and throws a
           directive's <a for="directive">value</a> is "`Matches`", return
           "`Allowed`".
 
-      2.  Let |integrity expressions| be the set of <a>source expressions</a> in
-          |directive|'s <a for="directive">value</a> that match the
-          <a grammar>hash-source</a> grammar.
-
-      3.  If |integrity expressions| is not empty:
-
-          1.  Let |integrity sources| be the result of executing the algorithm
-              defined in [[SRI#parse-metadata]] on |request|'s
-              <a for="request">integrity metadata</a>. [[!SRI]]
-
-          2.  If |integrity sources| is "`no metadata`" or an empty set, skip
-              the remaining substeps.
-
-          3.  Let |bypass due to integrity match| be `true`.
-
-          4.  <a for=set>For each</a> |source| of |integrity sources|:
-
-              1.  If |directive|'s <a for="directive">value</a> does not
-                  contain a <a>source expression</a> whose
-                  <a grammar>hash-algorithm</a> is an <a>ASCII case-insensitive</a> match
-                  for |source|'s <a grammar>hash-algorithm</a>, and whose
-                  <a grammar>base64-value</a> is <a for="string" lt="is">identical to</a>
-                  |source|'s `base64-value`, then set |bypass due to
-                  integrity match| to `false`.
-
-          5.  If |bypass due to integrity match| is `true`, return
-              "`Allowed`".
-
-          Note: Here, we verify only that the |request| contains a set of
-          <a for="request">integrity metadata</a> which is a subset of the
-          <a grammar>hash-source</a> <a>source expressions</a> specified by
-          |directive|. We rely on the browser's enforcement of Subresource
-          Integrity [[!SRI]] to block non-matching resources upon response.
+      2.  If the result of executing
+          [[#match-integrity-metadata-to-source-list]] on |request|'s <a
+          for="request">integrity metadata</a> and this directive's <a
+          for="directive">value</a> is "`Matches`", return "`Allowed`".
 
       3.  If |directive|'s <a for="directive">value</a> contains a <a>source
           expression</a> that is an <a>ASCII case-insensitive</a> match for
@@ -3714,12 +3685,20 @@ this algorithm returns normally if compilation is allowed, and throws a
           directive's <a for="directive">value</a> is "`Matches`", return
           "`Allowed`".
 
-      2.  If |directive|'s <a for="directive">value</a> contains
-          "<a grammar>`'strict-dynamic'`</a>", and |request|'s
-          <a for="request">parser metadata</a> is not <a>"parser-inserted"</a>,
-          return "`Allowed`".
+      2.  If the result of executing
+          [[#match-integrity-metadata-to-source-list]] on |request|'s <a
+          for="request">integrity metadata</a> and this directive's <a
+          for="directive">value</a> is "`Matches`", return "`Allowed`".
 
-      3.  If the result of executing [[#match-response-to-source-list]] on
+      3.  If |directive|'s <a for="directive">value</a> contains
+          "<a grammar>`'strict-dynamic'`</a>":
+          
+          1.  If |request|'s <a for="request">parser metadata</a> is not
+              <a>"parser-inserted"</a>, return "`Allowed`".
+             
+              Otherwise, return "`Blocked`".
+
+      4.  If the result of executing [[#match-response-to-source-list]] on
           |response|, |request|, |directive|'s <a for="directive">value</a>,
           and |policy|, is "`Does Not Match`", return "`Blocked`".
 
@@ -3791,6 +3770,44 @@ this algorithm returns normally if compilation is allowed, and throws a
           <a grammar>`base64-value`</a> part, return "`Matches`".
 
   4.  Return "`Does Not Match`".
+
+  <h5 id="match-integrity-metadata-to-source-list" algorithm>
+    Does |integrity metadata| match |source list|?
+  </h5>
+
+  Given a <a for="/">request</a>'s <a for="request">integrity metadata</a>
+  |integrity metadata| and a <a>source list</a> |source list|, this algorithm
+  returns "`Matches`" if the integrity metadata matches one or more source
+  expressions in the list, and "`Does Not Match`" otherwise:
+
+  1.  Assert: |source list| is not null.
+
+  2.  Let |integrity expressions| be the set of <a>source expressions</a> in
+      |source list| that match the <a grammar>hash-source</a> grammar.
+
+  3.  If |integrity expressions| is empty, return "`Does Not Match`".
+
+  4.  Let |integrity sources| be the result of executing the algorithm defined
+      in [[SRI#parse-metadata]] on |integrity metadata|. [[!SRI]]
+
+  5.  If |integrity sources| is "`no metadata`" or an empty set, return "`Does
+      Not Match`".
+
+  6.  <a for=set>For each</a> |source| of |integrity sources|:
+
+      1.  If |integrity expressions| does not contain a <a>source expression</a>
+          whose <a grammar>hash-algorithm</a> is an <a>ASCII
+          case-insensitive</a> match for |source|'s <a
+          grammar>hash-algorithm</a>, and whose <a grammar>base64-value</a> is
+          <a for="string" lt="is">identical to</a> |source|'s `base64-value`,
+          return "`Does Not Match`".
+
+  7.  Return "`Matches`".
+
+  Note: Here, we verify only whether the |integrity metadata| is a non-empty
+  subset of the <a grammar>hash-source</a> sources in |source list|. We rely on
+  the browser's enforcement of Subresource Integrity [[!SRI]] to block
+  non-matching resources upon response.
 
   <h5 id="match-request-to-source-list" algorithm>
     Does |request| match |source list|?
