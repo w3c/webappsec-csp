@@ -1452,19 +1452,15 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
   returns normally if string compilation is allowed, and throws an "`EvalError`"
   if not:
 
-  1.  If |compilationType| is timer, then:
-  <!-- timer is an enum value. -->
+  1.  If |compilationType| is "`TIMER`", then:
 
       1.  Let |sourceString| be |codeString|.
 
   1.  Else:
 
-      1.  Let |compilationSink| be `"Function"` if |compilationType| is function, otherwise `"Eval"`.
-      <!-- function is an enum value. -->
+      1.  Let |compilationSink| be "Function" if |compilationType| is "`FUNCTION`", otherwise "Eval".
 
-      1.  Let |isTrusted| be `true`.
-
-      1.  If |bodyArg| is not a {{TrustedScript}} object, set |isTrusted| to `false`.
+      1.  Let |isTrusted| be `true` if |bodyArg| [=implements=] {{TrustedScript}}, and `false` otherwise.
 
       1.  If |isTrusted| is `true` then:
 
@@ -1472,19 +1468,20 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
 
       1.  If |isTrusted| is `true`, then:
 
-          1.  For each |arg| in |parameterArgs|:
+          1. Assert: |parameterArgs|' [list/size=] is equal to [parameterStrings]' [=list/size=].
 
-              1. Let |index| be the index of |arg| in |parameterArgs|.
+          1. [=list/iterate|For each=] |index| of [=the range=] 0 to |parameterArgs]' [list/size=]:
+              1. Let |arg| be |parameterArgs|[|index|].
 
-              1. If |arg| is not a {{TrustedScript}} object, set |isTrusted| to `false`.
-
-              1. If |isTrusted| is `true`, then:
+              1. If |arg| [=implements=] {{TrustedScript}}, then:
 
                   1. if |parameterStrings|[|index|] is not equal to |arg|'s [=TrustedScript/data=], set |isTrusted| to `false`.
 
-      1.  If |isTrusted| is `true`, let |sourceToValidate| be a new instance of
-          the {{TrustedScript}} interface, with its [=TrustedScript/data=]
-          set to |codeString|. Otherwise, let |sourceToValidate| be |codeString|.
+              1. Otherwise, set |isTrusted| to `false`.
+
+      1.  Let |sourceToValidate| be a [=new=] {{TrustedScript}} object created in |realm|
+          whose [=TrustedScript/data=] is set to |codeString|, if |isTrusted| is `true`, and
+          |codeString| otherwise.
 
       1. Let |sourceString| be the result of executing the [$Get Trusted Type compliant string$] algorithm, with
          {{TrustedScript}}, |realm|, |sourceToValidate|, |compilationSink|, and `'script'`.
