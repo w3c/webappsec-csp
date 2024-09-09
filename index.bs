@@ -751,8 +751,8 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
 
   Each <a>violation</a> has a
   <dfn for="violation" id="violation-resource" export>resource</dfn>, which is
-  either null, "`inline`", "`eval`", "`wasm-eval`", or a {{URL}}. It represents the resource
-  which violated the policy.
+  either null, "`inline`", "`eval`", "`wasm-eval`", "`trusted-types-policy`", "`trusted-types-sink`" or a {{URL}}.
+  It represents the resource which violated the policy.
 
   Note: The value null for a <a>violation</a>'s <a
   for="violation">resource</a> is only allowed while the <a>violation</a> is
@@ -1452,6 +1452,44 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
   returns normally if string compilation is allowed, and throws an "`EvalError`"
   if not:
 
+  1.  If |compilationType| is "`TIMER`", then:
+
+      1.  Let |sourceString| be |codeString|.
+
+  1.  Else:
+
+      1.  Let |compilationSink| be "Function" if |compilationType| is "`FUNCTION`", and "Eval" otherwise.
+
+      1.  Let |isTrusted| be `true` if |bodyArg| [=implements=] {{TrustedScript}}, and `false` otherwise.
+
+      1.  If |isTrusted| is `true` then:
+
+          1. If |bodyString| is not equal to |bodyArg|'s [=TrustedScript/data=], set |isTrusted| to `false`.
+
+      1.  If |isTrusted| is `true`, then:
+
+          1. Assert: |parameterArgs|' [list/size=] is equal to [parameterStrings]' [=list/size=].
+
+          1. [=list/iterate|For each=] |index| of [=the range=] 0 to |parameterArgs]' [list/size=]:
+              1. Let |arg| be |parameterArgs|[|index|].
+
+              1. If |arg| [=implements=] {{TrustedScript}}, then:
+
+                  1. if |parameterStrings|[|index|] is not equal to |arg|'s [=TrustedScript/data=], set |isTrusted| to `false`.
+
+              1. Otherwise, set |isTrusted| to `false`.
+
+      1.  Let |sourceToValidate| be a [=new=] {{TrustedScript}} object created in |realm|
+          whose [=TrustedScript/data=] is set to |codeString| if |isTrusted| is `true`, and
+          |codeString| otherwise.
+
+      1. Let |sourceString| be the result of executing the [$Get Trusted Type compliant string$] algorithm, with
+         {{TrustedScript}}, |realm|, |sourceToValidate|, |compilationSink|, and `'script'`.
+
+      1.  If the algorithm throws an error, throw an {{EvalError}}.
+
+      1.  If |sourceString| is not equal to |codeString|, throw an {{EvalError}}.
+
   1.  Let |result| be "`Allowed`".
 
   2.  Let |global| be |realm|'s [=realm/global object=].
@@ -1477,7 +1515,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
 
           3.  If |source-list| [=list/contains=] the expression
               "<a grammar>`'report-sample'`</a>", then set |violation|'s [=violation/sample=] to
-              the substring of |codeString| containing its first 40 characters.
+              the substring of |sourceString| containing its first 40 characters.
 
           4.  Execute [[#report-violation]] on |violation|.
 
@@ -1485,8 +1523,6 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
               "`Blocked`".
 
   4.  If |result| is "`Blocked`", throw an `EvalError` exception.
-
-  Note: |parameterStrings|, |bodyString|, |compilationType|, |parameterArgs|, and |bodyArg| are currently unused. They are included for future use.
 
 <h3 id="wasm-integration">Integration with WebAssembly</h3>
 
@@ -3693,10 +3729,10 @@ this algorithm returns normally if compilation is allowed, and throws a
 
       3.  If |directive|'s <a for="directive">value</a> contains
           "<a grammar>`'strict-dynamic'`</a>":
-          
+
           1.  If |request|'s <a for="request">parser metadata</a> is not
               <a>"parser-inserted"</a>, return "`Allowed`".
-             
+
               Otherwise, return "`Blocked`".
 
       4.  If the result of executing [[#match-response-to-source-list]] on
