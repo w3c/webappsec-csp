@@ -3765,10 +3765,30 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   3. <a for=set>For each</a> |directive| of |policy|:
 
-      1.  Let |result| be the result of executing |directive|'s
-          <a for="directive">pre-request check</a> on |request| and |policy|.
+      1. If |directive|'s <a for="directive">name</a> is not one of the following:
+        * `child-src`
+        * `connect-src`
+        * `font-src`
+        * `frame-src`
+        * `img-src`
+        * `manifest-src`
+        * `media-src`
+        * `object-src`
+        * `script-src`
+        * `script-src-elem`
+        * `style-src`
+        * `style-src-elem`
+        * `worker-src`
 
-      2. If |result| is "`Allowed`", then return "`Does Not Violate`".
+        then continue.
+
+      1. Assert: |directive|'s <a for="directive">value</a> is a <a>source list</a>.
+
+      1. Let |result| be the result of executing [[#match-request-to-source-list]] on
+          |request|, |directive|'s <a for="directive">value</a>, and
+          |policy|.
+
+      1. If |result| is "`Allowed`", then return "`Does Not Violate`".
 
   4. Return |defaultDirective|.
 
