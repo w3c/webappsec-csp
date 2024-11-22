@@ -1082,6 +1082,21 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
 
               2.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
                   then set |result| to "`Blocked`".
+          2. If |directive| is [=`report-hash`=] and |request|'s [=request/destination=] matches
+             the |directive|'s [=directive/value=], then:
+              1.  Let |hash| be the empty [=string=].
+              1.  If |request| is CORS enabled, set |hash| to the result of [=applying algorithm to bytes=] on response's bytes and "sha-256".
+              1.  Let |body| be a [=csp hash report body=] with the current document' URL as its [=documentURL=],
+                  |request|'s URL as its [=subresourceURL=] and |hash| as its [=hash=].
+              1.  [=Generate and queue a report=] with the following arguments:
+                  :   <var ignore>context</var>
+                  ::  |settings object|
+                  :   <var ignore>type</var>
+                  ::  "csp-hash"
+                  :   <var ignore>destination</var>
+                  ::  |directive|'s <a for="directive">value</a>.
+                  :   <var ignore>data</var>
+                  ::  |body|
 
       Note: This portion of the check verifies that the page can load the
       response. That is, that a Service Worker hasn't substituted a file which
@@ -1592,6 +1607,19 @@ this algorithm returns normally if compilation is allowed, and throws a
       readonly attribute unsigned long? columnNumber;
     };
   </pre>
+
+  When a [=`report-hash`=] directive is present, <dfn export>csp hash report</dfn> may be generated
+  and sent out to a reporting endpoint associated with the <a for="/">policy</a>.
+
+  <p><a>csp hash reports</a> have the <a>report type</a> "csp-hash".</p>
+
+  <p><a>csp violation reports</a> are not <a>visible to
+  <code>ReportingObserver</code>s</a>.
+
+  <p>A <dfn>csp hash report body</dfn> is a [=struct=] with the following fields:
+      <dfn for="csp hash report body">documentURL</dfn>,
+      <dfn for="csp hash report body">subresourceURL</dfn>,
+      <dfn for="csp hash report body">hash</dfn>.
 
   <h3 id="violation-events">
     Violation DOM Events
@@ -3627,6 +3655,17 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   <pre>
     directive-name  = "report-to"
+    directive-value = <a grammar>token</a>
+  </pre>
+
+  <h4 id="directive-report-hash">`report-hash`</h4>
+
+  The <dfn export>`report-hash`</dfn> directive signifies that script hash reports
+  should be sent to <a lt="endpoint">reporting endpoints</a> [[REPORTING]]. The
+  directive's name and value are described by the following ABNF:
+
+  <pre>
+    directive-name  = "report-hash"
     directive-value = <a grammar>token</a>
   </pre>
 
