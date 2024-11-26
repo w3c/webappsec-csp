@@ -186,7 +186,7 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   "REPORTING": {
     "href": "https://wicg.github.io/reporting/",
     "title": "Reporting API",
-    "authors": [ "Ilya Gregorik", "Mike West" ]
+    "authors": [ "Ilya Grigorik", "Mike West" ]
   },
   "TIMING": {
       "href": "https://owasp.org/www-pdf-archive/HackPra_Allstars-Browser_Timing_Attacks_-_Paul_Stone.pdf",
@@ -1089,9 +1089,11 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
           2. If |directive| is [=`report-hash`=] and |request|'s [=request/destination=] matches
              the |directive|'s [=directive/value=], then:
               1.  Let |hash| be the empty [=string=].
-              1.  If |request| is CORS enabled, set |hash| to the result of [=applying algorithm to bytes=] on response's bytes and "sha-256".
-              1.  Let |body| be a [=csp hash report body=] with the current document' URL as its [=documentURL=],
-                  |request|'s URL as its [=subresourceURL=] and |hash| as its [=hash=].
+              1.  If |response| is [=CORS-same-origin=], set |hash| to the result of [=applying
+                  algorithm to bytes=] on |response|'s [=response/body=] and "sha-256".
+              1.  Let |body| be a [=csp hash report body=] with the current document' URL as its
+                  [=documentURL=], |request|'s URL as its [=subresourceURL=], |hash| as its
+                  [=hash=], and "subresource" as its [=csp hash report body/type=].
               1.  [=Generate and queue a report=] with the following arguments:
                   :   <var ignore>context</var>
                   ::  <var ignore>settings object</var>
@@ -1623,7 +1625,8 @@ this algorithm returns normally if compilation is allowed, and throws a
   <p>A <dfn>csp hash report body</dfn> is a [=struct=] with the following fields:
       <dfn for="csp hash report body">documentURL</dfn>,
       <dfn for="csp hash report body">subresourceURL</dfn>,
-      <dfn for="csp hash report body">hash</dfn>.
+      <dfn for="csp hash report body">hash</dfn>,
+      <dfn for="csp hash report body">type</dfn>.
 
   <h3 id="violation-events">
     Violation DOM Events
