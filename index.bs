@@ -687,9 +687,12 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
     ; Keywords:
     <dfn>keyword-source</dfn> = "<dfn>'self'</dfn>" / "<dfn>'unsafe-inline'</dfn>" / "<dfn>'unsafe-eval'</dfn>"
-                     / "<dfn>'strict-dynamic'</dfn>" / "<dfn>'unsafe-hashes'</dfn>" /
+                     / "<dfn>'strict-dynamic'</dfn>" / "<dfn>'unsafe-hashes'</dfn>"
                      / "<dfn>'report-sample'</dfn>" / "<dfn>'unsafe-allow-redirects'</dfn>"
                      / "<dfn>'wasm-unsafe-eval'</dfn>" / "<dfn>'report-sha256'</dfn>"
+                     / "<dfn>'report-sha384'</dfn>" /"<dfn>'report-sha512'</dfn>"
+
+
 
     ISSUE: Bikeshed `unsafe-allow-redirects`.
 
@@ -1088,7 +1091,6 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
               2.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
                   then set |result| to "`Blocked`".
-          2. Call [=should report hash?=] with |response|, |request|, |directive| and |policy|.
 
       Note: This portion of the check verifies that the page can load the
       response. That is, that a Service Worker hasn't substituted a file which
@@ -1101,10 +1103,14 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   Given a [=response=] |response|, a [=/request=] |request|, a [=directive=] |directive| and a
   [=content security policy object=] |policy|, run the following steps:
 
-  1.  If |directive|'s <a for="directive">value</a> does not <a for="list">contain</a> the
-      expression "<a grammar>`'report-sha256'`</a>", or |directive|'s [=directive/name=]
-      is not "script-src", then return.
-  1.  Let |algo| be "sha-256".
+  1.  Let |algo| be the empty [=string=].
+  1.  If |directive|'s <a for="directive">value</a> <a for="list">contains</a> the
+      expression "<a grammar>`'report-sha256'`</a>", set |algo| to "sha256".
+  1.  If |directive|'s <a for="directive">value</a> <a for="list">contains</a> the
+      expression "<a grammar>`'report-sha384'`</a>", set |algo| to "sha384".
+  1.  If |directive|'s <a for="directive">value</a> <a for="list">contains</a> the
+      expression "<a grammar>`'report-sha512'`</a>", set |algo| to "sha512".
+  1.  If |algo| is the empty [=string=], return.
   1.  Let |hash| be the empty [=string=].
   1.  If |response| is [=CORS-same-origin=], then:
       1. Let |hash list| be a [=list=] of [=strings=], initially empty.
@@ -3790,6 +3796,7 @@ this algorithm returns normally if compilation is allowed, and throws a
           |response|, |request|, |directive|'s <a for="directive">value</a>,
           and |policy|, is "`Does Not Match`", return "`Blocked`".
 
+      5. Call [=should report hash?=] with |response|, |request|, |directive| and |policy|.
   2.  Return "`Allowed`".
 
   <h4 id="matching-urls">URL Matching</h4>
