@@ -689,7 +689,7 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
     <dfn>keyword-source</dfn> = "<dfn>'self'</dfn>" / "<dfn>'unsafe-inline'</dfn>" / "<dfn>'unsafe-eval'</dfn>"
                      / "<dfn>'strict-dynamic'</dfn>" / "<dfn>'unsafe-hashes'</dfn>" /
                      / "<dfn>'report-sample'</dfn>" / "<dfn>'unsafe-allow-redirects'</dfn>"
-                     / "<dfn>'wasm-unsafe-eval'</dfn>"
+                     / "<dfn>'wasm-unsafe-eval'</dfn>" / "<dfn>'report-sha256'</dfn>"
 
     ISSUE: Bikeshed `unsafe-allow-redirects`.
 
@@ -700,6 +700,7 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
     ; Digests: 'sha256-[digest goes here]'
     <dfn>hash-source</dfn>    = "'" <a>hash-algorithm</a> "-" <a>base64-value</a> "'"
     <dfn>hash-algorithm</dfn> = "sha256" / "sha384" / "sha512"
+
   </pre>
 
   The <a grammar>host-char</a> production intentionally contains only ASCII
@@ -1087,9 +1088,10 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
               2.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
                   then set |result| to "`Blocked`".
-          2. If |directive| is [=`report-hash`=] and |request|'s [=request/destination=] matches
-             the |directive|'s [=directive/value=], then:
-              1.  Let |algo| be "sha-256" or another [=cryptographic hash function=].
+          2.  If |directive|'s <a for="directive">value</a> <a for="list">contains</a> the
+              expression "<a grammar>`'report-sha256'`</a>" and |directive|'s [=directive/name=]
+              is "script-src", then:
+              1.  Let |algo| be "sha-256".
               1.  Let |hash| be the empty [=string=].
               1.  If |response| is [=CORS-same-origin=], then:
                   1. Let |hash list| be a [=list=] of [=strings=], initially empty.
