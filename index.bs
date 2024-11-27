@@ -1088,29 +1088,7 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
               2.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
                   then set |result| to "`Blocked`".
-          2.  If |directive|'s <a for="directive">value</a> <a for="list">contains</a> the
-              expression "<a grammar>`'report-sha256'`</a>" and |directive|'s [=directive/name=]
-              is "script-src", then:
-              1.  Let |algo| be "sha-256".
-              1.  Let |hash| be the empty [=string=].
-              1.  If |response| is [=CORS-same-origin=], then:
-                  1. Let |hash list| be a [=list=] of [=strings=], initially empty.
-                  1. [=list/Append=] |algo| to |hash list|.
-                  1. [=list/Append=] the result of [=applying algorithm to bytes=] on |response|'s
-                     [=response/body=] and |algo| to |hash list|.
-                  1. Let |hash| be the result of [=concatenating=] |hash list| with U+002D (-).
-              1.  Let |body| be a [=csp hash report body=] with the current document' URL as its
-                  [=documentURL=], |request|'s URL as its [=subresourceURL=], |hash| as its
-                  [=hash=], and "subresource" as its [=csp hash report body/type=].
-              1.  [=Generate and queue a report=] with the following arguments:
-                  :   <var ignore>context</var>
-                  ::  <var ignore>settings object</var>
-                  :   <var ignore>type</var>
-                  ::  "csp-hash"
-                  :   <var ignore>destination</var>
-                  ::  |directive|'s <a for="directive">value</a>.
-                  :   <var ignore>data</var>
-                  ::  |body|
+          2. Call [=should report hash?=] with |response|, |request|, |directive| and |policy|.
 
       Note: This portion of the check verifies that the page can load the
       response. That is, that a Service Worker hasn't substituted a file which
@@ -1118,6 +1096,40 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
   4.  Return |result|.
 
+  <h4 id="should-report-hash" algorithm dfn export>Should report hash?</h4>
+
+  Given a [=response=] |response|, a [=/request=] |request|, a [=directive=] |directive| and a
+  [=content security policy object=] |policy|, run the following steps:
+
+  1.  If |directive|'s <a for="directive">value</a> does not <a for="list">contain</a> the
+      expression "<a grammar>`'report-sha256'`</a>", or |directive|'s [=directive/name=]
+      is not "script-src", then return.
+  1.  Let |algo| be "sha-256".
+  1.  Let |hash| be the empty [=string=].
+  1.  If |response| is [=CORS-same-origin=], then:
+      1. Let |hash list| be a [=list=] of [=strings=], initially empty.
+      1. [=list/Append=] |algo| to |hash list|.
+      1. [=list/Append=] the result of [=applying algorithm to bytes=] on |response|'s
+         [=response/body=] and |algo| to |hash list|.
+      1. Let |hash| be the result of [=concatenating=] |hash list| with U+002D (-).
+  1.  Let |document URL| be the empty [=string=].
+  1.  Let |global| be the |request|'s [=request/client=]'s [=/global object=].
+  1.  If |global| is a [=/Window=], set |document URL| to |global|'s [=document=]'s URL.
+  1.  If |policy|'s [=directive set=] does not contain a [=directive=] named "report-to", return.
+  1.  Let |report-to directive| be a [=directive=] named "report-to" from |policy|'s [=directive
+      set=].
+  1.  Let |body| be a [=csp hash report body=] with the |document URL| as its
+      [=documentURL=], |request|'s URL as its [=subresourceURL=], |hash| as its
+      [=hash=], and "subresource" as its [=csp hash report body/type=].
+  1.  [=Generate and queue a report=] with the following arguments:
+      :   <var ignore>context</var>
+      ::  <var ignore>settings object</var>
+      :   <var ignore>type</var>
+      ::  "csp-hash"
+      :   <var ignore>destination</var>
+      ::  |report-to directive|'s [=directive/value=].
+      :   <var ignore>data</var>
+      ::  |body|
 
   <h3 id="html-integration">
     Integration with HTML
