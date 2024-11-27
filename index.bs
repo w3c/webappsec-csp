@@ -167,6 +167,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
 spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   type:dfn;
     text:applying algorithm to bytes; url: #apply-algorithm-to-response
+    text: cryptographic hash function; url: #hash-functions
 
 </pre>
 <pre class="biblio">
@@ -1088,9 +1089,14 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
                   then set |result| to "`Blocked`".
           2. If |directive| is [=`report-hash`=] and |request|'s [=request/destination=] matches
              the |directive|'s [=directive/value=], then:
+              1.  Let |algo| be "sha-256" or another [=cryptographic hash function=].
               1.  Let |hash| be the empty [=string=].
-              1.  If |response| is [=CORS-same-origin=], set |hash| to the result of [=applying
-                  algorithm to bytes=] on |response|'s [=response/body=] and "sha-256".
+              1.  If |response| is [=CORS-same-origin=], then:
+                  1. Let |hash list| be a [=list=] of [=strings=], initially empty.
+                  1. [=list/Append=] |algo| to |hash list|.
+                  1. [=list/Append=] the result of [=applying algorithm to bytes=] on |response|'s
+                     [=response/body=] and |algo| to |hash list|.
+                  1. Let |hash| be the result of [=concatenating=] |hash list| with U+002D (-).
               1.  Let |body| be a [=csp hash report body=] with the current document' URL as its
                   [=documentURL=], |request|'s URL as its [=subresourceURL=], |hash| as its
                   [=hash=], and "subresource" as its [=csp hash report body/type=].
