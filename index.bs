@@ -1098,7 +1098,7 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
   4.  Return |result|.
 
-  <h4 id="should-report-hash" algorithm dfn export>Should report hash?</h4>
+  <h4 id="potentially-report-hash" algorithm dfn export>Potentially report hash</h4>
 
   Given a [=response=] |response|, a [=/request=] |request|, a [=directive=] |directive| and a
   [=content security policy object=] |policy|, run the following steps:
@@ -1640,13 +1640,12 @@ this algorithm returns normally if compilation is allowed, and throws a
     };
   </pre>
 
-  When a [=`report-hash`=] directive is present, <dfn export>csp hash report</dfn> may be generated
-  and sent out to a reporting endpoint associated with the <a for="/">policy</a>.
+  When a directive has a `report-hash` value, <dfn export>csp hash report</dfn> may be generated and
+  sent out to a reporting endpoint associated with the <a for="/">policy</a>.
 
   <p><a>csp hash reports</a> have the <a>report type</a> "csp-hash".</p>
 
-  <p><a>csp violation reports</a> are not <a>visible to
-  <code>ReportingObserver</code>s</a>.
+  <p><a>csp hash reports</a> are not <a>visible to <code>ReportingObserver</code>s</a>.
 
   <p>A <dfn>csp hash report body</dfn> is a [=struct=] with the following fields:
       <dfn for="csp hash report body">documentURL</dfn>,
@@ -3691,17 +3690,6 @@ this algorithm returns normally if compilation is allowed, and throws a
     directive-value = <a grammar>token</a>
   </pre>
 
-  <h4 id="directive-report-hash">`report-hash`</h4>
-
-  The <dfn export>`report-hash`</dfn> directive signifies that script hash reports
-  should be sent to <a lt="endpoint">reporting endpoints</a> [[REPORTING]]. The
-  directive's name and value are described by the following ABNF:
-
-  <pre>
-    directive-name  = "report-hash"
-    directive-value = <a grammar>token</a>
-  </pre>
-
   <h3 id="directives-elsewhere">
     Directives Defined in Other Documents
   </h3>
@@ -3796,7 +3784,7 @@ this algorithm returns normally if compilation is allowed, and throws a
           |response|, |request|, |directive|'s <a for="directive">value</a>,
           and |policy|, is "`Does Not Match`", return "`Blocked`".
 
-      5. Call [=should report hash?=] with |response|, |request|, |directive| and |policy|.
+      5. Call [=potentially report hash=] with |response|, |request|, |directive| and |policy|.
   2.  Return "`Allowed`".
 
   <h4 id="matching-urls">URL Matching</h4>
