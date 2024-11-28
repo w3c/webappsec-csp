@@ -1637,8 +1637,10 @@ this algorithm returns normally if compilation is allowed, and throws a
     };
   </pre>
 
-  When a directive has a `report-hash` value, a <dfn export>csp hash report</dfn> may be generated
-  and sent out to a reporting endpoint associated with the <a for="/">policy</a>.
+  When a directive that impacts [=script-like=] [=request/destinations=] has a `report-hash` value,
+  and a [=/request=] with a [=script-like=] [=request/destination=] is fetched, a <dfn export>csp
+  hash report</dfn> will be generated and sent out to a reporting endpoint associated with the <a
+  for="/">policy</a>.
 
   <p><a>csp hash reports</a> have the <a>report type</a> "csp-hash".</p>
 
@@ -1650,6 +1652,33 @@ this algorithm returns normally if compilation is allowed, and throws a
       <dfn for="csp hash report body">hash</dfn>,
       <dfn for="csp hash report body">type</dfn>.
 
+  <div class="example">
+  When a document's response contains the headers:
+```http
+Reporting-Endpoints: hashes-endpoint="https://example.com/reports"
+Content-Security-Policy: report-hash; report-to hashes-endpoint
+```
+  and the document loads the script "main.js", a report similar to the following on will be sent:
+```http
+POST /reports HTTP/1.1
+Host: example.com
+...
+Content-Type: application/reports+json
+
+[{
+  "type": "csp-hash-report",
+  "age": 12,
+  "url": "https://example.com/",
+  "user_agent": "Mozilla/5.0 (X11; Linux i686; rv:132.0) Gecko/20100101 Firefox/132.0",
+  "body": {
+    "document_url": "https://example.com/",
+    "subresource_url": "https://example.com/main.js",
+    "hash": "sha256-badbeef",
+    "type": "subresource"
+  }
+}]
+```
+  </div>
   <h3 id="violation-events">
     Violation DOM Events
   </h3>
