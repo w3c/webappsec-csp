@@ -690,9 +690,7 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
                      / "<dfn>'strict-dynamic'</dfn>" / "<dfn>'unsafe-hashes'</dfn>"
                      / "<dfn>'report-sample'</dfn>" / "<dfn>'unsafe-allow-redirects'</dfn>"
                      / "<dfn>'wasm-unsafe-eval'</dfn>" / "<dfn>'report-sha256'</dfn>"
-                     / "<dfn>'report-sha384'</dfn>" /"<dfn>'report-sha512'</dfn>"
-
-
+                     / "<dfn>'report-sha384'</dfn>" / "<dfn>'report-sha512'</dfn>"
 
     ISSUE: Bikeshed `unsafe-allow-redirects`.
 
@@ -703,7 +701,6 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
     ; Digests: 'sha256-[digest goes here]'
     <dfn>hash-source</dfn>    = "'" <a>hash-algorithm</a> "-" <a>base64-value</a> "'"
     <dfn>hash-algorithm</dfn> = "sha256" / "sha384" / "sha512"
-
   </pre>
 
   The <a grammar>host-char</a> production intentionally contains only ASCII
@@ -1103,29 +1100,29 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   Given a [=response=] |response|, a [=/request=] |request|, a [=directive=] |directive| and a
   [=content security policy object=] |policy|, run the following steps:
 
-  1.  Let |algo| be the empty [=string=].
+  1.  Let |algorithm| be the empty [=string=].
   1.  If |directive|'s <a for="directive">value</a> <a for="list">contains</a> the
-      expression "<a grammar>`'report-sha256'`</a>", set |algo| to "sha256".
+      expression "<a grammar>`'report-sha256'`</a>", set |algorithm| to "sha256".
   1.  If |directive|'s <a for="directive">value</a> <a for="list">contains</a> the
-      expression "<a grammar>`'report-sha384'`</a>", set |algo| to "sha384".
+      expression "<a grammar>`'report-sha384'`</a>", set |algorithm| to "sha384".
   1.  If |directive|'s <a for="directive">value</a> <a for="list">contains</a> the
-      expression "<a grammar>`'report-sha512'`</a>", set |algo| to "sha512".
-  1.  If |algo| is the empty [=string=], return.
+      expression "<a grammar>`'report-sha512'`</a>", set |algorithm| to "sha512".
+  1.  If |algorithm| is the empty [=string=], return.
   1.  Let |hash| be the empty [=string=].
   1.  If |response| is [=CORS-same-origin=], then:
       1. Let |hash list| be a [=list=] of [=strings=], initially empty.
-      1. [=list/Append=] |algo| to |hash list|.
+      1. [=list/Append=] |algorithm| to |hash list|.
       1. [=list/Append=] the result of [=applying algorithm to bytes=] on |response|'s
-         [=response/body=] and |algo| to |hash list|.
+         [=response/body=] and |algorithm| to |hash list|.
       1. Let |hash| be the result of [=concatenating=] |hash list| with U+002D (-).
   1.  Let |document URL| be the empty [=string=].
   1.  Let |global| be the |request|'s [=request/client=]'s [=/global object=].
-  1.  If |global| is a [=/Window=], set |document URL| to |global|'s [=document=]'s URL.
+  1.  If |global| is a {{Window}}, set |document URL| to |global|'s [=document=]'s URL.
   1.  If |policy|'s [=directive set=] does not contain a [=directive=] named "report-to", return.
   1.  Let |report-to directive| be a [=directive=] named "report-to" from |policy|'s [=directive
       set=].
-  1.  Let |body| be a [=csp hash report body=] with the |document URL| as its
-      [=documentURL=], |request|'s URL as its [=subresourceURL=], |hash| as its
+  1.  Let |body| be a [=csp hash report body=] with |document URL| as its [=documentURL=],
+      |request|'s URL as its [=subresourceURL=], |hash| as its
       [=hash=], and "subresource" as its [=csp hash report body/type=].
   1.  [=Generate and queue a report=] with the following arguments:
       :   <var ignore>context</var>
@@ -1640,8 +1637,8 @@ this algorithm returns normally if compilation is allowed, and throws a
     };
   </pre>
 
-  When a directive has a `report-hash` value, <dfn export>csp hash report</dfn> may be generated and
-  sent out to a reporting endpoint associated with the <a for="/">policy</a>.
+  When a directive has a `report-hash` value, a <dfn export>csp hash report</dfn> may be generated
+  and sent out to a reporting endpoint associated with the <a for="/">policy</a>.
 
   <p><a>csp hash reports</a> have the <a>report type</a> "csp-hash".</p>
 
