@@ -1122,10 +1122,12 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   1.  Let |document URL| be the empty [=string=].
   1.  Let |global| be the |request|'s [=request/client=]'s [=/global object=].
   1.  If |global| is a {{Window}}, set |document URL| to |global|'s [=document=]'s [=Document/URL=].
+  1.  Let |stripped document URL| to be the result of executing [[#strip-url-for-use-in-reports]]
+      on |document URL|.
   1.  If |policy|'s [=directive set=] does not contain a [=directive=] named "report-to", return.
   1.  Let |report-to directive| be a [=directive=] named "report-to" from |policy|'s [=directive
       set=].
-  1.  Let |body| be a [=csp hash report body=] with |document URL| as its [=documentURL=],
+  1.  Let |body| be a [=csp hash report body=] with |stripped document URL| as its [=documentURL=],
       |request|'s URL as its [=subresourceURL=], |hash| as its
       [=hash=], and "subresource" as its [=csp hash report body/type=].
   1.  [=Generate and queue a report=] with the following arguments:
@@ -3792,17 +3794,19 @@ Content-Type: application/reports+json
 
   1.  If |request|'s <a for="request">destination</a> is <a for="request/destination">script-like</a>:
 
+      1. Call [=potentially report hash=] with |response|, |request|, |directive| and |policy|.
+
       1.  If the result of executing [[#match-nonce-to-source-list]] on
           |request|'s <a for="request">cryptographic nonce metadata</a> and this
           directive's <a for="directive">value</a> is "`Matches`", return
           "`Allowed`".
 
-      2.  If the result of executing
+      1.  If the result of executing
           [[#match-integrity-metadata-to-source-list]] on |request|'s <a
           for="request">integrity metadata</a> and this directive's <a
           for="directive">value</a> is "`Matches`", return "`Allowed`".
 
-      3.  If |directive|'s <a for="directive">value</a> contains
+      1.  If |directive|'s <a for="directive">value</a> contains
           "<a grammar>`'strict-dynamic'`</a>":
 
           1.  If |request|'s <a for="request">parser metadata</a> is not
@@ -3810,11 +3814,10 @@ Content-Type: application/reports+json
 
               Otherwise, return "`Blocked`".
 
-      4.  If the result of executing [[#match-response-to-source-list]] on
+      1.  If the result of executing [[#match-response-to-source-list]] on
           |response|, |request|, |directive|'s <a for="directive">value</a>,
           and |policy|, is "`Does Not Match`", return "`Blocked`".
 
-      5. Call [=potentially report hash=] with |response|, |request|, |directive| and |policy|.
   2.  Return "`Allowed`".
 
   <h4 id="matching-urls">URL Matching</h4>
