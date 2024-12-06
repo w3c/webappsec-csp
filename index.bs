@@ -22,7 +22,11 @@ Markup Shorthands: css off, markdown on
 At Risk: The [[#is-element-nonceable]] algorithm.
 </pre>
 <pre class="link-defaults">
-spec:dom; type:interface; text:Document
+spec:dom;
+  type: interface
+    text: Document
+  type: dfn
+    text: URL; url: https://dom.spec.whatwg.org/#dom-document-url
 spec:html
   type: dfn
     text: fallback base url
@@ -164,6 +168,11 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
   type:dfn
     text: administratively-prohibited; url: #dfn-administratively-prohibited
 
+spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
+  type:dfn;
+    text:applying algorithm to bytes; url: #apply-algorithm-to-response
+    text: cryptographic hash function; url: #hash-functions
+
 </pre>
 <pre class="biblio">
 {
@@ -182,7 +191,7 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
   "REPORTING": {
     "href": "https://wicg.github.io/reporting/",
     "title": "Reporting API",
-    "authors": [ "Ilya Gregorik", "Mike West" ]
+    "authors": [ "Ilya Grigorik", "Mike West" ]
   },
   "TIMING": {
       "href": "https://owasp.org/www-pdf-archive/HackPra_Allstars-Browser_Timing_Attacks_-_Paul_Stone.pdf",
@@ -682,9 +691,10 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
 
     ; Keywords:
     <dfn>keyword-source</dfn> = "<dfn>'self'</dfn>" / "<dfn>'unsafe-inline'</dfn>" / "<dfn>'unsafe-eval'</dfn>"
-                     / "<dfn>'strict-dynamic'</dfn>" / "<dfn>'unsafe-hashes'</dfn>" /
+                     / "<dfn>'strict-dynamic'</dfn>" / "<dfn>'unsafe-hashes'</dfn>"
                      / "<dfn>'report-sample'</dfn>" / "<dfn>'unsafe-allow-redirects'</dfn>"
-                     / "<dfn>'wasm-unsafe-eval'</dfn>"
+                     / "<dfn>'wasm-unsafe-eval'</dfn>" / "<dfn>'report-sha256'</dfn>"
+                     / "<dfn>'report-sha384'</dfn>" / "<dfn>'report-sha512'</dfn>"
 
     ISSUE: Bikeshed `unsafe-allow-redirects`.
 
@@ -1089,6 +1099,46 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
 
   4.  Return |result|.
 
+  <h4 id="potentially-report-hash" algorithm dfn export>Potentially report hash</h4>
+
+  Given a [=response=] |response|, a [=/request=] |request|, a [=directive=] |directive| and a
+  [=content security policy object=] |policy|, run the following steps:
+
+  1.  Let |algorithm| be the empty [=string=].
+  1.  If |directive|'s <a for="directive">value</a> <a for="list">contains</a> the
+      expression "<a grammar>`'report-sha256'`</a>", set |algorithm| to "sha256".
+  1.  If |directive|'s <a for="directive">value</a> <a for="list">contains</a> the
+      expression "<a grammar>`'report-sha384'`</a>", set |algorithm| to "sha384".
+  1.  If |directive|'s <a for="directive">value</a> <a for="list">contains</a> the
+      expression "<a grammar>`'report-sha512'`</a>", set |algorithm| to "sha512".
+  1.  If |algorithm| is the empty [=string=], return.
+  1.  Let |hash| be the empty [=string=].
+  1.  If |response| is [=CORS-same-origin=], then:
+      1. Let |hash list| be a [=list=] of [=strings=], initially empty.
+      1. [=list/Append=] |algorithm| to |hash list|.
+      1. [=list/Append=] the result of [=applying algorithm to bytes=] on |response|'s
+         [=response/body=] and |algorithm| to |hash list|.
+      1. Let |hash| be the result of [=concatenating=] |hash list| with U+002D (-).
+  1.  Let |global| be the |request|'s [=request/client=]'s [=/global object=].
+  1.  If |global| is not a {{Window}}, return.
+  1.  Let |stripped document URL| to be the result of executing [[#strip-url-for-use-in-reports]]
+      on |global|'s [=document=]'s [=Document/URL=].
+  1.  If |policy|'s [=directive set=] does not contain a [=directive=] named "report-to", return.
+  1.  Let |report-to directive| be a [=directive=] named "report-to" from |policy|'s [=directive
+      set=].
+  1.  Let |body| be a [=csp hash report body=] with |stripped document URL| as its [=documentURL=],
+      |request|'s URL as its [=subresourceURL=], |hash| as its [=hash=], |request|'s
+      [=request/destination=] as its [=csp hash report body/destination=], and "subresource" as its
+      [=csp hash report body/type=].
+  1.  [=Generate and queue a report=] with the following arguments:
+      :   <var ignore>context</var>
+      ::  <var ignore>settings object</var>
+      :   <var ignore>type</var>
+      ::  "csp-hash"
+      :   <var ignore>destination</var>
+      ::  |report-to directive|'s [=directive/value=].
+      :   <var ignore>data</var>
+      ::  |body|
 
   <h3 id="html-integration">
     Integration with HTML
@@ -1593,6 +1643,50 @@ this algorithm returns normally if compilation is allowed, and throws a
     };
   </pre>
 
+  When a directive that impacts [=script-like=] [=request/destinations=] has a `report-sha256`,
+  `report-sha384` or `report-sha512` value, and a [=/request=] with a [=script-like=]
+  [=request/destination=] is fetched, a <dfn export>csp hash report</dfn> will be generated and
+  sent out to a reporting endpoint associated with the <a for="/">policy</a>.
+
+  <p><a>csp hash reports</a> have the <a>report type</a> "csp-hash".</p>
+
+  <p><a>csp hash reports</a> are not <a>visible to <code>ReportingObserver</code>s</a>.
+
+  <p>A <dfn>csp hash report body</dfn> is a [=struct=] with the following fields:
+      <dfn for="csp hash report body">documentURL</dfn>,
+      <dfn for="csp hash report body">subresourceURL</dfn>,
+      <dfn for="csp hash report body">hash</dfn>,
+      <dfn for="csp hash report body">destination</dfn>,
+      <dfn for="csp hash report body">type</dfn>.
+
+  <div class="example">
+  When a document's response contains the headers:
+```http
+Reporting-Endpoints: hashes-endpoint="https://example.com/reports"
+Content-Security-Policy: script-src 'self' 'report-sha256'; report-to hashes-endpoint
+```
+  and the document loads the script "main.js", a report similar to the following one will be sent:
+```http
+POST /reports HTTP/1.1
+Host: example.com
+...
+Content-Type: application/reports+json
+
+[{
+  "type": "csp-hash-report",
+  "age": 12,
+  "url": "https://example.com/",
+  "user_agent": "Mozilla/5.0 (X11; Linux i686; rv:132.0) Gecko/20100101 Firefox/132.0",
+  "body": {
+    "document_url": "https://example.com/",
+    "subresource_url": "https://example.com/main.js",
+    "hash": "sha256-badbeef",
+    "type": "subresource",
+    "destination": "script"
+  }
+}]
+```
+  </div>
   <h3 id="violation-events">
     Violation DOM Events
   </h3>
@@ -3702,17 +3796,19 @@ this algorithm returns normally if compilation is allowed, and throws a
 
   1.  If |request|'s <a for="request">destination</a> is <a for="request/destination">script-like</a>:
 
+      1. Call [=potentially report hash=] with |response|, |request|, |directive| and |policy|.
+
       1.  If the result of executing [[#match-nonce-to-source-list]] on
           |request|'s <a for="request">cryptographic nonce metadata</a> and this
           directive's <a for="directive">value</a> is "`Matches`", return
           "`Allowed`".
 
-      2.  If the result of executing
+      1.  If the result of executing
           [[#match-integrity-metadata-to-source-list]] on |request|'s <a
           for="request">integrity metadata</a> and this directive's <a
           for="directive">value</a> is "`Matches`", return "`Allowed`".
 
-      3.  If |directive|'s <a for="directive">value</a> contains
+      1.  If |directive|'s <a for="directive">value</a> contains
           "<a grammar>`'strict-dynamic'`</a>":
 
           1.  If |request|'s <a for="request">parser metadata</a> is not
@@ -3720,7 +3816,7 @@ this algorithm returns normally if compilation is allowed, and throws a
 
               Otherwise, return "`Blocked`".
 
-      4.  If the result of executing [[#match-response-to-source-list]] on
+      1.  If the result of executing [[#match-response-to-source-list]] on
           |response|, |request|, |directive|'s <a for="directive">value</a>,
           and |policy|, is "`Does Not Match`", return "`Blocked`".
 
