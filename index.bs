@@ -490,7 +490,7 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   <ol class="algorithm">
     1.  If |serialized| is a [=byte sequence=], then set |serialized| to be the result of
         [=isomorphic decoding=] |serialized|.
-        
+
     2.  Let |policy| be a new [=/policy=] with an empty [=policy/directive set=], a [=policy/source=]
         of |source|, and a [=policy/disposition=] of |disposition|.
 
@@ -693,8 +693,9 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
     <dfn>keyword-source</dfn> = "<dfn>'self'</dfn>" / "<dfn>'unsafe-inline'</dfn>" / "<dfn>'unsafe-eval'</dfn>"
                      / "<dfn>'strict-dynamic'</dfn>" / "<dfn>'unsafe-hashes'</dfn>"
                      / "<dfn>'report-sample'</dfn>" / "<dfn>'unsafe-allow-redirects'</dfn>"
-                     / "<dfn>'wasm-unsafe-eval'</dfn>" / "<dfn>'report-sha256'</dfn>"
-                     / "<dfn>'report-sha384'</dfn>" / "<dfn>'report-sha512'</dfn>"
+                     / "<dfn>'wasm-unsafe-eval'</dfn>" / "<dfn>'trusted-types-eval'</dfn>"
+                     / "<dfn>'report-sha256'</dfn>" / "<dfn>'report-sha384'</dfn>"
+                     / "<dfn>'report-sha512'</dfn>"
 
     ISSUE: Bikeshed `unsafe-allow-redirects`.
 
@@ -1539,9 +1540,17 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
           Otherwise if |policy| contains a [=directive=] whose [=directive/name=] is
           "`default-src`", then set |source-list| to that directive's [=directive/value=].
 
-      3.  If |source-list| is not null, and does not contain a [=source expression=] which is
-          an [=ASCII case-insensitive=] match for the string "<a grammar>`'unsafe-eval'`</a>",
-          then:
+      1.  If |source-list| is not null:
+
+          1.  Let |trustedTypesRequired| be the result of executing [$Does sink type require trusted types?$], with
+              |realm|, `'script'`, and `false`.
+
+          1.  If |trustedTypesRequired| is `true` and |source-list| contains a [=source expression=] which is an
+              [=ASCII case-insensitive=] match for the string "<a grammar>`'trusted-types-eval'`</a>", then skip the
+              following steps.
+
+          1.  If |source-list| contains a [=source expression=] which is an [=ASCII case-insensitive=] match for the
+              string "<a grammar>`'unsafe-eval'`</a>", then skip the following steps.
 
           1.  Let |violation| be the result of executing [[#create-violation-for-global]] on
               |global|, |policy|, and "`script-src`".
@@ -2861,8 +2870,8 @@ Content-Type: application/reports+json
       <a grammar>nonce-source</a> or a <a grammar>hash-source</a> that matches
       the inline block.
 
-  4.  The following JavaScript execution sinks are gated on the "`unsafe-eval`"
-      source expression:
+  4.  The following JavaScript execution sinks are gated on the "`unsafe-eval`" and "`trusted-types-eval`"
+      source expressions:
 
       *   {{eval()}}
       *   {{Function()}}
