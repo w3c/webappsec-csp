@@ -1280,18 +1280,18 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
   <h4 id="should-block-navigation-request" algorithm dfn export>
     Should |navigation request| of |type| be blocked
-    by Content Security Policy?
+    by Content Security Policy |cspList|?
   </h4>
 
-  Given a <a for="/">request</a> |navigation request| and a string |type| (either
-  "`form-submission`" or "`other`"), this algorithm return "`Blocked`" if the active policy blocks
-  the navigation, and "`Allowed`" otherwise:
+  Given a <a for="/">request</a> |navigation request|, a string |type| (either
+  "`form-submission`" or "`other`"), and a [=/CSP list=] |cspList|, this
+  algorithm return "`Blocked`" if the policy blocks the navigation, and
+  "`Allowed`" otherwise:
 
   <ol class="algorithm">
     1.  Let |result| be "`Allowed`".
 
-    2.  <a for=list>For each</a> |policy| of |navigation request|'s <a for="request">policy container</a>'s
-        <a for="policy container">CSP list</a>:
+    2.  <a for=list>For each</a> |policy| of |cspList|:
 
         1.  <a for=set>For each</a> |directive| of |policy|:
 
@@ -1315,9 +1315,7 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
     3.  If |result| is "`Allowed`", and if |navigation request|'s
         <a for="request">current URL</a>'s <a for="url">scheme</a> is `javascript`:
 
-        1.  <a for=list>For each</a> |policy| of |navigation request|'s <a for="request">client</a>'s
-            <a for="environment settings object">global object</a>'s
-            <a for="global object">CSP list</a>:
+        1.  <a for=list>For each</a> |policy| of |cspList|:
 
             1.  <a for=set>For each</a> |directive| of |policy|:
 
@@ -3982,7 +3980,7 @@ Content-Type: application/reports+json
       Note: An empty source list (that is, a directive without a value: `script-src`,
       as opposed to `script-src host1`) is equivalent to a source list containing `'none'`,
       and will not match any URL.
-      
+
       Note: The `'none'` keyword has no effect when other source expressions are
       present. That is, the list « `'none'` » does not match any URL. A list consisting
       of « `'none'`, `https://example.com` », on the other hand, would match
@@ -4134,7 +4132,7 @@ Content-Type: application/reports+json
   Note: The matching relation is asymmetric. That is, |pattern| matching |host| does not
   mean that |host| will match |pattern|. For example, `*.example.com` <a>`host-part` matches</a>
   `www.example.com`, but `www.example.com` does not <a>`host-part` match</a> `*.example.com`.
-  
+
   Note: A future version of this specification may allow literal IPv6 and IPv4 addresses,
   depending on usage and demand. Given the weak security properties of IP addresses in
   relation to named hosts, however, authors are encouraged to prefer the latter whenever possible.
@@ -4175,7 +4173,7 @@ Content-Type: application/reports+json
 
     3.  Let |normalizedInput| be null if |input| null; otherwise |input|
         interpreted as decimal number.
-    
+
     4.  If |normalizedInput| equals |url|'s [=url/port=], return "`Matches`".
 
     5.  If |url|'s [=url/port=] is null:
@@ -5156,7 +5154,7 @@ Content-Type: application/reports+json
       <pre>
         <a http-header>Content-Security-Policy</a>: img-src 'none'; script-src 'none'; font-src 'none'
       </pre>
-      
+
       Supplementing this policy with `default-src 'none'` would improve the page's robustness
       against this kind of attack.
     </div>
