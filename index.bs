@@ -1116,11 +1116,8 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   1.  If |algorithm| is the empty [=string=], return.
   1.  Let |hash| be the empty [=string=].
   1.  If |response| is [=CORS-same-origin=], then:
-      1. Let |hash list| be a [=list=] of [=strings=], initially empty.
-      1. [=list/Append=] |algorithm| to |hash list|.
-      1. [=list/Append=] the result of [=applying algorithm to bytes=] on |response|'s
-         [=response/body=] and |algorithm| to |hash list|.
-      1. Let |hash| be the result of [=concatenating=] |hash list| with U+002D (-).
+      1. Let |h| be the result of [=applying algorithm to bytes=] on |response|'s [=response/body=] and |algorithm|.
+      1. Let |hash| be the [=concatenation=] of |algorithm|, U+2D (-), and |h|.
   1.  Let |global| be the |request|'s [=request/client=]'s [=/global object=].
   1.  If |global| is not a {{Window}}, return.
   1.  Let |stripped document URL| to be the result of executing [[#strip-url-for-use-in-reports]]
@@ -1690,7 +1687,7 @@ Content-Type: application/reports+json
   "body": {
     "document_url": "https://example.com/",
     "subresource_url": "https://example.com/main.js",
-    "hash": "sha256-badbeef",
+    "hash": "sha256-85738f8f9a7f1b04b5329c590ebcb9e425925c6d0984089c43a022de4f19c281",
     "type": "subresource",
     "destination": "script"
   }
