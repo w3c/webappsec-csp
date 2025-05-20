@@ -1120,7 +1120,7 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
       1. Let |hash| be the [=concatenation=] of |algorithm|, U+2D (-), and |h|.
   1.  Let |global| be the |request|'s [=request/client=]'s [=/global object=].
   1.  If |global| is not a {{Window}}, return.
-  1.  Let |stripped document URL| to be the result of executing [[#strip-url-for-use-in-reports]]
+  1.  Let |stripped document URL| to be the result of [=stripping URL for use in reports=]
       on |global|'s [=associated document|document=]'s [=Document/URL=].
   1.  If |policy|'s [=directive set=] does not contain a [=directive=] named "report-to", return.
   1.  Let |report-to directive| be a [=directive=] named "report-to" from |policy|'s [=directive
@@ -1744,8 +1744,8 @@ Content-Type: application/reports+json
 
   1. Assert: |resource| is a [=/URL=] or a [=string=].
 
-  2. If |resource| is a [=/URL=], return the result of executing [[#strip-url-for-use-in-reports]] on
-     |resource|.
+  2. If |resource| is a [=/URL=], return the result of [=stripping URL for use in reports=]
+     on |resource|.
 
   3. Return |resource|.
 
@@ -1761,10 +1761,10 @@ Content-Type: application/reports+json
       follows:
 
       :   "`document-uri`"
-      ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+      ::  The result of [=stripping URL for use in reports=] on |violation|'s
           <a for="violation">url</a>.
       :   "`referrer`"
-      ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+      ::  The result of [=stripping URL for use in reports=] on |violation|'s
           <a for="violation">referrer</a>.
       :   "`blocked-uri`"
       ::  The result of executing [[#obtain-violation-blocked-uri]] on |violation|'s
@@ -1793,7 +1793,7 @@ Content-Type: application/reports+json
 
   2.  If |violation|'s <a for="violation">source file</a> is not null:
 
-      1.  Set |body|["`source-file`'] to the result of executing [[#strip-url-for-use-in-reports]]
+      1.  Set |body|["`source-file`'] to the result of [=stripping URL for use in reports=]
           on |violation|'s <a for="violation">source file</a>.
 
       2.  Set |body|["`line-number`"] to |violation|'s
@@ -1808,9 +1808,9 @@ Content-Type: application/reports+json
   4.  Return the result of <a>serialize an infra value to JSON bytes</a> given
       «[ "csp-report" → body ]».
 
-  <h3 id="strip-url-for-use-in-reports" algorithm>Strip URL for use in reports</h3>
-  Given a [=/URL=] |url|, this algorithm returns a string representing the URL for use in violation
-  reports:
+  <h3 id="strip-url-for-use-in-reports-heading">Strip URL for use in reports</h3>
+  To <dfn algorithm>strip URL for use in reports</dfn> given a [=/URL=] |url|,
+  perform the following steps. They return a string representing the URL for use in violation reports.
 
   1. If |url|'s <a for="url">scheme</a> is not an <a>HTTP(S) scheme</a>,
      then return |url|'s <a for="url">scheme</a>.
@@ -1865,10 +1865,10 @@ Content-Type: application/reports+json
           interface at |target| with its attributes initialized as follows:
 
           :  {{SecurityPolicyViolationEvent/documentURI}}
-          ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+          ::  The result of [=stripping URL for use in reports=] on |violation|'s
               <a for="violation">url</a>.
           :  {{SecurityPolicyViolationEvent/referrer}}
-          ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+          ::  The result of [=stripping URL for use in reports=] on |violation|'s
               <a for="violation">referrer</a>.
           :  {{SecurityPolicyViolationEvent/blockedURI}}
           ::  The result of executing [[#obtain-violation-blocked-uri]] on |violation|'s
@@ -1883,7 +1883,7 @@ Content-Type: application/reports+json
           :  {{SecurityPolicyViolationEvent/disposition}}
           :: |violation|'s <a for="violation">disposition</a>
           :  {{SecurityPolicyViolationEvent/sourceFile}}
-          ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+          ::  The result of [=stripping URL for use in reports=] on |violation|'s
               <a for="violation">source file</a>, if |violation|'s
               <a for="violation">source file</a> is not null, or null otherwise.
           :  {{SecurityPolicyViolationEvent/statusCode}}
@@ -1976,11 +1976,11 @@ Content-Type: application/reports+json
               follows:
 
               :   {{CSPViolationReportBody/documentURL}}
-              ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+              ::  The result of [=stripping URL for use in reports=] on |violation|'s
                   <a for="violation">url</a>.
 
               :   {{CSPViolationReportBody/referrer}}
-              ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+              ::  The result of [=stripping URL for use in reports=] on |violation|'s
                   <a for="violation">referrer</a>.
 
               :   {{CSPViolationReportBody/blockedURL}}
@@ -1995,7 +1995,7 @@ Content-Type: application/reports+json
                   <a for="violation">policy</a>.
 
               :   {{CSPViolationReportBody/sourceFile}}
-              ::  The result of executing [[#strip-url-for-use-in-reports]] on |violation|'s
+              ::  The result of [=stripping URL for use in reports=] on |violation|'s
                   <a for="violation">source file</a>, if |violation|'s
                   <a for="violation">source file</a> is not null, or null otherwise.
 
