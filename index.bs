@@ -3800,6 +3800,12 @@ Content-Type: application/reports+json
   Given a <a for="/">request</a> |request|, a <a>response</a> |response|,
   a <a>directive</a> |directive|, and a <a for="/">policy</a> |policy|:
 
+  Note: the check uses a |request| to determine whether it should match
+  the <a>response</a> |response| to the source-list. If the |request|'s
+  <a for="request">cryptographic nonce metadata</a> or
+  <a for="request">integrity metadata</a> matches the source list, then
+  the |response| is allowed and matching to the source list is skipped.
+
   1.  If |request|'s <a for="request">destination</a> is <a for="request/destination">script-like</a>:
 
       1. Call [=potentially report hash=] with |response|, |request|, |directive| and |policy|.
@@ -3814,13 +3820,17 @@ Content-Type: application/reports+json
           for="request">integrity metadata</a> and this directive's <a
           for="directive">value</a> is "`Matches`", return "`Allowed`".
 
-      1.  If |directive|'s <a for="directive">value</a> contains
-          "<a grammar>`'strict-dynamic'`</a>":
+      1.  If |directive|'s <a for="directive">value</a> contains a <a>source
+          expression</a> that is an <a>ASCII case-insensitive</a> match for
+          the "<a grammar>`'strict-dynamic'`</a>" <a grammar>keyword-source</a>:
 
-          1.  If |request|'s <a for="request">parser metadata</a> is not
-              <a>"parser-inserted"</a>, return "`Allowed`".
+          1.  If the |request|'s <a for="request">parser metadata</a> is
+              <a>"parser-inserted"</a>, return "`Blocked`".
 
-              Otherwise, return "`Blocked`".
+              Otherwise, return "`Allowed`".
+
+              Note: "<a grammar>`'strict-dynamic'`</a>" is explained in more detail
+              in [[#strict-dynamic-usage]].
 
       1.  If the result of executing [[#match-response-to-source-list]] on
           |response|, |request|, |directive|'s <a for="directive">value</a>,
