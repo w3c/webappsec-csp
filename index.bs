@@ -705,6 +705,8 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
     <dfn>base64-value</dfn>  = 1*( <a>ALPHA</a> / <a>DIGIT</a> / "+" / "/" / "-" / "_" )*2( "=" )
 
     ; Digests: 'sha256-[digest goes here]'
+    <dfn>url-hash-source</dfn> = "'url-" <a>hash-algorithm</a> "-" <a>base64-value</a> "'"
+    <dfn>eval-hash-source</dfn> = "'eval-" <a>hash-algorithm</a> "-" <a>base64-value</a> "'"
     <dfn>hash-source</dfn>    = "'" <a>hash-algorithm</a> "-" <a>base64-value</a> "'"
     <dfn>hash-algorithm</dfn> = "sha256" / "sha384" / "sha512"
   </pre>
@@ -1546,8 +1548,13 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
               [=ASCII case-insensitive=] match for the string "<a grammar>`'trusted-types-eval'`</a>", then skip the
               following steps.
 
-          1.  If |source-list| contains a [=source expression=] which is an [=ASCII case-insensitive=] match for the
-              string "<a grammar>`'unsafe-eval'`</a>", then skip the following steps.
+          1.  If the result of executing [[#match-eval-hash-to-source-list]] on |source-list| and |sourceString|
+              is "`Matches`", then skip the following steps.
+
+          1.  If |source-list| does not contain a [=source expression=] that is a match for the
+              "<a grammar>`'eval-hash-source'`</a>" grammar and |source-list| contains a [=source expression=] which is an
+              [=ASCII case-insensitive=] match for the string "<a grammar>`'unsafe-eval'`</a>", then skip the
+              following steps.
 
           1.  Let |violation| be the result of executing [[#create-violation-for-global]] on
               |global|, |policy|, and "`script-src`".
@@ -3771,7 +3778,11 @@ Content-Type: application/reports+json
           for="request">integrity metadata</a> and this directive's <a
           for="directive">value</a> is "`Matches`", return "`Allowed`".
 
-      3.  If |directive|'s <a for="directive">value</a> contains a <a>source
+      3.  If the result of executing [[#match-url-hash-to-source-list]] on
+          this directive's <a for="directive">value</a> and |request|'s
+          <a for="request">current url</a> is "`Matches`", return "`Allowed`".
+
+      4.  If |directive|'s <a for="directive">value</a> contains a <a>source
           expression</a> that is an <a>ASCII case-insensitive</a> match for
           the "<a grammar>`'strict-dynamic'`</a>" <a grammar>keyword-source</a>:
 
@@ -3783,9 +3794,13 @@ Content-Type: application/reports+json
               Note: "<a grammar>`'strict-dynamic'`</a>" is explained in more detail
               in [[#strict-dynamic-usage]].
 
-      4.  If the result of executing [[#match-request-to-source-list]] on
-          |request|, |directive|'s <a for="directive">value</a>, and |policy|,
-          is "`Does Not Match`", return "`Blocked`".
+      5.  If |directive|'s <a for="directive">value</a> does not contain a
+          <a>source expression</a> that is a match for the
+          "<a grammar>`'url-hash-source'`</a>" grammar:
+
+          1.  If the result of executing [[#match-request-to-source-list]] on
+              |request|, |directive|'s <a for="directive">value</a>, and
+              |policy|, is "`Does Not Match`", return "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -4404,44 +4419,8 @@ Content-Type: application/reports+json
           set |unsafe-hashes flag| to `true`. Break out of the loop.
 
   5.  If |type| is "`script`" or "`style`", or |unsafe-hashes flag| is
-      `true`:
-
-      1.  Set |source| to the result of executing <a>UTF-8 encode</a>
-          on the result of executing <a for="JavaScript string" data-lt="convert">JavaScript string converting</a>
-          on |source|.
-
-      2.  <a for=set>For each</a> |expression| of |list|:
-
-          1.  If |expression| matches the <a grammar>`hash-source`</a> grammar:
-
-              1.  Let |algorithm| be null.
-
-              2.  If |expression|'s <a grammar>`hash-algorithm`</a> part is an
-                  <a>ASCII case-insensitive</a> match for "sha256", set
-                  |algorithm| to <a>SHA-256</a>.
-
-              3.  If |expression|'s <a grammar>`hash-algorithm`</a> part is an
-                  <a>ASCII case-insensitive</a> match for "sha384", set
-                  |algorithm| to <a>SHA-384</a>.
-
-              4.  If |expression|'s <a grammar>`hash-algorithm`</a> part is an
-                  <a>ASCII case-insensitive</a> match for "sha512", set
-                  |algorithm| to <a>SHA-512</a>.
-
-              5.  If |algorithm| is not null:
-
-                  1.  Let |actual| be the result of <a>base64 encoding</a> the
-                      result of applying |algorithm| to |source|.
-
-                  2.  Let |expected| be |expression|'s <a grammar>`base64-value`</a> part,
-                      with all '`-`' characters replaced with '`+`', and all '`_`' characters
-                      replaced with '`/`'.
-
-                      Note: This replacement normalizes hashes expressed in [=base64url
-                      encoding=] into [=base64 encoding=] for matching.
-
-                  3.  If |actual| is <a for="string" lt="is">identical to</a>
-                      |expected|, return "`Matches`".
+      `true`, return result of executing [[#match-value-hash-to-source-list]] on
+      |source|, "`content`" and |list|.
 
       Note: Hashes apply to inline <{script}> and inline <{style}>. If the
       "<a grammar>`'unsafe-hashes'`</a>" source expression is present,
@@ -4451,6 +4430,93 @@ Content-Type: application/reports+json
   ISSUE(w3c/webappsec-csp#426): This should handle `'strict-dynamic'` for dynamically inserted inline scripts.
 
   6.  Return "`Does Not Match`".
+
+  <h5 id="match-url-hash-to-source-list" algorithm>
+    Does the hash of |url| match |source list|?
+  </h5>
+
+  Given a <a>source list</a> |source list| and a url |url|, this algorithm
+  returns "`Matches`" or "`Does Not Match`".
+
+  1.  Return the result of executing
+      [[#match-value-hash-to-source-list]] on |url|'s {{URL/href}},
+      "`url-hash`", and |source list|.
+
+  <h5 id="match-eval-hash-to-source-list" algorithm>
+    Does the hash of |sourceString| match |source list|?
+  </h5>
+
+  Given a <a>source list</a> |source list| and a source string |sourceString|,
+  this algorithm returns "`Matches`" or "`Does Not Match`".
+
+  1.  Return the result of executing
+      [[#match-value-hash-to-source-list]] on |sourceString|, "`eval-hash`",
+      and |source list|.
+
+  <h5 id="is-expression-of-hash-type" algorithm>
+    Is |expression| of |hash type|?
+  </h5>
+
+  Given a {{String}} |hash type| and a <a grammar>source-expression</a>
+  |expression|, this algorithm returns "`Yes`" or "`No`".
+
+  1.  If |hash type| is "url-hash" and |expression| matches the
+      <a grammar>`url-hash-source`</a> grammar, return "`Yes`".
+
+  2.  If |hash type| is "eval-hash" and |expression| matches the
+      <a grammar>`eval-hash-source`</a> grammar, return "`Yes`".
+
+  3.  If |expression| matches the <a grammar>`hash-source`</a> grammar,
+      return "`Yes`".
+
+  4.  Return "`No`".
+
+  <h5 id="match-value-hash-to-source-list" algorithm>
+    Does the hash of |value| match |source list|?
+  </h5>
+
+  Given a {{String}} |value|, {{String}} |hash type|, and a <a>source list</a>
+  |source list| type , this algorithm returns "`Matches`" or "`Does Not Match`".
+
+  1.  Set |value| to the result of executing <a>UTF-8 encode</a>
+      on the result of executing <a for="JavaScript string" data-lt="convert">JavaScript string converting</a>
+      on |value|.
+
+  2.  <a for=set>For each</a> |expression| of |source list|:
+
+      1.  If the result of executing [[#is-expression-of-hash-type]] with
+          |hash type| and |expression| is "`Yes`":
+
+          1.  Let |algorithm| be null.
+
+          2.  If |expression|'s <a grammar>`hash-algorithm`</a> part is an
+              <a>ASCII case-insensitive</a> match for "sha256", set
+              |algorithm| to <a>SHA-256</a>.
+
+          3.  If |expression|'s <a grammar>`hash-algorithm`</a> part is an
+              <a>ASCII case-insensitive</a> match for "sha384", set
+              |algorithm| to <a>SHA-384</a>.
+
+          4.  If |expression|'s <a grammar>`hash-algorithm`</a> part is an
+              <a>ASCII case-insensitive</a> match for "sha512", set
+              |algorithm| to <a>SHA-512</a>.
+
+          5.  If |algorithm| is not null:
+
+              1.  Let |actual| be the result of <a>base64 encoding</a> the
+                  result of applying |algorithm| to |value|.
+
+              2.  Let |expected| be |expression|'s <a grammar>`base64-value`</a> part,
+                  with all '`-`' characters replaced with '`+`', and all '`_`' characters
+                  replaced with '`/`'.
+
+                  Note: This replacement normalizes hashes expressed in [=base64url
+                  encoding=] into [=base64 encoding=] for matching.
+
+              3.  If |actual| is <a for="string" lt="is">identical to</a>
+                  |expected|, return "`Matches`".
+
+  3.  Return "`Does Not Match`".
 
   <h3 id="directive-algorithms">Directive Algorithms</h3>
 
