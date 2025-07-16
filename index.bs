@@ -392,7 +392,12 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
       metadata which is listed in the current policy. Details in
       [[#external-hash]].
 
-  11. Reports generated for inline violations will contain a <a for="violation">sample</a>
+  11. Hash-based source expressions may now match scripts based on their URL hashes.
+
+  12. Hash-based source expressions may now allow `eval()` execution based on the hash of
+      the content of the eval.
+
+  13. Reports generated for inline violations will contain a <a for="violation">sample</a>
       attribute if the relevant directive contains the <a grammar>`'report-sample'`</a>
       expression.
 </section>
@@ -692,7 +697,7 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
     ; Keywords:
     <dfn>keyword-source</dfn> = "<dfn>'self'</dfn>" / "<dfn>'unsafe-inline'</dfn>" / "<dfn>'unsafe-eval'</dfn>"
-                     / "<dfn>'strict-dynamic'</dfn>" / "<dfn>'unsafe-hashes'</dfn>"
+                     / "<dfn>'strict-dynamic'</dfn>" / "<dfn>'strict-dynamic-url'</dfn>" / "<dfn>'unsafe-hashes'</dfn>"
                      / "<dfn>'report-sample'</dfn>" / "<dfn>'unsafe-allow-redirects'</dfn>"
                      / "<dfn>'wasm-unsafe-eval'</dfn>" / "<dfn>'trusted-types-eval'</dfn>"
                      / "<dfn>'report-sha256'</dfn>" / "<dfn>'report-sha384'</dfn>"
@@ -3796,11 +3801,15 @@ Content-Type: application/reports+json
 
       5.  If |directive|'s <a for="directive">value</a> does not contain a
           <a>source expression</a> that is a match for the
-          "<a grammar>`'url-hash-source'`</a>" grammar:
+          "<a grammar>`url-hash-source`</a>" grammar:
 
           1.  If the result of executing [[#match-request-to-source-list]] on
               |request|, |directive|'s <a for="directive">value</a>, and
               |policy|, is "`Does Not Match`", return "`Blocked`".
+
+          Note: "<a grammar>`'strict-dynamic-url'`</a>" doesn't ignore <a grammar>`host-source`</a>
+          and <a grammar>`scheme-source`</a> expressions, unlike "<a grammar>`'strict-dynamic'`</a>"
+          and "<a grammar>`url-hash-source`</a>".
 
   2.  Return "`Allowed`".
 
@@ -3834,7 +3843,8 @@ Content-Type: application/reports+json
 
       1.  If |directive|'s <a for="directive">value</a> contains a <a>source
           expression</a> that is an <a>ASCII case-insensitive</a> match for
-          the "<a grammar>`'strict-dynamic'`</a>" <a grammar>keyword-source</a>:
+          the "<a grammar>`'strict-dynamic'`</a>" or
+          "<a grammar>`'strict-dynamic-url'`</a>" <a grammar>keyword-source</a>s:
 
           1.  If the |request|'s <a for="request">parser metadata</a> is
               <a>"parser-inserted"</a>, return "`Blocked`".
@@ -4340,10 +4350,12 @@ Content-Type: application/reports+json
 
       2.  If |type| is "`script`", "`script attribute`" or "`navigation`"
           and |expression| matches the <a grammar>keyword-source</a>
-          "<a grammar>`'strict-dynamic'`</a>", return "`Does Not Allow`".
+          "<a grammar>`'strict-dynamic'`</a>" or
+          "<a grammar>`'strict-dynamic-url'`</a>", return "`Does Not Allow`".
 
-          Note: `'strict-dynamic'` only applies to scripts, not other resource
-          types. Usage is explained in more detail in [[#strict-dynamic-usage]].
+          Note: `'strict-dynamic'` and `'strict-dynamic-url'` only apply to
+          scripts, not other resource types. Usage is explained in more detail
+          in [[#strict-dynamic-usage]].
 
       3.  If |expression| is an <a>ASCII case-insensitive</a> match for the
           <a grammar>`keyword-source`</a> "<a grammar>`'unsafe-inline'`</a>",
@@ -4373,13 +4385,17 @@ Content-Type: application/reports+json
      <a>Source lists</a> that do not
      <a for="source list">allow all inline behavior</a> when |type| is
      '`script`' or '`script attribute`' due to the presence of
-     '`strict-dynamic`', but <a for="source list">allow all inline behavior</a>
+     '`strict-dynamic`' or '`strict-dynamic-url`', but
+     <a for="source list">allow all inline behavior</a>
      otherwise:
 
      <pre>
       'unsafe-inline' 'strict-dynamic'
+      'unsafe-inline' 'strict-dynamic-url'
+
       http://example.com 'strict-dynamic' 'unsafe-inline'
     </pre>
+
   </div>
 
   <h5 id="match-element-to-source-list" algorithm>
@@ -5071,6 +5087,60 @@ Content-Type: application/reports+json
   of non-parser-inserted APIs and ensure that they are not invoked with potentially
   untrusted data. This includes applications or frameworks that tend to determine
   script locations at runtime.
+
+  Similarly, the "<a grammar>`'strict-dynamic-url'`</a>" source expression allows
+  you to deploy a policy based on "<a grammar>`url-hash-source`</a>"s in a
+  backwards compatible way.
+
+  If present in a <a>`script-src`</a> or <a>`default-src`</a> directive,
+  "<a grammar>`'strict-dynamic-url'`</a>" has two main effects:
+
+  1.  "<a grammar>`'unsafe-inline'`</a>" <a grammar>keyword-source</a> will be
+      ignored when loading script.
+
+  2.  Script requests which are triggered by non-<a>"parser-inserted"</a>
+      <{script}> elements are allowed.
+
+  "<a grammar>`'strict-dynamic-url'`</a>" doesn't ignore
+  <a grammar>host-source</a>, <a grammar>scheme-source</a> and
+  <a grammar>`'self'`</a>. However, <a grammar>`url-hash-source`</a>s ignore
+  these expressions.
+
+  This allows you to deploy <a grammar>`url-hash-source`</a>s in a
+  backwards compatible way, without requiring user-agent sniffing.
+
+  <div class="example">
+   Suppose MegaCorp, Inc. presently deploys the following lax policy:
+
+    <pre>
+      <a http-header>Content-Security-Policy</a>: <a>script-src</a> https: 'unsafe-inline'
+    </pre>
+
+    And serves the following HTML with that policy active:
+
+    <pre highlight="html">
+      ...
+      &lt;script src="https://example.com/script.js" &gt;&lt;/script&gt;
+      ...
+    </pre>
+
+    MegaCorp, Inc. now wants to deploy a more strict policy using <a grammar>`url-hash-source`</a>s:
+
+    <pre>
+      <a http-header>Content-Security-Policy</a>: <a>script-src</a> https: 'unsafe-inline' 'strict-dynamic-url' 'url-hash-EAaArVRs5qV39C9S3zO0z9ynVoWeZkuNfeMpsVDQnOk='
+    </pre>
+
+    User agents that understand <a grammar>`url-hash-source`</a>s will allow
+    the script and any non-parser inserted scripts it loads.
+
+    User agents that don't understand <a grammar>`url-hash-source`</a>s will
+    see the policy as "`https: 'unsafe-inline'`". This lax policy will also
+    allow the script to be loaded.
+
+    Note: This policy can't use "<a grammar>`'strict-dynamic'`</a>" because
+    older user agents that need to receive a lax fallback policy will ignore the
+    `https:` source expression due to "<a grammar>`'strict-dynamic'`</a>".
+  </div>
 
   <section>
     <h3 id="unsafe-hashes-usage">
