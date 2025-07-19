@@ -1825,13 +1825,23 @@ Content-Type: application/reports+json
   1. If |url|'s <a for="url">scheme</a> is not an <a>HTTP(S) scheme</a>,
      then return |url|'s <a for="url">scheme</a>.
 
+  2. Let |result| be the result of executing [[#strip-https-url]] on |url|.
+
+  3. Return the result of executing the <a>URL serializer</a> on |result|.
+
+  <h3 id="strip-https-url" algorithm>Strip HTTP(S) URL</h3>
+  Given a [=/URL=] |url|, this algorithm returns the URL with potentially
+  sensitive fields blanked.
+
+  1. Assert: |url|'s <a for="url">scheme</a> is an <a>HTTP(S) scheme</a>.
+
   2. Set |url|’s <a for="url">fragment</a> to the empty string.
 
   3. Set |url|’s <a for="url">username</a> to the empty string.
 
   4. Set |url|’s <a for="url">password</a> to the empty string.
 
-  5. Return the result of executing the <a>URL serializer</a> on |url|.
+  5. Return |url|.
 
   <h3 id="report-violation" algorithm>
     Report a |violation|
@@ -3784,8 +3794,8 @@ Content-Type: application/reports+json
           for="directive">value</a> is "`Matches`", return "`Allowed`".
 
       3.  If the result of executing [[#match-url-hash-to-source-list]] on
-          this directive's <a for="directive">value</a> and |request|'s
-          <a for="request">current url</a> is "`Matches`", return "`Allowed`".
+          this directive's <a for="directive">value</a> and |request| is
+          "`Matches`", return "`Allowed`".
 
       4.  If |directive|'s <a for="directive">value</a> contains a <a>source
           expression</a> that is an <a>ASCII case-insensitive</a> match for
@@ -4287,6 +4297,90 @@ Content-Type: application/reports+json
     9.  Return "`Matches`".
   </ol>
 
+  <h5 id="get-relative-url-string" algorithm>
+    Get relative URL string
+  </h5>
+
+  Given a {{URL}} |resourceURL| and a {{URL}} |documentURL|,
+  this algorithm returns a {{String}} that represents the relative path of
+  |resourceURL| according to |documentURL| if they are same origin.
+
+  1.  If |documentURL|'s <a for="url">scheme</a> is not
+      `http` or `https`, return empty string.
+
+  2.  If |documentURL|'s <a for="url">origin</a> is not equal to
+      |resourceURL|'s <a for="url">origin</a>, return empty string.
+
+  3.  If |resourceURL|'s <a for="url">path</a> is empty, return empty string.
+
+  4.  Let |documentURLPath| and |resourceURLPath| be the result of running the
+      <a>URL path serializer</a> on |documentURL| and |resourceURL| respectively.
+
+  5.  FIXME(properly define): Remove the part of |documentURLPath| after the last
+      U+002F SOLIDUS character (`/`).
+
+  6.  Let |documentURLTokens| and |resourceURLPathTokens| be the result of
+      <a lt="strictly split a string">strictly splitting</a> |documentURLPath|
+      and |resourceURLPath| respectively on the U+002F SOLIDUS character (`/`).
+
+  7.  Let |minLen| be the smaller of |documentURLPathTokens|' [=list/size=]
+      and |resourceURLPathTokens|' [=list/size=].
+
+  8.  Let |commonPrefixLen| be zero.
+
+  9. [=list/iterate|For each=] |index| of [=the exclusive range=] 0 to |minLen|:
+  
+      1.  If |documentURLPathTokens|[|index|] is equal to
+          |resourceURLPathTokens|[|index|], increment |commonPrefixLen|.
+
+  10. Let |levelDifference| be |documentURLPathTokens|'
+      [=list/size=] - |commonPrefixLen|.
+
+  11. Let |resultTokens| be an empty [=list=].
+
+  12. [=list/iterate|For each=] |index| of [=the exclusive range=] 0 to |levelDifference|:
+
+      1.  [=list/append|Append=] ".." to |resultTokens|.
+
+  13. [=list/iterate|For each=] |index| of [=the exclusive range=] |commonPrefixLen| + 1 to |resourceURLPathTokens|' [=list/size=]:
+
+      1.  [=list/append|Append=] |resourceURLPathTokens|[|index|] to |resultTokens|.
+
+  14. Let |result| be an empty string.
+
+  15. [=list/iterate|For each=] |index| of [=the exclusive range=] 0 to |resultTokens|' [=list/size=] - 1:
+  
+      1.  Append |resultTokens|[|index|] to |result|.
+
+      2.  Append U+002F SOLIDUS character (`/`) to |result|.
+  
+  16.  Append the last element in |resultTokens| to |result|.
+
+  17.  Let |query| be |resourceURL|'s <a for="url">query</a>.
+
+  18.  If |query| is a non-empty <a>string</a>:
+
+      1.  Append U+003F (?) to |result|.
+      2.  Append |query| to |result|.
+
+  19.  Return |result|.
+      
+       Note: |result| will never contain a <a for="url">fragment</a>.
+
+  <div class="example">
+    Relative URL string for |resourceURL|="https://example.com/script.js?query" and
+    |documentURL|="https://example.com" is "script.js?query".
+
+    Relative URL string for |resourceURL|="https://example.com/script.js?query" and
+    |documentURL|="https://example.com/index.html" is "script.js?query".
+
+    Relative URL string for |resourceURL|="https://example.com/script.js?query" and
+    |documentURL|="https://example.com/abc/index.html" is "../script.js?query".
+
+    Relative URL string for |resourceURL|="https://example.com/abc/script.js?query" and
+    |documentURL|="https://example.com/index.html" is "abc/script.js?query".
+  </div>
+
   <h4 id="matching-elements">Element Matching Algorithms</h4>
 
   <h5 id="is-element-nonceable" algorithm>
@@ -4448,15 +4542,43 @@ Content-Type: application/reports+json
   6.  Return "`Does Not Match`".
 
   <h5 id="match-url-hash-to-source-list" algorithm>
-    Does the hash of |url| match |source list|?
+    Does the hash of |request|'s URL match |source list|?
   </h5>
 
-  Given a <a>source list</a> |source list| and a url |url|, this algorithm
-  returns "`Matches`" or "`Does Not Match`".
+  Given a <a>source list</a> |source list| and <a for="/">request</a> |request|,
+  this algorithm returns "`Matches`" or "`Does Not Match`". It can only
+  return "`Matches`" for requests and documents with HTTP(S) schemes.
 
-  1.  Return the result of executing
-      [[#match-value-hash-to-source-list]] on |url|'s {{URL/href}},
-      "`url-hash`", and |source list|.
+  1.  If |request|'s <a for="request">url</a>'s <a for="url">scheme</a> is not
+      an <a>HTTP(S) scheme</a>, then return "`Does Not Match`".
+
+  2.  Let |requestURL| be the result of executing [[#strip-https-url]] on
+      |request|'s <a for="request">url</a>.
+
+  3.  If the result of executing [[#match-value-hash-to-source-list]] on
+      |requestURL|, "`url-hash`", and |source list| is "`Matches`", return
+      "`Matches`".
+
+  4.  Let |global| be the |request|'s [=request/client=]'s [=/global object=].
+
+  5.  If |global| is not a {{Window}}, return "`Does Not Match`".
+
+  6.  If |global|'s [=associated document|document=]'s [=Document/URL=]'s 
+      <a for="url">scheme</a> is not an <a>HTTP(S) scheme</a>, then return
+      "`Does Not Match`".
+
+  7.  Let |documentURL| to be the result of executing [[#strip-https-url]]
+      on |global|'s [=associated document|document=]'s [=Document/URL=].
+
+  8.  Let |relativeURL| be the result of executing [[#get-relative-url-string]]
+      on |requestURL| and |documentURL|.
+
+  9.  If |relativeURL| is empty string, return "`Does Not Match`".
+
+  10.  Return the result of executing
+      [[#match-value-hash-to-source-list]] on |relativeURL|, "`url-hash`", and
+      |source list|.
+  
 
   <h5 id="match-eval-hash-to-source-list" algorithm>
     Does the hash of |sourceString| match |source list|?
