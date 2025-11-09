@@ -40,6 +40,7 @@ spec:html
     text: style
   type: element-attr
     text: ping
+    text: type
   type:interface
     text:SharedWorker
 spec:fetch
@@ -696,7 +697,7 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
                      / "<dfn>'report-sample'</dfn>" / "<dfn>'unsafe-allow-redirects'</dfn>"
                      / "<dfn>'wasm-unsafe-eval'</dfn>" / "<dfn>'trusted-types-eval'</dfn>"
                      / "<dfn>'report-sha256'</dfn>" / "<dfn>'report-sha384'</dfn>"
-                     / "<dfn>'report-sha512'</dfn>"
+                     / "<dfn>'report-sha512'</dfn>" / "<dfn>'inline-speculation-rules'</dfn>"
 
     ISSUE: Bikeshed `unsafe-allow-redirects`.
 
@@ -1235,7 +1236,7 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   application, event handlers, etc.), and "`Blocked`" otherwise:
 
   Note: The valid values for |type| are "`script`", "`script attribute`",
-  "`style`", and "`style attribute`".
+  "`script speculationrules`", "`style`", and "`style attribute`".
 
   <ol class="algorithm">
     1.  Assert: |element| is not null.
@@ -2863,7 +2864,8 @@ Content-Type: application/reports+json
       implicitly by not specifying a `script-src` (or `default-src`) directive,
       or explicitly, by specifying "`unsafe-inline`", a
       <a grammar>nonce-source</a> or a <a grammar>hash-source</a> that matches
-      the inline block.
+      the inline block, or specifying "`inline-speculation-rules`" when the
+      <{script/type}> attribute matches "`speculationrules`".
 
   4.  The following JavaScript execution sinks are gated on the "`unsafe-eval`" and "`trusted-types-eval`"
       source expressions:
@@ -4006,7 +4008,7 @@ Content-Type: application/reports+json
       Note: An empty source list (that is, a directive without a value: `script-src`,
       as opposed to `script-src host1`) is equivalent to a source list containing `'none'`,
       and will not match any URL.
-      
+
       Note: The `'none'` keyword has no effect when other source expressions are
       present. That is, the list « `'none'` » does not match any URL. A list consisting
       of « `'none'`, `https://example.com` », on the other hand, would match
@@ -4157,7 +4159,7 @@ Content-Type: application/reports+json
   Note: The matching relation is asymmetric. That is, |pattern| matching |host| does not
   mean that |host| will match |pattern|. For example, `*.example.com` <a>`host-part` matches</a>
   `www.example.com`, but `www.example.com` does not <a>`host-part` match</a> `*.example.com`.
-  
+
   Note: A future version of this specification may allow literal IPv6 and IPv4 addresses,
   depending on usage and demand. Given the weak security properties of IP addresses in
   relation to named hosts, however, authors are encouraged to prefer the latter whenever possible.
@@ -4198,7 +4200,7 @@ Content-Type: application/reports+json
 
     3.  Let |normalizedInput| be null if |input| null; otherwise |input|
         interpreted as decimal number.
-    
+
     4.  If |normalizedInput| equals |url|'s [=url/port=], return "`Matches`".
 
     5.  If |url|'s [=url/port=] is null:
@@ -4330,7 +4332,12 @@ Content-Type: application/reports+json
           Note: `'strict-dynamic'` only applies to scripts, not other resource
           types. Usage is explained in more detail in [[#strict-dynamic-usage]].
 
-      3.  If |expression| is an <a>ASCII case-insensitive</a> match for the
+      3.  If |type| is "`script speculationrules`" and |expression| matches the
+          <a grammar>keyword-source</a>
+          "<a grammar>`'inline-speculation-rules'`</a>", set |allow all inline|
+          to `true`.
+
+      4.  If |expression| is an <a>ASCII case-insensitive</a> match for the
           <a grammar>`keyword-source`</a> "<a grammar>`'unsafe-inline'`</a>",
           set |allow all inline| to `true`.
 
@@ -4381,8 +4388,9 @@ Content-Type: application/reports+json
   1.  If [[#allow-all-inline]] returns "`Allows`" given |list| and |type|,
       return "`Matches`".
 
-  2.  If |type| is "`script`" or "`style`", and [[#is-element-nonceable]]
-      returns "`Nonceable`" when executed upon |element|:
+  2.  If |type| is "`script`", "`script speculationrules`", or "`style`", and
+      [[#is-element-nonceable]] returns "`Nonceable`" when executed upon
+      |element|:
 
       1.  <a for=set>For each</a> |expression| of |list|:
 
@@ -4403,8 +4411,8 @@ Content-Type: application/reports+json
           "<a grammar>`'unsafe-hashes'`</a>",
           set |unsafe-hashes flag| to `true`. Break out of the loop.
 
-  5.  If |type| is "`script`" or "`style`", or |unsafe-hashes flag| is
-      `true`:
+  5.  If |type| is "`script`",  "`script speculationrules`", or "`style`", or
+      |unsafe-hashes flag| is `true`:
 
       1.  Set |source| to the result of executing <a>UTF-8 encode</a>
           on the result of executing <a for="JavaScript string" data-lt="convert">JavaScript string converting</a>
@@ -4524,8 +4532,18 @@ Content-Type: application/reports+json
         1. Return `connect-src`.
 
       : "`report`"
+      : "`speculationrules`"
       ::
         1. Return null.
+
+        <p class="note">At present, requests with the
+        "`speculationrules`" destination can only be issued by the
+        [:Speculation-Rules:] HTTP header, for which CSP does not apply.
+        If support is added for loading external speculation rules via
+        the <{script}> element's <{script/src}> attribute, for which CSP
+        would apply, then we would need to make this case more
+        complicated, for example by introducing a new
+        [=request/initiator=] and switching on that.
 
   3.  Return `connect-src`.
 
@@ -5181,7 +5199,7 @@ Content-Type: application/reports+json
       <pre>
         <a http-header>Content-Security-Policy</a>: img-src 'none'; script-src 'none'; font-src 'none'
       </pre>
-      
+
       Supplementing this policy with `default-src 'none'` would improve the page's robustness
       against this kind of attack.
     </div>
