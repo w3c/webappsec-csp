@@ -696,7 +696,7 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
                      / "<dfn>'report-sample'</dfn>" / "<dfn>'unsafe-allow-redirects'</dfn>"
                      / "<dfn>'wasm-unsafe-eval'</dfn>" / "<dfn>'trusted-types-eval'</dfn>"
                      / "<dfn>'report-sha256'</dfn>" / "<dfn>'report-sha384'</dfn>"
-                     / "<dfn>'report-sha512'</dfn>"
+                     / "<dfn>'report-sha512'</dfn>" / "<dfn>'unsafe-webtransport-hashes'</dfn>"
 
     ISSUE: Bikeshed `unsafe-allow-redirects`.
 
@@ -2220,9 +2220,15 @@ Content-Type: application/reports+json
 
   3.  If the result of executing [[#match-request-to-source-list]] on
       |request|, this directive's <a for="directive">value</a>, and
-      |policy|, is "`Does Not Match`", return "`Blocked`".
+      |policy|, is "`Matches`", return "`Allowed`".
 
-  4.  Return "`Allowed`".
+  4.  If |request|'s [=request/mode=] is "`webtransport`", |request|'s
+      <a for="request">unsafe-webtransport-hashes flag</a> is set, and
+      the result of executing [[#allow-unsafe-webtransport-hashes]]
+      on this directive's <a for="directive">value</a>, is "`Matches`",
+      return "`Allowed`".
+
+  6.  Return "`Blocked`".
 
   <h5 algorithm id="connect-src-post-request">
     `connect-src` Post-request check
@@ -4261,6 +4267,27 @@ Content-Type: application/reports+json
 
     9.  Return "`Matches`".
   </ol>
+
+  <h5 id="allow-unsafe-webtransport-hashes" algorithm>
+    Does a source list allow unsafe WebTransport hashes?
+  </h5>
+
+  A <a>source list</a>
+  <dfn export for="source list" local-lt="allow unsafe WebTransport hashes">allows unsafe WebTransport hashes</dfn>
+  if it contains the <a grammar>`keyword-source`</a>
+  expression <a grammar>`'unsafe-webtransport-hashes'`</a>, as described in the following
+  algorithm:
+
+  Given a <a>source list</a> |list|, the following
+  algorithm returns "`Allows`" if allowed and "`Does Not Allow`" otherwise.
+
+  1.  <a for=set>For each</a> |expression| of |list|:
+
+      1.  If |expression| is an <a>ASCII case-insensitive</a> match for the
+          <a grammar>`keyword-source`</a> "<a grammar>`'unsafe-webtransport-hashes'`</a>",
+          return "`Allows`".
+
+  2.  Return "`Does Not Allow`".
 
   <h4 id="matching-elements">Element Matching Algorithms</h4>
 
