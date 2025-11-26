@@ -3555,6 +3555,62 @@ Content-Type: application/reports+json
 
   5.  Return "`Allowed`".
 
+  <h4 id="directive-immutable">`immutable`</h4>
+
+  The immutable directive prevents any subsequently declared policies from being applied.
+  Once a policy containing immutable is processed, all further policy declarations
+  (via HTTP headers or `<meta>` elements) are ignored.
+
+  <pre dfn-type="grammar" link-type="grammar" class="abnf">
+    directive-name  = "immutable"
+    directive-value = ""
+  </pre>
+
+  The directive takes no value.
+
+  <h5>
+    `immutable` processing model
+  </h5>
+
+  A policy is immutable if its directive set contains a directive whose name is immutable.
+  When parsing policies:
+
+  * Policies are processed in order
+  * If a policy contains `immutable`, all subsequent policies are discarded
+  * User agents SHOULD issue console warnings when policies are ignored
+
+  <div class="example">
+    <pre>
+      Content-Security-Policy: default-src 'self' example.com; immutable
+      Content-Security-Policy: script-src 'none'
+    </pre>
+
+    Only the first policy applies. The second is ignored.
+  </div>
+
+  <div class="example">
+    <pre>
+      &lt;meta http-equiv="Content-Security-Policy" content="default-src 'self' example.com;">
+      &lt;meta http-equiv="Content-Security-Policy" content="default-src 'self'; immutable">
+      &lt;meta http-equiv="Content-Security-Policy" content="script-src 'none'">
+    </pre>
+
+    The first and second policies are applied. The result of enforcing multiple
+    policies is described in [[#multiple-policies]].
+  </div>
+
+  <div class="example">
+    <pre>
+      Content-Security-Policy: default-src 'self' example.com; immutable
+    </pre>
+    <pre>
+      &lt;meta http-equiv="Content-Security-Policy" content="script-src 'none'">
+    </pre>
+
+    Only the first policy applies. The second is ignored. This is an example of
+     disabling policies set in `<meta>` tags.
+  </div>
+
   <h3 id="directives-navigation">
     Navigation Directives
   </h3>
