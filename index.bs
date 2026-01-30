@@ -696,7 +696,7 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
                      / "<dfn>'report-sample'</dfn>" / "<dfn>'unsafe-allow-redirects'</dfn>"
                      / "<dfn>'wasm-unsafe-eval'</dfn>" / "<dfn>'trusted-types-eval'</dfn>"
                      / "<dfn>'report-sha256'</dfn>" / "<dfn>'report-sha384'</dfn>"
-                     / "<dfn>'report-sha512'</dfn>"
+                     / "<dfn>'report-sha512'</dfn>" / "<dfn>'unsafe-webtransport-hashes'</dfn>"
 
     ISSUE: Bikeshed `unsafe-allow-redirects`.
 
@@ -2215,14 +2215,26 @@ Content-Type: application/reports+json
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
+  1.  If the result of executing [[#should-directive-execute]] on |name|,
       `connect-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-request-to-source-list]] on
-      |request|, this directive's <a for="directive">value</a>, and
-      |policy|, is "`Does Not Match`", return "`Blocked`".
+  1.  Let |source list| be directive's <a for="directive">value</a>.
 
-  4.  Return "`Allowed`".
+  1.  If |request|'s [=request/mode=] is "`webtransport`" and |request|'s
+      <a for="request">WebTransport-hash list</a> [=list/is not empty=]:
+
+      1. If |source list| [=list/contains=] a <a>source expression</a>
+         which is an <a>ASCII case-insensitive</a> match for the
+         <a grammar>`keyword-source`</a>
+         "<a grammar>`'unsafe-webtransport-hashes'`</a>", return "`Allowed`".
+
+      1.  Return "`Blocked`".
+
+  1.  If the result of executing [[#match-request-to-source-list]] on
+      |request|, |source list|, and |policy|, is "`Matches`", return
+      "`Allowed`".
+
+  1.  Return "`Blocked`".
 
   <h5 algorithm id="connect-src-post-request">
     `connect-src` Post-request check
@@ -2236,14 +2248,26 @@ Content-Type: application/reports+json
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
 
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
+  1.  If the result of executing [[#should-directive-execute]] on |name|,
       `connect-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, this directive's <a for="directive">value</a>,
-      and |policy|, is "`Does Not Match`", return "`Blocked`".
+  1.  Let |source list| be directive's <a for="directive">value</a>.
 
-  4.  Return "`Allowed`".
+  1.  If |request|'s [=request/mode=] is "`webtransport`" and |request|'s
+      <a for="request">WebTransport-hash list</a> [=list/is not empty=]:
+
+      1. If |source list| [=list/contains=] a <a>source expression</a>
+         which is an <a>ASCII case-insensitive</a> match for the
+         <a grammar>`keyword-source`</a>
+         "<a grammar>`'unsafe-webtransport-hashes'`</a>", return "`Allowed`".
+
+      1.  Return "`Blocked`".
+
+  1.  If the result of executing [[#match-response-to-source-list]] on
+      |response|, |request|, |source list|, and |policy|, is "`Matches`",
+      return "`Allowed`".
+
+  1.  Return "`Blocked`".
 
   <h4 id="directive-default-src">`default-src`</h4>
 
