@@ -4596,19 +4596,19 @@ Content-Type: application/reports+json
       ::
         1. Return `connect-src`.
 
-      : "`report`"
       : "`speculationrules`"
       ::
-        1. Return null.
+        1. If |request|'s [=request/initiator=] is "`speculation-rules-header`", return null.
 
-        <p class="note">At present, requests with the
-        "`speculationrules`" destination can only be issued by the
-        [:Speculation-Rules:] HTTP header, for which CSP does not apply.
-        If support is added for loading external speculation rules via
-        the <{script}> element's <{script/src}> attribute, for which CSP
-        would apply, then we would need to make this case more
-        complicated, for example by introducing a new
-        [=request/initiator=] and switching on that.
+        2. Return `script-src-elem`.
+
+        Note: Speculation rules fetched via the `Speculation-Rules` HTTP response
+        header are not subject to CSP. Only speculation rules fetched via the <{script}>
+        element are subject to `script-src-elem`.
+
+      : "`report`"
+      ::
+        1. Return null.
 
   3.  Return `connect-src`.
 
