@@ -169,6 +169,10 @@ spec: WebRTC; urlPrefix: https://www.w3.org/TR/webrtc/
   type:dfn
     text: administratively-prohibited; url: #dfn-administratively-prohibited
 
+spec: WEBDRIVER-BIDI; urlPrefix: https://w3c.github.io/webdriver-bidi/
+  type:dfn
+    text: webdriver bidi csp bypass is enabled
+
 spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   type:dfn;
     text:applying algorithm to bytes; url: #apply-algorithm-to-response
@@ -999,6 +1003,19 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   documents are the normative references which ought to be consulted for
   detailed information.
 
+  <h3 id="webdriver-bidi-integration">
+    Integration with WebDriver BiDi
+  </h3>
+
+  <dfn export>WebDriver BiDi CSP bypass is enabled</dfn> is an algorithm defined
+  by [[WEBDRIVER-BIDI]] that takes a <a>navigable</a> as input and returns a boolean.
+  When this algorithm returns true for a given navigable, Content Security Policy
+  enforcement is bypassed for that navigable's active document and its nested
+  navigables.
+
+  Note: This integration point allows WebDriver BiDi to disable CSP enforcement
+  during automated testing, similar to Chrome DevTools Protocol's Page.setBypassCSP.
+
   <h3 id="fetch-integration">
     Integration with Fetch
   </h3>
@@ -1201,7 +1218,11 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   Given a {{Document}} |document|, the user agent performs the following
   steps in order to initialize CSP for |document|:
 
-  1. <a for=list>For each</a> |policy| of |document|'s [=Document/policy container=]'s
+  1.  Let |navigable| be |document|'s [=/node navigable=].
+
+  2.  If |navigable| is not null and [=WebDriver BiDi CSP bypass is enabled=] given |navigable| is true, then set |document|'s [=Document/policy container=]'s [=policy container/CSP list=] to an empty list.
+
+  3. <a for=list>For each</a> |policy| of |document|'s [=Document/policy container=]'s
      [=policy container/CSP list=]:
 
       1.  <a for=set>For each</a> |directive| of |policy|:
