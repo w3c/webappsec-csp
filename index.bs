@@ -445,19 +445,20 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   Each policy has an associated <dfn for="policy" export>source</dfn>, which is either "`header`"
   or "`meta`".
 
-  Each policy has an associated <dfn for="policy" export>self-origin</dfn>, which
-  is an <a>origin</a> that is used when matching the <a grammar>`'self'`</a> keyword.
+  Multiple [=/policies=] can be applied to a single resource. A <dfn export>CSP
+  list</dfn> is a [=struct=] consisting of <dfn for="CSP list"
+  export>policies</dfn> (a [=list=] of [=/policies=]) and a <dfn for="CSP list"
+  export>self-origin</dfn> (an <a>origin</a> which is used when matching the <a
+  grammar>`'self'`</a> keyword).
 
   Note: This is needed to facilitate the <a grammar>`'self'`</a> checks of
   <a>local scheme</a> documents/workers that have inherited their policy but
   have an <a>opaque origin</a>. Most of the time this will simply be the
   <a>environment settings object</a>'s [=environment settings object/origin=].
 
-  Multiple [=/policies=] can be applied to a single resource, and are collected into a [=list=] of
-  [=/policies=] known as a <dfn export>CSP list</dfn>.
-
-  A [=/CSP list=] <dfn export>contains a header-delivered Content Security Policy</dfn> if it
-  [=list/contains=] a [=/policy=] whose [=policy/source=] is "`header`".
+  A [=/CSP list=] <dfn export>contains a header-delivered Content Security
+  Policy</dfn> if its [=CSP list/policies=] [=list/contain=] a [=/policy=] whose
+  [=policy/source=] is "`header`".
 
   A <dfn export>serialized CSP</dfn> is an <a>ASCII string</a> consisting of a semicolon-delimited
   series of <a>serialized directives</a>, adhering to the following ABNF grammar [[!RFC5234]]:
@@ -536,8 +537,8 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   To <dfn abstract-op>parse a response's Content Security Policies</dfn> given a <a>response</a>
   |response|, execute the following steps.
 
-  This algorithm returns a [=list=] of [=Content Security Policy objects=]. If the policies cannot
-  be parsed, the returned list will be empty.
+  This algorithm returns a [=/CSP list=]. If the policies cannot be parsed, the
+  returned list will have empty [=CSP list/policies=].
 
   <ol class="algorithm">
     1.  Let |policies| be an empty [=list=].
@@ -560,12 +561,8 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
         2.  If |policy|'s [=policy/directive set=] is not empty, append |policy| to |policies|.
 
-    4.  <a for=list>For each</a> |policy| of |policies|:
-
-        1.  Set |policy|'s [=policy/self-origin=] to |response|'s [=response/url=]'s
-            [=url/origin=].
-
-    5.  Return |policies|.
+    4.  Return a [=/CSP list=] whose [=CSP list/policies=] is |policies| and
+        [=CSP list/self-origin=] is |response|'s [=response/url=]'s [=url/origin=].
   </ol>
 
   Note: When <a abstract-op lt="parse a response's Content Security Policies">parsing a response's
@@ -601,15 +598,16 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
   <a>Directives</a> have a number of associated algorithms:
 
-  1.  A <dfn for="directive" export>pre-request check</dfn>, which takes a
-      <a for="/">request</a> and a <a for="/">policy</a> as an argument, and is executed
-      during [[#should-block-request]]. This algorithm returns "`Allowed`" unless
-      otherwise specified.
+  1.  A <dfn for="directive" export>pre-request check</dfn>, which takes a <a
+      for="/">request</a>, a <a for="/">policy</a>, and an <a>origin</a> as an
+      argument, and is executed during [[#should-block-request]]. This algorithm
+      returns "`Allowed`" unless otherwise specified.
 
-  2.  A <dfn for="directive" export>post-request check</dfn>, which takes a
-      <a for="/">request</a>, a <a>response</a>, and a <a for="/">policy</a> as arguments,
-      and is executed during [[#should-block-response]]. This algorithm returns
-      "`Allowed`" unless otherwise specified.
+  2.  A <dfn for="directive" export>post-request check</dfn>, which takes a <a
+      for="/">request</a>, a <a>response</a>, a <a for="/">policy</a> and an
+      <a>origin</a> as arguments, and is executed during
+      [[#should-block-response]]. This algorithm returns "`Allowed`" unless
+      otherwise specified.
 
   3.  An <dfn for="directive" export>inline check</dfn>, which takes an {{Element}}, a
       type string, a <a for="/">policy</a>, and a source string as arguments,
@@ -623,17 +621,19 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
       [[#run-global-object-csp-initialization]]. Unless otherwise specified, it has no
       effect and it returns "`Allowed`".
 
-  5.  A <dfn for="directive" export>pre-navigation check</dfn>, which takes a
-      <a for="/">request</a>, a navigation type string ("`form-submission`"
-      or "`other`"), and a <a for="/">policy</a> as arguments, and
+  5.  A <dfn for="directive" export>pre-navigation check</dfn>, which takes a <a
+      for="/">request</a>, a navigation type string ("`form-submission`" or
+      "`other`"), a <a for="/">policy</a> and an <a>origin</a> as arguments, and
       is executed during [[#should-block-navigation-request]]. It returns
       "`Allowed`" unless otherwise specified.
 
-  6.  A <dfn for="directive" export>navigation response check</dfn>, which takes a
-      <a for="/">request</a>, a navigation type string ("`form-submission`" or "`other`"),
-      a <a>response</a>, a <a>navigable</a>, a check type string ("`source`"
-      or "`response`"), and a <a for="/">policy</a> as arguments, and is executed during
-      [[#should-block-navigation-response]]. It returns "`Allowed`" unless otherwise specified.
+  6.  A <dfn for="directive" export>navigation response check</dfn>, which takes
+      a <a for="/">request</a>, a navigation type string ("`form-submission`" or
+      "`other`"), a <a>response</a>, a <a>navigable</a>, a check type string
+      ("`source`" or "`response`"), a <a for="/">policy</a>, and an
+      <a>origin</a> as arguments, and is executed during
+      [[#should-block-navigation-response]]. It returns "`Allowed`" unless
+      otherwise specified.
 
   8.  A <dfn for="directive" export>webrtc pre-connect check</dfn>, which takes a [=/policy=], and
       is executed during [[#should-block-rtc-connection]]. It returns "`Allowed`" unless
@@ -1029,13 +1029,14 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
   1.  Let |CSP list| be |request|'s [=request/policy container=]'s [=policy container/CSP list=].
 
-  2.  <a for=list>For each</a> |policy| of |CSP list|:
+  2.  <a for=list>For each</a> |policy| of |CSP list|'s [=CSP list/policies=]:
 
       1.  If |policy|'s <a for="policy">disposition</a> is "`enforce`",
           then skip to the next |policy|.
 
       2.  Let |violates| be the result of executing
-          [[#does-request-violate-policy]] on |request| and |policy|.
+          [[#does-request-violate-policy]] on |request|, |policy|, and |CSP
+          list|'s [=CSP list/self-origin=].
 
       3.  If |violates| is not "`Does Not Violate`", then execute
           [[#report-violation]] on the result of executing
@@ -1053,13 +1054,14 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
   2.  Let |result| be "`Allowed`".
 
-  3.  <a for=list>For each</a> |policy| of |CSP list|:
+  3.  <a for=list>For each</a> |policy| of |CSP list|'s [=CSP list/policies=]:
 
       1.  If |policy|'s <a for="policy">disposition</a> is "`report`",
           then skip to the next |policy|.
 
       2.  Let |violates| be the result of executing
-          [[#does-request-violate-policy]] on |request| and |policy|.
+          [[#does-request-violate-policy]] on |request|, |policy|, and |CSP
+          list|'s [=CSP list/self-origin=].
 
       3.  If |violates| is not "`Does Not Violate`", then:
 
@@ -1082,12 +1084,14 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
   2.  Let |result| be "`Allowed`".
 
-  3.  <a for=list>For each</a> |policy| of |CSP list|:
+  3.  <a for=list>For each</a> |policy| of |CSP list|'s [=CSP list/policies=]:
 
       1.  <a for=set>For each</a> |directive| of |policy|:
 
-          1.  If the result of executing |directive|'s
-              <a for="directive">post-request check</a> is "`Blocked`", then:
+          1.  If the result of executing |directive|'s <a
+              for="directive">post-request check</a> on |request|, |response|,
+              |policy|, and |CSP list|'s [=CSP list/self-origin=] is
+              "`Blocked`", then:
 
               1.  Execute [[#report-violation]] on the result of executing
                   [[#create-violation-for-request]] on |request|, and |policy|.
@@ -1243,7 +1247,7 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
     2.  Let |result| be "`Allowed`".
 
     3.  <a for=list>For each</a> |policy| of |element|'s {{Document}}'s <a for="/">global object</a>'s
-        <a for="global object">CSP list</a>:
+        <a for="global object">CSP list</a>'s [=CSP list/policies=]:
 
         1.  <a for=set>For each</a> |directive| of |policy|'s <a for="policy">directive set</a>:
 
@@ -1288,14 +1292,18 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   <ol class="algorithm">
     1.  Let |result| be "`Allowed`".
 
-    2.  <a for=list>For each</a> |policy| of |navigation request|'s <a for="request">policy container</a>'s
-        <a for="policy container">CSP list</a>:
+    1.  Let |CSP list| be |navigation request|'s <a for="request">policy
+        container</a>'s <a for="policy container">CSP list</a>'s [=CSP
+        list/policies=].
+
+    2.  <a for=list>For each</a> |policy| of |CSP list|'s [=CSP list/policies=]:
 
         1.  <a for=set>For each</a> |directive| of |policy|:
 
             1.  If |directive|'s <a for="directive">pre-navigation check</a>
                 returns "`Allowed`" when executed upon |navigation request|,
-                |type|, and |policy| skip to the next |directive|.
+                |type|, |policy|, and |CSP list|'s [=CSP list/self-origin=] skip
+                to the next |directive|.
 
             2.  Otherwise, let |violation| be the result of executing
                 [[#create-violation-for-global]] on |navigation request|'s
@@ -1315,7 +1323,7 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
         1.  <a for=list>For each</a> |policy| of |navigation request|'s
             <a for="request">policy container</a>'s
-            <a for="policy container">CSP list</a>:
+            <a for="policy container">CSP list</a>'s [=CSP list/policies=]:
 
             1.  <a for=set>For each</a> |directive| of |policy|:
 
@@ -1356,7 +1364,7 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   <ol class="algorithm">
     1.  Let |result| be "`Allowed`".
 
-    2.  <a for=list>For each</a> |policy| of |response CSP list|:
+    2.  <a for=list>For each</a> |policy| of |response CSP list|'s [=CSP list/policies=]:
 
         Note: Some directives (like <a>frame-ancestors</a>) allow a |response|'s
         <a>Content Security Policy</a> to act on the navigation.
@@ -1365,7 +1373,8 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
             1.  If |directive|'s <a for="directive">navigation response check</a>
                 returns "`Allowed`" when executed upon |navigation request|, |type|,
-                |navigation response|, |target|, "`response`", and |policy|
+                |navigation response|, |target|, "`response`", |policy|, and
+                |response CSP list|'s [=CSP list/self-origin=],
                 skip to the next |directive|.
 
             2.  Otherwise, let |violation| be the result of executing
@@ -1384,7 +1393,7 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
                 set |result| to "`Blocked`".
 
     3.  <a for=list>For each</a> |policy| of |navigation request|'s <a for="request">policy container</a>'s
-        <a for="policy container">CSP list</a>:
+        <a for="policy container">CSP list</a>'s [=CSP list/policies=]:
 
         Note: Some directives in the |navigation request|'s context (like <a>frame-ancestors</a>)
         need the |response| before acting on the navigation.
@@ -1393,7 +1402,8 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
             1.  If |directive|'s <a for="directive">navigation response check</a>
                 returns "`Allowed`" when executed upon |navigation request|, |type|,
-                |navigation response|, |target|, "`source`", and |policy|
+                |navigation response|, |target|, "`source`", |policy|, and
+                |response CSP list|'s [=CSP list/self-origin=],
                 skip to the next |directive|.
 
             2.  Otherwise, let |violation| be the result of executing
@@ -1423,7 +1433,8 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   <ol class="algorithm">
     1.  Let |result| be "`Allowed`".
 
-    2.  <a for=list>For each</a> |policy| of |global|'s [=global object/CSP list=]:
+    2.  <a for=list>For each</a> |policy| of |global|'s [=global object/CSP
+        list=]'s [=CSP list/policies=]:
 
         1.  <a for=set>For each</a> |directive| of |policy|:
 
@@ -1449,7 +1460,8 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   <ol class="algorithm">
     1.  Let |result| be "`Allowed`".
 
-    2.  <a for=list>For each</a> |policy| of |global|'s [=global object/CSP list=]:
+    2.  <a for=list>For each</a> |policy| of |global|'s [=global object/CSP
+        list=]'s [=CSP list/policies=]:
           1.  <a for=set>For each</a> |directive| of |policy|:
               1.  If |directive|'s <a for="directive">webrtc pre-connect check</a>
                   returns "`Allowed`", [=iteration/continue=].
@@ -1527,7 +1539,8 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
   2.  Let |global| be |realm|'s [=realm/global object=].
 
-  3.  <a for=list>For each</a> |policy| of |global|'s [=global object/CSP list=]:
+  3.  <a for=list>For each</a> |policy| of |global|'s [=global object/CSP
+      list=]'s [=CSP list/policies=]:
 
       1.  Let |source-list| be null.
 
@@ -1585,7 +1598,8 @@ this algorithm returns normally if compilation is allowed, and throws a
 
 2.  Let |result| be "`Allowed`".
 
-3.  <a for=list>For each</a> |policy| of |global|'s [=global object/CSP list=]:
+3.  <a for=list>For each</a> |policy| of |global|'s [=global object/CSP list=]'s
+    [=CSP list/policies=]:
 
     1.  Let |source-list| be null.
 
@@ -2115,7 +2129,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
+  and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
@@ -2124,9 +2139,9 @@ Content-Type: application/reports+json
       `child-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  Return the result of executing the <a for="directive">pre-request
-      check</a> for the <a>directive</a> whose <a for="directive">name</a>
-      is |name| on |request| and |policy|, using this directive's
-      <a for="directive">value</a> for the comparison.
+      check</a> for the <a>directive</a> whose <a for="directive">name</a> is
+      |name| on |request|, |policy|, and |self-origin| using this directive's <a
+      for="directive">value</a> for the comparison.
 
   <h5 algorithm id="child-src-post-request">
     `child-src` Post-request check
@@ -2134,8 +2149,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
-  <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
+  <a for="/">policy</a> |policy| and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
@@ -2144,9 +2159,9 @@ Content-Type: application/reports+json
       `child-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  Return the result of executing the <a for="directive">post-request
-      check</a> for the <a>directive</a> whose <a for="directive">name</a>
-      is |name| on |request|, |response|, and |policy|, using this directive's
-      <a for="directive">value</a> for the comparison.
+      check</a> for the <a>directive</a> whose <a for="directive">name</a> is
+      |name| on |request|, |response|, |policy|, and |self-origin|, using this
+      directive's <a for="directive">value</a> for the comparison.
 
   <h4 id="directive-connect-src">`connect-src`</h4>
 
@@ -2210,7 +2225,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
+  and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
@@ -2230,8 +2246,8 @@ Content-Type: application/reports+json
 
       1.  Return "`Blocked`".
 
-  1.  If the result of executing [[#match-request-to-source-list]] on
-      |request|, |source list|, and |policy|, is "`Matches`", return
+  1.  If the result of executing [[#match-request-to-source-list]] on |request|,
+      |source list|, and |self-origin|, is "`Matches`", return
       "`Allowed`".
 
   1.  Return "`Blocked`".
@@ -2242,8 +2258,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
-  <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
+  <a for="/">policy</a> |policy| and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
@@ -2264,8 +2280,8 @@ Content-Type: application/reports+json
       1.  Return "`Blocked`".
 
   1.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, |source list|, and |policy|, is "`Matches`",
-      return "`Allowed`".
+      |response|, |request|, |source list|, and |self-origin|, is
+      "`Matches`", return "`Allowed`".
 
   1.  Return "`Blocked`".
 
@@ -2360,7 +2376,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
+  and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
@@ -2368,10 +2385,10 @@ Content-Type: application/reports+json
   2.  If the result of executing [[#should-directive-execute]] on |name|,
       `default-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  Return the result of executing the
-      <a for="directive">pre-request check</a> for the <a>directive</a> whose
-      <a for="directive">name</a> is |name| on |request| and |policy|, using
-      this directive's <a for="directive">value</a> for the comparison.
+  3.  Return the result of executing the <a for="directive">pre-request
+      check</a> for the <a>directive</a> whose <a for="directive">name</a> is
+      |name| on |request|, |policy|, and |self-origin|, using this directive's
+      <a for="directive">value</a> for the comparison.
 
   <h5 algorithm id="default-src-post-request">
     `default-src` Post-request check
@@ -2379,8 +2396,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
-  <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
+  <a for="/">policy</a> |policy| and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing
       [[#effective-directive-for-a-request]] on |request|.
@@ -2388,11 +2405,10 @@ Content-Type: application/reports+json
   2.  If the result of executing [[#should-directive-execute]] on |name|,
       `default-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  Return the result of executing the
-      <a for="directive">post-request check</a> for the <a>directive</a> whose
-      <a for="directive">name</a> is |name| on |request|, |response|, and
-      |policy|, using this directive's <a for="directive">value</a> for the
-      comparison.
+  3.  Return the result of executing the <a for="directive">post-request
+      check</a> for the <a>directive</a> whose <a for="directive">name</a> is
+      |name| on |request|, |response|, |policy|, and |self-origin|, using this
+      directive's <a for="directive">value</a> for the comparison.
 
   <h5 algorithm id="default-src-inline">
     `default-src` Inline Check
@@ -2454,7 +2470,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
+  and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2462,9 +2479,9 @@ Content-Type: application/reports+json
   2.  If the result of executing [[#should-directive-execute]] on |name|,
       `font-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-request-to-source-list]] on
-      |request|, this directive's <a for="directive">value</a>, and
-      |policy|, is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of executing [[#match-request-to-source-list]] on |request|,
+      this directive's <a for="directive">value</a>, and |self-origin|, is
+      "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2474,8 +2491,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
-  <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
+  <a for="/">policy</a> |policy| and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2485,7 +2502,7 @@ Content-Type: application/reports+json
 
   3.  If the result of executing [[#match-response-to-source-list]] on
       |response|, |request|, this directive's <a for="directive">value</a>,
-      and |policy|, is "`Does Not Match`", return "`Blocked`".
+      and |self-origin|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2522,7 +2539,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
+  and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2530,9 +2548,9 @@ Content-Type: application/reports+json
   2.  If the result of executing [[#should-directive-execute]] on |name|,
       `frame-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-request-to-source-list]] on
-      |request|, this directive's <a for="directive">value</a>, and
-      |policy|, is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of executing [[#match-request-to-source-list]] on |request|,
+      this directive's <a for="directive">value</a>, and |self-origin|, is
+      "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2542,8 +2560,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
-  <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
+  <a for="/">policy</a> |policy| and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2553,7 +2571,7 @@ Content-Type: application/reports+json
 
   3.  If the result of executing [[#match-response-to-source-list]] on
       |response|, |request|, this directive's <a for="directive">value</a>,
-      and |policy|, is "`Does Not Match`", return "`Blocked`".
+      and |self-origin|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2593,7 +2611,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
+  and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2601,9 +2620,9 @@ Content-Type: application/reports+json
   2.  If the result of executing [[#should-directive-execute]] on |name|,
       `img-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-request-to-source-list]] on
-      |request|, this directive's <a for="directive">value</a>, and |policy|,
-      is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of executing [[#match-request-to-source-list]] on |request|,
+      this directive's <a for="directive">value</a>, and |self-origin|, is
+      "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2613,8 +2632,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
-  <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
+  <a for="/">policy</a> |policy| and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2624,7 +2643,7 @@ Content-Type: application/reports+json
 
   3.  If the result of executing [[#match-response-to-source-list]] on
       |response|, |request|, this directive's <a for="directive">value</a>,
-      and |policy|, is "`Does Not Match`", return "`Blocked`".
+      and |self-origin|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2660,7 +2679,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
+  and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2668,9 +2688,9 @@ Content-Type: application/reports+json
   2.  If the result of executing [[#should-directive-execute]] on |name|,
       `manifest-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-request-to-source-list]] on
-      |request|, this directive's <a for="directive">value</a>, and |policy|,
-      is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of executing [[#match-request-to-source-list]] on |request|,
+      this directive's <a for="directive">value</a>, and |self-origin|, is
+      "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2680,8 +2700,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
-  <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
+  <a for="/">policy</a> |policy| and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2691,7 +2711,7 @@ Content-Type: application/reports+json
 
   3.  If the result of executing [[#match-response-to-source-list]] on
       |response|, |request|, this directive's <a for="directive">value</a>,
-      and |policy|, is "`Does Not Match`", return "`Blocked`".
+      and |self-origin|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2730,7 +2750,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
+  and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2738,9 +2759,9 @@ Content-Type: application/reports+json
   2.  If the result of executing [[#should-directive-execute]] on |name|,
       `media-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-request-to-source-list]] on
-      |request|, this directive's <a for="directive">value</a>, and |policy|,
-      is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of executing [[#match-request-to-source-list]] on |request|,
+      this directive's <a for="directive">value</a>, and |self-origin|, is
+      "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2750,8 +2771,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
-  <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
+  <a for="/">policy</a> |policy| and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2761,7 +2782,7 @@ Content-Type: application/reports+json
 
   3.  If the result of executing [[#match-response-to-source-list]] on
       |response|, |request|, this directive's <a for="directive">value</a>,
-      and |policy|, is "`Does Not Match`", return "`Blocked`".
+      and |self-origin|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2821,7 +2842,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
+  and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2829,9 +2851,9 @@ Content-Type: application/reports+json
   2.  If the result of executing [[#should-directive-execute]] on |name|,
       `object-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-request-to-source-list]] on
-      |request|, this directive's <a for="directive">value</a>, and |policy|,
-      is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of executing [[#match-request-to-source-list]] on |request|,
+      this directive's <a for="directive">value</a>, and |self-origin|, is
+      "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2841,8 +2863,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
-  <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
+  <a for="/">policy</a> |policy| and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2852,7 +2874,7 @@ Content-Type: application/reports+json
 
   3.  If the result of executing [[#match-response-to-source-list]] on
       |response|, |request|, this directive's <a for="directive">value</a>,
-      and |policy|, is "`Does Not Match`", return "`Blocked`".
+      and |self-origin|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -2927,7 +2949,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
+  and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2936,7 +2959,7 @@ Content-Type: application/reports+json
       `script-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  Return the result of executing [[#script-pre-request]] on |request|,
-      this directive, and |policy|.
+      this directive, |policy|, and |self-origin|.
 
   <h5 algorithm id="script-src-post-request">
     `script-src` Post-request check
@@ -2944,8 +2967,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
-  <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
+  <a for="/">policy</a> |policy| and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -2954,7 +2977,7 @@ Content-Type: application/reports+json
       `script-src` and |policy| is "`No`", return "`Allowed`".
 
   3.  Return the result of executing [[#script-post-request]] on |request|,
-      |response|, this directive, and |policy|.
+      |response|, this directive, |policy|, and |self-origin|.
 
   <h5 algorithm id="script-src-inline">
     `script-src` Inline Check
@@ -3006,7 +3029,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
+  and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -3015,7 +3039,7 @@ Content-Type: application/reports+json
       `script-src-elem` and |policy| is "`No`", return "`Allowed`".
 
   3.  Return the result of executing [[#script-pre-request]] on |request|,
-      this directive, and |policy|.
+      this directive, |policy|, and |self-origin|.
 
   <h5 algorithm id="script-src-elem-post-request">
     `script-src-elem` Post-request check
@@ -3023,8 +3047,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
-  <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
+  <a for="/">policy</a> |policy| and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -3033,7 +3057,7 @@ Content-Type: application/reports+json
       `script-src-elem` and |policy| is "`No`", return "`Allowed`".
 
   3.  Return the result of executing [[#script-post-request]] on |request|,
-      |response|, this directive, and |policy|.
+      |response|, this directive, |policy|, and |self-origin|.
 
   <h5 algorithm id="script-src-elem-inline">
     `script-src-elem` Inline Check
@@ -3145,7 +3169,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
+  and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -3158,9 +3183,9 @@ Content-Type: application/reports+json
       directive's <a for="directive">value</a> is "`Matches`", return
       "`Allowed`".
 
-  4.  If the result of executing [[#match-request-to-source-list]] on
-      |request|, this directive's <a for="directive">value</a>, and |policy|,
-      is "`Does Not Match`", return "`Blocked`".
+  4.  If the result of executing [[#match-request-to-source-list]] on |request|,
+      this directive's <a for="directive">value</a>, and |self-origin|, is
+      "`Does Not Match`", return "`Blocked`".
 
   5.  Return "`Allowed`".
 
@@ -3170,8 +3195,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
-  <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
+  <a for="/">policy</a> |policy|, and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -3186,7 +3211,7 @@ Content-Type: application/reports+json
 
   4.  If the result of executing [[#match-response-to-source-list]] on
       |response|, |request|, this directive's <a for="directive">value</a>,
-      and |policy|, is "`Does Not Match`", return "`Blocked`".
+      and |self-origin|, is "`Does Not Match`", return "`Blocked`".
 
   5.  Return "`Allowed`".
 
@@ -3235,7 +3260,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
+  and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -3248,9 +3274,9 @@ Content-Type: application/reports+json
       directive's <a for="directive">value</a> is "`Matches`", return
       "`Allowed`".
 
-  4.  If the result of executing [[#match-request-to-source-list]] on
-      |request|, this directive's <a for="directive">value</a>, and |policy|,
-      is "`Does Not Match`", return "`Blocked`".
+  4.  If the result of executing [[#match-request-to-source-list]] on |request|,
+      this directive's <a for="directive">value</a>, and |self-origin|, is
+      "`Does Not Match`", return "`Blocked`".
 
   5.  Return "`Allowed`".
 
@@ -3260,8 +3286,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
-  <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
+  <a for="/">policy</a> |policy|, and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -3276,7 +3302,7 @@ Content-Type: application/reports+json
 
   4.  If the result of executing [[#match-response-to-source-list]] on
       |response|, |request|, this directive's <a for="directive">value</a>,
-      and |policy|, is "`Does Not Match`", return "`Blocked`".
+      and |self-origin|, is "`Does Not Match`", return "`Blocked`".
 
   5.  Return "`Allowed`".
 
@@ -3432,7 +3458,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">pre-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
+  and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -3440,9 +3467,9 @@ Content-Type: application/reports+json
   2.  If the result of executing [[#should-directive-execute]] on |name|,
       `worker-src` and |policy| is "`No`", return "`Allowed`".
 
-  3.  If the result of executing [[#match-request-to-source-list]] on
-      |request|, this directive's <a for="directive">value</a>, and |policy|,
-      is "`Does Not Match`", return "`Blocked`".
+  3.  If the result of executing [[#match-request-to-source-list]] on |request|,
+      this directive's <a for="directive">value</a>, and |self-origin|, is
+      "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -3452,8 +3479,8 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
-  <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
+  <a for="/">policy</a> |policy|, and an <a>origin</a> |self-origin|:
 
   1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
       on |request|.
@@ -3463,7 +3490,7 @@ Content-Type: application/reports+json
 
   3.  If the result of executing [[#match-response-to-source-list]] on
       |response|, |request|, this directive's <a for="directive">value</a>,
-      and |policy|, is "`Does Not Match`", return "`Blocked`".
+      and |self-origin|, is "`Does Not Match`", return "`Blocked`".
 
   4.  Return "`Allowed`".
 
@@ -3496,8 +3523,10 @@ Content-Type: application/reports+json
   returns "`Allowed`" if |base| may be used as the value of a <{base}>
   element's <{base/href}> attribute, and "`Blocked`" otherwise:
 
-  1.  <a for=list>For each</a> |policy| of |document|'s <a for="/">global object</a>'s
-      <a for="global object">csp list</a>:
+  1. Let |CSP list| be |document|'s <a for="/">global object</a>'s <a
+      for="global object">csp list</a>
+
+  1.  <a for=list>For each</a> |policy| of |CSP list|'s [=CSP list/policies=]:
 
       1.  Let |source list| be null.
 
@@ -3508,8 +3537,9 @@ Content-Type: application/reports+json
 
       3.  If |source list| is null, skip to the next |policy|.
 
-      4.  If the result of executing [[#match-url-to-source-list]] on |base|, |source list|,
-          |policy|'s [=policy/self-origin=], and `0` is "`Does Not Match`":
+      4.  If the result of executing [[#match-url-to-source-list]] on |base|,
+          |source list|, |CSP list|'s [=CSP list/self-origin=], and `0` is
+          "`Does Not Match`":
 
           1.  Let |violation| be the result of executing
               [[#create-violation-for-global]] on |document|'s <a for="/">global
@@ -3598,10 +3628,12 @@ Content-Type: application/reports+json
     `form-action` Pre-Navigation Check
   </h5>
 
-  Given a <a for="/">request</a> |request|, a string |navigation type| ("`form-submission`" or
-  "`other`"), and a <a for="/">policy</a> |policy| this algorithm returns "`Blocked`" if a form
+  Given a <a for="/">request</a> |request|, a string |navigation type|
+  ("`form-submission`" or "`other`"), a <a for="/">policy</a> |policy|, and an
+  <a>origin</a> |self-origin|, this algorithm returns "`Blocked`" if a form
   submission violates the `form-action` directive's constraints, and "`Allowed`"
-  otherwise. This constitutes the `form-action` directive's <a>pre-navigation check</a>:
+  otherwise. This constitutes the `form-action` directive's <a>pre-navigation
+  check</a>:
 
   <ol class="algorithm">
     1.  Assert: |policy| is unused in this algorithm.
@@ -3609,8 +3641,8 @@ Content-Type: application/reports+json
     2.  If |navigation type| is "`form-submission`":
 
         1.  If the result of executing [[#match-request-to-source-list]] on
-            |request|, this directive's <a for="directive">value</a>, and a
-            |policy|, is "`Does Not Match`", return "`Blocked`".
+            |request|, this directive's <a for="directive">value</a>,
+            and |self-origin|, is "`Does Not Match`", return "`Blocked`".
 
     3.  Return "`Allowed`".
   </ol>
@@ -3645,12 +3677,12 @@ Content-Type: application/reports+json
   </h5>
 
   Given a <a for="/">request</a> |request|, a string |navigation type|
-  ("`form-submission`" or "`other`"), a
-  <a>response</a> |navigation response|, a <a>navigable</a> |target|,
-  a string |check type| ("`source`" or "`response`"), and a
-  <a for="/">policy</a> |policy| this algorithm returns "`Blocked`" if one or
-  more of the ancestors of |target| violate the `frame-ancestors` directive
-  delivered with the response, and "`Allowed`" otherwise. This constitutes the
+  ("`form-submission`" or "`other`"), a <a>response</a> |navigation response|, a
+  <a>navigable</a> |target|, a string |check type| ("`source`" or "`response`"),
+  a <a for="/">policy</a> <var ignore>policy</var>, and an [=origin=]
+  |self-origin|, this algorithm returns "`Blocked`" if one or more of the
+  ancestors of |target| violate the `frame-ancestors` directive delivered with
+  the response, and "`Allowed`" otherwise. This constitutes the
   `frame-ancestors` directive's <a>navigation response check</a>:
 
   <ol class="algorithm">
@@ -3680,7 +3712,7 @@ Content-Type: application/reports+json
 
         3.  If [[#match-url-to-source-list]] returns `Does Not Match` when
             executed upon |origin|, this directive's <a for="directive">value</a>,
-            |policy|'s [=policy/self-origin=], and `0`, return "`Blocked`".
+            |self-origin|, and `0`, return "`Blocked`".
 
         4.  Set |current| to |document|'s <a>node navigable</a>.
 
@@ -3780,8 +3812,9 @@ Content-Type: application/reports+json
     Script directives pre-request check
   </h5>
 
-  Given a <a for="/">request</a> |request|, a <a>directive</a> |directive|,
-  and a <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a>directive</a> |directive|, a <a
+  for="/">policy</a> <var ignore>policy</var>, and an <a>origin</a>
+  |self-origin|:
 
   1.  If |request|'s <a for="request">destination</a> is <a for="request/destination">script-like</a>:
 
@@ -3808,8 +3841,8 @@ Content-Type: application/reports+json
               in [[#strict-dynamic-usage]].
 
       4.  If the result of executing [[#match-request-to-source-list]] on
-          |request|, |directive|'s <a for="directive">value</a>, and |policy|,
-          is "`Does Not Match`", return "`Blocked`".
+          |request|, |directive|'s <a for="directive">value</a>, and
+          |self-origin|, is "`Does Not Match`", return "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -3819,8 +3852,9 @@ Content-Type: application/reports+json
 
   This directive's <a for="directive">post-request check</a> is as follows:
 
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|,
-  a <a>directive</a> |directive|, and a <a for="/">policy</a> |policy|:
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
+  <a>directive</a> |directive|, a <a for="/">policy</a> |policy|, and an
+  <a>origin</a> |self-origin|:
 
   Note: This check needs both |request| and |response| as input
   parameters since if |request|'s <a for="request">cryptographic nonce metadata</a>
@@ -3855,7 +3889,8 @@ Content-Type: application/reports+json
 
       1.  If the result of executing [[#match-response-to-source-list]] on
           |response|, |request|, |directive|'s <a for="directive">value</a>,
-          and |policy|, is "`Does Not Match`", return "`Blocked`".
+          and |self-origin|, is "`Does Not Match`", return
+          "`Blocked`".
 
   2.  Return "`Allowed`".
 
@@ -3865,19 +3900,22 @@ Content-Type: application/reports+json
     Does |request| violate |policy|?
   </h5>
 
-  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|, this
-  algorithm returns the violated <a>directive</a> if the request violates the
-  policy, and "`Does Not Violate`" otherwise.
+  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
+  and an <a>origin</a> |self-origin|, this algorithm returns the violated
+  <a>directive</a> if the request violates the policy, and "`Does Not Violate`"
+  otherwise.
 
-  1.  If |request|'s [=request/initiator=] is "`prefetch`", then return the result of executing
-      [[#does-resource-hint-violate-policy]] on |request| and |policy|.
+  1.  If |request|'s [=request/initiator=] is "`prefetch`", then return the
+      result of executing [[#does-resource-hint-violate-policy]] on |request|,
+      |policy|, and |self-origin|.
 
   2.  Let |violates| be "`Does Not Violate`".
 
   3.  <a for=set>For each</a> |directive| of |policy|:
 
-      1.  Let |result| be the result of executing |directive|'s
-          <a for="directive">pre-request check</a> on |request| and |policy|.
+      1.  Let |result| be the result of executing |directive|'s <a
+          for="directive">pre-request check</a> on |request|, |policy|, and
+          |self-origin|.
 
       2.  If |result| is "`Blocked`", then let |violates| be |directive|.
 
@@ -3887,9 +3925,10 @@ Content-Type: application/reports+json
     Does resource hint |request| violate |policy|?
   </h5>
 
-  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|, this
-  algorithm returns the default <a>directive</a> if the resource-hint request violates all the
-  policies, and "`Does Not Violate`" otherwise.
+  Given a <a for="/">request</a> |request|,a <a for="/">policy</a> |policy|, and
+  an <a>origin</a> |self-origin|, this algorithm returns the default
+  <a>directive</a> if the resource-hint request violates all the policies, and
+  "`Does Not Violate`" otherwise.
 
   1. Let |defaultDirective| be |policy|'s first [=directive=] whose [=directive/name=] is
       "`default-src`".
@@ -3917,9 +3956,9 @@ Content-Type: application/reports+json
 
       1. Assert: |directive|'s <a for="directive">value</a> is a <a>source list</a>.
 
-      1. Let |result| be the result of executing [[#match-request-to-source-list]] on
-          |request|, |directive|'s <a for="directive">value</a>, and
-          |policy|.
+      1. Let |result| be the result of executing
+         [[#match-request-to-source-list]] on |request|, |directive|'s <a
+         for="directive">value</a>, and |self-origin|.
 
       1. If |result| is "`Allowed`", then return "`Does Not Violate`".
 
@@ -3989,9 +4028,9 @@ Content-Type: application/reports+json
   </h5>
 
   Given a <a for="/">request</a> |request|, a <a>source list</a> |source list|,
-  and a <a for="/">policy</a> |policy|, this algorithm returns the result of executing
-  [[#match-url-to-source-list]] on |request|'s <a for="request">current url</a>,
-  |source list|, |policy|'s [=policy/self-origin=], and |request|'s
+  and an <a>origin</a> |self-origin|, this algorithm returns the result of
+  executing [[#match-url-to-source-list]] on |request|'s <a
+  for="request">current url</a>, |source list|, |self-origin|, and |request|'s
   <a for="request">redirect count</a>.
 
   Note: This is generally used in <a>directives</a>' <a>pre-request check</a>
@@ -4002,10 +4041,10 @@ Content-Type: application/reports+json
   </h5>
 
   Given a <a>response</a> |response|, a <a for="/">request</a> |request|, a
-  <a>source list</a> |source list|, and a <a for="/">policy</a> |policy|, this
+  <a>source list</a> |source list|, and an <a>origin</a> |self-origin|, this
   algorithm returns the result of executing [[#match-url-to-source-list]] on
-  |response|'s <a for="response">url</a>, |source list|, |policy|'s
-  [=policy/self-origin=], and |request|'s <a for="request">redirect count</a>.
+  |response|'s <a for="response">url</a>, |source list|, |self-origin|, and
+  |request|'s <a for="request">redirect count</a>.
 
   Note: This is generally used in <a>directives</a>' <a>post-request check</a>
   algorithms to verify that a given <a>response</a> is reasonable.
