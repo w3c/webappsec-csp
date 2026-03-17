@@ -1003,35 +1003,6 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   documents are the normative references which ought to be consulted for
   detailed information.
 
-  <h3 id="webdriver-bidi-integration">
-    Integration with WebDriver BiDi
-  </h3>
-
-  <dfn export>WebDriver BiDi CSP bypass is enabled</dfn> is an algorithm defined
-  by [[WEBDRIVER-BIDI]] that takes a <a>navigable</a> as input and returns a boolean.
-  When this algorithm returns true for a given navigable, Content Security Policy
-  enforcement is bypassed for that navigable's active document and its nested
-  navigables.
-
-  Note: This integration point allows WebDriver BiDi to disable CSP enforcement
-  during automated testing, similar to Chrome DevTools Protocol's Page.setBypassCSP.
-
-  <h4 id="obtain-navigable-for-request" algorithm dfn>
-    Obtain the navigable for a request
-  </h4>
-
-  Given a <a for="/">request</a> |request|, this algorithm returns a <a>navigable</a> or null.
-
-  1.  Let |navigable| be null.
-
-  2.  If |request|'s [=request/client=] is an [=environment settings object=]:
-
-      1.  Let |environment settings| be |request|'s [=request/client=].
-
-      2.  If there is a [=navigable=] whose [=navigable/active window=] is |environment settings|' [=environment settings object/global object=], set |navigable| to be that [=navigable=].
-
-  3.  Return |navigable|.
-
   <h3 id="fetch-integration">
     Integration with Fetch
   </h3>
@@ -1083,15 +1054,13 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   reports violations based on |request|'s [=request/policy container=]'s
   [=policy container/CSP list=].
 
-  1.  Let |navigable| be the result of [[#obtain-navigable-for-request]] given |request|.
+  1.  If [[#csp-enforcement-disabled-for-request]] given |request| is true, return "`Allowed`".
 
-  2.  If |navigable| is not null and [=WebDriver BiDi CSP bypass is enabled=] given |navigable| is true, return "`Allowed`".
+  2.  Let |CSP list| be |request|'s [=request/policy container=]'s [=policy container/CSP list=].
 
-  3.  Let |CSP list| be |request|'s [=request/policy container=]'s [=policy container/CSP list=].
+  3.  Let |result| be "`Allowed`".
 
-  4.  Let |result| be "`Allowed`".
-
-  5.  <a for=list>For each</a> |policy| of |CSP list|'s [=CSP list/policies=]:
+  4.  <a for=list>For each</a> |policy| of |CSP list|'s [=CSP list/policies=]:
 
       1.  If |policy|'s <a for="policy">disposition</a> is "`report`",
           then skip to the next |policy|.
@@ -1107,7 +1076,7 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
           2.  Set |result| to "`Blocked`".
 
-  6.  Return |result|.
+  5.  Return |result|.
 
   <h4 id="should-block-response" algorithm dfn export>
     Should |response| to |request| be blocked by Content Security Policy?
@@ -1117,15 +1086,13 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   returns `Blocked` or `Allowed`, and reports violations based on |request|'s
   [=request/policy container=]'s [=policy container/CSP list=].
 
-  1.  Let |navigable| be the result of [[#obtain-navigable-for-request]] given |request|.
+  1.  If [[#csp-enforcement-disabled-for-request]] given |request| is true, return "`Allowed`".
 
-  2.  If |navigable| is not null and [=WebDriver BiDi CSP bypass is enabled=] given |navigable| is true, return "`Allowed`".
+  2.  Let |CSP list| be |request|'s [=request/policy container=]'s [=policy container/CSP list=].
 
-  3.  Let |CSP list| be |request|'s [=request/policy container=]'s [=policy container/CSP list=].
+  3.  Let |result| be "`Allowed`".
 
-  4.  Let |result| be "`Allowed`".
-
-  5.  <a for=list>For each</a> |policy| of |CSP list|'s [=CSP list/policies=]:
+  4.  <a for=list>For each</a> |policy| of |CSP list|'s [=CSP list/policies=]:
 
       1.  <a for=set>For each</a> |directive| of |policy|:
 
@@ -1144,7 +1111,7 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
       response. That is, that a Service Worker hasn't substituted a file which
       would violate the page's CSP.
 
-  6.  Return |result|.
+  5.  Return |result|.
 
   <h4 id="potentially-report-hash" algorithm dfn export>Potentially report hash</h4>
 
@@ -1246,11 +1213,9 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   Given a {{Document}} |document|, the user agent performs the following
   steps in order to initialize CSP for |document|:
 
-  1.  Let |navigable| be |document|'s [=/node navigable=].
+  1.  If |document|'s [=/node navigable=] is not null and [=WebDriver BiDi CSP bypass is enabled=] given |document|'s [=/node navigable=] is true, then set |document|'s [=Document/policy container=]'s [=policy container/CSP list=] to an empty list.
 
-  2.  If |navigable| is not null and [=WebDriver BiDi CSP bypass is enabled=] given |navigable| is true, then set |document|'s [=Document/policy container=]'s [=policy container/CSP list=] to an empty list.
-
-  3. <a for=list>For each</a> |policy| of |document|'s [=Document/policy container=]'s
+  2. <a for=list>For each</a> |policy| of |document|'s [=Document/policy container=]'s
      [=policy container/CSP list=]:
 
       1.  <a for=set>For each</a> |directive| of |policy|:
@@ -1289,13 +1254,11 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   <ol class="algorithm">
     1.  Assert: |element| is not null.
 
-    2.  Let |navigable| be |element|'s [=/node navigable=].
+    2.  If |element|'s [=/node navigable=] is not null and [=WebDriver BiDi CSP bypass is enabled=] given |element|'s [=/node navigable=] is true, return "`Allowed`".
 
-    3.  If |navigable| is not null and [=WebDriver BiDi CSP bypass is enabled=] given |navigable| is true, return "`Allowed`".
+    3.  Let |result| be "`Allowed`".
 
-    4.  Let |result| be "`Allowed`".
-
-    5.  <a for=list>For each</a> |policy| of |element|'s {{Document}}'s <a for="/">global object</a>'s
+    4.  <a for=list>For each</a> |policy| of |element|'s {{Document}}'s <a for="/">global object</a>'s
         <a for="global object">CSP list</a>'s [=CSP list/policies=]:
 
         1.  <a for=set>For each</a> |directive| of |policy|'s <a for="policy">directive set</a>:
@@ -1326,7 +1289,7 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
             8.  If |policy|'s <a for="policy">disposition</a> is "`enforce`", then
                 set |result| to "`Blocked`".
 
-    6.  Return |result|.
+    5.  Return |result|.
   </ol>
 
   <h4 id="should-block-navigation-request" algorithm dfn export>
@@ -1339,17 +1302,15 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   the navigation, and "`Allowed`" otherwise:
 
   <ol class="algorithm">
-    1.  Let |navigable| be the result of [[#obtain-navigable-for-request]] given |navigation request|.
+    1.  If [[#csp-enforcement-disabled-for-request]] given |navigation request| is true, return "`Allowed`".
 
-    2.  If |navigable| is not null and [=WebDriver BiDi CSP bypass is enabled=] given |navigable| is true, return "`Allowed`".
+    2.  Let |result| be "`Allowed`".
 
-    3.  Let |result| be "`Allowed`".
-
-    4.  Let |CSP list| be |navigation request|'s <a for="request">policy
+    3.  Let |CSP list| be |navigation request|'s <a for="request">policy
         container</a>'s <a for="policy container">CSP list</a>'s [=CSP
         list/policies=].
 
-    5.  <a for=list>For each</a> |policy| of |CSP list|'s [=CSP list/policies=]:
+    4.  <a for=list>For each</a> |policy| of |CSP list|'s [=CSP list/policies=]:
 
         1.  <a for=set>For each</a> |directive| of |policy|:
 
@@ -1681,6 +1642,35 @@ this algorithm returns normally if compilation is allowed, and throws a
             "`Blocked`".
 
 4.  If |result| is "`Blocked`", throw a {{WebAssembly.CompileError}} exception.
+
+  <h3 id="webdriver-bidi-integration">
+    Integration with WebDriver BiDi
+  </h3>
+
+  <dfn export>WebDriver BiDi CSP bypass is enabled</dfn> is an algorithm defined
+  by [[WEBDRIVER-BIDI]] that takes a <a>navigable</a> as input and returns a boolean.
+  When this algorithm returns true for a given navigable, Content Security Policy
+  enforcement is disabled for that navigable's active document and its nested
+  navigables.
+
+  Note: This integration point allows WebDriver BiDi clients to optionally
+  disable CSP enforcement during automated testing, but this is not the default
+  behavior.
+
+  <h4 id="csp-enforcement-disabled-for-request" algorithm dfn>
+    Is CSP enforcement disabled for |request|?
+  </h4>
+
+  Given a <a for="/">request</a> |request|, this algorithm returns true if
+  [=WebDriver BiDi CSP bypass is enabled=] applies to |request|, and false otherwise.
+
+  1.  If |request|'s [=request/client=] is an [=environment settings object=]:
+
+      1.  Let |environment settings| be |request|'s [=request/client=].
+
+      2.  If there is a [=navigable=] whose [=navigable/active window=] is |environment settings|'s [=environment settings object/global object=] and [=WebDriver BiDi CSP bypass is enabled=] given that [=navigable=] is true, return true.
+
+  2.  Return false.
 
 </section>
 
@@ -3960,17 +3950,14 @@ Content-Type: application/reports+json
   <a>directive</a> if the request violates the policy, and "`Does Not Violate`"
   otherwise.
 
-  1.  Let |navigable| be the result of [[#obtain-navigable-for-request]] given |request|.
+  1.  If [[#csp-enforcement-disabled-for-request]] given |request| is true, return "`Does Not Violate`".
 
-  2.  If |navigable| is not null and [=WebDriver BiDi CSP bypass is enabled=] given |navigable| is true, return "`Does Not Violate`".
+  2.  If |request|'s [=request/initiator=] is "`prefetch`", then return the result of executing
+      [[#does-resource-hint-violate-policy]] on |request| and |policy|.
 
-  3.  If |request|'s [=request/initiator=] is "`prefetch`", then return the
-      result of executing [[#does-resource-hint-violate-policy]] on |request|,
-      |policy|, and |self-origin|.
+  3.  Let |violates| be "`Does Not Violate`".
 
-  4.  Let |violates| be "`Does Not Violate`".
-
-  5.  <a for=set>For each</a> |directive| of |policy|:
+  4.  <a for=set>For each</a> |directive| of |policy|:
 
       1.  Let |result| be the result of executing |directive|'s <a
           for="directive">pre-request check</a> on |request|, |policy|, and
@@ -3978,7 +3965,7 @@ Content-Type: application/reports+json
 
       2.  If |result| is "`Blocked`", then let |violates| be |directive|.
 
-  6.  Return |violates|.
+  5.  Return |violates|.
 
   <h5 id="does-resource-hint-violate-policy">
     Does resource hint |request| violate |policy|?
