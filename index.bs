@@ -2332,6 +2332,7 @@ Content-Type: application/reports+json
                                <a>object-src</a> <a grammar>'self'</a>;
                                <a>script-src-elem</a> <a grammar>'self'</a>;
                                <a>script-src-attr</a> <a grammar>'self'</a>;
+                               <a>speculation-rules-src</a> <a grammar>'self'</a>;
                                <a>style-src-elem</a> <a grammar>'self'</a>;
                                <a>style-src-attr</a> <a grammar>'self'</a>;
                                <a>worker-src</a> <a grammar>'self'</a>
@@ -2361,6 +2362,7 @@ Content-Type: application/reports+json
                                <a>object-src</a> <a grammar>'self'</a>;
                                <a>script-src-elem</a> https://example.com;
                                <a>script-src-attr</a> <a grammar>'self'</a>;
+                               <a>speculation-rules-src</a> <a grammar>'self'</a>;
                                <a>style-src-elem</a> <a grammar>'self'</a>;
                                <a>style-src-attr</a> <a grammar>'self'</a>;
                                <a>worker-src</a> <a grammar>'self'</a>
@@ -3117,6 +3119,99 @@ Content-Type: application/reports+json
   4.  If the result of executing [[#match-element-to-source-list]] on
       |element|, this directive's <a for="directive">value</a>, |type|,
       and |source|, is "`Does Not Match`", return "`Blocked`".
+
+  5.  Return "`Allowed`".
+
+  <h4 id="directive-speculation-rules-src">`speculation-rules-src`</h4>
+
+  The syntax for the directive's name and value is described by the following ABNF:
+
+  <pre>
+    directive-name  = "speculation-rules-src"
+    directive-value = <a grammar>serialized-source-list</a>
+  </pre>
+
+  The <dfn export>speculation-rules-src</dfn> directive restricts the sources
+  from which speculation rules may be loaded, whether via
+  <{script}> elements or the `Speculation-Rules` HTTP response header.
+
+  If `speculation-rules-src` is not present, the user agent will fall back to
+  `script-src-elem`, then `script-src`, then `default-src` when evaluating
+  whether a given speculation rules resource should be allowed.
+
+  <div class="example">
+    Given a page with the following Content Security Policy:
+
+    <pre>
+      <a http-header>Content-Security-Policy</a>: <a>speculation-rules-src</a> https://cdn.example.com/
+    </pre>
+
+    Only speculation rules from `https://cdn.example.com/` will be allowed,
+    regardless of the values set in `script-src-elem`, `script-src`, or
+    `default-src`.
+  </div>
+
+  <h5 algorithm id="speculation-rules-src-pre-request">
+    `speculation-rules-src` Pre-request check
+  </h5>
+
+  This directive's <a for="directive">pre-request check</a> is as follows:
+
+  Given a <a for="/">request</a> |request| and a <a for="/">policy</a> |policy|:
+
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
+
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `speculation-rules-src` and |policy| is "`No`", return "`Allowed`".
+
+  3.  If the result of executing [[#match-request-to-source-list]] on
+      |request|, this directive's <a for="directive">value</a>, and |policy|,
+      is "`Does Not Match`", return "`Blocked`".
+
+  4.  Return "`Allowed`".
+
+  <h5 algorithm id="speculation-rules-src-post-request">
+    `speculation-rules-src` Post-request check
+  </h5>
+
+  This directive's <a for="directive">post-request check</a> is as follows:
+
+  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, and a
+  <a for="/">policy</a> |policy|:
+
+  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
+      on |request|.
+
+  2.  If the result of executing [[#should-directive-execute]] on |name|,
+      `speculation-rules-src` and |policy| is "`No`", return "`Allowed`".
+
+  3.  If the result of executing [[#match-response-to-source-list]] on
+      |response|, |request|, this directive's <a for="directive">value</a>,
+      and |policy|, is "`Does Not Match`", return "`Blocked`".
+
+  4.  Return "`Allowed`".
+
+  <h5 algorithm id="speculation-rules-src-inline">
+    `speculation-rules-src` Inline Check
+  </h5>
+
+  This directive's <a for="directive">inline check</a> algorithm is as follows:
+
+  Given an {{Element}} |element|, a string |type|, a <a for="/">policy</a>
+  |policy| and a string |source|:
+
+  1.  Assert: |element| is not null.
+
+  2.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
+      on |type|.
+
+  3.  If the result of executing [[#should-directive-execute]] on |name|,
+      `speculation-rules-src`, and |policy| is "`No`", return "`Allowed`".
+
+  4.  If the result of executing [[#match-element-to-source-list]] on
+      |element|, this directive's <a for="directive">value</a>, |type|,
+      and |source| is "`Does Not Match`", return "`Blocked`".
 
   5.  Return "`Allowed`".
 
@@ -3951,6 +4046,7 @@ Content-Type: application/reports+json
         * `object-src`
         * `script-src`
         * `script-src-elem`
+        * `speculation-rules-src`
         * `style-src`
         * `style-src-elem`
         * `worker-src`
@@ -4598,13 +4694,7 @@ Content-Type: application/reports+json
 
       : "`speculationrules`"
       ::
-        1. If |request|'s [=request/initiator=] is "`speculation-rules-header`", return null.
-
-        2. Return `script-src-elem`.
-
-        Note: Speculation rules fetched via the `Speculation-Rules` HTTP response
-        header are not subject to CSP. Only speculation rules fetched via the <{script}>
-        element are subject to `script-src-elem`.
+        1. Return `speculation-rules-src`.
 
       : "`report`"
       ::
@@ -4633,6 +4723,9 @@ Content-Type: application/reports+json
       : "`navigation`"
       ::
         1.  Return `script-src-elem`.
+      : "`script speculationrules`"
+      ::
+        1.  Return `speculation-rules-src`.
       : "`script attribute`"
       ::
         1.  Return `script-src-attr`.
@@ -4655,6 +4748,10 @@ Content-Type: application/reports+json
   Given a string |directive name|:
 
   1.  Switch on |directive name|:
+
+      : "`speculation-rules-src`"
+      ::
+        1.  Return `<< "speculation-rules-src", "script-src-elem", "script-src", "default-src" >>`.
 
       : "`script-src-elem`"
       ::
@@ -5350,6 +5447,8 @@ Content-Type: application/reports+json
   ::  This document (see [[#directive-script-src-attr]])
   :   <a>`script-src-elem`</a>
   ::  This document (see [[#directive-script-src-elem]])
+  :   <a>`speculation-rules-src`</a>
+  ::  This document (see [[#directive-speculation-rules-src]])
   :   <a>`style-src`</a>
   ::  This document (see [[#directive-style-src]])
   :   <a>`style-src-attr`</a>
