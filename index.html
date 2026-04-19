@@ -5,9 +5,9 @@
   <title>Content Security Policy Level 3</title>
   <meta content="WD" name="w3c-status">
   <link href="https://www.w3.org/StyleSheets/TR/2021/W3C-WD" rel="stylesheet">
-  <meta content="Bikeshed version 0ef803fdf, updated Tue Jan 6 11:59:39 2026 -0800" name="generator">
+  <meta content="Bikeshed version 5d4d5b9a8, updated Fri Apr 17 13:49:40 2026 -0700" name="generator">
   <link href="https://www.w3.org/TR/CSP3/" rel="canonical">
-  <meta content="7845c09ef1e0f3ef149f262f0509e8db0e040f77" name="revision">
+  <meta content="3e24aea3421b225f890a5c1f8a415354b6730b32" name="revision">
   <meta content="dark light" name="color-scheme">
   <link href="https://www.w3.org/StyleSheets/TR/2021/dark.css" media="(prefers-color-scheme: dark)" rel="stylesheet" type="text/css">
 <style>
@@ -336,7 +336,7 @@ pre .property::before, pre .property::after {
 </style>
 <style>/* Boilerplate: style-counters */
 body {
-    counter-reset: example figure issue;
+    counter-reset: example figure issue table;
 }
 .issue {
     counter-increment: issue;
@@ -361,6 +361,13 @@ figcaption {
 }
 figcaption:not(.no-marker)::before {
     content: "Figure " counter(figure) " ";
+}
+
+figure.table figcaption {
+    counter-increment: table;
+}
+figure.table figcaption:not(.no-marker)::before {
+    content: "Table " counter(table) " ";
 }
 </style>
 <style>/* Boilerplate: style-dfn-panel */
@@ -723,6 +730,30 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
     c-[vm] { color: #cb4b16 } /* Name.Variable.Magic */
     c-[il] { color: #657b83 } /* Literal.Number.Integer.Long */
 }
+
+@media print {
+    /* Darken colors for print that would otherwise print too faintly */
+    c-[c]  { color: #555555 } /* Comment */
+    c-[d]  { color: #555555 } /* Comment.Multiline */
+    c-[cp] { color: #555555 } /* Comment.Preproc */
+    c-[c1] { color: #555555 } /* Comment.Single */
+    c-[cs] { color: #555555 } /* Comment.Special */
+    c-[o]  { color: #222222 } /* Operator */
+    c-[p]  { color: #222222 } /* Punctuation */
+    c-[ow] { color: #222222 } /* Operator.Word */
+    c-[s]  { color: #664400 } /* Literal.String */
+    c-[t]  { color: #664400 } /* Literal.String.Single */
+    c-[u]  { color: #664400 } /* Literal.String.Double */
+    c-[sb] { color: #664400 } /* Literal.String.Backtick */
+    c-[sc] { color: #664400 } /* Literal.String.Char */
+    c-[sd] { color: #664400 } /* Literal.String.Doc */
+    c-[se] { color: #664400 } /* Literal.String.Escape */
+    c-[sh] { color: #664400 } /* Literal.String.Heredoc */
+    c-[si] { color: #664400 } /* Literal.String.Interpol */
+    c-[sx] { color: #664400 } /* Literal.String.Other */
+    c-[sr] { color: #664400 } /* Literal.String.Regex */
+    c-[ss] { color: #664400 } /* Literal.String.Symbol */
+}
 </style>
 <style>/* Boilerplate: style-var-click-highlighting */
 /*
@@ -775,13 +806,13 @@ var[data-var-color="6"] { --var-vg: #FFBCF2; }
 </p>
    <h1>Content Security Policy Level 3</h1>
    <p id="w3c-state"><a href="https://www.w3.org/standards/types/#WD">W3C Working Draft</a>,
-    <time class="dt-updated" datetime="2026-04-01">1 April 2026</time></p>
+    <time class="dt-updated" datetime="2026-04-19">19 April 2026</time></p>
    <details open>
     <summary>More details about this document</summary>
     <div data-fill-with="spec-metadata">
      <dl>
       <dt>This version:
-      <dd><a class="u-url" href="https://www.w3.org/TR/2026/WD-CSP3-20260401/">https://www.w3.org/TR/2026/WD-CSP3-20260401/</a>
+      <dd><a class="u-url" href="https://www.w3.org/TR/2026/WD-CSP3-20260419/">https://www.w3.org/TR/2026/WD-CSP3-20260419/</a>
       <dt>Latest published version:
       <dd><a href="https://www.w3.org/TR/CSP3/">https://www.w3.org/TR/CSP3/</a>
       <dt>Editor's Draft:
@@ -1428,7 +1459,7 @@ of security-relevant policy decisions.</p>
      <a href="#references"><span class="secno"></span> <span class="content">References</span></a>
      <ol class="toc">
       <li><a href="#normative"><span class="secno"></span> <span class="content">Normative References</span></a>
-      <li><a href="#informative"><span class="secno"></span> <span class="content">Informative References</span></a>
+      <li><a href="#informative"><span class="secno"></span> <span class="content">Non-Normative References</span></a>
      </ol>
     <li><a href="#idl-index"><span class="secno"></span> <span class="content">IDL Index</span></a>
     <li><a href="#issues-index"><span class="secno"></span> <span class="content">Issues Index</span></a>
@@ -1580,11 +1611,11 @@ of security-relevant policy decisions.</p>
     <p>A <dfn class="dfn-paneled" data-dfn-type="dfn" data-export data-local-lt="policy" data-lt="content security policy object" id="content-security-policy-object">policy</dfn> defines allowed
   and restricted behaviors, and may be applied to a <code class="idl"><a data-link-type="idl" href="https://dom.spec.whatwg.org/#document" id="ref-for-document①">Document</a></code>, <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#workerglobalscope" id="ref-for-workerglobalscope">WorkerGlobalScope</a></code>, or
   <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/worklets.html#workletglobalscope" id="ref-for-workletglobalscope">WorkletGlobalScope</a></code>.</p>
-    <p>Each policy has an associated <dfn class="dfn-paneled" data-dfn-for="policy" data-dfn-type="dfn" data-export id="policy-directive-set">directive set</dfn>, which is an <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-set" id="ref-for-ordered-set">ordered
+    <p>Each policy has an associated <dfn class="dfn-paneled" data-dfn-for="content security policy object" data-dfn-type="dfn" data-export id="content-security-policy-object-directive-set">directive set</dfn>, which is an <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-set" id="ref-for-ordered-set">ordered
   set</a> of <a data-link-type="dfn" href="#directives" id="ref-for-directives">directives</a> that define the policy’s implications when applied.</p>
-    <p>Each policy has an associated <dfn class="dfn-paneled" data-dfn-for="policy" data-dfn-type="dfn" data-export id="policy-disposition">disposition</dfn>, which is either
+    <p>Each policy has an associated <dfn class="dfn-paneled" data-dfn-for="content security policy object" data-dfn-type="dfn" data-export id="content-security-policy-object-disposition">disposition</dfn>, which is either
   "<code>enforce</code>" or "<code>report</code>".</p>
-    <p>Each policy has an associated <dfn class="dfn-paneled" data-dfn-for="policy" data-dfn-type="dfn" data-export id="policy-source">source</dfn>, which is either "<code>header</code>"
+    <p>Each policy has an associated <dfn class="dfn-paneled" data-dfn-for="content security policy object" data-dfn-type="dfn" data-export id="content-security-policy-object-source">source</dfn>, which is either "<code>header</code>"
   or "<code>meta</code>".</p>
     <p>Multiple <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object">policies</a> can be applied to a single resource. A <dfn class="dfn-paneled" data-dfn-type="dfn" data-export data-lt="CSP list" id="csp-list">CSP
   list</dfn> is a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#struct" id="ref-for-struct">struct</a> consisting of <dfn class="dfn-paneled" data-dfn-for="CSP list" data-dfn-type="dfn" data-export id="csp-list-policies">policies</dfn> (a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list" id="ref-for-list">list</a> of <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object①">policies</a>) and a <dfn class="dfn-paneled" data-dfn-for="CSP list" data-dfn-type="dfn" data-export id="csp-list-self-origin">self-origin</dfn> (an <a data-link-type="dfn" href="https://html.spec.whatwg.org/#concept-origin" id="ref-for-concept-origin">origin</a> which is used when matching the <a data-link-type="grammar" href="#grammardef-self" id="ref-for-grammardef-self"><code>'self'</code></a> keyword).</p>
@@ -1594,7 +1625,7 @@ of security-relevant policy decisions.</p>
   <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#environment-settings-object" id="ref-for-environment-settings-object">environment settings object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-origin" id="ref-for-concept-settings-object-origin">origin</a>.</p>
     <p>A <a data-link-type="dfn" href="#csp-list" id="ref-for-csp-list">CSP list</a> <dfn class="dfn-paneled" data-dfn-type="dfn" data-export data-lt="contains a header-delivered Content Security Policy" id="contains-a-header-delivered-content-security-policy">contains a header-delivered Content Security
   Policy</dfn> if its <a data-link-type="dfn" href="#csp-list-policies" id="ref-for-csp-list-policies">policies</a> <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-contain" id="ref-for-list-contain">contain</a> a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object②">policy</a> whose
-  <a data-link-type="dfn" href="#policy-source" id="ref-for-policy-source">source</a> is "<code>header</code>".</p>
+  <a data-link-type="dfn" href="#content-security-policy-object-source" id="ref-for-content-security-policy-object-source">source</a> is "<code>header</code>".</p>
     <p>A <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="serialized-csp">serialized CSP</dfn> is an <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ascii-string" id="ref-for-ascii-string">ASCII string</a> consisting of a semicolon-delimited
   series of <a data-link-type="dfn" href="#serialized-directive" id="ref-for-serialized-directive">serialized directives</a>, adhering to the following ABNF grammar <a data-link-type="biblio" href="#biblio-rfc5234" title="Augmented BNF for Syntax Specifications: ABNF">[RFC5234]</a>:</p>
 <pre><dfn class="dfn-paneled" data-dfn-type="grammar" data-export id="grammardef-serialized-policy">serialized-policy</dfn> =
@@ -1611,17 +1642,17 @@ of security-relevant policy decisions.</p>
     Parse a serialized CSP
   </span><a class="self-link" href="#parse-serialized-policy"></a></h4>
     <p>To <dfn class="dfn-paneled" data-dfn-type="abstract-op" data-export id="abstract-opdef-parse-a-serialized-csp">parse a serialized CSP</dfn>, given a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#byte-sequence" id="ref-for-byte-sequence">byte sequence</a> or
-  <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string">string</a> <var>serialized</var>, a <a data-link-type="dfn" href="#policy-source" id="ref-for-policy-source①">source</a> <var>source</var>, and a <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition">disposition</a>
+  <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string">string</a> <var>serialized</var>, a <a data-link-type="dfn" href="#content-security-policy-object-source" id="ref-for-content-security-policy-object-source①">source</a> <var>source</var>, and a <a data-link-type="dfn" href="#content-security-policy-object-disposition" id="ref-for-content-security-policy-object-disposition">disposition</a>
   <var>disposition</var>, execute the following steps.</p>
     <p>This algorithm returns a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object③">Content Security Policy object</a>. If <var>serialized</var> could not be
-  parsed, the object’s <a data-link-type="dfn" href="#policy-directive-set" id="ref-for-policy-directive-set">directive set</a> will be empty.</p>
+  parsed, the object’s <a data-link-type="dfn" href="#content-security-policy-object-directive-set" id="ref-for-content-security-policy-object-directive-set">directive set</a> will be empty.</p>
     <ol class="algorithm">
      <li data-md>
       <p>If <var>serialized</var> is a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#byte-sequence" id="ref-for-byte-sequence①">byte sequence</a>, then set <var>serialized</var> to be the result of
   <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#isomorphic-decode" id="ref-for-isomorphic-decode">isomorphic decoding</a> <var>serialized</var>.</p>
      <li data-md>
-      <p>Let <var>policy</var> be a new <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object④">policy</a> with an empty <a data-link-type="dfn" href="#policy-directive-set" id="ref-for-policy-directive-set①">directive set</a>, a <a data-link-type="dfn" href="#policy-source" id="ref-for-policy-source②">source</a>
-  of <var>source</var>, and a <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①">disposition</a> of <var>disposition</var>.</p>
+      <p>Let <var>policy</var> be a new <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object④">policy</a> with an empty <a data-link-type="dfn" href="#content-security-policy-object-directive-set" id="ref-for-content-security-policy-object-directive-set①">directive set</a>, a <a data-link-type="dfn" href="#content-security-policy-object-source" id="ref-for-content-security-policy-object-source②">source</a>
+  of <var>source</var>, and a <a data-link-type="dfn" href="#content-security-policy-object-disposition" id="ref-for-content-security-policy-object-disposition①">disposition</a> of <var>disposition</var>.</p>
      <li data-md>
       <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-iterate" id="ref-for-list-iterate">For each</a> <var>token</var> returned by <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#strictly-split" id="ref-for-strictly-split">strictly splitting</a> <var>serialized</var> on
   the U+003B SEMICOLON character (<code>;</code>):</p>
@@ -1639,7 +1670,7 @@ of security-relevant policy decisions.</p>
         <p class="note" role="note"><span class="marker">Note:</span> Directive names are case-insensitive, that is: <code>script-SRC 'none'</code> and
   <code>ScRiPt-sRc 'none'</code> are equivalent.</p>
        <li data-md>
-        <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-directive-set" id="ref-for-policy-directive-set②">directive set</a> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives①">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name">name</a>
+        <p>If <var>policy</var>’s <a data-link-type="dfn" href="#content-security-policy-object-directive-set" id="ref-for-content-security-policy-object-directive-set②">directive set</a> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives①">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name">name</a>
   is <var>directive name</var>, <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#iteration-continue" id="ref-for-iteration-continue①">continue</a>.</p>
         <p class="note" role="note"><span class="marker">Note:</span> In this case, the user agent SHOULD notify developers that a duplicate
   directive was ignored. A console warning might be appropriate, for example.</p>
@@ -1651,7 +1682,7 @@ of security-relevant policy decisions.</p>
         <p>Let <var>directive</var> be a new <a data-link-type="dfn" href="#directives" id="ref-for-directives②">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name①">name</a> is <var>directive name</var>, and
   <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value">value</a> is <var>directive value</var>.</p>
        <li data-md>
-        <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append" id="ref-for-set-append">Append</a> <var>directive</var> to <var>policy</var>’s <a data-link-type="dfn" href="#policy-directive-set" id="ref-for-policy-directive-set③">directive set</a>.</p>
+        <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#set-append" id="ref-for-set-append">Append</a> <var>directive</var> to <var>policy</var>’s <a data-link-type="dfn" href="#content-security-policy-object-directive-set" id="ref-for-content-security-policy-object-directive-set③">directive set</a>.</p>
       </ol>
      <li data-md>
       <p>Return <var>policy</var>.</p>
@@ -1673,9 +1704,9 @@ of security-relevant policy decisions.</p>
        <li data-md>
         <p>Let <var>policy</var> be the result of
   <a data-link-type="abstract-op" href="#abstract-opdef-parse-a-serialized-csp" id="ref-for-abstract-opdef-parse-a-serialized-csp">parsing</a> <var>token</var>, with a
-  <a data-link-type="dfn" href="#policy-source" id="ref-for-policy-source③">source</a> of "<code>header</code>", and a <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition②">disposition</a> of "<code>enforce</code>".</p>
+  <a data-link-type="dfn" href="#content-security-policy-object-source" id="ref-for-content-security-policy-object-source③">source</a> of "<code>header</code>", and a <a data-link-type="dfn" href="#content-security-policy-object-disposition" id="ref-for-content-security-policy-object-disposition②">disposition</a> of "<code>enforce</code>".</p>
        <li data-md>
-        <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-directive-set" id="ref-for-policy-directive-set④">directive set</a> is not empty, append <var>policy</var> to <var>policies</var>.</p>
+        <p>If <var>policy</var>’s <a data-link-type="dfn" href="#content-security-policy-object-directive-set" id="ref-for-content-security-policy-object-directive-set④">directive set</a> is not empty, append <var>policy</var> to <var>policies</var>.</p>
       </ol>
      <li data-md>
       <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-iterate" id="ref-for-list-iterate②">For each</a> <var>token</var> returned by <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#extract-header-list-values" id="ref-for-extract-header-list-values①">extracting header list values</a> given
@@ -1684,9 +1715,9 @@ of security-relevant policy decisions.</p>
        <li data-md>
         <p>Let <var>policy</var> be the result of
   <a data-link-type="abstract-op" href="#abstract-opdef-parse-a-serialized-csp" id="ref-for-abstract-opdef-parse-a-serialized-csp①">parsing</a> <var>token</var>, with a
-  <a data-link-type="dfn" href="#policy-source" id="ref-for-policy-source④">source</a> of "<code>header</code>", and a <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition③">disposition</a> of "<code>report</code>".</p>
+  <a data-link-type="dfn" href="#content-security-policy-object-source" id="ref-for-content-security-policy-object-source④">source</a> of "<code>header</code>", and a <a data-link-type="dfn" href="#content-security-policy-object-disposition" id="ref-for-content-security-policy-object-disposition③">disposition</a> of "<code>report</code>".</p>
        <li data-md>
-        <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-directive-set" id="ref-for-policy-directive-set⑤">directive set</a> is not empty, append <var>policy</var> to <var>policies</var>.</p>
+        <p>If <var>policy</var>’s <a data-link-type="dfn" href="#content-security-policy-object-directive-set" id="ref-for-content-security-policy-object-directive-set⑤">directive set</a> is not empty, append <var>policy</var> to <var>policies</var>.</p>
       </ol>
      <li data-md>
       <p>Return a <a data-link-type="dfn" href="#csp-list" id="ref-for-csp-list②">CSP list</a> whose <a data-link-type="dfn" href="#csp-list-policies" id="ref-for-csp-list-policies②">policies</a> is <var>policies</var> and
@@ -1697,7 +1728,7 @@ of security-relevant policy decisions.</p>
   user agents can hold a flag on <var>policies</var> and use it to optimize away the <a data-link-type="dfn" href="#contains-a-header-delivered-content-security-policy" id="ref-for-contains-a-header-delivered-content-security-policy">contains a header-delivered Content Security Policy</a> algorithm.</p>
     <h3 class="heading settled" data-level="2.3" id="framework-directives"><span class="secno">2.3. </span><span class="content">Directives</span><a class="self-link" href="#framework-directives"></a></h3>
     <p>Each <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object⑤">policy</a> contains an <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#ordered-set" id="ref-for-ordered-set①">ordered set</a> of <dfn class="dfn-paneled" data-dfn-type="dfn" data-export id="directives">directives</dfn> (its
-  <a data-link-type="dfn" href="#policy-directive-set" id="ref-for-policy-directive-set⑥">directive set</a>), each of which controls a specific behavior. The directives
+  <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy-directive-set" id="ref-for-policy-directive-set">directive set</a>), each of which controls a specific behavior. The directives
   defined in this document are described in detail in <a href="#csp-directives">§ 6 Content Security Policy Directives</a>.</p>
     <p>Each <a data-link-type="dfn" href="#directives" id="ref-for-directives③">directive</a> is a <dfn class="dfn-paneled" data-dfn-for="directive" data-dfn-type="dfn" data-export id="directive-name">name</dfn> /
   <dfn class="dfn-paneled" data-dfn-for="directive" data-dfn-type="dfn" data-export id="directive-value">value</dfn> pair. The <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name②">name</a> is a
@@ -1873,7 +1904,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
   <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object①⑤">policy</a> that has been violated.</p>
     <p>Each <a data-link-type="dfn" href="#violation" id="ref-for-violation①⓪">violation</a> has a
   <dfn class="dfn-paneled" data-dfn-for="violation" data-dfn-type="dfn" data-export id="violation-disposition">disposition</dfn>, which is the
-  <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition④">disposition</a> of the <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object①⑥">policy</a> that has been violated.</p>
+  <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy-disposition" id="ref-for-policy-disposition">disposition</a> of the <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object①⑥">policy</a> that has been violated.</p>
     <p>Each <a data-link-type="dfn" href="#violation" id="ref-for-violation①①">violation</a> has an
   <dfn class="dfn-paneled" data-dfn-for="violation" data-dfn-type="dfn" data-export id="violation-effective-directive">effective directive</dfn>
   which is a non-empty string representing the <a data-link-type="dfn" href="#directives" id="ref-for-directives⑥">directive</a> whose
@@ -2094,7 +2125,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
       <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-iterate" id="ref-for-list-iterate③">For each</a> <var>policy</var> of <var>CSP list</var>’s <a data-link-type="dfn" href="#csp-list-policies" id="ref-for-csp-list-policies③">policies</a>:</p>
       <ol>
        <li data-md>
-        <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition⑤">disposition</a> is "<code>enforce</code>",
+        <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy-disposition" id="ref-for-policy-disposition①">disposition</a> is "<code>enforce</code>",
   then skip to the next <var>policy</var>.</p>
        <li data-md>
         <p>Let <var>violates</var> be the result of executing
@@ -2121,7 +2152,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
       <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-iterate" id="ref-for-list-iterate④">For each</a> <var>policy</var> of <var>CSP list</var>’s <a data-link-type="dfn" href="#csp-list-policies" id="ref-for-csp-list-policies④">policies</a>:</p>
       <ol>
        <li data-md>
-        <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition⑥">disposition</a> is "<code>report</code>",
+        <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy-disposition" id="ref-for-policy-disposition②">disposition</a> is "<code>report</code>",
   then skip to the next <var>policy</var>.</p>
        <li data-md>
         <p>Let <var>violates</var> be the result of executing
@@ -2166,7 +2197,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
             <p>Execute <a href="#report-violation">§ 5.5 Report a violation</a> on the result of executing
   <a href="#create-violation-for-request">§ 2.4.2 Create a violation object for request, and policy.</a> on <var>request</var>, and <var>policy</var>.</p>
            <li data-md>
-            <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition⑦">disposition</a> is "<code>enforce</code>",
+            <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy-disposition" id="ref-for-policy-disposition③">disposition</a> is "<code>enforce</code>",
   then set <var>result</var> to "<code>Blocked</code>".</p>
           </ol>
         </ol>
@@ -2212,9 +2243,9 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
       <p>Let <var>stripped document URL</var> to be the result of executing <a href="#strip-url-for-use-in-reports">§ 5.4 Strip URL for use in reports</a>
   on <var>global</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/nav-history-apis.html#concept-document-window" id="ref-for-concept-document-window①">document</a>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document-url" id="ref-for-concept-document-url">URL</a>.</p>
      <li data-md>
-      <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-directive-set" id="ref-for-policy-directive-set⑦">directive set</a> does not contain a <a data-link-type="dfn" href="#directives" id="ref-for-directives⑨">directive</a> named "report-to", return.</p>
+      <p>If <var>policy</var>’s <a data-link-type="dfn" href="#content-security-policy-object-directive-set" id="ref-for-content-security-policy-object-directive-set⑥">directive set</a> does not contain a <a data-link-type="dfn" href="#directives" id="ref-for-directives⑨">directive</a> named "report-to", return.</p>
      <li data-md>
-      <p>Let <var>report-to directive</var> be a <a data-link-type="dfn" href="#directives" id="ref-for-directives①⓪">directive</a> named "report-to" from <var>policy</var>’s <a data-link-type="dfn" href="#policy-directive-set" id="ref-for-policy-directive-set⑧">directive set</a>.</p>
+      <p>Let <var>report-to directive</var> be a <a data-link-type="dfn" href="#directives" id="ref-for-directives①⓪">directive</a> named "report-to" from <var>policy</var>’s <a data-link-type="dfn" href="#content-security-policy-object-directive-set" id="ref-for-content-security-policy-object-directive-set⑦">directive set</a>.</p>
      <li data-md>
       <p>Let <var>body</var> be a <a data-link-type="dfn" href="#csp-hash-report-body" id="ref-for-csp-hash-report-body">csp hash report body</a> with <var>stripped document URL</var> as its <a data-link-type="dfn" href="#csp-hash-report-body-documenturl" id="ref-for-csp-hash-report-body-documenturl">documentURL</a>,
   <var>request</var>’s URL as its <a data-link-type="dfn" href="#csp-hash-report-body-subresourceurl" id="ref-for-csp-hash-report-body-subresourceurl">subresourceURL</a>, <var>hash</var> as its <a data-link-type="dfn" href="#csp-hash-report-body-hash" id="ref-for-csp-hash-report-body-hash">hash</a>, <var>request</var>’s
@@ -2346,7 +2377,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
   <a data-link-type="dfn" href="#global-object-csp-list" id="ref-for-global-object-csp-list③">CSP list</a>’s <a data-link-type="dfn" href="#csp-list-policies" id="ref-for-csp-list-policies⑥">policies</a>:</p>
       <ol>
        <li data-md>
-        <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-iterate" id="ref-for-list-iterate①⓪">For each</a> <var>directive</var> of <var>policy</var>’s <a data-link-type="dfn" href="#policy-directive-set" id="ref-for-policy-directive-set⑨">directive set</a>:</p>
+        <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-iterate" id="ref-for-list-iterate①⓪">For each</a> <var>directive</var> of <var>policy</var>’s <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy-directive-set" id="ref-for-policy-directive-set①">directive set</a>:</p>
         <ol>
          <li data-md>
           <p>If <var>directive</var>’s <a data-link-type="dfn" href="#directive-inline-check" id="ref-for-directive-inline-check">inline check</a> returns
@@ -2372,7 +2403,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
          <li data-md>
           <p>Execute <a href="#report-violation">§ 5.5 Report a violation</a> on <var>violation</var>.</p>
          <li data-md>
-          <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition⑧">disposition</a> is "<code>enforce</code>", then
+          <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy-disposition" id="ref-for-policy-disposition④">disposition</a> is "<code>enforce</code>", then
   set <var>result</var> to "<code>Blocked</code>".</p>
         </ol>
       </ol>
@@ -2415,7 +2446,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
          <li data-md>
           <p>Execute <a href="#report-violation">§ 5.5 Report a violation</a> on <var>violation</var>.</p>
          <li data-md>
-          <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition⑨">disposition</a> is "<code>enforce</code>", then
+          <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy-disposition" id="ref-for-policy-disposition⑤">disposition</a> is "<code>enforce</code>", then
   set <var>result</var> to "<code>Blocked</code>".</p>
         </ol>
       </ol>
@@ -2449,7 +2480,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
            <li data-md>
             <p>Execute <a href="#report-violation">§ 5.5 Report a violation</a> on <var>violation</var>.</p>
            <li data-md>
-            <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①⓪">disposition</a> is "<code>enforce</code>", then
+            <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy-disposition" id="ref-for-policy-disposition⑥">disposition</a> is "<code>enforce</code>", then
   set <var>result</var> to "<code>Blocked</code>".</p>
           </ol>
         </ol>
@@ -2496,7 +2527,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
          <li data-md>
           <p>Execute <a href="#report-violation">§ 5.5 Report a violation</a> on <var>violation</var>.</p>
          <li data-md>
-          <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①①">disposition</a> is "<code>enforce</code>", then
+          <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy-disposition" id="ref-for-policy-disposition⑦">disposition</a> is "<code>enforce</code>", then
   set <var>result</var> to "<code>Blocked</code>".</p>
         </ol>
       </ol>
@@ -2526,7 +2557,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
          <li data-md>
           <p>Execute <a href="#report-violation">§ 5.5 Report a violation</a> on <var>violation</var>.</p>
          <li data-md>
-          <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①②">disposition</a> is "<code>enforce</code>", then
+          <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy-disposition" id="ref-for-policy-disposition⑧">disposition</a> is "<code>enforce</code>", then
   set <var>result</var> to "<code>Blocked</code>".</p>
         </ol>
       </ol>
@@ -2586,7 +2617,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
          <li data-md>
           <p>Execute <a href="#report-violation">§ 5.5 Report a violation</a> on <var>violation</var>.</p>
          <li data-md>
-          <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①③">disposition</a> is "<code>enforce</code>", then
+          <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy-disposition" id="ref-for-policy-disposition⑨">disposition</a> is "<code>enforce</code>", then
   set <var>result</var> to "<code>Blocked</code>".</p>
         </ol>
       </ol>
@@ -2697,7 +2728,7 @@ ISSUE: Bikeshed <code>unsafe-allow-redirects</code>.
          <li data-md>
           <p>Execute <a href="#report-violation">§ 5.5 Report a violation</a> on <var>violation</var>.</p>
          <li data-md>
-          <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①④">disposition</a> is "<code>enforce</code>", then set <var>result</var> to
+          <p>If <var>policy</var>’s <a data-link-type="dfn" href="#content-security-policy-object-disposition" id="ref-for-content-security-policy-object-disposition④">disposition</a> is "<code>enforce</code>", then set <var>result</var> to
   "<code>Blocked</code>".</p>
         </ol>
       </ol>
@@ -2746,7 +2777,7 @@ this algorithm returns normally if compilation is allowed, and throws a
          <li data-md>
           <p>Execute <a href="#report-violation">§ 5.5 Report a violation</a> on <var>violation</var>.</p>
          <li data-md>
-          <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①⑤">disposition</a> is "<code>enforce</code>", then set <var>result</var> to
+          <p>If <var>policy</var>’s <a data-link-type="dfn" href="#content-security-policy-object-disposition" id="ref-for-content-security-policy-object-disposition⑤">disposition</a> is "<code>enforce</code>", then set <var>result</var> to
   "<code>Blocked</code>".</p>
         </ol>
       </ol>
@@ -2915,7 +2946,7 @@ Content-Type: application/reports+json
   <a data-link-type="dfn" href="#violation-policy" id="ref-for-violation-policy①">policy</a></p>
        <dt data-md>"<code>disposition</code>"
        <dd data-md>
-        <p>The <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①⑥">disposition</a> of <var>violation</var>’s
+        <p>The <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy-disposition" id="ref-for-policy-disposition①⓪">disposition</a> of <var>violation</var>’s
   <a data-link-type="dfn" href="#violation-policy" id="ref-for-violation-policy②">policy</a></p>
        <dt data-md>"<code>status-code</code>"
        <dd data-md>
@@ -3068,13 +3099,13 @@ Content-Type: application/reports+json
   <code class="idl"><a data-link-type="idl" href="#dom-securitypolicyviolationevent-violateddirective" id="ref-for-dom-securitypolicyviolationevent-violateddirective①">violatedDirective</a></code> are the same value.
   This is intentional to maintain backwards compatibility.</p>
        <li data-md>
-        <p>If <var>violation</var>’s <a data-link-type="dfn" href="#violation-policy" id="ref-for-violation-policy⑥">policy</a>’s <a data-link-type="dfn" href="#policy-directive-set" id="ref-for-policy-directive-set①⓪">directive
+        <p>If <var>violation</var>’s <a data-link-type="dfn" href="#violation-policy" id="ref-for-violation-policy⑥">policy</a>’s <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy-directive-set" id="ref-for-policy-directive-set②">directive
   set</a> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives①⑦">directive</a> named "<a data-link-type="dfn" href="#report-uri" id="ref-for-report-uri①"><code>report-uri</code></a>"
   <var>directive</var>:</p>
         <ol>
          <li data-md>
           <p>If <var>violation</var>’s <a data-link-type="dfn" href="#violation-policy" id="ref-for-violation-policy⑦">policy</a>’s
-  <a data-link-type="dfn" href="#policy-directive-set" id="ref-for-policy-directive-set①①">directive set</a> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives①⑧">directive</a> named
+  <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy-directive-set" id="ref-for-policy-directive-set③">directive set</a> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives①⑧">directive</a> named
   "<a data-link-type="dfn" href="#report-to" id="ref-for-report-to①"><code>report-to</code></a>", skip the remaining substeps.</p>
          <li data-md>
           <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list-iterate" id="ref-for-list-iterate②⑥">For each</a> <var>token</var> of <var>directive</var>’s
@@ -3142,7 +3173,7 @@ Content-Type: application/reports+json
   is, the latter overrides the former, allowing for backwards compatibility
   with browsers that don’t support the new mechanism.</p>
        <li data-md>
-        <p>If <var>violation</var>’s <a data-link-type="dfn" href="#violation-policy" id="ref-for-violation-policy⑧">policy</a>’s <a data-link-type="dfn" href="#policy-directive-set" id="ref-for-policy-directive-set①②">directive
+        <p>If <var>violation</var>’s <a data-link-type="dfn" href="#violation-policy" id="ref-for-violation-policy⑧">policy</a>’s <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy-directive-set" id="ref-for-policy-directive-set④">directive
   set</a> contains a <a data-link-type="dfn" href="#directives" id="ref-for-directives①⑨">directive</a> named "<a data-link-type="dfn" href="#report-to" id="ref-for-report-to②"><code>report-to</code></a>"
   <var>directive</var>:</p>
         <ol>
@@ -4560,7 +4591,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
         <p>Let <var>source list</var> be null.</p>
        <li data-md>
         <p>If a <a data-link-type="dfn" href="#directives" id="ref-for-directives②⑥">directive</a> whose <a data-link-type="dfn" href="#directive-name" id="ref-for-directive-name①⑥">name</a> is
-  "<code>base-uri</code>" is present in <var>policy</var>’s <a data-link-type="dfn" href="#policy-directive-set" id="ref-for-policy-directive-set①③">directive
+  "<code>base-uri</code>" is present in <var>policy</var>’s <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy-directive-set" id="ref-for-policy-directive-set⑤">directive
   set</a>, set <var>source list</var> to that <a data-link-type="dfn" href="#directives" id="ref-for-directives②⑦">directive</a>’s
   <a data-link-type="dfn" href="#directive-value" id="ref-for-directive-value⑤②">value</a>.</p>
        <li data-md>
@@ -4579,7 +4610,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-serialized-sourc
          <li data-md>
           <p>Execute <a href="#report-violation">§ 5.5 Report a violation</a> on <var>violation</var>.</p>
          <li data-md>
-          <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①⑦">disposition</a> is "<code>enforce</code>",
+          <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy-disposition" id="ref-for-policy-disposition①①">disposition</a> is "<code>enforce</code>",
   return "<code>Blocked</code>".</p>
         </ol>
       </ol>
@@ -4615,7 +4646,7 @@ directive-value = "" / <a data-link-type="grammar" href="https://tools.ietf.org/
   <var>policy</var>:</p>
     <ol>
      <li data-md>
-      <p>If <var>policy</var>’s <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①⑧">disposition</a> is not "<code>enforce</code>", or
+      <p>If <var>policy</var>’s <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy-disposition" id="ref-for-policy-disposition①②">disposition</a> is not "<code>enforce</code>", or
   <var>context</var> is not a <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/workers.html#workerglobalscope" id="ref-for-workerglobalscope②">WorkerGlobalScope</a></code>, then abort this algorithm.</p>
      <li data-md>
       <p>Let <var>sandboxing flag set</var> be a new <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#sandboxing-flag-set" id="ref-for-sandboxing-flag-set">sandboxing flag set</a>.</p>
@@ -4737,7 +4768,7 @@ directive-value = <a data-link-type="grammar" href="#grammardef-ancestor-source-
   <a data-link-type="dfn" href="#frame-ancestors" id="ref-for-frame-ancestors③"><code>frame-ancestors</code></a> directive <em>overrides</em> the
   `<code>`<code><a data-link-type="http-header" href="https://html.spec.whatwg.org/multipage/speculative-loading.html#x-frame-options" id="ref-for-x-frame-options②">X-Frame-Options</a></code>`</code>` header. If a resource is delivered with
   a <a data-link-type="dfn" href="#content-security-policy-object" id="ref-for-content-security-policy-object⑥⑦">policy</a> that includes a <a data-link-type="dfn" href="#directives" id="ref-for-directives③⓪">directive</a> named
-  <a data-link-type="dfn" href="#frame-ancestors" id="ref-for-frame-ancestors④"><code>frame-ancestors</code></a> and whose <a data-link-type="dfn" href="#policy-disposition" id="ref-for-policy-disposition①⑨">disposition</a> is
+  <a data-link-type="dfn" href="#frame-ancestors" id="ref-for-frame-ancestors④"><code>frame-ancestors</code></a> and whose <a data-link-type="dfn" href="https://www.w3.org/TR/CSP3/#policy-disposition" id="ref-for-policy-disposition①③">disposition</a> is
   "<code>enforce</code>", then the `<code>`<code><a data-link-type="http-header" href="https://html.spec.whatwg.org/multipage/speculative-loading.html#x-frame-options" id="ref-for-x-frame-options③">X-Frame-Options</a></code>`</code>` header will be
   ignored, per <cite>HTML</cite>’s processing model.</p>
     <h3 class="heading settled" data-level="6.5" id="directives-reporting"><span class="secno">6.5. </span><span class="content">
@@ -6463,13 +6494,13 @@ rest of Google’s CSP Cabal.</p>
    <li><a href="#csp-hash-report-body-destination">destination</a><span>, in § 5</span>
    <li><a href="#grammardef-directive-name">directive-name</a><span>, in § 2.3</span>
    <li><a href="#directives">directives</a><span>, in § 2.3</span>
-   <li><a href="#policy-directive-set">directive set</a><span>, in § 2.2</span>
+   <li><a href="#content-security-policy-object-directive-set">directive set</a><span>, in § 2.2</span>
    <li><a href="#grammardef-directive-value">directive-value</a><span>, in § 2.3</span>
    <li>
     disposition
     <ul>
      <li><a href="#dom-securitypolicyviolationevent-disposition">attribute for SecurityPolicyViolationEvent</a><span>, in § 5.1</span>
-     <li><a href="#policy-disposition">dfn for policy</a><span>, in § 2.2</span>
+     <li><a href="#content-security-policy-object-disposition">dfn for content security policy object</a><span>, in § 2.2</span>
      <li><a href="#violation-disposition">dfn for violation</a><span>, in § 2.4</span>
      <li><a href="#dom-cspviolationreportbody-disposition">dict-member for CSPViolationReportBody</a><span>, in § 5</span>
      <li><a href="#dom-securitypolicyviolationeventinit-disposition">dict-member for SecurityPolicyViolationEventInit</a><span>, in § 5.1</span>
@@ -6621,7 +6652,7 @@ rest of Google’s CSP Cabal.</p>
    <li><a href="#should-block-navigation-response">Should navigation response to navigation request of type in target be blocked by Content Security Policy?</a><span>, in § 4.2.4</span>
    <li><a href="#should-block-request">Should request be blocked by Content Security Policy?</a><span>, in § 4.1.1</span>
    <li><a href="#should-block-response">Should response to request be blocked by Content Security Policy?</a><span>, in § 4.1.2</span>
-   <li><a href="#policy-source">source</a><span>, in § 2.2</span>
+   <li><a href="#content-security-policy-object-source">source</a><span>, in § 2.2</span>
    <li><a href="#source-expression">source expression</a><span>, in § 2.3.1</span>
    <li><a href="#grammardef-source-expression">source-expression</a><span>, in § 2.3.1</span>
    <li><a href="#violation-source-file">source file</a><span>, in § 2.4</span>
@@ -6669,6 +6700,12 @@ rest of Google’s CSP Cabal.</p>
   </ul>
   <h3 class="heading no-num no-ref settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
   <ul class="index">
+   <li>
+    <a data-link-type="biblio">[CSP3]</a> defines the following terms:
+    <ul>
+     <li><span class="dfn-paneled" id="1e2de89e">directive set</span>
+     <li><span class="dfn-paneled" id="059ad73c">disposition</span>
+    </ul>
    <li>
     <a data-link-type="biblio">[CSS-CASCADE-5]</a> defines the following terms:
     <ul>
@@ -6991,6 +7028,8 @@ rest of Google’s CSP Cabal.</p>
   <h2 class="heading no-num no-ref settled" id="references"><span class="content">References</span><a class="self-link" href="#references"></a></h2>
   <h3 class="heading no-num no-ref settled" id="normative"><span class="content">Normative References</span><a class="self-link" href="#normative"></a></h3>
   <dl>
+   <dt id="biblio-csp3">[CSP3]
+   <dd>Mike West; Antonio Sartori. <a href="https://www.w3.org/TR/CSP3/"><cite>Content Security Policy Level 3</cite></a>. 1 April 2026. WD. URL: <a href="https://www.w3.org/TR/CSP3/">https://www.w3.org/TR/CSP3/</a>
    <dt id="biblio-css-cascade-5">[CSS-CASCADE-5]
    <dd>Elika Etemad; Miriam Suzanne; Tab Atkins Jr.. <a href="https://www.w3.org/TR/css-cascade-5/"><cite>CSS Cascading and Inheritance Level 5</cite></a>. 13 January 2022. CR. URL: <a href="https://www.w3.org/TR/css-cascade-5/">https://www.w3.org/TR/css-cascade-5/</a>
    <dt id="biblio-cssom">[CSSOM]
@@ -7030,7 +7069,7 @@ rest of Google’s CSP Cabal.</p>
    <dt id="biblio-rfc9110">[RFC9110]
    <dd>R. Fielding, Ed.; M. Nottingham, Ed.; J. Reschke, Ed.. <a href="https://httpwg.org/specs/rfc9110.html"><cite>HTTP Semantics</cite></a>. June 2022. Internet Standard. URL: <a href="https://httpwg.org/specs/rfc9110.html">https://httpwg.org/specs/rfc9110.html</a>
    <dt id="biblio-service-workers">[SERVICE-WORKERS]
-   <dd>Monica CHINTALA; Yoshisato Yanagisawa. <a href="https://www.w3.org/TR/service-workers/"><cite>Service Workers Nightly</cite></a>. 12 March 2026. CRD. URL: <a href="https://www.w3.org/TR/service-workers/">https://www.w3.org/TR/service-workers/</a>
+   <dd>Monica CHINTALA; Yoshisato Yanagisawa. <a href="https://www.w3.org/TR/service-workers/"><cite>Service Workers Nightly</cite></a>. 9 April 2026. CRD. URL: <a href="https://www.w3.org/TR/service-workers/">https://www.w3.org/TR/service-workers/</a>
    <dt id="biblio-sri">[SRI]
    <dd>Frederik Braun. <a href="https://www.w3.org/TR/sri-2/"><cite>Subresource Integrity</cite></a>. 20 March 2026. WD. URL: <a href="https://www.w3.org/TR/sri-2/">https://www.w3.org/TR/sri-2/</a>
    <dt id="biblio-trusted-types">[TRUSTED-TYPES]
@@ -7042,10 +7081,10 @@ rest of Google’s CSP Cabal.</p>
    <dt id="biblio-webrtc">[WEBRTC]
    <dd>Cullen Jennings; et al. <a href="https://www.w3.org/TR/webrtc/"><cite>WebRTC: Real-Time Communication in Browsers</cite></a>. 13 March 2025. REC. URL: <a href="https://www.w3.org/TR/webrtc/">https://www.w3.org/TR/webrtc/</a>
   </dl>
-  <h3 class="heading no-num no-ref settled" id="informative"><span class="content">Informative References</span><a class="self-link" href="#informative"></a></h3>
+  <h3 class="heading no-num no-ref settled" id="informative"><span class="content">Non-Normative References</span><a class="self-link" href="#informative"></a></h3>
   <dl>
    <dt id="biblio-appmanifest">[APPMANIFEST]
-   <dd>Marcos Caceres; et al. <a href="https://www.w3.org/TR/appmanifest/"><cite>Web Application Manifest</cite></a>. 24 March 2026. WD. URL: <a href="https://www.w3.org/TR/appmanifest/">https://www.w3.org/TR/appmanifest/</a>
+   <dd>Marcos Caceres; Daniel Murphy; Christian Liebel. <a href="https://www.w3.org/TR/appmanifest/"><cite>Web Application Manifest</cite></a>. 9 April 2026. WD. URL: <a href="https://www.w3.org/TR/appmanifest/">https://www.w3.org/TR/appmanifest/</a>
    <dt id="biblio-beacon">[BEACON]
    <dd>Ilya Grigorik; Alois Reitbauer. <a href="https://www.w3.org/TR/beacon/"><cite>Beacon</cite></a>. 3 August 2022. CRD. URL: <a href="https://www.w3.org/TR/beacon/">https://www.w3.org/TR/beacon/</a>
    <dt id="biblio-csp2">[CSP2]
@@ -7361,6 +7400,7 @@ let dfnPanelData = {
 "0204d188": {"dfnID":"0204d188","dfnText":"size","external":true,"refSections":[{"refs":[{"id":"ref-for-list-size"}],"title":"4.4.1. \n    EnsureCSPDoesNotBlockStringCompilation(realm, parameterStrings, bodyString, codeString, compilationType, parameterArgs, bodyArg)\n  "},{"refs":[{"id":"ref-for-list-size\u2460"}],"title":"6.7.2.7. \n    Does url match source list in origin with redirect count?\n  "}],"url":"https://infra.spec.whatwg.org/#list-size"},
 "022e2bd1": {"dfnID":"022e2bd1","dfnText":"does sink type require trusted types?","external":true,"refSections":[{"refs":[{"id":"ref-for-does-sink-type-require-trusted-types"}],"title":"4.4.1. \n    EnsureCSPDoesNotBlockStringCompilation(realm, parameterStrings, bodyString, codeString, compilationType, parameterArgs, bodyArg)\n  "}],"url":"https://www.w3.org/TR/trusted-types/#does-sink-type-require-trusted-types"},
 "0303e8e5": {"dfnID":"0303e8e5","dfnText":"UTF-8 encode","external":true,"refSections":[{"refs":[{"id":"ref-for-utf-8-encode"}],"title":"6.7.3.3. \n    Does element match source list for type and source?\n  "},{"refs":[{"id":"ref-for-utf-8-encode\u2460"}],"title":"8.4. \n      Allowing external JavaScript via hashes\n    "}],"url":"https://encoding.spec.whatwg.org/#utf-8-encode"},
+"059ad73c": {"dfnID":"059ad73c","dfnText":"disposition","external":true,"refSections":[{"refs":[{"id":"ref-for-policy-disposition"}],"title":"2.4. Violations"},{"refs":[{"id":"ref-for-policy-disposition\u2460"}],"title":"4.1.1. \n    Report Content Security Policy violations for request\n  "},{"refs":[{"id":"ref-for-policy-disposition\u2461"}],"title":"4.1.2. \n    Should request be blocked by Content Security Policy?\n  "},{"refs":[{"id":"ref-for-policy-disposition\u2462"}],"title":"4.1.3. \n    Should response to request be blocked by Content Security Policy?\n  "},{"refs":[{"id":"ref-for-policy-disposition\u2463"}],"title":"4.2.3. \n    Should element\u2019s inline type behavior be blocked by Content Security Policy?\n  "},{"refs":[{"id":"ref-for-policy-disposition\u2464"},{"id":"ref-for-policy-disposition\u2465"}],"title":"4.2.4. \n    Should navigation request of type be blocked\n    by Content Security Policy?\n  "},{"refs":[{"id":"ref-for-policy-disposition\u2466"},{"id":"ref-for-policy-disposition\u2467"}],"title":"4.2.5. \n    Should navigation response to navigation request of type\n    in target be blocked by Content Security Policy?\n  "},{"refs":[{"id":"ref-for-policy-disposition\u2468"}],"title":"4.3.1. \n    Should RTC connections be blocked for global?\n  "},{"refs":[{"id":"ref-for-policy-disposition\u2460\u24ea"}],"title":"5.3. \n    Obtain the deprecated serialization of violation\n  "},{"refs":[{"id":"ref-for-policy-disposition\u2460\u2460"}],"title":"6.3.1.1. \n    Is base allowed for document?\n  "},{"refs":[{"id":"ref-for-policy-disposition\u2460\u2461"}],"title":"6.3.2.1. \n    sandbox Initialization\n  "},{"refs":[{"id":"ref-for-policy-disposition\u2460\u2462"}],"title":"6.4.2.2. \n    Relation to ``X-Frame-Options``\n  "}],"url":"https://www.w3.org/TR/CSP3/#policy-disposition"},
 "0698d556": {"dfnID":"0698d556","dfnText":"string","external":true,"refSections":[{"refs":[{"id":"ref-for-string"}],"title":"2.2.1. \n    Parse a serialized CSP\n  "},{"refs":[{"id":"ref-for-string\u2460"},{"id":"ref-for-string\u2461"}],"title":"2.3. Directives"},{"refs":[{"id":"ref-for-string\u2462"},{"id":"ref-for-string\u2463"}],"title":"2.3.1. Source Lists"},{"refs":[{"id":"ref-for-string\u2464"}],"title":"2.4.1. \n    Create a violation object for global, policy, and directive\n  "},{"refs":[{"id":"ref-for-string\u2465"},{"id":"ref-for-string\u2466"},{"id":"ref-for-string\u2467"}],"title":"4.1.4. Potentially report hash"},{"refs":[{"id":"ref-for-string\u2468"},{"id":"ref-for-string\u2460\u24ea"}],"title":"5.2. \n    Obtain the blockedURI of a violation\u2019s resource\n  "}],"url":"https://infra.spec.whatwg.org/#string"},
 "07ad3048": {"dfnID":"07ad3048","dfnText":"create navigation params by fetching","external":true,"refSections":[{"refs":[{"id":"ref-for-create-navigation-params-by-fetching"}],"title":"4.2. \n    Integration with HTML\n  "}],"url":"https://html.spec.whatwg.org/multipage/browsing-the-web.html#create-navigation-params-by-fetching"},
 "07d359a5": {"dfnID":"07d359a5","dfnText":"generate and queue a report","external":true,"refSections":[{"refs":[{"id":"ref-for-generate-and-queue-a-report"}],"title":"4.1.4. Potentially report hash"},{"refs":[{"id":"ref-for-generate-and-queue-a-report\u2460"}],"title":"5.5. \n    Report a violation\n  "}],"url":"https://www.w3.org/TR/reporting-1/#generate-and-queue-a-report"},
@@ -7383,6 +7423,7 @@ let dfnPanelData = {
 "168f1b6e": {"dfnID":"168f1b6e","dfnText":"global object (for realm)","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-realm-global"}],"title":"4.4.1. \n    EnsureCSPDoesNotBlockStringCompilation(realm, parameterStrings, bodyString, codeString, compilationType, parameterArgs, bodyArg)\n  "},{"refs":[{"id":"ref-for-concept-realm-global\u2460"}],"title":"4.5.1. \n  EnsureCSPDoesNotBlockWasmByteCompilationrealm\n"}],"url":"https://html.spec.whatwg.org/multipage/webappapis.html#concept-realm-global"},
 "16d07e10": {"dfnID":"16d07e10","dfnText":"for each","external":true,"refSections":[{"refs":[{"id":"ref-for-list-iterate"}],"title":"2.2.1. \n    Parse a serialized CSP\n  "},{"refs":[{"id":"ref-for-list-iterate\u2460"},{"id":"ref-for-list-iterate\u2461"}],"title":"2.2.2. \n    Parse response\u2019s Content Security Policies\n  "},{"refs":[{"id":"ref-for-list-iterate\u2462"}],"title":"4.1.1. \n    Report Content Security Policy violations for request\n  "},{"refs":[{"id":"ref-for-list-iterate\u2463"}],"title":"4.1.2. \n    Should request be blocked by Content Security Policy?\n  "},{"refs":[{"id":"ref-for-list-iterate\u2464"},{"id":"ref-for-list-iterate\u2465"}],"title":"4.1.3. \n    Should response to request be blocked by Content Security Policy?\n  "},{"refs":[{"id":"ref-for-list-iterate\u2466"},{"id":"ref-for-list-iterate\u2467"}],"title":"4.2.1. \n    Run CSP initialization for a Document\n  "},{"refs":[{"id":"ref-for-list-iterate\u2468"},{"id":"ref-for-list-iterate\u2460\u24ea"}],"title":"4.2.3. \n    Should element\u2019s inline type behavior be blocked by Content Security Policy?\n  "},{"refs":[{"id":"ref-for-list-iterate\u2460\u2460"},{"id":"ref-for-list-iterate\u2460\u2461"},{"id":"ref-for-list-iterate\u2460\u2462"},{"id":"ref-for-list-iterate\u2460\u2463"}],"title":"4.2.4. \n    Should navigation request of type be blocked\n    by Content Security Policy?\n  "},{"refs":[{"id":"ref-for-list-iterate\u2460\u2464"},{"id":"ref-for-list-iterate\u2460\u2465"},{"id":"ref-for-list-iterate\u2460\u2466"},{"id":"ref-for-list-iterate\u2460\u2467"}],"title":"4.2.5. \n    Should navigation response to navigation request of type\n    in target be blocked by Content Security Policy?\n  "},{"refs":[{"id":"ref-for-list-iterate\u2460\u2468"},{"id":"ref-for-list-iterate\u2461\u24ea"}],"title":"4.2.6. \n    Run CSP initialization for a global object\n  "},{"refs":[{"id":"ref-for-list-iterate\u2461\u2460"},{"id":"ref-for-list-iterate\u2461\u2461"}],"title":"4.3.1. \n    Should RTC connections be blocked for global?\n  "},{"refs":[{"id":"ref-for-list-iterate\u2461\u2462"},{"id":"ref-for-list-iterate\u2461\u2463"}],"title":"4.4.1. \n    EnsureCSPDoesNotBlockStringCompilation(realm, parameterStrings, bodyString, codeString, compilationType, parameterArgs, bodyArg)\n  "},{"refs":[{"id":"ref-for-list-iterate\u2461\u2464"}],"title":"4.5.1. \n  EnsureCSPDoesNotBlockWasmByteCompilationrealm\n"},{"refs":[{"id":"ref-for-list-iterate\u2461\u2465"}],"title":"5.5. \n    Report a violation\n  "},{"refs":[{"id":"ref-for-list-iterate\u2461\u2466"}],"title":"6.3.1.1. \n    Is base allowed for document?\n  "},{"refs":[{"id":"ref-for-list-iterate\u2461\u2467"}],"title":"6.7.2.1. \n    Does request violate policy?\n  "},{"refs":[{"id":"ref-for-list-iterate\u2461\u2468"}],"title":"6.7.2.2. \n    Does resource hint request violate policy?\n  "},{"refs":[{"id":"ref-for-list-iterate\u2462\u24ea"}],"title":"6.7.2.3. \n    Does nonce match source list?\n  "},{"refs":[{"id":"ref-for-list-iterate\u2462\u2460"}],"title":"6.7.2.4. \n    Does integrity metadata match source list?\n  "},{"refs":[{"id":"ref-for-list-iterate\u2462\u2461"}],"title":"6.7.2.7. \n    Does url match source list in origin with redirect count?\n  "},{"refs":[{"id":"ref-for-list-iterate\u2462\u2462"}],"title":"6.7.2.12. \n    path-part matching\n  "},{"refs":[{"id":"ref-for-list-iterate\u2462\u2463"}],"title":"6.7.3.1. \n    Is element nonceable?\n  "},{"refs":[{"id":"ref-for-list-iterate\u2462\u2464"}],"title":"6.7.3.2. \n    Does a source list allow all inline behavior for type?\n  "},{"refs":[{"id":"ref-for-list-iterate\u2462\u2465"},{"id":"ref-for-list-iterate\u2462\u2466"},{"id":"ref-for-list-iterate\u2462\u2467"}],"title":"6.7.3.3. \n    Does element match source list for type and source?\n  "},{"refs":[{"id":"ref-for-list-iterate\u2462\u2468"}],"title":"6.8.4. \n    Should fetch directive execute\n  "}],"url":"https://infra.spec.whatwg.org/#list-iterate"},
 "17bd86ff": {"dfnID":"17bd86ff","dfnText":"port (for URL)","external":true,"refSections":[{"refs":[{"id":"ref-for-dom-url-port"},{"id":"ref-for-dom-url-port\u2460"}],"title":"6.7.2.8. \n    Does url match expression in origin with redirect count?\n  "}],"url":"https://url.spec.whatwg.org/#dom-url-port"},
+"1e2de89e": {"dfnID":"1e2de89e","dfnText":"directive set","external":true,"refSections":[{"refs":[{"id":"ref-for-policy-directive-set"}],"title":"2.3. Directives"},{"refs":[{"id":"ref-for-policy-directive-set\u2460"}],"title":"4.2.3. \n    Should element\u2019s inline type behavior be blocked by Content Security Policy?\n  "},{"refs":[{"id":"ref-for-policy-directive-set\u2461"},{"id":"ref-for-policy-directive-set\u2462"},{"id":"ref-for-policy-directive-set\u2463"}],"title":"5.5. \n    Report a violation\n  "},{"refs":[{"id":"ref-for-policy-directive-set\u2464"}],"title":"6.3.1.1. \n    Is base allowed for document?\n  "}],"url":"https://www.w3.org/TR/CSP3/#policy-directive-set"},
 "215d47ca": {"dfnID":"215d47ca","dfnText":"prepare the script element","external":true,"refSections":[{"refs":[{"id":"ref-for-prepare-the-script-element"}],"title":"4.2. \n    Integration with HTML\n  "}],"url":"https://html.spec.whatwg.org/#prepare-the-script-element"},
 "218c9455": {"dfnID":"218c9455","dfnText":"username","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-url-username"}],"title":"5.4. Strip URL for use in reports"}],"url":"https://url.spec.whatwg.org/#concept-url-username"},
 "22477314": {"dfnID":"22477314","dfnText":"domain","external":true,"refSections":[{"refs":[{"id":"ref-for-concept-domain"}],"title":"6.7.2.10. \n    host-part matching\n  "}],"url":"https://url.spec.whatwg.org/#concept-domain"},
@@ -7557,6 +7598,9 @@ let dfnPanelData = {
 "contains-a-header-delivered-content-security-policy": {"dfnID":"contains-a-header-delivered-content-security-policy","dfnText":"contains a header-delivered Content Security\n  Policy","external":false,"refSections":[{"refs":[{"id":"ref-for-contains-a-header-delivered-content-security-policy"}],"title":"2.2.2. Parse response\u2019s Content Security Policies"}],"url":"#contains-a-header-delivered-content-security-policy"},
 "content-security-policy": {"dfnID":"content-security-policy","dfnText":"Content Security Policy","external":false,"refSections":[{"refs":[{"id":"ref-for-content-security-policy"}],"title":"4.2.5. Should navigation response to navigation request of type in target be blocked by Content Security Policy?"}],"url":"#content-security-policy"},
 "content-security-policy-object": {"dfnID":"content-security-policy-object","dfnText":"policy","external":false,"refSections":[{"refs":[{"id":"ref-for-content-security-policy-object"},{"id":"ref-for-content-security-policy-object\u2460"},{"id":"ref-for-content-security-policy-object\u2461"}],"title":"2.2. Policies"},{"refs":[{"id":"ref-for-content-security-policy-object\u2462"},{"id":"ref-for-content-security-policy-object\u2463"}],"title":"2.2.1. Parse a serialized CSP"},{"refs":[{"id":"ref-for-content-security-policy-object\u2464"},{"id":"ref-for-content-security-policy-object\u2465"},{"id":"ref-for-content-security-policy-object\u2466"},{"id":"ref-for-content-security-policy-object\u2467"},{"id":"ref-for-content-security-policy-object\u2468"},{"id":"ref-for-content-security-policy-object\u2460\u24ea"},{"id":"ref-for-content-security-policy-object\u2460\u2460"},{"id":"ref-for-content-security-policy-object\u2460\u2461"}],"title":"2.3. Directives"},{"refs":[{"id":"ref-for-content-security-policy-object\u2460\u2462"},{"id":"ref-for-content-security-policy-object\u2460\u2463"},{"id":"ref-for-content-security-policy-object\u2460\u2464"},{"id":"ref-for-content-security-policy-object\u2460\u2465"}],"title":"2.4. Violations"},{"refs":[{"id":"ref-for-content-security-policy-object\u2460\u2466"}],"title":"2.4.1. Create a violation object for global, policy, and directive"},{"refs":[{"id":"ref-for-content-security-policy-object\u2460\u2467"}],"title":"2.4.2. Create a violation object for request, and policy."},{"refs":[{"id":"ref-for-content-security-policy-object\u2460\u2468"},{"id":"ref-for-content-security-policy-object\u2461\u24ea"}],"title":"3. Policy Delivery"},{"refs":[{"id":"ref-for-content-security-policy-object\u2461\u2460"}],"title":"4.1.4. Potentially report hash"},{"refs":[{"id":"ref-for-content-security-policy-object\u2461\u2461"},{"id":"ref-for-content-security-policy-object\u2461\u2462"},{"id":"ref-for-content-security-policy-object\u2461\u2463"}],"title":"4.2. Integration with HTML"},{"refs":[{"id":"ref-for-content-security-policy-object\u2461\u2464"},{"id":"ref-for-content-security-policy-object\u2461\u2465"},{"id":"ref-for-content-security-policy-object\u2461\u2466"}],"title":"5. Reporting"},{"refs":[{"id":"ref-for-content-security-policy-object\u2461\u2467"}],"title":"6.1.1.1. child-src Pre-request check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2461\u2468"}],"title":"6.1.1.2. child-src Post-request check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2462\u24ea"}],"title":"6.1.2.1. connect-src Pre-request check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2462\u2460"}],"title":"6.1.2.2. connect-src Post-request check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2462\u2461"}],"title":"6.1.3.1. default-src Pre-request check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2462\u2462"}],"title":"6.1.3.2. default-src Post-request check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2462\u2463"}],"title":"6.1.3.3. default-src Inline Check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2462\u2464"}],"title":"6.1.4.1. font-src Pre-request check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2462\u2465"}],"title":"6.1.4.2. font-src Post-request check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2462\u2466"}],"title":"6.1.5.1. frame-src Pre-request check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2462\u2467"}],"title":"6.1.5.2. frame-src Post-request check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2462\u2468"}],"title":"6.1.6.1. img-src Pre-request check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2463\u24ea"}],"title":"6.1.6.2. img-src Post-request check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2463\u2460"}],"title":"6.1.7.1. manifest-src Pre-request check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2463\u2461"}],"title":"6.1.7.2. manifest-src Post-request check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2463\u2462"}],"title":"6.1.8.1. media-src Pre-request check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2463\u2463"}],"title":"6.1.8.2. media-src Post-request check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2463\u2464"}],"title":"6.1.9. object-src"},{"refs":[{"id":"ref-for-content-security-policy-object\u2463\u2465"}],"title":"6.1.9.1. object-src Pre-request check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2463\u2466"}],"title":"6.1.9.2. object-src Post-request check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2463\u2467"}],"title":"6.1.10.1. script-src Pre-request check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2463\u2468"}],"title":"6.1.10.2. script-src Post-request check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2464\u24ea"}],"title":"6.1.10.3. script-src Inline Check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2464\u2460"}],"title":"6.1.11.1. script-src-elem Pre-request check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2464\u2461"}],"title":"6.1.11.2. script-src-elem Post-request check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2464\u2462"}],"title":"6.1.11.3. script-src-elem Inline Check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2464\u2463"}],"title":"6.1.12.1. script-src-attr Inline Check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2464\u2464"}],"title":"6.1.13.1. style-src Pre-request Check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2464\u2465"}],"title":"6.1.13.2. style-src Post-request Check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2464\u2466"}],"title":"6.1.13.3. style-src Inline Check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2464\u2467"}],"title":"6.1.14.1. style-src-elem Pre-request Check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2464\u2468"}],"title":"6.1.14.2. style-src-elem Post-request Check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2465\u24ea"}],"title":"6.1.14.3. style-src-elem Inline Check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2465\u2460"}],"title":"6.1.15.1. style-src-attr Inline Check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2465\u2461"}],"title":"6.2.2.1. worker-src Pre-request Check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2465\u2462"}],"title":"6.2.2.2. worker-src Post-request Check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2465\u2463"}],"title":"6.3.2.1. sandbox Initialization"},{"refs":[{"id":"ref-for-content-security-policy-object\u2465\u2464"}],"title":"6.4.1.1. form-action Pre-Navigation Check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2465\u2465"}],"title":"6.4.2.1. frame-ancestors Navigation Response Check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2465\u2466"}],"title":"6.4.2.2. Relation to ``X-Frame-Options``"},{"refs":[{"id":"ref-for-content-security-policy-object\u2465\u2467"}],"title":"6.7.1.1. Script directives pre-request check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2465\u2468"}],"title":"6.7.1.2. Script directives post-request check"},{"refs":[{"id":"ref-for-content-security-policy-object\u2466\u24ea"}],"title":"6.7.2.1. Does request violate policy?"},{"refs":[{"id":"ref-for-content-security-policy-object\u2466\u2460"}],"title":"6.7.2.2. Does resource hint request violate policy?"},{"refs":[{"id":"ref-for-content-security-policy-object\u2466\u2461"}],"title":"6.8.4. Should fetch directive execute"},{"refs":[{"id":"ref-for-content-security-policy-object\u2466\u2462"}],"title":"7.1. Nonce Reuse"},{"refs":[{"id":"ref-for-content-security-policy-object\u2466\u2463"}],"title":"9.1. Vendor-specific Extensions and Addons"}],"url":"#content-security-policy-object"},
+"content-security-policy-object-directive-set": {"dfnID":"content-security-policy-object-directive-set","dfnText":"directive set","external":false,"refSections":[{"refs":[{"id":"ref-for-content-security-policy-object-directive-set"},{"id":"ref-for-content-security-policy-object-directive-set\u2460"},{"id":"ref-for-content-security-policy-object-directive-set\u2461"},{"id":"ref-for-content-security-policy-object-directive-set\u2462"}],"title":"2.2.1. Parse a serialized CSP"},{"refs":[{"id":"ref-for-content-security-policy-object-directive-set\u2463"},{"id":"ref-for-content-security-policy-object-directive-set\u2464"}],"title":"2.2.2. Parse response\u2019s Content Security Policies"},{"refs":[{"id":"ref-for-content-security-policy-object-directive-set\u2465"},{"id":"ref-for-content-security-policy-object-directive-set\u2466"}],"title":"4.1.4. Potentially report hash"}],"url":"#content-security-policy-object-directive-set"},
+"content-security-policy-object-disposition": {"dfnID":"content-security-policy-object-disposition","dfnText":"disposition","external":false,"refSections":[{"refs":[{"id":"ref-for-content-security-policy-object-disposition"},{"id":"ref-for-content-security-policy-object-disposition\u2460"}],"title":"2.2.1. Parse a serialized CSP"},{"refs":[{"id":"ref-for-content-security-policy-object-disposition\u2461"},{"id":"ref-for-content-security-policy-object-disposition\u2462"}],"title":"2.2.2. Parse response\u2019s Content Security Policies"},{"refs":[{"id":"ref-for-content-security-policy-object-disposition\u2463"}],"title":"4.4.1. EnsureCSPDoesNotBlockStringCompilation(realm, parameterStrings, bodyString, codeString, compilationType, parameterArgs, bodyArg)"},{"refs":[{"id":"ref-for-content-security-policy-object-disposition\u2464"}],"title":"4.5.1. EnsureCSPDoesNotBlockWasmByteCompilationrealm"}],"url":"#content-security-policy-object-disposition"},
+"content-security-policy-object-source": {"dfnID":"content-security-policy-object-source","dfnText":"source","external":false,"refSections":[{"refs":[{"id":"ref-for-content-security-policy-object-source"}],"title":"2.2. Policies"},{"refs":[{"id":"ref-for-content-security-policy-object-source\u2460"},{"id":"ref-for-content-security-policy-object-source\u2461"}],"title":"2.2.1. Parse a serialized CSP"},{"refs":[{"id":"ref-for-content-security-policy-object-source\u2462"},{"id":"ref-for-content-security-policy-object-source\u2463"}],"title":"2.2.2. Parse response\u2019s Content Security Policies"}],"url":"#content-security-policy-object-source"},
 "csp-hash-report": {"dfnID":"csp-hash-report","dfnText":"csp hash report","external":false,"refSections":[{"refs":[{"id":"ref-for-csp-hash-report"},{"id":"ref-for-csp-hash-report\u2460"}],"title":"5. Reporting"}],"url":"#csp-hash-report"},
 "csp-hash-report-body": {"dfnID":"csp-hash-report-body","dfnText":"csp hash report body","external":false,"refSections":[{"refs":[{"id":"ref-for-csp-hash-report-body"}],"title":"4.1.4. Potentially report hash"}],"url":"#csp-hash-report-body"},
 "csp-hash-report-body-destination": {"dfnID":"csp-hash-report-body-destination","dfnText":"destination","external":false,"refSections":[{"refs":[{"id":"ref-for-csp-hash-report-body-destination"}],"title":"4.1.4. Potentially report hash"}],"url":"#csp-hash-report-body-destination"},
@@ -7713,9 +7757,6 @@ let dfnPanelData = {
 "object-src": {"dfnID":"object-src","dfnText":"object-src","external":false,"refSections":[{"refs":[{"id":"ref-for-object-src"}],"title":"6. Content Security Policy Directives"},{"refs":[{"id":"ref-for-object-src\u2460"},{"id":"ref-for-object-src\u2461"}],"title":"6.1.3. default-src"},{"refs":[{"id":"ref-for-object-src\u2462"}],"title":"6.1.9. object-src"},{"refs":[{"id":"ref-for-object-src\u2463"}],"title":"10.1. Directive Registry"}],"url":"#object-src"},
 "parse-response-csp": {"dfnID":"parse-response-csp","dfnText":"2.2.2. \n    Parse response\u2019s Content Security Policies\n  ","external":false,"refSections":[{"refs":[{"id":"ref-for-parse-response-csp"}],"title":"2.2.2. Parse response\u2019s Content Security Policies"}],"url":"#parse-response-csp"},
 "path-part-match": {"dfnID":"path-part-match","dfnText":"path-part matches","external":false,"refSections":[{"refs":[{"id":"ref-for-path-part-match"}],"title":"6.7.2.8. Does url match expression in origin with redirect count?"},{"refs":[{"id":"ref-for-path-part-match\u2460"}],"title":"6.7.2.12. path-part matching"}],"url":"#path-part-match"},
-"policy-directive-set": {"dfnID":"policy-directive-set","dfnText":"directive set","external":false,"refSections":[{"refs":[{"id":"ref-for-policy-directive-set"},{"id":"ref-for-policy-directive-set\u2460"},{"id":"ref-for-policy-directive-set\u2461"},{"id":"ref-for-policy-directive-set\u2462"}],"title":"2.2.1. Parse a serialized CSP"},{"refs":[{"id":"ref-for-policy-directive-set\u2463"},{"id":"ref-for-policy-directive-set\u2464"}],"title":"2.2.2. Parse response\u2019s Content Security Policies"},{"refs":[{"id":"ref-for-policy-directive-set\u2465"}],"title":"2.3. Directives"},{"refs":[{"id":"ref-for-policy-directive-set\u2466"},{"id":"ref-for-policy-directive-set\u2467"}],"title":"4.1.4. Potentially report hash"},{"refs":[{"id":"ref-for-policy-directive-set\u2468"}],"title":"4.2.3. Should element\u2019s inline type behavior be blocked by Content Security Policy?"},{"refs":[{"id":"ref-for-policy-directive-set\u2460\u24ea"},{"id":"ref-for-policy-directive-set\u2460\u2460"},{"id":"ref-for-policy-directive-set\u2460\u2461"}],"title":"5.5. Report a violation"},{"refs":[{"id":"ref-for-policy-directive-set\u2460\u2462"}],"title":"6.3.1.1. Is base allowed for document?"}],"url":"#policy-directive-set"},
-"policy-disposition": {"dfnID":"policy-disposition","dfnText":"disposition","external":false,"refSections":[{"refs":[{"id":"ref-for-policy-disposition"},{"id":"ref-for-policy-disposition\u2460"}],"title":"2.2.1. Parse a serialized CSP"},{"refs":[{"id":"ref-for-policy-disposition\u2461"},{"id":"ref-for-policy-disposition\u2462"}],"title":"2.2.2. Parse response\u2019s Content Security Policies"},{"refs":[{"id":"ref-for-policy-disposition\u2463"}],"title":"2.4. Violations"},{"refs":[{"id":"ref-for-policy-disposition\u2464"}],"title":"4.1.1. Report Content Security Policy violations for request"},{"refs":[{"id":"ref-for-policy-disposition\u2465"}],"title":"4.1.2. Should request be blocked by Content Security Policy?"},{"refs":[{"id":"ref-for-policy-disposition\u2466"}],"title":"4.1.3. Should response to request be blocked by Content Security Policy?"},{"refs":[{"id":"ref-for-policy-disposition\u2467"}],"title":"4.2.3. Should element\u2019s inline type behavior be blocked by Content Security Policy?"},{"refs":[{"id":"ref-for-policy-disposition\u2468"},{"id":"ref-for-policy-disposition\u2460\u24ea"}],"title":"4.2.4. Should navigation request of type be blocked by Content Security Policy?"},{"refs":[{"id":"ref-for-policy-disposition\u2460\u2460"},{"id":"ref-for-policy-disposition\u2460\u2461"}],"title":"4.2.5. Should navigation response to navigation request of type in target be blocked by Content Security Policy?"},{"refs":[{"id":"ref-for-policy-disposition\u2460\u2462"}],"title":"4.3.1. Should RTC connections be blocked for global?"},{"refs":[{"id":"ref-for-policy-disposition\u2460\u2463"}],"title":"4.4.1. EnsureCSPDoesNotBlockStringCompilation(realm, parameterStrings, bodyString, codeString, compilationType, parameterArgs, bodyArg)"},{"refs":[{"id":"ref-for-policy-disposition\u2460\u2464"}],"title":"4.5.1. EnsureCSPDoesNotBlockWasmByteCompilationrealm"},{"refs":[{"id":"ref-for-policy-disposition\u2460\u2465"}],"title":"5.3. Obtain the deprecated serialization of violation"},{"refs":[{"id":"ref-for-policy-disposition\u2460\u2466"}],"title":"6.3.1.1. Is base allowed for document?"},{"refs":[{"id":"ref-for-policy-disposition\u2460\u2467"}],"title":"6.3.2.1. sandbox Initialization"},{"refs":[{"id":"ref-for-policy-disposition\u2460\u2468"}],"title":"6.4.2.2. Relation to ``X-Frame-Options``"}],"url":"#policy-disposition"},
-"policy-source": {"dfnID":"policy-source","dfnText":"source","external":false,"refSections":[{"refs":[{"id":"ref-for-policy-source"}],"title":"2.2. Policies"},{"refs":[{"id":"ref-for-policy-source\u2460"},{"id":"ref-for-policy-source\u2461"}],"title":"2.2.1. Parse a serialized CSP"},{"refs":[{"id":"ref-for-policy-source\u2462"},{"id":"ref-for-policy-source\u2463"}],"title":"2.2.2. Parse response\u2019s Content Security Policies"}],"url":"#policy-source"},
 "port-part-matches": {"dfnID":"port-part-matches","dfnText":"port-part matches","external":false,"refSections":[{"refs":[{"id":"ref-for-port-part-matches"}],"title":"6.7.2.8. Does url match expression in origin with redirect count?"},{"refs":[{"id":"ref-for-port-part-matches\u2460"}],"title":"6.7.2.11. port-part matching"}],"url":"#port-part-matches"},
 "potentially-report-hash": {"dfnID":"potentially-report-hash","dfnText":"4.1.4. Potentially report hash","external":false,"refSections":[{"refs":[{"id":"ref-for-potentially-report-hash"}],"title":"4.1.4. Potentially report hash"},{"refs":[{"id":"ref-for-potentially-report-hash"}],"title":"6.7.1.2. Script directives post-request check"}],"url":"#potentially-report-hash"},
 "report-for-request": {"dfnID":"report-for-request","dfnText":"4.1.1. \n    Report Content Security Policy violations for request\n  ","external":false,"refSections":[{"refs":[{"id":"ref-for-report-for-request"}],"title":"4.1.1. Report Content Security Policy violations for request"}],"url":"#report-for-request"},
@@ -8157,6 +8198,9 @@ let refsData = {
 "#contains-a-header-delivered-content-security-policy": {"displayText":"contains a header-delivered content security policy","export":true,"for_":[],"level":"","normative":true,"shortname":"csp3","spec":"csp3","status":"local","text":"contains a header-delivered content security policy","type":"dfn","url":"#contains-a-header-delivered-content-security-policy"},
 "#content-security-policy": {"displayText":"content security policy","export":true,"for_":[],"level":"","normative":true,"shortname":"csp3","spec":"csp3","status":"local","text":"content security policy","type":"dfn","url":"#content-security-policy"},
 "#content-security-policy-object": {"displayText":"policy","export":true,"for_":[],"level":"","normative":true,"shortname":"csp3","spec":"csp3","status":"local","text":"policy","type":"dfn","url":"#content-security-policy-object"},
+"#content-security-policy-object-directive-set": {"displayText":"directive set","export":true,"for_":["content security policy object"],"level":"","normative":true,"shortname":"csp3","spec":"csp3","status":"local","text":"directive set","type":"dfn","url":"#content-security-policy-object-directive-set"},
+"#content-security-policy-object-disposition": {"displayText":"disposition","export":true,"for_":["content security policy object"],"level":"","normative":true,"shortname":"csp3","spec":"csp3","status":"local","text":"disposition","type":"dfn","url":"#content-security-policy-object-disposition"},
+"#content-security-policy-object-source": {"displayText":"source","export":true,"for_":["content security policy object"],"level":"","normative":true,"shortname":"csp3","spec":"csp3","status":"local","text":"source","type":"dfn","url":"#content-security-policy-object-source"},
 "#csp-hash-report": {"displayText":"csp hash report","export":true,"for_":[],"level":"","normative":true,"shortname":"csp3","spec":"csp3","status":"local","text":"csp hash report","type":"dfn","url":"#csp-hash-report"},
 "#csp-hash-report-body": {"displayText":"csp hash report body","export":true,"for_":[],"level":"","normative":true,"shortname":"csp3","spec":"csp3","status":"local","text":"csp hash report body","type":"dfn","url":"#csp-hash-report-body"},
 "#csp-hash-report-body-destination": {"displayText":"destination","export":true,"for_":["csp hash report body"],"level":"","normative":true,"shortname":"csp3","spec":"csp3","status":"local","text":"destination","type":"dfn","url":"#csp-hash-report-body-destination"},
@@ -8257,9 +8301,6 @@ let refsData = {
 "#monitored": {"displayText":"monitored","export":true,"for_":[],"level":"","normative":true,"shortname":"csp3","spec":"csp3","status":"local","text":"monitored","type":"dfn","url":"#monitored"},
 "#object-src": {"displayText":"object-src","export":true,"for_":[],"level":"","normative":true,"shortname":"csp3","spec":"csp3","status":"local","text":"object-src","type":"dfn","url":"#object-src"},
 "#path-part-match": {"displayText":"path-part match","export":true,"for_":[],"level":"","normative":true,"shortname":"csp3","spec":"csp3","status":"local","text":"path-part match","type":"dfn","url":"#path-part-match"},
-"#policy-directive-set": {"displayText":"directive set","export":true,"for_":["policy"],"level":"","normative":true,"shortname":"csp3","spec":"csp3","status":"local","text":"directive set","type":"dfn","url":"#policy-directive-set"},
-"#policy-disposition": {"displayText":"disposition","export":true,"for_":["policy"],"level":"","normative":true,"shortname":"csp3","spec":"csp3","status":"local","text":"disposition","type":"dfn","url":"#policy-disposition"},
-"#policy-source": {"displayText":"source","export":true,"for_":["policy"],"level":"","normative":true,"shortname":"csp3","spec":"csp3","status":"local","text":"source","type":"dfn","url":"#policy-source"},
 "#port-part-matches": {"displayText":"port-part matches","export":true,"for_":[],"level":"","normative":true,"shortname":"csp3","spec":"csp3","status":"local","text":"port-part matches","type":"dfn","url":"#port-part-matches"},
 "#potentially-report-hash": {"displayText":"potentially report hash","export":true,"for_":[],"level":"","normative":true,"shortname":"csp3","spec":"csp3","status":"local","text":"potentially report hash","type":"dfn","url":"#potentially-report-hash"},
 "#report-to": {"displayText":"report-to","export":true,"for_":[],"level":"","normative":true,"shortname":"csp3","spec":"csp3","status":"local","text":"report-to","type":"dfn","url":"#report-to"},
@@ -8500,6 +8541,8 @@ let refsData = {
 "https://webidl.spec.whatwg.org/#idl-unsigned-short": {"displayText":"unsigned short","export":true,"for_":[],"level":"1","normative":true,"shortname":"webidl","spec":"webidl","status":"current","text":"unsigned short","type":"interface","url":"https://webidl.spec.whatwg.org/#idl-unsigned-short"},
 "https://webidl.spec.whatwg.org/#implements": {"displayText":"implements","export":true,"for_":[],"level":"1","normative":true,"shortname":"webidl","spec":"webidl","status":"current","text":"implements","type":"dfn","url":"https://webidl.spec.whatwg.org/#implements"},
 "https://webidl.spec.whatwg.org/#new": {"displayText":"new","export":true,"for_":[],"level":"1","normative":true,"shortname":"webidl","spec":"webidl","status":"current","text":"new","type":"dfn","url":"https://webidl.spec.whatwg.org/#new"},
+"https://www.w3.org/TR/CSP3/#policy-directive-set": {"displayText":"directive set","export":true,"for_":["policy"],"level":"3","normative":true,"shortname":"csp","spec":"csp3","status":"snapshot","text":"directive set","type":"dfn","url":"https://www.w3.org/TR/CSP3/#policy-directive-set"},
+"https://www.w3.org/TR/CSP3/#policy-disposition": {"displayText":"disposition","export":true,"for_":["policy"],"level":"3","normative":true,"shortname":"csp","spec":"csp3","status":"snapshot","text":"disposition","type":"dfn","url":"https://www.w3.org/TR/CSP3/#policy-disposition"},
 "https://www.w3.org/TR/css-cascade-5/#at-ruledef-import": {"displayText":"@import","export":true,"for_":[],"level":"5","normative":true,"shortname":"css-cascade","spec":"css-cascade-5","status":"snapshot","text":"@import","type":"at-rule","url":"https://www.w3.org/TR/css-cascade-5/#at-ruledef-import"},
 "https://www.w3.org/TR/cssom-1/#insert-a-css-rule": {"displayText":"insert a CSS rule","export":true,"for_":[],"level":"1","normative":true,"shortname":"cssom","spec":"cssom-1","status":"snapshot","text":"insert a css rule","type":"dfn","url":"https://www.w3.org/TR/cssom-1/#insert-a-css-rule"},
 "https://www.w3.org/TR/cssom-1/#parse-a-css-declaration-block": {"displayText":"parse a CSS declaration block","export":true,"for_":[],"level":"1","normative":true,"shortname":"cssom","spec":"cssom-1","status":"snapshot","text":"parse a css declaration block","type":"dfn","url":"https://www.w3.org/TR/cssom-1/#parse-a-css-declaration-block"},
