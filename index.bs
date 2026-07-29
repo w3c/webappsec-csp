@@ -1497,11 +1497,9 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   returns normally if string compilation is allowed, and throws an "`EvalError`"
   if not:
 
-  1.  If |compilationType| is "`TIMER`", then:
+  1.  Let |sourceString| be |codeString|.
 
-      1.  Let |sourceString| be |codeString|.
-
-  1.  Else:
+  1.  If |compilationType| is not "`TIMER`", then:
 
       1.  Let |compilationSink| be "Function" if |compilationType| is "`FUNCTION`", and "eval" otherwise.
 
@@ -1524,16 +1522,14 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
               1. Otherwise, set |isTrusted| to `false`.
 
-      1.  Let |sourceToValidate| be a [=new=] {{TrustedScript}} object created in |realm|
-          whose [=TrustedScript/data=] is set to |codeString| if |isTrusted| is `true`, and
-          |codeString| otherwise.
+      1.  If |isTrusted| is `false`, then:
 
-      1. Let |sourceString| be the result of executing the [=get trusted type compliant string=] algorithm, with
-         {{TrustedScript}}, |realm|, |sourceToValidate|, |compilationSink|, and `'script'`.
+          1.  Set |sourceString| to the result of executing the [=get trusted type compliant string=] algorithm, with
+              {{TrustedScript}}, |realm|, |codeString|, |compilationSink|, and `'script'`.
 
-      1.  If the algorithm throws an error, throw an {{EvalError}}.
+          1.  If the algorithm throws an error, throw an {{EvalError}}.
 
-      1.  If |sourceString| is not equal to |codeString|, throw an {{EvalError}}.
+          1.  If |sourceString| is not equal to |codeString|, throw an {{EvalError}}.
 
   1.  Let |result| be "`Allowed`".
 
