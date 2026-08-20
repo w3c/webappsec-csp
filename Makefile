@@ -30,12 +30,14 @@ ci: out/index.html
 
 out/index.html: index.bs
 	mkdir -p out
-	@ (HTTP_STATUS=$$(curl https://api.csswg.org/bikeshed/ \
+	@ (HTTP_STATUS=$$(curl https://www.w3.org/publications/spec-generator/ \
 	                       --output $@ \
 	                       --write-out "%{http_code}" \
 	                       --header "Accept: text/plain, text/html" \
 	                       -F die-on=nothing \
-	                       -F file=@$<) && \
+	                       -F file=@$< \
+	                       -F type=bikeshed-spec \
+	                       -F output=html) && \
 	[[ "$$HTTP_STATUS" -eq "200" ]]) || ( \
 		echo ""; cat $@; echo ""; \
 		$(RM) -r out; \
