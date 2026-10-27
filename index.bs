@@ -615,19 +615,13 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
       [[#should-block-navigation-request]] for `javascript:` requests. This
       algorithm returns "`Allowed`" unless otherwise specified.
 
-  4.  An <dfn for="directive" export>initialization</dfn>, which takes a {{Document}}
-      or <a for="/">global object</a> and a <a for="/">policy</a> as arguments. This
-      algorithm is executed during [[#run-document-csp-initialization]] and
-      [[#run-global-object-csp-initialization]]. Unless otherwise specified, it has no
-      effect and it returns "`Allowed`".
-
-  5.  A <dfn for="directive" export>pre-navigation check</dfn>, which takes a <a
+  4.  A <dfn for="directive" export>pre-navigation check</dfn>, which takes a <a
       for="/">request</a>, a navigation type string ("`form-submission`" or
       "`other`"), a <a for="/">policy</a> and an <a>origin</a> as arguments, and
       is executed during [[#should-block-navigation-request]]. It returns
       "`Allowed`" unless otherwise specified.
 
-  6.  A <dfn for="directive" export>navigation response check</dfn>, which takes
+  5.  A <dfn for="directive" export>navigation response check</dfn>, which takes
       a <a for="/">request</a>, a navigation type string ("`form-submission`" or
       "`other`"), a <a>response</a>, a <a>navigable</a>, a check type string
       ("`source`" or "`response`"), a <a for="/">policy</a>, and an
@@ -1198,17 +1192,13 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
     Run `CSP` initialization for a `Document`
   </h4>
 
-  Given a {{Document}} |document|, the user agent performs the following
-  steps in order to initialize CSP for |document|:
+  Given a {{Document}} <var ignore>document</var>, this algorithm returns
+  without performing any steps.
 
-  1. <a for=list>For each</a> |policy| of |document|'s [=Document/policy container=]'s
-     [=policy container/CSP list=]:
-
-      1.  <a for=set>For each</a> |directive| of |policy|:
-
-          1.  Execute |directive|'s <a for="directive">initialization</a>
-              algorithm on |document| and |policy|, and assert: its returned
-              value is "`Allowed`".
+  Note: Document-level CSP initialization (such as applying the <a>`sandbox`</a>
+  directive via <a spec=html>CSP-derived sandboxing flags</a>) is handled
+  directly during HTML's navigation and document creation algorithms. This
+  hook is retained for backwards-compatibility.
 
   <h4 id="get-csp-of-object" algorithm>
     Retrieve the <a for="global object">CSP list</a> of an |object|
@@ -1427,18 +1417,36 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   returns "`Allowed`" if |global| is allowed, and "`Blocked`" otherwise:
 
   <ol class="algorithm">
-    1.  Let |result| be "`Allowed`".
+    1.  If |global| is not a {{WorkerGlobalScope}}, return "`Allowed`".
 
     2.  <a for=list>For each</a> |policy| of |global|'s [=global object/CSP
         list=]'s [=CSP list/policies=]:
 
-        1.  <a for=set>For each</a> |directive| of |policy|:
+        1.  If |policy|'s [=content security policy object/disposition=] is not
+            "`enforce`", [=iteration/continue=].
 
-            1. Execute |directive|'s <a for="directive">initialization</a> algorithm on
-               |global| and |policy|. If its returned value is "`Blocked`", then set |result| to
-               "`Blocked`".
+        2.  If |policy|'s [=content security policy object/directive set=] does
+            not [=list/contain=] a [=directive=] whose [=directive/name=] is
+            "`sandbox`", [=iteration/continue=].
 
-    3.  Return |result|.
+        3.  Let |directive| be the [=directive=] in |policy|'s
+            [=content security policy object/directive set=] whose
+            [=directive/name=] is "`sandbox`".
+
+        4.  Let |sandboxing flag set| be a new [=/sandboxing flag set=].
+
+        5.  <a>Parse a sandboxing directive</a> using |directive|'s
+            <a for="directive">value</a> as the input, and |sandboxing flag set|
+            as the output.
+
+        6.  If |sandboxing flag set| contains either the
+            <a>sandboxed scripts browsing context flag</a> or the
+            <a>sandboxed origin browsing context flag</a>, return "`Blocked`".
+
+            Note: This will need to change if we allow Workers to be sandboxed
+            into unique origins, which seems like a pretty reasonable thing to do.
+
+    3.  Return "`Allowed`".
   </ol>
 
   <h3 id="webrtc-integration">Integration with WebRTC</h3>
@@ -3234,12 +3242,6 @@ Content-Type: application/reports+json
 
   4.  Return "`Allowed`".
 
-  This directive's <a for="directive">initialization</a> algorithm is as follows:
-
-  ISSUE: Do something interesting to the execution context in order to lock down
-  interesting CSSOM algorithms. I don't think CSSOM gives us any hooks here, so
-  let's work with them to put something reasonable together.
-
   <h4 id="directive-style-src-elem">`style-src-elem`</h4>
 
   The syntax for the directive's name and value is described by the following ABNF:
@@ -3565,37 +3567,10 @@ Content-Type: application/reports+json
   delivered in a <a http-header>`Content-Security-Policy-Report-Only`</a> header, or within
   a <{meta}> element.
 
-  <h5 algorithm id="sandbox-init">
-    `sandbox` Initialization
-  </h5>
-
-  This directive's <a for="directive">initialization</a> algorithm is
-  responsible for checking whether a worker is allowed to run according
-  to the <a>`sandbox`</a> values present in its policies as follows:
-
-  Note: The <a>sandbox</a> directive is also responsible for adjusting a
-  {{Document}}'s <a for=Document>active sandboxing flag set</a> via the
-  <a spec=html>CSP-derived sandboxing flags</a>.
-
-  Given a {{Document}} or <a for="/">global object</a> |context| and a <a for="/">policy</a>
-  |policy|:
-
-  1.  If |policy|'s <a for="content security policy object">disposition</a> is not "`enforce`", or
-      |context| is not a {{WorkerGlobalScope}}, then abort this algorithm.
-
-  2.  Let |sandboxing flag set| be a new [=/sandboxing flag set=].
-
-  3.  <a>Parse a sandboxing directive</a> using this directive's <a
-      for="directive">value</a> as the input, and |sandboxing flag set| as the output.
-
-  4.  If |sandboxing flag set| contains either the <a>sandboxed scripts browsing context
-      flag</a> or the <a>sandboxed origin browsing context flag</a> flags,
-      return "`Blocked`".
-
-       Note: This will need to change if we allow Workers to be sandboxed into unique
-       origins, which seems like a pretty reasonable thing to do.
-
-  5.  Return "`Allowed`".
+  The <a>`sandbox`</a> directive adjusts a {{Document}}'s
+  <a for=Document>active sandboxing flag set</a> via HTML's
+  <a spec=html>CSP-derived sandboxing flags</a>, and checks whether a worker is
+  allowed to run in [[#run-global-object-csp-initialization]].
 
   <h3 id="directives-navigation">
     Navigation Directives
@@ -3786,11 +3761,6 @@ Content-Type: application/reports+json
   Extensions to CSP MUST register themselves via the process outlined in
   [[!RFC7762]]. In particular, note the criteria discussed in Section 4.2 of
   that document.
-
-  New directives SHOULD use the <a for="directive">pre-request check</a>,
-  <a for="directive">post-request check</a>, and
-  <a for="directive">initialization</a> hooks in order to integrate themselves
-  into Fetch and HTML.
 
   <h3 id="matching-algorithms">Matching Algorithms</h3>
 
