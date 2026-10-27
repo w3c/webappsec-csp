@@ -596,19 +596,6 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
     ; <a>ALPHA</a>, <a>DIGIT</a>, and <a>VCHAR</a> are defined in Appendix B.1 of RFC 5234.
   </pre>
 
-  <a>Directives</a> have a number of associated algorithms:
-
-  1.  A <dfn for="directive" export>pre-request check</dfn>, which takes a <a
-      for="/">request</a>, a <a for="/">policy</a>, and an <a>origin</a> as an
-      argument, and is executed during [[#should-block-request]]. This algorithm
-      returns "`Allowed`" unless otherwise specified.
-
-  2.  A <dfn for="directive" export>post-request check</dfn>, which takes a <a
-      for="/">request</a>, a <a>response</a>, a <a for="/">policy</a> and an
-      <a>origin</a> as arguments, and is executed during
-      [[#should-block-response]]. This algorithm returns "`Allowed`" unless
-      otherwise specified.
-
   <h4 id="framework-directive-source-list">Source Lists</h4>
 
   Many <a>directives</a>' [=directive/value=] consist of <dfn export>source lists</dfn>: <a>sets</a>
@@ -980,15 +967,14 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   with a <a>network error</a>.
 
   1.  [[#should-block-request]] is called as part of step 2.4 of the <a>Main
-      Fetch</a> algorithm. This allows directives' <a>pre-request checks</a>
-      to be executed against each <a for="/">request</a> before it hits the network,
-      and against each redirect that a <a for="/">request</a> might go through on its
-      way to reaching a resource.
+      Fetch</a> algorithm. This allows policies to be checked against each <a
+      for="/">request</a> before it hits the network, and against each redirect
+      that a <a for="/">request</a> might go through on its way to reaching a
+      resource.
 
   2.  [[#should-block-response]] is called as part of step 11 of the <a>Main
-      Fetch</a> algorithm. This allows directives' <a>post-request checks</a>
-      to be executed on the <a>response</a> delivered from the network
-      or from a Service Worker.
+      Fetch</a> algorithm. This allows policies to be checked against the
+      <a>response</a> delivered from the network or from a Service Worker.
 
   <h4 id="report-for-request" algorithm dfn export>
     Report Content Security Policy violations for |request|
@@ -1056,18 +1042,17 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
   3.  <a for=list>For each</a> |policy| of |CSP list|'s [=CSP list/policies=]:
 
-      1.  <a for=set>For each</a> |directive| of |policy|:
+      1.  Let |violates| be the result of executing
+          [[#does-response-violate-policy]] on |response|, |request|, |policy|,
+          and |CSP list|'s [=CSP list/self-origin=].
 
-          1.  If the result of executing |directive|'s <a
-              for="directive">post-request check</a> on |request|, |response|,
-              |policy|, and |CSP list|'s [=CSP list/self-origin=] is
-              "`Blocked`", then:
+      2.  If |violates| is not "`Does Not Violate`", then:
 
-              1.  Execute [[#report-violation]] on the result of executing
-                  [[#create-violation-for-request]] on |request|, and |policy|.
+          1.  Execute [[#report-violation]] on the result of executing
+              [[#create-violation-for-request]] on |request|, and |policy|.
 
-              2.  If |policy|'s <a for="content security policy object">disposition</a> is "`enforce`",
-                  then set |result| to "`Blocked`".
+          2.  If |policy|'s <a for="content security policy object">disposition</a> is "`enforce`",
+              then set |result| to "`Blocked`".
 
       Note: This portion of the check verifies that the page can load the
       response. That is, that a Service Worker hasn't substituted a file which
@@ -2087,46 +2072,6 @@ Content-Type: application/reports+json
     </pre>
   </div>
 
-  <h5 algorithm id="child-src-pre-request">
-    `child-src` Pre-request check
-  </h5>
-
-  This directive's <a for="directive">pre-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
-  and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing
-      [[#effective-directive-for-a-request]] on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `child-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  Return the result of executing the <a for="directive">pre-request
-      check</a> for the <a>directive</a> whose <a for="directive">name</a> is
-      |name| on |request|, |policy|, and |self-origin| using this directive's <a
-      for="directive">value</a> for the comparison.
-
-  <h5 algorithm id="child-src-post-request">
-    `child-src` Post-request check
-  </h5>
-
-  This directive's <a for="directive">post-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
-  <a for="/">policy</a> |policy| and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing
-      [[#effective-directive-for-a-request]] on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `child-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  Return the result of executing the <a for="directive">post-request
-      check</a> for the <a>directive</a> whose <a for="directive">name</a> is
-      |name| on |request|, |response|, |policy|, and |self-origin|, using this
-      directive's <a for="directive">value</a> for the comparison.
-
   <h4 id="directive-connect-src">`connect-src`</h4>
 
   The <dfn export>connect-src</dfn> directive restricts the URLs which can be loaded
@@ -2181,73 +2126,6 @@ Content-Type: application/reports+json
       &lt;/script&gt;
     </pre>
   </div>
-
-
-  <h5 algorithm id="connect-src-pre-request">
-    `connect-src` Pre-request check
-  </h5>
-
-  This directive's <a for="directive">pre-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
-  and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing
-      [[#effective-directive-for-a-request]] on |request|.
-
-  1.  If the result of executing [[#should-directive-execute]] on |name|,
-      `connect-src` and |policy| is "`No`", return "`Allowed`".
-
-  1.  Let |source list| be directive's <a for="directive">value</a>.
-
-  1.  If |request|'s [=request/mode=] is "`webtransport`" and |request|'s
-      <a for="request">WebTransport-hash list</a> [=list/is not empty=]:
-
-      1. If |source list| [=list/contains=] a <a>source expression</a>
-         which is an <a>ASCII case-insensitive</a> match for the
-         <a grammar>`keyword-source`</a>
-         "<a grammar>`'unsafe-webtransport-hashes'`</a>", return "`Allowed`".
-
-      1.  Return "`Blocked`".
-
-  1.  If the result of executing [[#match-request-to-source-list]] on |request|,
-      |source list|, and |self-origin|, is "`Matches`", return
-      "`Allowed`".
-
-  1.  Return "`Blocked`".
-
-  <h5 algorithm id="connect-src-post-request">
-    `connect-src` Post-request check
-  </h5>
-
-  This directive's <a for="directive">post-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
-  <a for="/">policy</a> |policy| and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing
-      [[#effective-directive-for-a-request]] on |request|.
-
-  1.  If the result of executing [[#should-directive-execute]] on |name|,
-      `connect-src` and |policy| is "`No`", return "`Allowed`".
-
-  1.  Let |source list| be directive's <a for="directive">value</a>.
-
-  1.  If |request|'s [=request/mode=] is "`webtransport`" and |request|'s
-      <a for="request">WebTransport-hash list</a> [=list/is not empty=]:
-
-      1. If |source list| [=list/contains=] a <a>source expression</a>
-         which is an <a>ASCII case-insensitive</a> match for the
-         <a grammar>`keyword-source`</a>
-         "<a grammar>`'unsafe-webtransport-hashes'`</a>", return "`Allowed`".
-
-      1.  Return "`Blocked`".
-
-  1.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, |source list|, and |self-origin|, is
-      "`Matches`", return "`Allowed`".
-
-  1.  Return "`Blocked`".
 
   <h4 id="directive-default-src">`default-src`</h4>
 
@@ -2334,46 +2212,6 @@ Content-Type: application/reports+json
     particular page the policy will apply to.
   </div>
 
-  <h5 algorithm id="default-src-pre-request">
-    `default-src` Pre-request check
-  </h5>
-
-  This directive's <a for="directive">pre-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
-  and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing
-      [[#effective-directive-for-a-request]] on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `default-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  Return the result of executing the <a for="directive">pre-request
-      check</a> for the <a>directive</a> whose <a for="directive">name</a> is
-      |name| on |request|, |policy|, and |self-origin|, using this directive's
-      <a for="directive">value</a> for the comparison.
-
-  <h5 algorithm id="default-src-post-request">
-    `default-src` Post-request check
-  </h5>
-
-  This directive's <a for="directive">post-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
-  <a for="/">policy</a> |policy| and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing
-      [[#effective-directive-for-a-request]] on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `default-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  Return the result of executing the <a for="directive">post-request
-      check</a> for the <a>directive</a> whose <a for="directive">name</a> is
-      |name| on |request|, |response|, |policy|, and |self-origin|, using this
-      directive's <a for="directive">value</a> for the comparison.
-
   <h4 id="directive-font-src">`font-src`</h4>
 
   The <dfn export>font-src</dfn> directive restricts the URLs from which font resources
@@ -2407,48 +2245,6 @@ Content-Type: application/reports+json
     </pre>
   </div>
 
-  <h5 algorithm id="font-src-pre-request">
-    `font-src` Pre-request check
-  </h5>
-
-  This directive's <a for="directive">pre-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
-  and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `font-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-request-to-source-list]] on |request|,
-      this directive's <a for="directive">value</a>, and |self-origin|, is
-      "`Does Not Match`", return "`Blocked`".
-
-  4.  Return "`Allowed`".
-
-  <h5 algorithm id="font-src-post-request">
-    `font-src` Post-request check
-  </h5>
-
-  This directive's <a for="directive">post-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
-  <a for="/">policy</a> |policy| and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `font-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, this directive's <a for="directive">value</a>,
-      and |self-origin|, is "`Does Not Match`", return "`Blocked`".
-
-  4.  Return "`Allowed`".
-
   <h4 id="directive-frame-src">`frame-src`</h4>
 
   The <dfn export>frame-src</dfn> directive restricts the URLs which may be loaded into
@@ -2475,48 +2271,6 @@ Content-Type: application/reports+json
       &lt;/iframe&gt;
     </pre>
   </div>
-
-  <h5 algorithm id="frame-src-pre-request">
-    `frame-src` Pre-request check
-  </h5>
-
-  This directive's <a for="directive">pre-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
-  and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `frame-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-request-to-source-list]] on |request|,
-      this directive's <a for="directive">value</a>, and |self-origin|, is
-      "`Does Not Match`", return "`Blocked`".
-
-  4.  Return "`Allowed`".
-
-  <h5 algorithm id="frame-src-post-request">
-    `frame-src` Post-request check
-  </h5>
-
-  This directive's <a for="directive">post-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
-  <a for="/">policy</a> |policy| and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `frame-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, this directive's <a for="directive">value</a>,
-      and |self-origin|, is "`Does Not Match`", return "`Blocked`".
-
-  4.  Return "`Allowed`".
 
   <h4 id="directive-img-src">`img-src`</h4>
 
@@ -2548,48 +2302,6 @@ Content-Type: application/reports+json
     </pre>
   </div>
 
-  <h5 algorithm id="img-src-pre-request">
-    `img-src` Pre-request check
-  </h5>
-
-  This directive's <a for="directive">pre-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
-  and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `img-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-request-to-source-list]] on |request|,
-      this directive's <a for="directive">value</a>, and |self-origin|, is
-      "`Does Not Match`", return "`Blocked`".
-
-  4.  Return "`Allowed`".
-
-  <h5 algorithm id="img-src-post-request">
-    `img-src` Post-request check
-  </h5>
-
-  This directive's <a for="directive">post-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
-  <a for="/">policy</a> |policy| and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `img-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, this directive's <a for="directive">value</a>,
-      and |self-origin|, is "`Does Not Match`", return "`Blocked`".
-
-  4.  Return "`Allowed`".
-
   <h4 id="directive-manifest-src">`manifest-src`</h4>
 
   The <dfn export>manifest-src</dfn> directive restricts the URLs from which application
@@ -2615,48 +2327,6 @@ Content-Type: application/reports+json
       &lt;link rel="manifest" href="https://example.org/manifest"&gt;
     </pre>
   </div>
-
-  <h5 algorithm id="manifest-src-pre-request">
-    `manifest-src` Pre-request check
-  </h5>
-
-  This directive's <a for="directive">pre-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
-  and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `manifest-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-request-to-source-list]] on |request|,
-      this directive's <a for="directive">value</a>, and |self-origin|, is
-      "`Does Not Match`", return "`Blocked`".
-
-  4.  Return "`Allowed`".
-
-  <h5 algorithm id="manifest-src-post-request">
-    `manifest-src` Post-request check
-  </h5>
-
-  This directive's <a for="directive">post-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
-  <a for="/">policy</a> |policy| and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `manifest-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, this directive's <a for="directive">value</a>,
-      and |self-origin|, is "`Does Not Match`", return "`Blocked`".
-
-  4.  Return "`Allowed`".
 
   <h4 id="directive-media-src">`media-src`</h4>
 
@@ -2686,48 +2356,6 @@ Content-Type: application/reports+json
       &lt;/video&gt;
     </pre>
   </div>
-
-  <h5 algorithm id="media-src-pre-request">
-    `media-src` Pre-request check
-  </h5>
-
-  This directive's <a for="directive">pre-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
-  and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `media-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-request-to-source-list]] on |request|,
-      this directive's <a for="directive">value</a>, and |self-origin|, is
-      "`Does Not Match`", return "`Blocked`".
-
-  4.  Return "`Allowed`".
-
-  <h5 algorithm id="media-src-post-request">
-    `media-src` Post-request check
-  </h5>
-
-  This directive's <a for="directive">post-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
-  <a for="/">policy</a> |policy| and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `media-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, this directive's <a for="directive">value</a>,
-      and |self-origin|, is "`Does Not Match`", return "`Blocked`".
-
-  4.  Return "`Allowed`".
 
 <h4 id="directive-object-src">`object-src`</h4>
 
@@ -2778,48 +2406,6 @@ Content-Type: application/reports+json
   sometimes-interesting security model presented by Flash and others), this could mitigate the risk
   of attack vectors like
   <a href="https://miki.it/blog/2014/7/8/abusing-jsonp-with-rosetta-flash/">Rosetta Flash</a>.
-
-  <h5 algorithm id="object-src-pre-request">
-    `object-src` Pre-request check
-  </h5>
-
-  This directive's <a for="directive">pre-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
-  and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `object-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-request-to-source-list]] on |request|,
-      this directive's <a for="directive">value</a>, and |self-origin|, is
-      "`Does Not Match`", return "`Blocked`".
-
-  4.  Return "`Allowed`".
-
-  <h5 algorithm id="object-src-post-request">
-    `object-src` Post-request check
-  </h5>
-
-  This directive's <a for="directive">post-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
-  <a for="/">policy</a> |policy| and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `object-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, this directive's <a for="directive">value</a>,
-      and |self-origin|, is "`Does Not Match`", return "`Blocked`".
-
-  4.  Return "`Allowed`".
 
   <h4 id="directive-script-src">`script-src`</h4>
 
@@ -2886,42 +2472,6 @@ Content-Type: application/reports+json
   6.  Navigation to `javascript:` URLs MUST pass through [[#should-block-inline]]. Such navigations
       will only execute script if every policy allows inline script, as per #3 above.
 
-  <h5 algorithm id="script-src-pre-request">
-    `script-src` Pre-request check
-  </h5>
-
-  This directive's <a for="directive">pre-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
-  and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `script-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  Return the result of executing [[#script-pre-request]] on |request|,
-      this directive, |policy|, and |self-origin|.
-
-  <h5 algorithm id="script-src-post-request">
-    `script-src` Post-request check
-  </h5>
-
-  This directive's <a for="directive">post-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
-  <a for="/">policy</a> |policy| and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `script-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  Return the result of executing [[#script-post-request]] on |request|,
-      |response|, this directive, |policy|, and |self-origin|.
-
   <h4 id="directive-script-src-elem">`script-src-elem`</h4>
 
   The syntax for the directive's name and value is described by the following ABNF:
@@ -2942,42 +2492,6 @@ Content-Type: application/reports+json
     execution sink checks that are gated on the "`unsafe-eval`" check.
   * `script-src-elem` is not used as a fallback for the `worker-src` directive.
     The `worker-src` checks still fall back on the `script-src` directive.
-
-  <h5 algorithm id="script-src-elem-pre-request">
-    `script-src-elem` Pre-request check
-  </h5>
-
-  This directive's <a for="directive">pre-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
-  and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `script-src-elem` and |policy| is "`No`", return "`Allowed`".
-
-  3.  Return the result of executing [[#script-pre-request]] on |request|,
-      this directive, |policy|, and |self-origin|.
-
-  <h5 algorithm id="script-src-elem-post-request">
-    `script-src-elem` Post-request check
-  </h5>
-
-  This directive's <a for="directive">post-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
-  <a for="/">policy</a> |policy| and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `script-src-elem` and |policy| is "`No`", return "`Allowed`".
-
-  3.  Return the result of executing [[#script-post-request]] on |request|,
-      |response|, this directive, |policy|, and |self-origin|.
 
   <h4 id="directive-script-src-attr">`script-src-attr`</h4>
 
@@ -3037,58 +2551,6 @@ Content-Type: application/reports+json
 
       ISSUE(w3c/webappsec-csp#212): This needs to be better explained.
 
-  <h5 algorithm id="style-src-pre-request">
-    `style-src` Pre-request Check
-  </h5>
-
-  This directive's <a for="directive">pre-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
-  and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `style-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-nonce-to-source-list]] on
-      |request|'s <a for="request">cryptographic nonce metadata</a> and this
-      directive's <a for="directive">value</a> is "`Matches`", return
-      "`Allowed`".
-
-  4.  If the result of executing [[#match-request-to-source-list]] on |request|,
-      this directive's <a for="directive">value</a>, and |self-origin|, is
-      "`Does Not Match`", return "`Blocked`".
-
-  5.  Return "`Allowed`".
-
-  <h5 algorithm id="style-src-post-request">
-    `style-src` Post-request Check
-  </h5>
-
-  This directive's <a for="directive">post-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
-  <a for="/">policy</a> |policy|, and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `style-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-nonce-to-source-list]] on
-      |request|'s <a for="request">cryptographic nonce metadata</a> and this
-      directive's <a for="directive">value</a> is "`Matches`", return
-      "`Allowed`".
-
-  4.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, this directive's <a for="directive">value</a>,
-      and |self-origin|, is "`Does Not Match`", return "`Blocked`".
-
-  5.  Return "`Allowed`".
-
   <h4 id="directive-style-src-elem">`style-src-elem`</h4>
 
   The syntax for the directive's name and value is described by the following ABNF:
@@ -3100,58 +2562,6 @@ Content-Type: application/reports+json
 
   The <dfn export>style-src-elem</dfn> directive governs the behaviour of styles
   except for styles defined in inline attributes.
-
-  <h5 algorithm id="style-src-elem-pre-request">
-    `style-src-elem` Pre-request Check
-  </h5>
-
-  This directive's <a for="directive">pre-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
-  and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `style-src-elem` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-nonce-to-source-list]] on
-      |request|'s <a for="request">cryptographic nonce metadata</a> and this
-      directive's <a for="directive">value</a> is "`Matches`", return
-      "`Allowed`".
-
-  4.  If the result of executing [[#match-request-to-source-list]] on |request|,
-      this directive's <a for="directive">value</a>, and |self-origin|, is
-      "`Does Not Match`", return "`Blocked`".
-
-  5.  Return "`Allowed`".
-
-  <h5 algorithm id="style-src-elem-post-request">
-    `style-src-elem` Post-request Check
-  </h5>
-
-  This directive's <a for="directive">post-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
-  <a for="/">policy</a> |policy|, and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `style-src-elem` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-nonce-to-source-list]] on
-      |request|'s <a for="request">cryptographic nonce metadata</a> and this
-      directive's <a for="directive">value</a> is "`Matches`", return
-      "`Allowed`".
-
-  4.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, this directive's <a for="directive">value</a>,
-      and |self-origin|, is "`Does Not Match`", return "`Blocked`".
-
-  5.  Return "`Allowed`".
 
   <h4 id="directive-style-src-attr">`style-src-attr`</h4>
 
@@ -3246,48 +2656,6 @@ Content-Type: application/reports+json
       &lt;/script&gt;
     </pre>
   </div>
-
-  <h5 algorithm id="worker-src-pre-request">
-    `worker-src` Pre-request Check
-  </h5>
-
-  This directive's <a for="directive">pre-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a for="/">policy</a> |policy|,
-  and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `worker-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-request-to-source-list]] on |request|,
-      this directive's <a for="directive">value</a>, and |self-origin|, is
-      "`Does Not Match`", return "`Blocked`".
-
-  4.  Return "`Allowed`".
-
-  <h5 algorithm id="worker-src-post-request">
-    `worker-src` Post-request Check
-  </h5>
-
-  This directive's <a for="directive">post-request check</a> is as follows:
-
-  Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
-  <a for="/">policy</a> |policy|, and an <a>origin</a> |self-origin|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-a-request]]
-      on |request|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `worker-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-response-to-source-list]] on
-      |response|, |request|, this directive's <a for="directive">value</a>,
-      and |self-origin|, is "`Does Not Match`", return "`Blocked`".
-
-  4.  Return "`Allowed`".
 
   <h3 id="directives-document">
     Document Directives
@@ -3578,8 +2946,6 @@ Content-Type: application/reports+json
     Script directives post-request check
   </h5>
 
-  This directive's <a for="directive">post-request check</a> is as follows:
-
   Given a <a for="/">request</a> |request|, a <a>response</a> |response|, a
   <a>directive</a> |directive|, a <a for="/">policy</a> |policy|, and an
   <a>origin</a> |self-origin|:
@@ -3637,17 +3003,110 @@ Content-Type: application/reports+json
       result of executing [[#does-resource-hint-violate-policy]] on |request|,
       |policy|, and |self-origin|.
 
-  2.  Let |violates| be "`Does Not Violate`".
+  2.  Let |name| be the result of executing
+      [[#effective-directive-for-a-request]] on |request|.
 
-  3.  <a for=set>For each</a> |directive| of |policy|:
+  3.  Let |directive| be the result of executing
+      [[#operative-directive-for-policy]] on |name| and |policy|.
 
-      1.  Let |result| be the result of executing |directive|'s <a
-          for="directive">pre-request check</a> on |request|, |policy|, and
-          |self-origin|.
+  4.  If |directive| is null, return "`Does Not Violate`".
 
-      2.  If |result| is "`Blocked`", then let |violates| be |directive|.
+  5.  If |name| is "`script-src-elem`", or if |directive|'s [=directive/name=]
+      is "`script-src`":
 
-  4.  Return |violates|.
+      1.  If the result of executing [[#script-pre-request]] on |request|,
+          |directive|, |policy|, and |self-origin| is "`Blocked`", return
+          |directive|.
+
+      2.  Return "`Does Not Violate`".
+
+  6.  If |name| is "`style-src-elem`":
+
+      1.  If the result of executing [[#match-nonce-to-source-list]] on
+          |request|'s <a for="request">cryptographic nonce metadata</a> and
+          |directive|'s <a for="directive">value</a> is "`Matches`", return
+          "`Does Not Violate`".
+
+      2.  If the result of executing [[#match-request-to-source-list]] on
+          |request|, |directive|'s <a for="directive">value</a>, and
+          |self-origin| is "`Does Not Match`", return |directive|.
+
+      3.  Return "`Does Not Violate`".
+
+  7.  If |name| is "`connect-src`" and |request|'s [=request/mode=] is
+      "`webtransport`" and |request|'s <a for="request">WebTransport-hash
+      list</a> [=list/is not empty=]:
+
+      1.  If |directive|'s <a for="directive">value</a> [=list/contains=] a
+          <a>source expression</a> which is an <a>ASCII case-insensitive</a>
+          match for the <a grammar>`keyword-source`</a>
+          "<a grammar>`'unsafe-webtransport-hashes'`</a>", return "`Does Not
+          Violate`".
+
+      2.  Return |directive|.
+
+  8.  If the result of executing [[#match-request-to-source-list]] on |request|,
+      |directive|'s <a for="directive">value</a>, and |self-origin| is "`Does
+      Not Match`", return |directive|.
+
+  9.  Return "`Does Not Violate`".
+
+  <h5 id="does-response-violate-policy" algorithm>
+    Does |response| to |request| violate |policy|?
+  </h5>
+
+  Given a <a>response</a> |response|, a <a for="/">request</a> |request|, a <a
+  for="/">policy</a> |policy|, and an <a>origin</a> |self-origin|, this
+  algorithm returns the violated <a>directive</a> if the response violates the
+  policy, and "`Does Not Violate`" otherwise.
+
+  1.  Let |name| be the result of executing
+      [[#effective-directive-for-a-request]] on |request|.
+
+  2.  Let |directive| be the result of executing
+      [[#operative-directive-for-policy]] on |name| and |policy|.
+
+  3.  If |directive| is null, return "`Does Not Violate`".
+
+  4.  If |name| is "`script-src-elem`", or if |directive|'s [=directive/name=]
+      is "`script-src`":
+
+      1.  If the result of executing [[#script-post-request]] on |request|,
+          |response|, |directive|, |policy|, and |self-origin| is "`Blocked`",
+          return |directive|.
+
+      2.  Return "`Does Not Violate`".
+
+  5.  If |name| is "`style-src-elem`":
+
+      1.  If the result of executing [[#match-nonce-to-source-list]] on
+          |request|'s <a for="request">cryptographic nonce metadata</a> and
+          |directive|'s <a for="directive">value</a> is "`Matches`", return
+          "`Does Not Violate`".
+
+      2.  If the result of executing [[#match-response-to-source-list]] on
+          |response|, |request|, |directive|'s <a for="directive">value</a>, and
+          |self-origin| is "`Does Not Match`", return |directive|.
+
+      3.  Return "`Does Not Violate`".
+
+  6.  If |name| is "`connect-src`" and |request|'s [=request/mode=] is
+      "`webtransport`" and |request|'s <a for="request">WebTransport-hash
+      list</a> [=list/is not empty=]:
+
+      1.  If |directive|'s <a for="directive">value</a> [=list/contains=] a
+          <a>source expression</a> which is an <a>ASCII case-insensitive</a>
+          match for the <a grammar>`keyword-source`</a>
+          "<a grammar>`'unsafe-webtransport-hashes'`</a>", return "`Does Not
+          Violate`".
+
+      2.  Return |directive|.
+
+  7.  If the result of executing [[#match-response-to-source-list]] on
+      |response|, |request|, |directive|'s <a for="directive">value</a>, and
+      |self-origin| is "`Does Not Match`", return |directive|.
+
+  8.  Return "`Does Not Violate`".
 
   <h5 id="does-resource-hint-violate-policy">
     Does resource hint |request| violate |policy|?
@@ -3761,9 +3220,6 @@ Content-Type: application/reports+json
   for="request">current url</a>, |source list|, |self-origin|, and |request|'s
   <a for="request">redirect count</a>.
 
-  Note: This is generally used in <a>directives</a>' <a>pre-request check</a>
-  algorithms to verify that a given <a for="/">request</a> is reasonable.
-
   <h5 id="match-response-to-source-list" algorithm>
     Does |response| to |request| match |source list|?
   </h5>
@@ -3773,9 +3229,6 @@ Content-Type: application/reports+json
   algorithm returns the result of executing [[#match-url-to-source-list]] on
   |response|'s <a for="response">url</a>, |source list|, |self-origin|, and
   |request|'s <a for="request">redirect count</a>.
-
-  Note: This is generally used in <a>directives</a>' <a>post-request check</a>
-  algorithms to verify that a given <a>response</a> is reasonable.
 
   <h5 id="match-url-to-source-list" algorithm>
     Does |url| match |source list| in |origin| with |redirect count|?
@@ -4445,31 +3898,6 @@ Content-Type: application/reports+json
           |fallback directive|, return that [=directive=].
 
   4.  Return null.
-
-  <h4 id="should-directive-execute" algorithm>
-    Should fetch directive execute
-  </h4>
-
-  This algorithm is used for <a>fetch directives</a> to decide whether a directive
-  should execute or defer to a different directive that is better suited.
-  For example: if the |effective directive name| is `worker-src` (meaning that
-  we are currently checking a worker request), a `default-src` directive
-  should not execute if a `worker-src` or `script-src` directive exists.
-
-  Given a string |effective directive name|, a string |directive name| and
-  a <a for="/">policy</a> |policy|:
-
-  1.  Let |directive fallback list| be the result of executing [[#directive-fallback-list]]
-      on |effective directive name|.
-
-  2.  <a for=set>For each</a> |fallback directive| of |directive fallback list|:
-
-      1.  If |directive name| is |fallback directive|, Return "`Yes`".
-
-      2.  If |policy| contains a directive whose <a for="directive">name</a>
-          is |fallback directive|,  Return "`No`".
-
-  3.  Return "`No`".
 
 </section>
 
