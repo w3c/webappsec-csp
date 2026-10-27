@@ -609,12 +609,6 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
       [[#should-block-response]]. This algorithm returns "`Allowed`" unless
       otherwise specified.
 
-  3.  An <dfn for="directive" export>inline check</dfn>, which takes an {{Element}}, a
-      type string, a <a for="/">policy</a>, and a source string as arguments,
-      and is executed during [[#should-block-inline]] and during
-      [[#should-block-navigation-request]] for `javascript:` requests. This
-      algorithm returns "`Allowed`" unless otherwise specified.
-
   <h4 id="framework-directive-source-list">Source Lists</h4>
 
   Many <a>directives</a>' [=directive/value=] consist of <dfn export>source lists</dfn>: <a>sets</a>
@@ -1218,38 +1212,41 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
     2.  Let |result| be "`Allowed`".
 
-    3.  <a for=list>For each</a> |policy| of |element|'s {{Document}}'s <a for="/">global object</a>'s
+    3.  Let |directive-name| be the result of executing
+        [[#effective-directive-for-inline-check]] on |type|.
+
+    4.  <a for=list>For each</a> |policy| of |element|'s {{Document}}'s <a for="/">global object</a>'s
         <a for="global object">CSP list</a>'s [=CSP list/policies=]:
 
-        1.  <a for=set>For each</a> |directive| of |policy|'s <a for="content security policy object">directive set</a>:
+        1.  Let |directive| be the result of executing
+            [[#operative-directive-for-policy]] on |directive-name| and |policy|.
 
-            1.  If |directive|'s <a for="directive">inline check</a> returns
-                "`Allowed`" when executed upon |element|, |type|, |policy| and |source|,
-                skip to the next |directive|.
+        2.  If |directive| is null, [=iteration/continue=].
 
-            2.  Let |directive-name| be the result of executing
-                [[#effective-directive-for-inline-check]] on |type|.
+        3.  If the result of executing [[#match-element-to-source-list]] on
+            |element|, |directive|'s <a for="directive">value</a>, |type|,
+            and |source| is "`Matches`", [=iteration/continue=].
 
-            3.  Otherwise, let |violation| be the result of executing
-                [[#create-violation-for-global]] on the <a>current settings
-                object</a>'s <a for="environment settings object">global object</a>, |policy|,
-                and |directive-name|.
+        4.  Let |violation| be the result of executing
+            [[#create-violation-for-global]] on the <a>current settings
+            object</a>'s <a for="environment settings object">global object</a>, |policy|,
+            and |directive-name|.
 
-            4.  Set |violation|'s <a for="violation">resource</a> to "`inline`".
+        5.  Set |violation|'s <a for="violation">resource</a> to "`inline`".
 
-            5.  Set |violation|'s <a for="violation">element</a> to |element|.
+        6.  Set |violation|'s <a for="violation">element</a> to |element|.
 
-            6.  If |directive|'s <a for="directive">value</a> <a for="list">contains</a> the
-                expression "<a grammar>`'report-sample'`</a>", then set |violation|'s
-                <a for="violation">sample</a> to the substring of |source| containing its first 40
-                characters.
+        7.  If |directive|'s <a for="directive">value</a> <a for="list">contains</a> the
+            expression "<a grammar>`'report-sample'`</a>", then set |violation|'s
+            <a for="violation">sample</a> to the substring of |source| containing its first 40
+            characters.
 
-            7.  Execute [[#report-violation]] on |violation|.
+        8.  Execute [[#report-violation]] on |violation|.
 
-            8.  If |policy|'s <a for="content security policy object">disposition</a> is "`enforce`", then
-                set |result| to "`Blocked`".
+        9.  If |policy|'s <a for="content security policy object">disposition</a> is "`enforce`", then
+            set |result| to "`Blocked`".
 
-    4.  Return |result|.
+    5.  Return |result|.
   </ol>
 
   <h4 id="should-block-navigation-request" algorithm dfn export>
@@ -1300,29 +1297,32 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
     4.  If |result| is "`Allowed`", and if |navigation request|'s
         <a for="request">current URL</a>'s <a for="url">scheme</a> is `javascript`:
 
-        1.  <a for=list>For each</a> |policy| of |CSP list|'s [=CSP list/policies=]:
+        1.  Let |directive-name| be the result of executing
+            [[#effective-directive-for-inline-check]] on "`navigation`".
 
-            1.  <a for=set>For each</a> |directive| of |policy|:
+        2.  <a for=list>For each</a> |policy| of |CSP list|'s [=CSP list/policies=]:
 
-                1.  Let |directive-name| be the result of executing
-                    [[#effective-directive-for-inline-check]] on "`navigation`".
+            1.  Let |directive| be the result of executing
+                [[#operative-directive-for-policy]] on |directive-name| and |policy|.
 
-                2.  If |directive|'s <a for="directive">inline check</a>
-                    returns "`Allowed`" when executed upon null,
-                    "`navigation`", |policy|, and |navigation request|'s <a for="request">current URL</a>,
-                    skip to the next |directive|.
+            2.  If |directive| is null, [=iteration/continue=].
 
-                3.  Otherwise, let |violation| be the result of executing
-                    [[#create-violation-for-global]] on |navigation request|'s
-                    <a for="request">client</a>'s <a for="environment settings object">global object</a>,
-                    |policy|, and |directive-name|.
+            3.  If the result of executing [[#match-element-to-source-list]] on
+                null, |directive|'s <a for="directive">value</a>, "`navigation`",
+                and |navigation request|'s <a for="request">current URL</a> is
+                "`Matches`", [=iteration/continue=].
 
-                4.  Set |violation|'s <a for="violation">resource</a> to "`inline`".
+            4.  Let |violation| be the result of executing
+                [[#create-violation-for-global]] on |navigation request|'s
+                <a for="request">client</a>'s <a for="environment settings object">global object</a>,
+                |policy|, and |directive-name|.
 
-                5.  Execute [[#report-violation]] on |violation|.
+            5.  Set |violation|'s <a for="violation">resource</a> to "`inline`".
 
-                6.  If |policy|'s <a for="content security policy object">disposition</a> is "`enforce`", then
-                    set |result| to "`Blocked`".
+            6.  Execute [[#report-violation]] on |violation|.
+
+            7.  If |policy|'s <a for="content security policy object">disposition</a> is "`enforce`", then
+                set |result| to "`Blocked`".
 
     5.  Return |result|.
   </ol>
@@ -1514,38 +1514,35 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   3.  <a for=list>For each</a> |policy| of |global|'s [=global object/CSP
       list=]'s [=CSP list/policies=]:
 
-      1.  Let |source-list| be null.
+      1.  Let |directive| be the result of executing
+          [[#operative-directive-for-policy]] on "`script-src`" and |policy|.
 
-      2.  If |policy| contains a [=directive=] whose [=directive/name=] is "`script-src`", then
-          set |source-list| to that [=directive=]'s [=directive/value=].
+      2.  If |directive| is not null:
 
-          Otherwise if |policy| contains a [=directive=] whose [=directive/name=] is
-          "`default-src`", then set |source-list| to that directive's [=directive/value=].
+          1.  Let |source-list| be |directive|'s [=directive/value=].
 
-      1.  If |source-list| is not null:
-
-          1.  Let |trustedTypesRequired| be the result of executing [=does sink type require trusted types?=], with
+          2.  Let |trustedTypesRequired| be the result of executing [=does sink type require trusted types?=], with
               |realm|, `'script'`, and `false`.
 
-          1.  If |trustedTypesRequired| is `true` and |source-list| contains a [=source expression=] which is an
+          3.  If |trustedTypesRequired| is `true` and |source-list| contains a [=source expression=] which is an
               [=ASCII case-insensitive=] match for the string "<a grammar>`'trusted-types-eval'`</a>", then skip the
               following steps.
 
-          1.  If |source-list| contains a [=source expression=] which is an [=ASCII case-insensitive=] match for the
+          4.  If |source-list| contains a [=source expression=] which is an [=ASCII case-insensitive=] match for the
               string "<a grammar>`'unsafe-eval'`</a>", then skip the following steps.
 
-          1.  Let |violation| be the result of executing [[#create-violation-for-global]] on
+          5.  Let |violation| be the result of executing [[#create-violation-for-global]] on
               |global|, |policy|, and "`script-src`".
 
-          2.  Set |violation|'s [=violation/resource=] to "`eval`".
+          6.  Set |violation|'s [=violation/resource=] to "`eval`".
 
-          3.  If |source-list| [=list/contains=] the expression
+          7.  If |source-list| [=list/contains=] the expression
               "<a grammar>`'report-sample'`</a>", then set |violation|'s [=violation/sample=] to
               the substring of |sourceString| containing its first 40 characters.
 
-          4.  Execute [[#report-violation]] on |violation|.
+          8.  Execute [[#report-violation]] on |violation|.
 
-          5.  If |policy|'s [=content security policy object/disposition=] is "`enforce`", then set |result| to
+          9.  If |policy|'s [=content security policy object/disposition=] is "`enforce`", then set |result| to
               "`Blocked`".
 
   4.  If |result| is "`Blocked`", throw an `EvalError` exception.
@@ -1573,19 +1570,14 @@ this algorithm returns normally if compilation is allowed, and throws a
 3.  <a for=list>For each</a> |policy| of |global|'s [=global object/CSP list=]'s
     [=CSP list/policies=]:
 
-    1.  Let |source-list| be null.
+    1.  Let |directive| be the result of executing
+        [[#operative-directive-for-policy]] on "`script-src`" and |policy|.
 
-    2.  If |policy| contains a [=directive=] whose [=directive/name=] is "`script-src`", then
-        set |source-list| to that [=directive=]'s [=directive/value=].
-
-        Otherwise if |policy| contains a [=directive=] whose [=directive/name=] is
-        "`default-src`", then set |source-list| to that directive's [=directive/value=].
-
-    3.  If |source-list| is non-null, and does not contain a [=source
-        expression=] which is an [=ASCII case-insensitive=] match for the
-        string "<a grammar>`'unsafe-eval'`</a>", and does not contain a
-        [=source expression=] which is an [=ASCII case-insensitive=] match
-        for the string "<a grammar>`'wasm-unsafe-eval'`</a>", then:
+    2.  If |directive| is non-null, and |directive|'s [=directive/value=] does
+        not contain a [=source expression=] which is an [=ASCII case-insensitive=]
+        match for the string "<a grammar>`'unsafe-eval'`</a>", and does not
+        contain a [=source expression=] which is an [=ASCII case-insensitive=]
+        match for the string "<a grammar>`'wasm-unsafe-eval'`</a>", then:
 
         1.  Let |violation| be the result of executing [[#create-violation-for-global]] on
             |global|, |policy|, and "`script-src`".
@@ -2382,27 +2374,6 @@ Content-Type: application/reports+json
       |name| on |request|, |response|, |policy|, and |self-origin|, using this
       directive's <a for="directive">value</a> for the comparison.
 
-  <h5 algorithm id="default-src-inline">
-    `default-src` Inline Check
-  </h5>
-
-  This directive's <a for="directive">inline check</a> algorithm is as follows:
-
-  Given an {{Element}} |element|, a string |type|, a <a for="/">policy</a>
-  |policy| and a string |source|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
-      on |type|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `default-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  Otherwise, return the result of executing the
-      <a for="directive">inline check</a> for the <a>directive</a> whose
-      <a for="directive">name</a> is |name| on |element|, |type|, |policy|
-      and |source|, using this directive's <a for="directive">value</a> for the
-      comparison.
-
   <h4 id="directive-font-src">`font-src`</h4>
 
   The <dfn export>font-src</dfn> directive restricts the URLs from which font resources
@@ -2951,29 +2922,6 @@ Content-Type: application/reports+json
   3.  Return the result of executing [[#script-post-request]] on |request|,
       |response|, this directive, |policy|, and |self-origin|.
 
-  <h5 algorithm id="script-src-inline">
-    `script-src` Inline Check
-  </h5>
-
-  This directive's <a for="directive">inline check</a> algorithm is as follows:
-
-  Given an {{Element}} |element|, a string |type|, a <a for="/">policy</a>
-  |policy| and a string |source|:
-
-  1.  Assert: |element| is not null or |type| is "`navigation`".
-
-  2.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
-      on |type|.
-
-  3.  If the result of executing [[#should-directive-execute]] on |name|,
-      `script-src` and |policy| is "`No`", return "`Allowed`".
-
-  4.  If the result of executing [[#match-element-to-source-list]] on
-      |element|, this directive's <a for="directive">value</a>, |type|,
-      and |source|, is "`Does Not Match`", return "`Blocked`".
-
-  5.  Return "`Allowed`".
-
   <h4 id="directive-script-src-elem">`script-src-elem`</h4>
 
   The syntax for the directive's name and value is described by the following ABNF:
@@ -3031,29 +2979,6 @@ Content-Type: application/reports+json
   3.  Return the result of executing [[#script-post-request]] on |request|,
       |response|, this directive, |policy|, and |self-origin|.
 
-  <h5 algorithm id="script-src-elem-inline">
-    `script-src-elem` Inline Check
-  </h5>
-
-  This directive's <a for="directive">inline check</a> algorithm is as follows:
-
-  Given an {{Element}} |element|, a string |type|, a <a for="/">policy</a>
-  |policy| and a string |source|:
-
-  1.  Assert: |element| is not null or |type| is "`navigation`".
-
-  2.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
-      on |type|.
-
-  3.  If the result of executing [[#should-directive-execute]] on |name|,
-      `script-src-elem`, and |policy| is "`No`", return "`Allowed`".
-
-  4.  If the result of executing [[#match-element-to-source-list]] on
-      |element|, this directive's <a for="directive">value</a>, |type|,
-      and |source| is "`Does Not Match`", return "`Blocked`".
-
-  5.  Return "`Allowed`".
-
   <h4 id="directive-script-src-attr">`script-src-attr`</h4>
 
   The syntax for the directive's name and value is described by the following ABNF:
@@ -3065,29 +2990,6 @@ Content-Type: application/reports+json
 
   The <dfn export>script-src-attr</dfn> directive applies to event handlers and, if present,
   it will override the `script-src` directive for relevant checks.
-
-  <h5 algorithm id="script-src-attr-inline">
-    `script-src-attr` Inline Check
-  </h5>
-
-  This directive's <a for="directive">inline check</a> algorithm is as follows:
-
-  Given an {{Element}} |element|, a string |type|, a <a for="/">policy</a>
-  |policy| and a string |source|:
-
-  1.  Assert: |element| is not null or |type| is "`navigation`".
-
-  2.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
-      on |type|.
-
-  3.  If the result of executing [[#should-directive-execute]] on |name|,
-      `script-src-attr` and |policy| is "`No`", return "`Allowed`".
-
-  4.  If the result of executing [[#match-element-to-source-list]] on
-      |element|, this directive's <a for="directive">value</a>, |type|,
-      and |source|, is "`Does Not Match`", return "`Blocked`".
-
-  5.  Return "`Allowed`".
 
   <h4 id="directive-style-src">`style-src`</h4>
 
@@ -3187,27 +3089,6 @@ Content-Type: application/reports+json
 
   5.  Return "`Allowed`".
 
-  <h5 algorithm id="style-src-inline">
-    `style-src` Inline Check
-  </h5>
-
-  This directive's <a for="directive">inline check</a> algorithm is as follows:
-
-  Given an {{Element}} |element|, a string |type|, a <a for="/">policy</a>
-  |policy| and a string |source|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
-      on |type|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `style-src` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-element-to-source-list]] on
-      |element|, this directive's <a for="directive">value</a>, |type|,
-      and |source|, is "`Does Not Match`", return "`Blocked`".
-
-  4.  Return "`Allowed`".
-
   <h4 id="directive-style-src-elem">`style-src-elem`</h4>
 
   The syntax for the directive's name and value is described by the following ABNF:
@@ -3272,27 +3153,6 @@ Content-Type: application/reports+json
 
   5.  Return "`Allowed`".
 
-  <h5 algorithm id="style-src-elem-inline">
-    `style-src-elem` Inline Check
-  </h5>
-
-  This directive's <a for="directive">inline check</a> algorithm is as follows:
-
-  Given an {{Element}} |element|, a string |type|, a <a for="/">policy</a>
-  |policy| and a string |source|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
-      on |type|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `style-src-elem` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-element-to-source-list]] on
-      |element|, this directive's <a for="directive">value</a>, |type|,
-      and |source|, is "`Does Not Match`", return "`Blocked`".
-
-  4.  Return "`Allowed`".
-
   <h4 id="directive-style-src-attr">`style-src-attr`</h4>
 
   The syntax for the directive's name and value is described by the following ABNF:
@@ -3303,27 +3163,6 @@ Content-Type: application/reports+json
   </pre>
 
   The <dfn export>style-src-attr</dfn> directive governs the behaviour of style attributes.
-
-  <h5 algorithm id="style-src-attr-inline">
-    `style-src-attr` Inline Check
-  </h5>
-
-  This directive's <a for="directive">inline check</a> algorithm is as follows:
-
-  Given an {{Element}} |element|, a string |type|, a <a for="/">policy</a>
-  |policy| and a string |source|:
-
-  1.  Let |name| be the result of executing [[#effective-directive-for-inline-check]]
-      on |type|.
-
-  2.  If the result of executing [[#should-directive-execute]] on |name|,
-      `style-src-attr` and |policy| is "`No`", return "`Allowed`".
-
-  3.  If the result of executing [[#match-element-to-source-list]] on
-      |element|, this directive's <a for="directive">value</a>, |type|,
-      and |source|, is "`Does Not Match`", return "`Blocked`".
-
-  4.  Return "`Allowed`".
 
   <h3 id="directives-other">Other Directives</h3>
 
@@ -4539,6 +4378,10 @@ Content-Type: application/reports+json
       ::
         1.  Return `<< "script-src-attr", "script-src", "default-src" >>`.
 
+      : "`script-src`"
+      ::
+        1.  Return `<< "script-src", "default-src" >>`.
+
       : "`style-src-elem`"
       ::
         1.  Return `<< "style-src-elem", "style-src", "default-src" >>`.
@@ -4580,6 +4423,28 @@ Content-Type: application/reports+json
         1.  Return `<< "img-src", "default-src" >>`.
 
   2.  Return `<< >>`.
+
+  <h4 id="operative-directive-for-policy" algorithm>
+    Get the operative directive for |name| in |policy|
+  </h4>
+
+  Given a string or null |name| and a [=/policy=] |policy|, this algorithm
+  returns the [=directive=] in |policy| that governs checks for |name|
+  (accounting for fallback directives), or null if no such directive is
+  present in |policy|:
+
+  1.  If |name| is null, return null.
+
+  2.  Let |directive fallback list| be the result of executing
+      [[#directive-fallback-list]] on |name|.
+
+  3.  <a for=set>For each</a> |fallback directive| of |directive fallback list|:
+
+      1.  If |policy|'s [=content security policy object/directive set=]
+          [=list/contains=] a [=directive=] whose [=directive/name=] is
+          |fallback directive|, return that [=directive=].
+
+  4.  Return null.
 
   <h4 id="should-directive-execute" algorithm>
     Should fetch directive execute
