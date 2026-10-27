@@ -615,20 +615,6 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
       [[#should-block-navigation-request]] for `javascript:` requests. This
       algorithm returns "`Allowed`" unless otherwise specified.
 
-  4.  A <dfn for="directive" export>pre-navigation check</dfn>, which takes a <a
-      for="/">request</a>, a navigation type string ("`form-submission`" or
-      "`other`"), a <a for="/">policy</a> and an <a>origin</a> as arguments, and
-      is executed during [[#should-block-navigation-request]]. It returns
-      "`Allowed`" unless otherwise specified.
-
-  5.  A <dfn for="directive" export>navigation response check</dfn>, which takes
-      a <a for="/">request</a>, a navigation type string ("`form-submission`" or
-      "`other`"), a <a>response</a>, a <a>navigable</a>, a check type string
-      ("`source`" or "`response`"), a <a for="/">policy</a>, and an
-      <a>origin</a> as arguments, and is executed during
-      [[#should-block-navigation-response]]. It returns "`Allowed`" unless
-      otherwise specified.
-
   <h4 id="framework-directive-source-list">Source Lists</h4>
 
   Many <a>directives</a>' [=directive/value=] consist of <dfn export>source lists</dfn>: <a>sets</a>
@@ -1278,38 +1264,43 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   <ol class="algorithm">
     1.  Let |result| be "`Allowed`".
 
-    1.  Let |CSP list| be |navigation request|'s <a for="request">policy
-        container</a>'s <a for="policy container">CSP list</a>'s [=CSP
-        list/policies=].
+    2.  Let |CSP list| be |navigation request|'s <a for="request">policy
+        container</a>'s <a for="policy container">CSP list</a>.
 
-    2.  <a for=list>For each</a> |policy| of |CSP list|'s [=CSP list/policies=]:
+    3.  If |type| is "`form-submission`":
 
-        1.  <a for=set>For each</a> |directive| of |policy|:
+        1.  <a for=list>For each</a> |policy| of |CSP list|'s [=CSP list/policies=]:
 
-            1.  If |directive|'s <a for="directive">pre-navigation check</a>
-                returns "`Allowed`" when executed upon |navigation request|,
-                |type|, |policy|, and |CSP list|'s [=CSP list/self-origin=] skip
-                to the next |directive|.
+            1.  If |policy|'s [=content security policy object/directive set=] does
+                not [=list/contain=] a [=directive=] whose [=directive/name=] is
+                "`form-action`", [=iteration/continue=].
 
-            2.  Otherwise, let |violation| be the result of executing
+            2.  Let |directive| be the [=directive=] in |policy|'s
+                [=content security policy object/directive set=] whose
+                [=directive/name=] is "`form-action`".
+
+            3.  If the result of executing [[#match-request-to-source-list]] on
+                |navigation request|, |directive|'s <a for="directive">value</a>,
+                and |CSP list|'s [=CSP list/self-origin=] is "`Matches`",
+                [=iteration/continue=].
+
+            4.  Let |violation| be the result of executing
                 [[#create-violation-for-global]] on |navigation request|'s
                 <a for="request">client</a>'s <a for="environment settings object">global object</a>,
-                |policy|, and |directive|'s <a for="directive">name</a>.
+                |policy|, and "`form-action`".
 
-            3.  Set |violation|'s <a for="violation">resource</a> to |navigation
+            5.  Set |violation|'s <a for="violation">resource</a> to |navigation
                 request|'s <a for="request">URL</a>.
 
-            4.  Execute [[#report-violation]] on |violation|.
+            6.  Execute [[#report-violation]] on |violation|.
 
-            5.  If |policy|'s <a for="content security policy object">disposition</a> is "`enforce`", then
+            7.  If |policy|'s <a for="content security policy object">disposition</a> is "`enforce`", then
                 set |result| to "`Blocked`".
 
-    3.  If |result| is "`Allowed`", and if |navigation request|'s
+    4.  If |result| is "`Allowed`", and if |navigation request|'s
         <a for="request">current URL</a>'s <a for="url">scheme</a> is `javascript`:
 
-        1.  <a for=list>For each</a> |policy| of |navigation request|'s
-            <a for="request">policy container</a>'s
-            <a for="policy container">CSP list</a>'s [=CSP list/policies=]:
+        1.  <a for=list>For each</a> |policy| of |CSP list|'s [=CSP list/policies=]:
 
             1.  <a for=set>For each</a> |directive| of |policy|:
 
@@ -1333,7 +1324,7 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
                 6.  If |policy|'s <a for="content security policy object">disposition</a> is "`enforce`", then
                     set |result| to "`Blocked`".
 
-    4.  Return |result|.
+    5.  Return |result|.
   </ol>
 
   <h4 id="should-block-navigation-response" algorithm dfn export>
@@ -1352,60 +1343,35 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
     2.  <a for=list>For each</a> |policy| of |response CSP list|'s [=CSP list/policies=]:
 
-        Note: Some directives (like <a>frame-ancestors</a>) allow a |response|'s
-        <a>Content Security Policy</a> to act on the navigation.
+        1.  If |policy|'s [=content security policy object/directive set=] does
+            not [=list/contain=] a [=directive=] whose [=directive/name=] is
+            "`frame-ancestors`", [=iteration/continue=].
 
-        1.  <a for=set>For each</a> |directive| of |policy|:
+        2.  Let |directive| be the [=directive=] in |policy|'s
+            [=content security policy object/directive set=] whose
+            [=directive/name=] is "`frame-ancestors`".
 
-            1.  If |directive|'s <a for="directive">navigation response check</a>
-                returns "`Allowed`" when executed upon |navigation request|, |type|,
-                |navigation response|, |target|, "`response`", |policy|, and
-                |response CSP list|'s [=CSP list/self-origin=],
-                skip to the next |directive|.
+        3.  If the result of executing [[#frame-ancestors-navigation-response]]
+            on |navigation response|, |target|, |directive|, and
+            |response CSP list|'s [=CSP list/self-origin=] is "`Allowed`",
+            [=iteration/continue=].
 
-            2.  Otherwise, let |violation| be the result of executing
-                [[#create-violation-for-global]] on null, |policy|, and
-                |directive|'s <a for="directive">name</a>.
+        4.  Let |violation| be the result of executing
+            [[#create-violation-for-global]] on null, |policy|, and
+            "`frame-ancestors`".
 
-                Note: We use null for the global object, as no global exists:
-                we haven't processed the navigation to create a Document yet.
+            Note: We use null for the global object, as no global exists:
+            we haven't processed the navigation to create a Document yet.
 
-            3.  Set |violation|'s <a for="violation">resource</a> to |navigation
-                response|'s <a for="response">URL</a>.
+        5.  Set |violation|'s <a for="violation">resource</a> to |navigation
+            response|'s <a for="response">URL</a>.
 
-            4.  Execute [[#report-violation]] on |violation|.
+        6.  Execute [[#report-violation]] on |violation|.
 
-            5.  If |policy|'s <a for="content security policy object">disposition</a> is "`enforce`", then
-                set |result| to "`Blocked`".
+        7.  If |policy|'s <a for="content security policy object">disposition</a> is "`enforce`", then
+            set |result| to "`Blocked`".
 
-    3.  <a for=list>For each</a> |policy| of |navigation request|'s <a for="request">policy container</a>'s
-        <a for="policy container">CSP list</a>'s [=CSP list/policies=]:
-
-        Note: Some directives in the |navigation request|'s context (like <a>frame-ancestors</a>)
-        need the |response| before acting on the navigation.
-
-        1.  <a for=set>For each</a> |directive| of |policy|:
-
-            1.  If |directive|'s <a for="directive">navigation response check</a>
-                returns "`Allowed`" when executed upon |navigation request|, |type|,
-                |navigation response|, |target|, "`source`", |policy|, and
-                |response CSP list|'s [=CSP list/self-origin=],
-                skip to the next |directive|.
-
-            2.  Otherwise, let |violation| be the result of executing
-                [[#create-violation-for-global]] on |navigation request|'s
-                <a for="request">client</a>'s <a for="environment settings object">global object</a>,
-                |policy|, and |directive|'s <a for="directive">name</a>.
-
-            3.  Set |violation|'s <a for="violation">resource</a> to |navigation
-                request|'s <a for="request">URL</a>.
-
-            4.  Execute [[#report-violation]] on |violation|.
-
-            5.  If |policy|'s <a for="content security policy object">disposition</a> is "`enforce`", then
-                set |result| to "`Blocked`".
-
-    4.  Return |result|.
+    3.  Return |result|.
   </ol>
 
   <h4 id="run-global-object-csp-initialization" algorithm dfn export>
@@ -3587,28 +3553,7 @@ Content-Type: application/reports+json
     directive-value = <a>serialized-source-list</a>
   </pre>
 
-  <h5 algorithm id="form-action-pre-navigate">
-    `form-action` Pre-Navigation Check
-  </h5>
-
-  Given a <a for="/">request</a> |request|, a string |navigation type|
-  ("`form-submission`" or "`other`"), a <a for="/">policy</a> |policy|, and an
-  <a>origin</a> |self-origin|, this algorithm returns "`Blocked`" if a form
-  submission violates the `form-action` directive's constraints, and "`Allowed`"
-  otherwise. This constitutes the `form-action` directive's <a>pre-navigation
-  check</a>:
-
-  <ol class="algorithm">
-    1.  Assert: |policy| is unused in this algorithm.
-
-    2.  If |navigation type| is "`form-submission`":
-
-        1.  If the result of executing [[#match-request-to-source-list]] on
-            |request|, this directive's <a for="directive">value</a>,
-            and |self-origin|, is "`Does Not Match`", return "`Blocked`".
-
-    3.  Return "`Allowed`".
-  </ol>
+  The directive's behavior is defined in [[#should-block-navigation-request]].
 
   <h4 id="directive-frame-ancestors">`frame-ancestors`</h4>
 
@@ -3639,33 +3584,19 @@ Content-Type: application/reports+json
     `frame-ancestors` Navigation Response Check
   </h5>
 
-  Given a <a for="/">request</a> |request|, a string |navigation type|
-  ("`form-submission`" or "`other`"), a <a>response</a> |navigation response|, a
-  <a>navigable</a> |target|, a string |check type| ("`source`" or "`response`"),
-  a <a for="/">policy</a> <var ignore>policy</var>, and an [=origin=]
-  |self-origin|, this algorithm returns "`Blocked`" if one or more of the
-  ancestors of |target| violate the `frame-ancestors` directive delivered with
-  the response, and "`Allowed`" otherwise. This constitutes the
-  `frame-ancestors` directive's <a>navigation response check</a>:
+  Given a <a>response</a> |navigation response|, a <a>navigable</a> |target|,
+  a <a>directive</a> |directive|, and an [=origin=] |self-origin|, this
+  algorithm returns "`Blocked`" if one or more of the ancestors of |target|
+  violate |directive|, and "`Allowed`" otherwise:
 
   <ol class="algorithm">
     1.  If |navigation response|'s [=response/URL=] [=is local=], return "`Allowed`".
 
-    2.  Assert: |request|, |navigation response|, and |navigation type|, are unused
-        from this point forward in this algorithm, as `frame-ancestors` is concerned only
-        with |navigation response|'s <a>frame-ancestors</a> <a>directive</a>.
+    2.  If |target| is not a <a>child navigable</a>, return "`Allowed`".
 
-    3.  If |check type| is "`source`", return "`Allowed`".
+    3.  Let |current| be |target|.
 
-        Note: The 'frame-ancestors' <a>directive</a> is relevant only to the
-        |target| <a>navigable</a> and it has no impact on the |request|'s
-        context.
-
-    4.  If |target| is not a <a>child navigable</a>, return "`Allowed`".
-
-    5.  Let |current| be |target|.
-
-    6.  While |current| is a <a>child navigable</a>:
+    4.  While |current| is a <a>child navigable</a>:
 
         1.  Let |document| be |current|'s [=navigable/container document=].
 
@@ -3673,13 +3604,13 @@ Content-Type: application/reports+json
             <a lt="ASCII serialization of an origin">ASCII serialization</a>
             of |document|'s [=Document/origin=].
 
-        3.  If [[#match-url-to-source-list]] returns `Does Not Match` when
-            executed upon |origin|, this directive's <a for="directive">value</a>,
+        3.  If [[#match-url-to-source-list]] returns "`Does Not Match`" when
+            executed upon |origin|, |directive|'s <a for="directive">value</a>,
             |self-origin|, and `0`, return "`Blocked`".
 
         4.  Set |current| to |document|'s <a>node navigable</a>.
 
-    7.  Return "`Allowed`".
+    5.  Return "`Allowed`".
   </ol>
 
   <h5 id="frame-ancestors-and-frame-options">
