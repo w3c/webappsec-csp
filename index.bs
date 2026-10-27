@@ -635,10 +635,6 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
       [[#should-block-navigation-response]]. It returns "`Allowed`" unless
       otherwise specified.
 
-  8.  A <dfn for="directive" export>webrtc pre-connect check</dfn>, which takes a [=/policy=], and
-      is executed during [[#should-block-rtc-connection]]. It returns "`Allowed`" unless
-      otherwise specified.
-
   <h4 id="framework-directive-source-list">Source Lists</h4>
 
   Many <a>directives</a>' [=directive/value=] consist of <dfn export>source lists</dfn>: <a>sets</a>
@@ -1462,20 +1458,28 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
     2.  <a for=list>For each</a> |policy| of |global|'s [=global object/CSP
         list=]'s [=CSP list/policies=]:
-          1.  <a for=set>For each</a> |directive| of |policy|:
-              1.  If |directive|'s <a for="directive">webrtc pre-connect check</a>
-                  returns "`Allowed`" when executed upon |policy|, [=iteration/continue=].
+          1.  If |policy|'s [=content security policy object/directive set=] does not
+              [=list/contain=] a [=directive=] whose [=directive/name=] is "`webrtc`",
+              [=iteration/continue=].
 
-              2.  Otherwise, let |violation| be the result of executing
-                  [[#create-violation-for-global]] on |global|, |policy|, and
-                  |directive|'s <a for="directive">name</a>.
+          2.  Let |directive| be the [=directive=] in |policy|'s
+              [=content security policy object/directive set=] whose [=directive/name=]
+              is "`webrtc`".
 
-              3.  Set |violation|'s <a for="violation">resource</a> to null.
+          3.  If |directive|'s [=directive/value=] contains a single item which is an
+              <a>ASCII case-insensitive</a> match for the string "<a grammar>`'allow'`</a>",
+              [=iteration/continue=].
 
-              4.  Execute [[#report-violation]] on |violation|.
+          4.  Let |violation| be the result of executing
+              [[#create-violation-for-global]] on |global|, |policy|, and
+              "`webrtc`".
 
-              5.  If |policy|'s <a for="content security policy object">disposition</a> is "`enforce`", then
-                  set |result| to "`Blocked`".
+          5.  Set |violation|'s <a for="violation">resource</a> to null.
+
+          6.  Execute [[#report-violation]] on |violation|.
+
+          7.  If |policy|'s <a for="content security policy object">disposition</a> is "`enforce`", then
+              set |result| to "`Blocked`".
 
     3.  Return |result|.
   </ol>
@@ -3404,17 +3408,7 @@ Content-Type: application/reports+json
     </pre>
   </div>
 
-  <h5 algorithm id="webrtc-pre-connect">
-    `webrtc` Pre-connect Check
-  </h5>
-
-  This directive's <a for="directive">webrtc pre-connect check</a> is as follows:
-
-  1.  If this directive's [=directive/value=] contains a single item which is an
-      <a>ASCII case-insensitive</a> match for the string "<a grammar>`'allow'`</a>",
-      return "`Allowed`".
-
-  2.  Return "`Blocked`".
+  The directive's behavior is defined in [[#should-block-rtc-connection]].
 
   <h4 id="directive-worker-src">`worker-src`</h4>
 
