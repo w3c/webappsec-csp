@@ -351,11 +351,16 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
       1. The `frame-src` directive, which was deprecated in CSP Level
          2, has been undeprecated, but continues to defer to `child-src` if
-         not present (which defers to `default-src` in turn).
+         not present (and then to `default-src`, if `child-src` is also
+         absent).
 
       2. A `worker-src` directive has been added, deferring to `child-src`
-         if not present (which likewise defers to `script-src` and
-         eventually `default-src`).
+         if not present (and then to `script-src`, and eventually to
+         `default-src`).
+
+      Note that it is the lookup for `frame-src` or `worker-src` which falls
+      back through this chain: `child-src` itself has no fallback. The full
+      fallback lists are defined in [[#directive-fallback-list]].
 
   3.  The URL matching algorithm now treats insecure schemes and ports as
       matching their secure variants. That is, the source expression
