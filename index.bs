@@ -5302,6 +5302,24 @@ Content-Type: application/reports+json
         <a http-header>Content-Security-Policy</a>: default-src 'none'; img-src *
       </pre>
     </div>
+
+    <div class="example">
+      When multiple policies are present, each is evaluated independently (see
+      [[#multiple-policies]]). A resource hint like <{link/rel/prefetch}> is allowed by a
+      given policy if any of that policy's directives would allow the request (see
+      [[#does-resource-hint-violate-policy]]), which can lead to surprising results. Given the
+      following two policies, neither scripts nor stylesheets can be loaded, as each is blocked
+      by one of the policies:
+
+      <pre>
+        <a http-header>Content-Security-Policy</a>: default-src 'none'; script-src 'none'; style-src *
+        <a http-header>Content-Security-Policy</a>: default-src 'none'; script-src *; style-src 'none'
+      </pre>
+
+      Each policy, however, contains a wildcard which allows requests to arbitrary servers, so
+      <{link/rel/prefetch}> requests to arbitrary servers are allowed by both policies, and can
+      be used to exfiltrate data.
+    </div>
   </section>
 </section>
 
