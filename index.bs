@@ -993,6 +993,18 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
 
   Note: Modifications to the <{meta/content}> attribute of a <{meta}> element
   after the element has been parsed will be ignored.
+
+  Note: Nonce-based policies delivered via <{meta}> are more exposed to the
+  exfiltration attacks described in [[#nonce-exfiltration-content-attributes]]
+  than those delivered via an HTTP header. [[HTML]] only hides the values of
+  <{htmlsvg-global/nonce}> attributes when a document's [=/CSP list=]
+  [=contains a header-delivered Content Security Policy=], and the <{meta}>
+  element's <{meta/content}> attribute itself contains the policy's nonces.
+  Developers who rely on nonces are encouraged to deliver their policies via the
+  <a http-header>`Content-Security-Policy`</a> header. If that isn't possible,
+  removing the <{meta}> element from the document once it has been parsed
+  prevents its <{meta/content}> attribute from leaking the nonce; the policy
+  itself remains in effect.
 </section>
 
 <!-- Big Text: Integration -->
