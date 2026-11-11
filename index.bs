@@ -1122,10 +1122,13 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
   1.  If |response| is [=CORS-same-origin=], then:
       1. Let |h| be the result of [=applying algorithm to bytes=] on |response|'s [=response/body=] and |algorithm|.
       1. Let |hash| be the [=concatenation=] of |algorithm|, U+2D (-), and |h|.
-  1.  Let |global| be the |request|'s [=request/client=]'s [=/global object=].
+  1.  Let |client| be |request|'s [=request/client=].
+  1.  If |client| is null, return.
+  1.  Let |global| be |client|'s [=/global object=].
   1.  If |global| is not a {{Window}}, return.
-  1.  Let |stripped document URL| to be the result of executing [[#strip-url-for-use-in-reports]]
-      on |global|'s [=associated document|document=]'s [=Document/URL=].
+  1.  Let |document| be |global|'s [=associated document=].
+  1.  Let |stripped document URL| be the result of executing [[#strip-url-for-use-in-reports]]
+      on |document|'s [=Document/URL=].
   1.  If |policy|'s [=directive set=] does not contain a [=directive=] named "report-to", return.
   1.  Let |report-to directive| be a [=directive=] named "report-to" from |policy|'s [=directive
       set=].
@@ -1135,7 +1138,7 @@ spec:SRI; urlPrefix: https://w3c.github.io/webappsec-subresource-integrity
       [=csp hash report body/type=].
   1.  [=Generate and queue a report=] with the following arguments:
       :   <var ignore>context</var>
-      ::  <var ignore>settings object</var>
+      ::  |document|
       :   <var ignore>type</var>
       ::  "csp-hash"
       :   <var ignore>destination</var>
