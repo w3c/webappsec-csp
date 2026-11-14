@@ -139,7 +139,7 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     text: prepare the script element; url: prepare-the-script-element
     text: plugin; url: #plugin
     text: navigable; url: #navigable
-    text: script; url: concept-script
+    text: module script; url: module-script
     text: set up the module script request; url: set-up-the-module-script-request
     text: environment settings object's realm; url: environment-settings-object's-realm
     for: script
@@ -1593,14 +1593,14 @@ such compilation or instantiation ought to be blocked.
 
 When instantiating a WebAssembly module that was loaded through the module
 system, WebAssembly additionally passes the host-defined value stored in the
-\[[HostDefined]] field of its WebAssembly Module Record. For HTML, this is the
-module's [=script=].
+\[[HostDefined]] field of its WebAssembly Module Record. For HTML, this is its
+[=module script=].
 
 <h4 id="can-compile-wasm-bytes" algorithm dfn export>
   EnsureCSPDoesNotBlockWasmByteCompilation(|realm|, |script|)
 </h4>
 
-Given a <a>realm</a> |realm|, and an optional [=script=] |script|,
+Given a <a>realm</a> |realm|, and an optional [=module script=] |script|,
 this algorithm returns normally if compilation or instantiation is allowed,
 and throws a {{WebAssembly.CompileError}} if not:
 
@@ -1658,7 +1658,7 @@ and throws a {{WebAssembly.CompileError}} if not:
   Is module |script| allowed by |policy|?
 </h4>
 
-Given a [=script=] |script|, a <a for="/">policy</a> |policy|, and an
+Given a [=module script=] |script|, a <a for="/">policy</a> |policy|, and an
 <a>origin</a> |self-origin|, this algorithm returns "`Allowed`" if |policy|
 would allow |script| to be loaded from its URL, and "`Blocked`" otherwise:
 
@@ -1673,6 +1673,10 @@ would allow |script| to be loaded from its URL, and "`Blocked`" otherwise:
     |policy|, and |self-origin| is "`Does Not Violate`", return "`Allowed`".
 
 4.  Return "`Blocked`".
+
+Note: A script recreated when its module was deserialized is not
+<a>"parser-inserted"</a> and has no nonce. As when importing it, any URL is
+therefore allowed by a policy containing "<a grammar>`'strict-dynamic'`</a>".
 
 </section>
 
